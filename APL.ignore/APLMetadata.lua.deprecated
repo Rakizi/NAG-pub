@@ -1,0 +1,1514 @@
+local _, NAG = ...
+local APLSchema = ns.APLSchema
+
+local APLMetadata = {}
+
+local function generateNAGFunctions()
+    for protoName, funcDef in pairs(APL_FUNCTION_MAP) do
+        -- Create the function
+        NAG[funcDef.func] = function(self, ...)
+            local args = {...}
+            
+            -- Handle required args
+            if #args < 1 and #funcDef.args > 0 then
+                self:Error(string.format("%s: No %s provided", 
+                    funcDef.func, funcDef.args[1]))
+                return false
+            end
+            
+            -- Apply defaults
+            for argName, defaultValue in pairs(funcDef.defaults or {}) do
+                local argIndex = tIndexOf(funcDef.args, argName)
+                if argIndex and args[argIndex] == nil then
+                    args[argIndex] = defaultValue
+                end
+            end
+            
+            -- Call implementation
+            return funcDef.implementation(self, unpack(args))
+        end
+    end
+end
+
+-- Action Metadata
+APLMetadata.Actions = {
+    [APLSchema.ActionType.CastSpell] = {
+        label = "Cast",
+        shortDescription = "Casts the spell if possible, i.e. resource/cooldown/GCD/etc requirements are all met.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to cast"
+            },
+            target = {
+                type = "UnitReference",
+                label = "Target",
+                tooltip = "The target to cast the spell on"
+            }
+        }
+    },
+    [APLSchema.ActionType.CastFriendlySpell] = {
+        label = "Cast at Player",
+        shortDescription = "Casts a friendly spell if possible, i.e. resource/cooldown/GCD/etc requirements are all met.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The friendly spell to cast"
+            },
+            target = {
+                type = "UnitReference",
+                label = "Target",
+                tooltip = "The player to cast the spell on"
+            }
+        }
+    },
+    [APLSchema.ActionType.ChannelSpell] = {
+        label = "Channel",
+        shortDescription = "Channels the spell if possible, i.e. resource/cooldown/GCD/etc requirements are all met.",
+        fullDescription = [[
+            The difference between channeling a spell vs casting the spell is that channels can be interrupted. If the Interrupt If parameter is empty, this action is equivalent to Cast.
+            The channel will be interrupted only if all of the following are true:
+            - Immediately following a tick of the channel
+            - The Interrupt If condition evaluates to True
+            - Another action in the APL list is available
+            Note that if you simply want to allow other actions to interrupt the channel, set Interrupt If to True.
+        ]],
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to channel"
+            },
+            target = {
+                type = "UnitReference",
+                label = "Target",
+                tooltip = "The target to channel the spell on"
+            },
+            interruptIf = {
+                type = "APLValue",
+                label = "Interrupt If",
+                tooltip = "Condition which must be true to allow the channel to be interrupted"
+            },
+            allowRecast = {
+                type = "boolean",
+                label = "Recast",
+                tooltip = "If checked, interrupts of this channel will recast the spell"
+            }
+        }
+    },
+    [APLSchema.ActionType.Multidot] = {
+        label = "Multi Dot",
+        shortDescription = "Keeps a DoT active on multiple targets by casting the specified spell.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The DoT spell to cast"
+            },
+            maxDots = {
+                type = "number",
+                label = "Max Dots",
+                tooltip = "Maximum number of DoTs to simultaneously apply",
+                default = 3
+            },
+            maxOverlap = {
+                type = "APLValue",
+                label = "Overlap",
+                tooltip = "Maximum amount of time before a DoT expires when it may be refreshed",
+                default = "0ms"
+            }
+        }
+    },
+    [APLSchema.ActionType.StrictMultidot] = {
+        label = "Strict Multi Dot",
+        shortDescription = "Like a regular Multi Dot, except all Dots are applied immediately after each other. Keeps a DoT active on multiple targets by casting the specified spell. Will take Cast Time/GCD into account when refreshing subsequent DoTs.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The DoT spell to cast"
+            },
+            maxDots = {
+                type = "number",
+                label = "Max Dots",
+                tooltip = "Maximum number of DoTs to simultaneously apply",
+                default = 3
+            },
+            maxOverlap = {
+                type = "APLValue",
+                label = "Overlap",
+                tooltip = "Maximum amount of time before a DoT expires when it may be refreshed",
+                default = "0ms"
+            }
+        }
+    },
+    [APLSchema.ActionType.Multishield] = {
+        label = "Multi Shield",
+        shortDescription = "Keeps a Shield active on multiple targets by casting the specified spell.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The shield spell to cast"
+            },
+            maxShields = {
+                type = "number",
+                label = "Max Shields",
+                tooltip = "Maximum number of Shields to simultaneously apply",
+                default = 3
+            },
+            maxOverlap = {
+                type = "APLValue",
+                label = "Overlap",
+                tooltip = "Maximum amount of time before a Shield expires when it may be refreshed",
+                default = "0ms"
+            }
+        }
+    },
+    [APLSchema.ActionType.CastAllStatBuffCooldowns] = {
+        label = "Cast All Stat Buff Cooldowns",
+        shortDescription = "Casts all cooldowns that buff the specified stat type(s).",
+        fullDescription = [[
+            - Does not cast cooldowns which are already controlled by other actions in the priority list.
+            - By default, this action will cast such cooldowns greedily as they become available. However, when embedded in a sequence, the action will only fire when ALL cooldowns matching the specified buff type(s) are ready.
+        ]],
+        fields = {
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to match"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to match"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to match"
+            }
+        }
+    },
+    [APLSchema.ActionType.AutocastOtherCooldowns] = {
+        label = "Autocast Other Cooldowns",
+        shortDescription = "Auto-casts cooldowns as soon as they are ready.",
+        fullDescription = [[
+            - Does not auto-cast cooldowns which are already controlled by other actions in the priority list.
+            - Cooldowns are usually cast immediately upon becoming ready, but there are some basic smart checks in place, e.g. don't use Mana CDs when near full mana.
+        ]]
+    },
+    [APLSchema.ActionType.Wait] = {
+        label = "Wait",
+        shortDescription = "Pauses all APL actions for a specified amount of time.",
+        fields = {
+            duration = {
+                type = "APLValue",
+                label = "Duration",
+                tooltip = "Amount of time to wait",
+                default = "1000ms"
+            }
+        }
+    },
+    [APLSchema.ActionType.WaitUntil] = {
+        label = "Wait Until",
+        shortDescription = "Pauses all APL actions until the specified condition is True.",
+        fields = {
+            condition = {
+                type = "APLValue",
+                label = "Condition",
+                tooltip = "Condition that must be true to continue"
+            }
+        }
+    },
+    [APLSchema.ActionType.Schedule] = {
+        label = "Scheduled Action",
+        shortDescription = "Executes the inner action once at each specified timing.",
+        fields = {
+            schedule = {
+                type = "string",
+                label = "Do At",
+                tooltip = "Comma-separated list of timings. The inner action will be performed once at each timing.",
+                default = "0s, 60s"
+            },
+            innerAction = {
+                type = "APLAction",
+                label = "Action",
+                tooltip = "The action to perform at each timing"
+            }
+        }
+    },
+    [APLSchema.ActionType.Sequence] = {
+        label = "Sequence",
+        shortDescription = "A list of sub-actions to execute in the specified order.",
+        fullDescription = [[
+            Once one of the sub-actions has been performed, the next sub-action will not necessarily be immediately executed next. The system will restart at the beginning of the whole actions list (not the sequence). If the sequence is executed again, it will perform the next sub-action.
+            When all actions have been performed, the sequence does NOT automatically reset; instead, it will be skipped from now on. Use the Reset Sequence action to reset it, if desired.
+        ]],
+        fields = {
+            name = {
+                type = "string",
+                label = "Name",
+                tooltip = "Name of the sequence"
+            },
+            actions = {
+                type = "APLAction[]",
+                label = "Actions",
+                tooltip = "List of actions to execute in order"
+            }
+        }
+    },
+    [APLSchema.ActionType.ResetSequence] = {
+        label = "Reset Sequence",
+        shortDescription = "Restarts a sequence, so that the next time it executes it will perform its first sub-action.",
+        fullDescription = "Use the name field to refer to the sequence to be reset. The desired sequence must have the same (non-empty) value for its name.",
+        fields = {
+            sequenceName = {
+                type = "string",
+                label = "Sequence Name",
+                tooltip = "Name of the sequence to reset"
+            }
+        }
+    },
+    [APLSchema.ActionType.StrictSequence] = {
+        label = "Strict Sequence",
+        shortDescription = "Like a regular Sequence, except all sub-actions are executed immediately after each other and the sequence resets automatically upon completion.",
+        fullDescription = "Strict Sequences do not begin unless ALL sub-actions are ready.",
+        fields = {
+            actions = {
+                type = "APLAction[]",
+                label = "Actions",
+                tooltip = "List of actions to execute in order"
+            }
+        }
+    },
+    [APLSchema.ActionType.ChangeTarget] = {
+        label = "Change Target",
+        shortDescription = "Sets the current target, which is the target of auto attacks and most casts by default.",
+        fields = {
+            newTarget = {
+                type = "UnitReference",
+                label = "New Target",
+                tooltip = "The target to switch to"
+            }
+        }
+    },
+    [APLSchema.ActionType.ActivateAura] = {
+        label = "Activate Aura",
+        shortDescription = "Activates an aura",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to activate"
+            }
+        }
+    },
+    [APLSchema.ActionType.ActivateAuraWithStacks] = {
+        label = "Activate Aura With Stacks",
+        shortDescription = "Activates an aura with the specified number of stacks",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The stackable aura to activate"
+            },
+            numStacks = {
+                type = "number",
+                label = "Stacks",
+                tooltip = "Desired number of initial aura stacks",
+                default = 1
+            }
+        }
+    },
+    [APLSchema.ActionType.ActivateAllStatBuffProcAuras] = {
+        label = "Activate All Stat Buff Proc Auras",
+        shortDescription = "Activates all item/enchant proc auras that buff the specified stat type(s) using the specified item set.",
+        fields = {
+            swapSet = {
+                type = "ItemSwapSet",
+                label = "Item Set",
+                tooltip = "The item set to use",
+                default = "Main"
+            },
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to match"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to match"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to match"
+            }
+        }
+    },
+    [APLSchema.ActionType.CancelAura] = {
+        label = "Cancel Aura",
+        shortDescription = "Deactivates an aura, equivalent to /cancelaura.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to cancel"
+            }
+        }
+    },
+    [APLSchema.ActionType.TriggerICD] = {
+        label = "Trigger ICD",
+        shortDescription = "Triggers an aura's ICD, putting it on cooldown. Example usage would be to desync an ICD cooldown before combat starts.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura whose ICD to trigger"
+            }
+        }
+    },
+    [APLSchema.ActionType.ItemSwap] = {
+        label = "Item Swap",
+        shortDescription = "Swaps items, using the swap set specified in Settings.",
+        fields = {
+            swapSet = {
+                type = "ItemSwapSet",
+                label = "Item Set",
+                tooltip = "The item set to swap to",
+                default = "Main"
+            }
+        }
+    },
+    [APLSchema.ActionType.Move] = {
+        label = "Move",
+        shortDescription = "Starts a move to the desired range from target.",
+        fields = {
+            rangeFromTarget = {
+                type = "APLValue",
+                label = "to Range",
+                tooltip = "Desired range from target"
+            }
+        }
+    },
+    [APLSchema.ActionType.MoveDuration] = {
+        label = "Move duration",
+        shortDescription = "The characters moves for the given duration.",
+        fields = {
+            duration = {
+                type = "APLValue",
+                label = "Duration",
+                tooltip = "Amount of time the character should move"
+            }
+        }
+    },
+    [APLSchema.ActionType.PaladinCastWithMacro] = {
+        label = "Cast with Macro",
+        shortDescription = "Casts a spell with a specific macro command (StartAttack/StopAttack).",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to cast"
+            },
+            target = {
+                type = "UnitReference",
+                label = "Target",
+                tooltip = "The target to cast on"
+            },
+            macro = {
+                type = "string",
+                label = "Macro",
+                tooltip = "The macro command to use (StartAttack/StopAttack)"
+            }
+        }
+    },
+    [APLSchema.ActionType.CastPaladinPrimarySeal] = {
+        label = "Cast Primary Seal",
+        shortDescription = "Casts the Paladin's primary seal.",
+        fields = {}
+    },
+
+    -- Intentionally omitting CatOptimalRotationAction as it is internal/unused
+    --[APLSchema.ActionType.CatOptimalRotationAction] = {},
+
+    -- Intentionally omitting CustomRotation as it is internal/unused
+    --[APLSchema.ActionType.CustomRotation] = {}
+}
+
+-- Value Metadata
+APLMetadata.Values = {
+    -- Operators
+    [APLSchema.ValueType.Const] = {
+        label = "Const",
+        shortDescription = "A fixed value.",
+        fullDescription = [[<p>
+			Examples:
+			<ul>
+				<li><b>Number:</b> '123', '0.5', '-10'</li>
+				<li><b>Time:</b> '100ms', '5s', '3m'</li>
+				<li><b>Percentage:</b> '30%'</li>
+			</ul>
+		</p>]],
+        fields = {
+            val = {
+                type = "string",
+                label = "Value",
+                tooltip = "The constant value"
+            }
+        }
+    },
+    [APLSchema.ValueType.And] = {
+        label = "All of",
+        shortDescription = "Returns <b>True</b> if all of the sub-values are <b>True</b>, otherwise <b>False</b>",
+        fields = {
+            vals = {
+                type = "APLValue[]",
+                label = "Values",
+                tooltip = "Values to perform AND operation on"
+            }
+        }
+    },
+    [APLSchema.ValueType.Or] = {
+        label = "Any of",
+        shortDescription = "Returns <b>True</b> if any of the sub-values are <b>True</b>, otherwise <b>False</b>",
+        fields = {
+            vals = {
+                type = "APLValue[]",
+                label = "Values",
+                tooltip = "Values to perform OR operation on"
+            }
+        }
+    },
+    [APLSchema.ValueType.Not] = {
+        label = "Not",
+        shortDescription = "Returns the opposite of the inner value, i.e. <b>True</b> if the value is <b>False</b> and vice-versa.",
+        fields = {
+            val = {
+                type = "APLValue",
+                label = "Value",
+                tooltip = "Value to negate"
+            }
+        }
+    },
+    [APLSchema.ValueType.Compare] = {
+        label = "Compare",
+        shortDescription = "Compare two values",
+        fields = {
+            op = {
+                type = "ComparisonOperator",
+                label = "Operator",
+                tooltip = "Comparison operator to use"
+            },
+            lhs = {
+                type = "APLValue",
+                label = "Left Hand Side",
+                tooltip = "Left side of comparison"
+            },
+            rhs = {
+                type = "APLValue",
+                label = "Right Hand Side",
+                tooltip = "Right side of comparison"
+            }
+        }
+    },
+    [APLSchema.ValueType.Math] = {
+        label = "Math",
+        shortDescription = "Do basic math on two values.",
+        fields = {
+            op = {
+                type = "MathOperator",
+                label = "Operator",
+                tooltip = "Mathematical operator to use"
+            },
+            lhs = {
+                type = "APLValue",
+                label = "Left Hand Side",
+                tooltip = "Left side of operation"
+            },
+            rhs = {
+                type = "APLValue",
+                label = "Right Hand Side",
+                tooltip = "Right side of operation"
+            }
+        }
+    },
+    [APLSchema.ValueType.Max] = {
+        label = "Max",
+        shortDescription = "Returns the largest value among the subvalues.",
+        fields = {
+            vals = {
+                type = "APLValue[]",
+                label = "Values",
+                tooltip = "Values to find maximum of"
+            }
+        }
+    },
+    [APLSchema.ValueType.Min] = {
+        label = "Min",
+        shortDescription = "Returns the smallest value among the subvalues.",
+        fields = {
+            vals = {
+                type = "APLValue[]",
+                label = "Values",
+                tooltip = "Values to find minimum of"
+            }
+        }
+    },
+
+    -- Encounter values
+    [APLSchema.ValueType.CurrentTime] = {
+        label = "Current Time",
+        shortDescription = "Elapsed time of the current sim iteration.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentTimePercent] = {
+        label = "Current Time (%)",
+        shortDescription = "Elapsed time of the current sim iteration, as a percentage.",
+        fields = {}
+    },
+    [APLSchema.ValueType.RemainingTime] = {
+        label = "Remaining Time",
+        shortDescription = "Elapsed time of the remaining sim iteration.",
+        fields = {}
+    },
+    [APLSchema.ValueType.RemainingTimePercent] = {
+        label = "Remaining Time (%)",
+        shortDescription = "Elapsed time of the remaining sim iteration, as a percentage.",
+        fields = {}
+    },
+    [APLSchema.ValueType.IsExecutePhase] = {
+        label = "Is Execute Phase",
+        shortDescription = "<b>True</b> if the encounter is in Execute Phase, meaning the target's health is less than the given threshold, otherwise <b>False</b>.",
+        fields = {
+            threshold = {
+                type = "ExecutePhaseThreshold",
+                label = "Threshold",
+                tooltip = "Health threshold for execute phase"
+            }
+        }
+    },
+    [APLSchema.ValueType.NumberTargets] = {
+        label = "Number of Targets",
+        shortDescription = "Count of targets in the current encounter",
+        fields = {}
+    },
+    [APLSchema.ValueType.FrontOfTarget] = {
+        label = "Front of Target",
+        shortDescription = "<b>True</b> if facing from of target",
+        fields = {}
+    },
+
+    -- Boss values
+    [APLSchema.ValueType.BossSpellTimeToReady] = {
+        label = "Spell Time to Ready",
+        shortDescription = "",
+        fields = {
+            targetUnit = {
+                type = "UnitReference",
+                label = "Target Unit",
+                tooltip = "The boss unit to check"
+            },
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.BossSpellIsCasting] = {
+        label = "Spell is Casting",
+        shortDescription = "",
+        fields = {
+            targetUnit = {
+                type = "UnitReference",
+                label = "Target Unit",
+                tooltip = "The boss unit to check"
+            },
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+
+    -- Unit values
+    [APLSchema.ValueType.UnitIsMoving] = {
+        label = "Is moving",
+        shortDescription = "",
+        fields = {
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+
+    -- Resource values
+    [APLSchema.ValueType.CurrentHealth] = {
+        label = "Current Health",
+        shortDescription = "Amount of currently available Health.",
+        fields = {
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.CurrentHealthPercent] = {
+        label = "Current Health (%)",
+        shortDescription = "Amount of currently available Health, as a percentage.",
+        fields = {
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.CurrentMana] = {
+        label = "Current Mana",
+        shortDescription = "Amount of currently available Mana.",
+        fields = {
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.CurrentManaPercent] = {
+        label = "Current Mana (%)",
+        shortDescription = "Amount of currently available Mana, as a percentage.",
+        fields = {
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.CurrentRage] = {
+        label = "Rage",
+        shortDescription = "Amount of currently available Rage.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentEnergy] = {
+        label = "Current Energy",
+        shortDescription = "Amount of currently available Energy.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentFocus] = {
+        label = "Current Focus",
+        shortDescription = "Amount of currently available Focus.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentComboPoints] = {
+        label = "Combo Points",
+        shortDescription = "Amount of currently available Combo Points.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentRunicPower] = {
+        label = "Current Runic Power",
+        shortDescription = "Amount of currently available Runic Power.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentSolarEnergy] = {
+        label = "Lunar Energy",
+        shortDescription = "Amount of currently available Lunar Energy",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentLunarEnergy] = {
+        label = "Solar Energy",
+        shortDescription = "Amount of currently available Solar Energy.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentHolyPower] = {
+        label = "Holy Power",
+        shortDescription = "Amount of currently available Holy Power.",
+        fields = {}
+    },
+    [APLSchema.ValueType.MaxEnergy] = {
+        label = "Max Energy",
+        shortDescription = "Amount of maximum available Energy.",
+        fields = {}
+    },
+    [APLSchema.ValueType.MaxFocus] = {
+        label = "Max Focus",
+        shortDescription = "Amount of maximum available Focus.",
+        fields = {}
+    },
+    [APLSchema.ValueType.MaxRunicPower] = {
+        label = "Max Runic Power",
+        shortDescription = "Amount of maximum available Runic Power.",
+        fields = {}
+    },
+    [APLSchema.ValueType.EnergyRegenPerSecond] = {
+        label = "Energy Regen Per Second",
+        shortDescription = "Energy regen per second.",
+        fields = {}
+    },
+    [APLSchema.ValueType.FocusRegenPerSecond] = {
+        label = "Focus Regen Per Second",
+        shortDescription = "Focus regen per second.",
+        fields = {}
+    },
+    [APLSchema.ValueType.EnergyTimeToTarget] = {
+        label = "Estimated Time To Target Energy",
+        shortDescription = "Estimated time until target Energy is reached, will return 0 if at or above target.",
+        fields = {
+            targetEnergy = {
+                type = "APLValue",
+                label = "Target Energy",
+                tooltip = "Target energy value"
+            }
+        }
+    },
+    [APLSchema.ValueType.FocusTimeToTarget] = {
+        label = "Estimated Time To Target Focus",
+        shortDescription = "Estimated time until target Focus is reached, will return 0 if at or above target.",
+        fields = {
+            targetFocus = {
+                type = "APLValue",
+                label = "Target Focus",
+                tooltip = "Target focus value"
+            }
+        }
+    },
+
+    -- Rune Resource values
+    [APLSchema.ValueType.CurrentRuneCount] = {
+        label = "Num Runes",
+        shortDescription = "Amount of currently available Runes of certain type including Death.",
+        fields = {
+            runeType = {
+                type = "RuneType",
+                label = "Rune Type",
+                tooltip = "Type of rune to count"
+            }
+        }
+    },
+    [APLSchema.ValueType.CurrentNonDeathRuneCount] = {
+        label = "Num Non Death Runes",
+        shortDescription = "Amount of currently available Runes of certain type ignoring Death",
+        fields = {
+            runeType = {
+                type = "RuneType",
+                label = "Rune Type",
+                tooltip = "Type of rune to count"
+            }
+        }
+    },
+    [APLSchema.ValueType.CurrentRuneDeath] = {
+        label = "Rune Is Death",
+        shortDescription = "Is the rune of a certain slot currently converted to Death.",
+        fields = {
+            runeSlot = {
+                type = "RuneSlot",
+                label = "Rune Slot",
+                tooltip = "The rune slot to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.CurrentRuneActive] = {
+        label = "Rune Is Ready",
+        shortDescription = "Is the rune of a certain slot currently available.",
+        fields = {
+            runeSlot = {
+                type = "RuneSlot",
+                label = "Rune Slot",
+                tooltip = "The rune slot to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.RuneCooldown] = {
+        label = "Rune Cooldown",
+        shortDescription = "Amount of time until a rune of certain type is ready to use.<br><b>NOTE:</b> Returns 0 if there is a rune available",
+        fields = {
+            runeType = {
+                type = "RuneType",
+                label = "Rune Type",
+                tooltip = "Type of rune to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.NextRuneCooldown] = {
+        label = "Next Rune Cooldown",
+        shortDescription = "Amount of time until a 2nd rune of certain type is ready to use.<br><b>NOTE:</b> Returns 0 if there are 2 runes available",
+        fields = {
+            runeType = {
+                type = "RuneType",
+                label = "Rune Type",
+                tooltip = "Type of rune to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.RuneSlotCooldown] = {
+        label = "Rune Slot Cooldown",
+        shortDescription = "Amount of time until a rune of certain slot is ready to use.<br><b>NOTE:</b> Returns 0 if rune is ready",
+        fields = {
+            runeSlot = {
+                type = "RuneSlot",
+                label = "Rune Slot",
+                tooltip = "The rune slot to check"
+            }
+        }
+    },
+
+    -- GCD values
+    [APLSchema.ValueType.GCDIsReady] = {
+        label = "GCD Is Ready",
+        shortDescription = "<b>True</b> if the GCD is not on cooldown, otherwise <b>False</b>.",
+        fields = {}
+    },
+    [APLSchema.ValueType.GCDTimeToReady] = {
+        label = "GCD Time To Ready",
+        shortDescription = "Amount of time remaining before the GCD comes off cooldown, or <b>0</b> if it is not on cooldown.",
+        fields = {}
+    },
+
+    -- Autoattack values
+    [APLSchema.ValueType.AutoTimeToNext] = {
+        label = "Time To Next Auto",
+        shortDescription = "Amount of time remaining before the next Main-hand or Off-hand melee attack, or <b>0</b> if autoattacks are not engaged.",
+        fields = {}
+    },
+
+    -- Spell values
+    [APLSchema.ValueType.SpellIsKnown] = {
+        label = "Spell Known",
+        shortDescription = "<b>True</b> if the spell is currently known, otherwise <b>False</b>.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellCanCast] = {
+        label = "Can Cast",
+        shortDescription = "<b>True</b> if all requirements for casting the spell are currently met, otherwise <b>False</b>.",
+        fullDescription = [[<p>The <b>Cast Spell</b> action does not need to be conditioned on this, because it applies this check automatically.</p>]],
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellIsReady] = {
+        label = "Is Ready",
+        shortDescription = "<b>True</b> if the spell is not on cooldown, otherwise <b>False</b>.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellTimeToReady] = {
+        label = "Time To Ready",
+        shortDescription = "Amount of time remaining before the spell comes off cooldown, or <b>0</b> if it is not on cooldown.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellCastTime] = {
+        label = "Cast Time",
+        shortDescription = "Amount of time to cast the spell including any haste and spell cast time adjustments.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellTravelTime] = {
+        label = "Travel Time",
+        shortDescription = "Amount of time for the spell to travel to the target.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellCPM] = {
+        label = "CPM",
+        shortDescription = "Casts Per Minute for the spell so far in the current iteration.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellIsChanneling] = {
+        label = "Is Channeling",
+        shortDescription = "<b>True</b> if this spell is currently being channeled, otherwise <b>False</b>.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellChanneledTicks] = {
+        label = "Channeled Ticks",
+        shortDescription = "The number of completed ticks in the current channel of this spell, or <b>0</b> if the spell is not being channeled.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SpellCurrentCost] = {
+        label = "Current Cost",
+        shortDescription = "Returns current resource cost of spell",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The spell to check"
+            }
+        }
+    },
+
+    -- Aura values
+    [APLSchema.ValueType.AuraIsKnown] = {
+        label = "Aura Known",
+        shortDescription = "<b>True</b> if the aura is currently known, otherwise <b>False</b>.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraIsActive] = {
+        label = "Aura Active",
+        shortDescription = "<b>True</b> if the aura is currently active, otherwise <b>False</b>.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraIsActiveWithReactionTime] = {
+        label = "Aura Active (with Reaction Time)",
+        shortDescription = "<b>True</b> if the aura is currently active AND it has been active for at least as long as the player reaction time (configured in Settings), otherwise <b>False</b>.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraIsInactiveWithReactionTime] = {
+        label = "Aura Inactive (with Reaction Time)",
+        shortDescription = "Returns true if the aura is not active and has been inactive for at least the reaction time.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraRemainingTime] = {
+        label = "Aura Remaining Time",
+        shortDescription = "Time remaining before this aura will expire, or 0 if the aura is not currently active.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraNumStacks] = {
+        label = "Aura Num Stacks",
+        shortDescription = "Number of stacks of the aura.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraInternalCooldown] = {
+        label = "Aura Remaining ICD",
+        shortDescription = "Time remaining before this aura's internal cooldown will be ready, or <b>0</b> if the ICD is ready now.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraICDIsReadyWithReactionTime] = {
+        label = "Aura ICD Is Ready (with Reaction Time)",
+        shortDescription = "<b>True</b> if the aura's ICD is currently ready OR it was put on CD recently, within the player's reaction time (configured in Settings), otherwise <b>False</b>.",
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AuraShouldRefresh] = {
+        label = "Should Refresh Aura",
+        shortDescription = "Whether this aura should be refreshed, e.g. for the purpose of maintaining a debuff.",
+        fullDescription = [[<p>This condition checks not only the specified aura but also any other auras on the same unit, including auras applied by other raid members, which apply the same debuff category.</p>
+		<p>For example, 'Should Refresh Debuff(Sunder Armor)' will return <b>False</b> if the unit has an active Expose Armor aura.</p>]],
+        fields = {
+            auraId = {
+                type = "ActionID",
+                label = "Aura",
+                tooltip = "The aura to check"
+            },
+            sourceUnit = {
+                type = "UnitReference",
+                label = "Source Unit",
+                tooltip = "The unit to check"
+            },
+            maxOverlap = {
+                type = "APLValue",
+                label = "Max Overlap",
+                tooltip = "Maximum amount of time before the aura expires when it may be refreshed"
+            }
+        }
+    },
+
+    -- Dot values
+    [APLSchema.ValueType.DotIsActive] = {
+        label = "Dot Is Active",
+        shortDescription = "<b>True</b> if the specified dot is currently ticking, otherwise <b>False</b>.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The DoT spell to check"
+            },
+            targetUnit = {
+                type = "UnitReference",
+                label = "Target Unit",
+                tooltip = "The target to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.DotRemainingTime] = {
+        label = "Dot Remaining Time",
+        shortDescription = "Time remaining before the last tick of this DoT will occur, or 0 if the DoT is not currently ticking.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The DoT spell to check"
+            },
+            targetUnit = {
+                type = "UnitReference",
+                label = "Target Unit",
+                tooltip = "The target to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.DotTickFrequency] = {
+        label = "Dot Tick Frequency",
+        shortDescription = "The time between each tick.",
+        fields = {
+            spellId = {
+                type = "ActionID",
+                label = "Spell",
+                tooltip = "The DoT spell to check"
+            },
+            targetUnit = {
+                type = "UnitReference",
+                label = "Target Unit",
+                tooltip = "The target to check"
+            }
+        }
+    },
+
+    -- Sequence values
+    [APLSchema.ValueType.SequenceIsComplete] = {
+        label = "Sequence Is Complete",
+        shortDescription = "<b>True</b> if there are no more subactions left to execute in the sequence, otherwise <b>False</b>.",
+        fields = {
+            sequenceName = {
+                type = "string",
+                label = "Sequence Name",
+                tooltip = "Name of the sequence to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SequenceIsReady] = {
+        label = "Sequence Is Ready",
+        shortDescription = "<b>True</b> if the next subaction in the sequence is ready to be executed, otherwise <b>False</b>.",
+        fields = {
+            sequenceName = {
+                type = "string",
+                label = "Sequence Name",
+                tooltip = "Name of the sequence to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.SequenceTimeToReady] = {
+        label = "Sequence Time To Ready",
+        shortDescription = "Returns the amount of time remaining until the next subaction in the sequence will be ready.",
+        fields = {
+            sequenceName = {
+                type = "string",
+                label = "Sequence Name",
+                tooltip = "Name of the sequence to check"
+            }
+        }
+    },
+
+    -- Properties
+    [APLSchema.ValueType.ChannelClipDelay] = {
+        label = "Channel Clip Delay",
+        shortDescription = "The amount of time specified by the <b>Channel Clip Delay</b> setting.",
+        fields = {}
+    },
+    [APLSchema.ValueType.InputDelay] = {
+        label = "Input Delay",
+        shortDescription = "The amount of time specified by the Input Delay setting.",
+        fields = {}
+    },
+
+    -- Class-specific values
+    [APLSchema.ValueType.CatExcessEnergy] = {
+        label = "Excess Energy",
+        shortDescription = "Returns the amount of excess energy available, after subtracting energy that will be needed to maintain DoTs.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CatNewSavageRoarDuration] = {
+        label = "New Savage Roar Duration",
+        shortDescription = "Returns duration of savage roar based on current combo points",
+        fields = {}
+    },
+    [APLSchema.ValueType.WarlockShouldRecastDrainSoul] = {
+        label = "Should Recast Drain Soul",
+        shortDescription = "Returns <b>True</b> if the current Drain Soul channel should be immediately recast, to get a better snapshot.",
+        fields = {}
+    },
+    [APLSchema.ValueType.WarlockShouldRefreshCorruption] = {
+        label = "Should Refresh Corruption",
+        shortDescription = "Returns <b>True</b> if the current Corruption has expired, or should be refreshed to get a better snapshot.",
+        fields = {
+            targetUnit = {
+                type = "UnitReference",
+                label = "Target Unit",
+                tooltip = "The target to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.MageCurrentCombustionDotEstimate] = {
+        label = "Combustion Dot Value",
+        shortDescription = "Returns the current estimated size of your Combustion Dot.",
+        fields = {}
+    },
+    [APLSchema.ValueType.ShamanCanSnapshotStrongerFireElemental] = {
+        label = "Can snapshot stronger Fire Elemental",
+        shortDescription = "Returns true if a new Fire Elemental would be stronger than the current.",
+        fields = {}
+    },
+    [APLSchema.ValueType.ShamanFireElementalDuration] = {
+        label = "Fire Elemental Total Duration",
+        shortDescription = "Returns the duration of Fire Elemental depending on if Totemic Focus is talented or not.",
+        fields = {}
+    },
+    [APLSchema.ValueType.DruidCurrentEclipsePhase] = {
+        label = "Current Eclipse Phase",
+        shortDescription = "Returns the current eclipse phase (1=Neutral, 2=Solar, 3=Lunar)",
+        fields = {
+            eclipsePhase = {
+                type = "EclipsePhase",
+                label = "Eclipse Phase",
+                tooltip = "Optional phase to check against. If provided, returns current phase if it matches, 0 otherwise"
+            }
+        }
+    },
+    [APLSchema.ValueType.TotemRemainingTime] = {
+        label = "Totem Remaining Time",
+        shortDescription = "Returns the amount of time remaining until the totem will expire.",
+        fields = {
+            totemType = {
+                type = "TotemType",
+                label = "Totem Type",
+                tooltip = "The totem type to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.AllTrinketStatProcsActive] = {
+        label = "All Item Proc Buffs Active",
+        shortDescription = "<b>True</b> if all item/enchant procs that buff the specified stat type(s) are currently active, otherwise <b>False</b>.",
+        fullDescription = [[<p>For stacking proc buffs, this condition also checks that the buff has been stacked to its maximum possible strength.</p>]],
+        fields = {
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to check"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to check"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to check"
+            },
+            minIcdSeconds = {
+                type = "number",
+                label = "Min ICD Seconds",
+                tooltip = "Minimum internal cooldown in seconds",
+                default = 0
+            }
+        }
+    },
+    [APLSchema.ValueType.AnyTrinketStatProcsActive] = {
+        label = "Any Item Proc Buff Active",
+        shortDescription = "<b>True</b> if any item/enchant procs that buff the specified stat type(s) are currently active, otherwise <b>False</b>.",
+        fullDescription = [[<p>For stacking proc buffs, this condition also checks that the buff has been stacked to its maximum possible strength.</p>]],
+        fields = {
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to check"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to check"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to check"
+            },
+            minIcdSeconds = {
+                type = "number",
+                label = "Min ICD Seconds",
+                tooltip = "Minimum internal cooldown in seconds",
+                default = 0
+            }
+        }
+    },
+    [APLSchema.ValueType.TrinketProcsMinRemainingTime] = {
+        label = "Item Procs Min Remaining Time",
+        shortDescription = "Shortest remaining duration on any active item/enchant procs that buff the specified stat type(s), or infinity if none are currently active.",
+        fields = {
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to check"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to check"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to check"
+            },
+            minIcdSeconds = {
+                type = "number",
+                label = "Min ICD Seconds",
+                tooltip = "Minimum internal cooldown in seconds",
+                default = 0
+            }
+        }
+    },
+    [APLSchema.ValueType.TrinketProcsMaxRemainingICD] = {
+        label = "Item Procs Max Remaining ICD",
+        shortDescription = "Longest remaining ICD on any inactive item/enchant procs that buff the specified stat type(s), or 0 if all are currently active.",
+        fields = {
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to check"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to check"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to check"
+            },
+            minIcdSeconds = {
+                type = "number",
+                label = "Min ICD Seconds",
+                tooltip = "Minimum internal cooldown in seconds",
+                default = 0
+            }
+        }
+    },
+    [APLSchema.ValueType.NumEquippedStatProcTrinkets] = {
+        label = "Num Equipped Stat Proc Effects",
+        shortDescription = "Number of equipped passive item/enchant effects that buff the specified stat type(s) when they proc.",
+        fields = {
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to check"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to check"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to check"
+            },
+            minIcdSeconds = {
+                type = "number",
+                label = "Min ICD Seconds",
+                tooltip = "Minimum internal cooldown in seconds",
+                default = 0
+            }
+        }
+    },
+    [APLSchema.ValueType.NumStatBuffCooldowns] = {
+        label = "Num Stat Buff Cooldowns",
+        shortDescription = "Number of registered Major Cooldowns that buff the specified stat type(s) when they are cast.",
+        fullDescription = [[<p>Both manually casted cooldowns as well as cooldowns controlled by "Cast All Stat Buff Cooldowns" and "Autocast Other Cooldowns" actions are included in the total count returned by this value.</p>]],
+        fields = {
+            statType1 = {
+                type = "StatType",
+                label = "Stat Type 1",
+                tooltip = "First stat type to check"
+            },
+            statType2 = {
+                type = "StatType",
+                label = "Stat Type 2",
+                tooltip = "Second stat type to check"
+            },
+            statType3 = {
+                type = "StatType",
+                label = "Stat Type 3",
+                tooltip = "Third stat type to check"
+            }
+        }
+    },
+    [APLSchema.ValueType.CatEnergyAfterDuration] = {
+        label = "Energy After Duration",
+        shortDescription = "Returns the amount of energy that will be available after the specified duration.",
+        fields = {
+            duration = {
+                type = "APLValue",
+                label = "Duration",
+                tooltip = "The duration to check energy after"
+            }
+        }
+    },
+    [APLSchema.ValueType.WarlockCurrentPetMana] = {
+        label = "Pet Mana",
+        shortDescription = "Returns the current mana of the Warlock's pet.",
+        fields = {}
+    },
+    [APLSchema.ValueType.WarlockCurrentPetManaPercent] = {
+        label = "Pet Mana (%)",
+        shortDescription = "Returns the current mana percentage of the Warlock's pet.",
+        fields = {}
+    },
+    [APLSchema.ValueType.WarlockPetIsActive] = {
+        label = "Pet Is Active",
+        shortDescription = "Returns true if the Warlock's pet is currently active.",
+        fields = {}
+    },
+    [APLSchema.ValueType.CurrentSealRemainingTime] = {
+        label = "Current Seal Remaining Time",
+        shortDescription = "Returns the remaining duration of the Paladin's current seal.",
+        fields = {}
+    },
+    [APLSchema.ValueType.RuneIsEquipped] = {
+        label = "Rune Is Equipped",
+        shortDescription = "Returns true if the specified rune is equipped.",
+        fields = {
+            runeId = {
+                type = "ActionID",
+                label = "Rune",
+                tooltip = "The rune to check"
+            }
+        }
+    }
+}
+
+NAG.APLMetadata = APLMetadata 

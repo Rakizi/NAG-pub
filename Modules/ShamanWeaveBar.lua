@@ -1,0 +1,1161 @@
+--- ============================ HEADER ============================
+--[[
+    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+    
+    Author: Rakizi
+    Date: 2024
+]]
+--- ======= LOCALIZE =======
+local _, ns = ...
+local L = LibStub("AceLocale-3.0"):GetLocale("NAG")
+local SpecializationCompat = ns.SpecializationCompat
+
+---@class NAG
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+---@class DataManager
+local DataManager = NAG:GetModule("DataManager")
+---@class TimerManager
+local Timer = NAG:GetModule("TimerManager")
+-- Add reference to ShamanWeaveModule for sync threshold
+local ShamanWeaveModule = ns.ShamanWeaveModule
+
+-- Check if player is a Shaman
+local _, playerClass = UnitClass("player")
+if playerClass ~= "SHAMAN" then
+    -- Return early to prevent any code from executing for non-Shaman classes
+    return
+end
+
+-- Constants
+local LIGHTNING_BOLT_ID = 403
+local CHAIN_LIGHTNING_ID = 421 -- Chain Lightning spell ID
+local MAX_WEAVE_TIME = 3.0
+local TIMER_CATEGORY = Timer.Categories.UI_NOTIFICATION
+local MIN_ENEMIES_FOR_CL = 2 -- Minimum number of enemies to switch to Chain Lightning
+
+-- Specialization constants
+local ENHANCEMENT_SPEC_ID = 263 -- Enhancement spec ID for Cataclysm
+
+-- Default settings
+local defaults = {
+    profile = {
+        enabled = true,
+        showBar = true,
+        hideOutOfCombat = true, -- New option to hide bars out of combat
+        bar = {
+            width = 200,
+            height = 20,
+            alpha = 1,
+            point = "CENTER",
+            x = 0,
+            y = -100,
+            locked = false,
+            showBorder = true,
+            borderColor = {r = 1, g = 1, b = 1, a = 1},
+            borderThickness = 1,
+            showCountdownText = true,
+            countdownTextSize = 14,
+            countdownTextColor = {r = 1, g = 1, b = 1, a = 1},
+            -- Bar colors
+            colors = {
+                background = {r = 0.2, g = 0.2, b = 0.2, a = 0.8},
+                weave = {r = 0.4, g = 0.7, b = 1, a = 0.8},
+                countdown = {r = 0.8, g = 0.2, b = 0.2, a = 0.8},
+                gcd = {r = 0.3, g = 0.3, b = 0.3, a = 0.85},
+                spark = {r = 1, g = 1, b = 1, a = 1},
+                clweave = {r = 0.2, g = 0.4, b = 0.8, a = 0.8},
+                upcomingweave = {r = 0.4, g = 0.7, b = 1, a = 0.8},
+                clupcomingweave = {r = 0.2, g = 0.4, b = 0.8, a = 0.8}
+            },
+            -- Swing timer settings
+            swingTimer = {
+                enabled = true,
+                height = 2,
+                sparkSize = 20, -- Fixed height
+                sparkWidth = 2, -- Fixed width
+                sparkColor = {r = 0.8, g = 0.8, b = 0.8, a = 1}, -- Light gray color
+                nextSwingEnabled = true,
+                nextSparkColor = {r = 0.8, g = 0.8, b = 0.8, a = 0.7} -- Same light gray but slightly transparent for next swing
+            },
+            background = "none", -- options: "none", "bg2", "bg3", "bg4"
+            bgColor = { r = 1, g = 1, b = 1, a = 1 }, -- default: no tint, fully opaque
+        }
+    }
+}
+
+-- Local state
+local frame = nil
+local isDragging = false
+local isPositioning = false -- New variable to track positioning mode
+local lastUpdate = 0
+local UPDATE_INTERVAL = 0.016 -- Approximately 60 FPS for smooth movement
+
+-- Track current spell cast for GCD bar logic
+local currentCastSpellId = nil
+local currentCastEndTime = nil
+
+---@class ShamanWeaveBar:ModuleBase
+local ShamanWeaveBar = NAG:CreateModule("ShamanWeaveBar", defaults, {
+    moduleType = ns.MODULE_TYPES.CLASS,
+    debug = true,
+    optionsCategory = ns.MODULE_CATEGORIES.CLASS,
+    classRestriction = "SHAMAN",
+    defaultState = {
+        frame = nil,
+        isDragging = false
+    }
+})
+
+function ShamanWeaveBar:OnInitialize()
+    -- Check if player is a Shaman
+    local _, playerClass = UnitClass("player")
+    if playerClass ~= "SHAMAN" then
+        self:Debug("Not a Shaman, skipping initialization")
+        self:SetEnabledState(false)
+        return
+    end
+
+    -- Check if player is high enough level to have specs
+    local playerLevel = UnitLevel("player")
+    if playerLevel < 10 then
+        self:Debug("Player level too low for specs, skipping initialization")
+        self:SetEnabledState(false)
+        return
+    end
+
+    self:Debug("Initializing ShamanWeaveBar")
+    self.db = NAG.db:RegisterNamespace("ShamanWeaveBar", defaults)
+    
+    -- Register for spec change events
+    self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+    self:RegisterMessage("NAG_SPEC_UPDATED")
+    self:RegisterEvent("PLAYER_LEVEL_UP", "CheckLevelAndSpec")
+    
+    -- Register for swing timer events to force instant update on swing
+    local swingTimerLib = LibStub("LibClassicSwingTimerAPI")
+    if swingTimerLib then
+        swingTimerLib.RegisterCallback(self, "UNIT_SWING_TIMER_START", function(_, unitId, speed, expirationTime, hand)
+            if unitId == "player" and hand == "mainhand" then
+                self.forceInstantUpdate = true
+                self:UpdateDisplay()
+                self.forceInstantUpdate = false
+            end
+        end)
+        swingTimerLib.RegisterCallback(self, "UNIT_SWING_TIMER_STOP", function(_, unitId, hand)
+            if unitId == "player" and hand == "mainhand" then
+                self.forceInstantUpdate = true
+                self:UpdateDisplay()
+                self.forceInstantUpdate = false
+            end
+        end)
+    end
+    
+    -- Register for spellcast events to track cast for GCD bar
+    self:RegisterEvent("UNIT_SPELLCAST_START")
+    self:RegisterEvent("UNIT_SPELLCAST_STOP")
+    self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+    
+    -- Initial spec check
+    self:CheckLevelAndSpec()
+end
+
+function ShamanWeaveBar:CheckLevelAndSpec()
+    -- Check level first
+    local playerLevel = UnitLevel("player")
+    if playerLevel < 10 then
+        self:Debug("Player level too low for specs, disabling module")
+        self:SetEnabledState(false)
+        return
+    end
+
+    -- Check if we can get spec info
+    local currentSpec = SpecializationCompat:GetActiveSpecialization()
+    if not currentSpec then
+        self:Debug("No specialization selected, disabling module")
+        self:SetEnabledState(false)
+        return
+    end
+
+    -- Get spec info
+    local specId = select(1, SpecializationCompat:GetSpecializationInfo(currentSpec))
+    if not specId then
+        self:Debug("Could not get specialization info, disabling module")
+        self:SetEnabledState(false)
+        return
+    end
+
+    -- Check if it's Enhancement
+    if specId == ENHANCEMENT_SPEC_ID then
+        if not self:IsEnabled() then
+            self:Debug("Enabling module for Enhancement spec")
+            self:Enable()
+        end
+    else
+        if self:IsEnabled() then
+            self:Debug("Disabling module for non-Enhancement spec")
+            self:Disable()
+        end
+    end
+end
+
+function ShamanWeaveBar:PLAYER_SPECIALIZATION_CHANGED(event, unit)
+    if unit == "player" then
+        self:CheckLevelAndSpec()
+    end
+end
+
+function ShamanWeaveBar:NAG_SPEC_UPDATED()
+    self:CheckLevelAndSpec()
+end
+
+function ShamanWeaveBar:ModuleEnable()
+    -- Double check all conditions before enabling
+    local _, playerClass = UnitClass("player")
+    if playerClass ~= "SHAMAN" then
+        self:Debug("Not a Shaman, skipping enable")
+        self:SetEnabledState(false)
+        return
+    end
+
+    local playerLevel = UnitLevel("player")
+    if playerLevel < 10 then
+        self:Debug("Player level too low for specs, skipping enable")
+        self:SetEnabledState(false)
+        return
+    end
+
+    local currentSpec = SpecializationCompat:GetActiveSpecialization()
+    if not currentSpec then
+        self:Debug("No specialization selected, skipping enable")
+        self:SetEnabledState(false)
+        return
+    end
+
+    local specId = select(1, SpecializationCompat:GetSpecializationInfo(currentSpec))
+    if specId ~= ENHANCEMENT_SPEC_ID then
+        self:Debug("Not Enhancement spec, skipping enable")
+        self:SetEnabledState(false)
+        return
+    end
+
+    self:Debug("Enabling ShamanWeaveBar")
+    
+    -- Create or show the frame
+    if not frame then
+        self:CreateFrames()
+    end
+    
+    -- Update visibility based on settings
+    self:UpdateVisibility()
+    
+    -- Register events
+    self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnCombatStateChanged")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnCombatStateChanged")
+    
+    -- Start update using OnUpdate with smooth interpolation
+    frame:SetScript("OnUpdate", function(self, elapsed)
+        lastUpdate = lastUpdate + elapsed
+        if lastUpdate >= UPDATE_INTERVAL then
+            ShamanWeaveBar:UpdateDisplay()
+            lastUpdate = 0
+        end
+    end)
+end
+
+function ShamanWeaveBar:ModuleDisable()
+    self:Debug("Disabling ShamanWeaveBar")
+    
+    if frame then
+        frame:SetScript("OnUpdate", nil)
+        frame:Hide()
+    end
+    
+    -- Unregister events
+    self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+    self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+end
+
+function ShamanWeaveBar:CreateFrames()
+    -- Create main frame
+    frame = CreateFrame("Frame", "NAGShamanWeaveBar", UIParent)
+    frame:SetSize(self.db.profile.bar.width, self.db.profile.bar.height)
+    frame:SetPoint(self.db.profile.bar.point, self.db.profile.bar.x, self.db.profile.bar.y)
+
+    -- Create background texture (just behind bars, slightly larger)
+    local barWidth = self.db.profile.bar.width
+    local barHeight = self.db.profile.bar.height
+    local bgWidth = barWidth * 1.45
+    local bgHeight = barHeight * 3.4
+    local bgTexture = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+    local bgFile = self.db.profile.bar.background
+    local bgPath = nil
+    if bgFile == "bg2" then
+        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg2.png"
+    elseif bgFile == "bg3" then
+        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg3.png"
+    elseif bgFile == "bg4" then
+        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg4.png"
+    end
+    if bgPath then
+        bgTexture:SetTexture(bgPath)
+        bgTexture:Show()
+    else
+        bgTexture:SetTexture(nil)
+        bgTexture:Hide()
+    end
+    bgTexture:SetSize(bgWidth, bgHeight)
+    bgTexture:ClearAllPoints()
+    bgTexture:SetPoint("CENTER", frame, "CENTER", 0, 31)
+    local bgColor = self.db.profile.bar.bgColor or { r = 1, g = 1, b = 1, a = 1 }
+    bgTexture:SetVertexColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a)
+    frame.bgTexture = bgTexture
+
+    -- Create countdown bar (drawn first, lowest sublayer)
+    local countdownBar = frame:CreateTexture(nil, "ARTWORK", nil, -8)
+    countdownBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    countdownBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    countdownBar:SetWidth(0)
+    countdownBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+    countdownBar:SetColorTexture(
+        self.db.profile.bar.colors.countdown.r,
+        self.db.profile.bar.colors.countdown.g,
+        self.db.profile.bar.colors.countdown.b,
+        self.db.profile.bar.colors.countdown.a
+    )
+    frame.countdownBar = countdownBar
+
+    -- Create CL weave bar (drawn below LB bar)
+    local clWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, -7)
+    clWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    clWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    clWeaveBar:SetWidth(0)
+    clWeaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+    clWeaveBar:SetColorTexture(0.2, 0.4, 0.8, 0.8) -- Darker blue
+    frame.clWeaveBar = clWeaveBar
+
+    -- Create weave bar (drawn above CL bar)
+    local weaveBar = frame:CreateTexture(nil, "ARTWORK", nil, -6)
+    weaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    weaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    weaveBar:SetWidth(0)
+    weaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+    weaveBar:SetColorTexture(0.4, 0.7, 1, 0.8) -- Light blue
+    frame.weaveBar = weaveBar
+
+    -- Create GCD bar (drawn above all other bars)
+    local gcdBar = frame:CreateTexture(nil, "ARTWORK", nil, 6)
+    gcdBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    gcdBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    gcdBar:SetWidth(0)
+    gcdBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+    gcdBar:SetColorTexture(0.4, 0.4, 0.4, 0.95) -- Dark gray with 85% alpha
+    frame.gcdBar = gcdBar
+
+    -- Create GCD spark texture (highest strata)
+    local gcdSpark = frame:CreateTexture(nil, "OVERLAY", nil, 7)
+    gcdSpark:SetSize(self.db.profile.bar.swingTimer.sparkWidth + 2, self.db.profile.bar.swingTimer.sparkSize)
+    gcdSpark:SetPoint("CENTER", gcdBar, "RIGHT", 0, 0)
+    gcdSpark:SetColorTexture(0, 0, 0, 1) -- Solid black
+    -- Remove the spark texture and blend mode to make it a solid line
+    gcdSpark:SetTexture(nil)
+    gcdSpark:SetBlendMode("BLEND")
+    frame.gcdSpark = gcdSpark
+
+    -- Add LB icon spark for weaveBar
+    local lbIcon = "Interface\\Icons\\Spell_Nature_Lightning"
+    if NAG.Spell and NAG.Spell[403] and NAG.Spell[403].icon then
+        lbIcon = NAG.Spell[403].icon
+    end
+    -- Create frame for weave spark
+    local weaveSparkFrame = CreateFrame("Frame", nil, frame)
+    weaveSparkFrame:SetSize(16, 16)
+    local weaveSpark = weaveSparkFrame:CreateTexture(nil, "OVERLAY", nil, 3)
+    weaveSpark:SetAllPoints()
+    weaveSpark:SetTexture(lbIcon)
+    weaveSpark:SetTexCoord(0.15, 0.85, 0.15, 0.85) -- 30% zoom (crop 15% each side)
+    -- Create mask for circular shape
+    local weaveSparkMask = weaveSparkFrame:CreateMaskTexture()
+    weaveSparkMask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    weaveSparkMask:SetAllPoints()
+    weaveSpark:AddMaskTexture(weaveSparkMask)
+    weaveSparkFrame:Hide()
+    frame.weaveSpark = weaveSparkFrame
+
+    -- Add CL icon spark for clWeaveBar
+    local clIcon = "Interface\\Icons\\Spell_Nature_ChainLightning"
+    if NAG.Spell and NAG.Spell[421] and NAG.Spell[421].icon then
+        clIcon = NAG.Spell[421].icon
+    end
+    -- Create frame for CL weave spark
+    local clWeaveSparkFrame = CreateFrame("Frame", nil, frame)
+    clWeaveSparkFrame:SetSize(16, 16)
+    local clWeaveSpark = clWeaveSparkFrame:CreateTexture(nil, "OVERLAY", nil, 2)
+    clWeaveSpark:SetAllPoints()
+    clWeaveSpark:SetTexture(clIcon)
+    clWeaveSpark:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+    -- Create mask for circular shape
+    local clWeaveSparkMask = clWeaveSparkFrame:CreateMaskTexture()
+    clWeaveSparkMask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    clWeaveSparkMask:SetAllPoints()
+    clWeaveSpark:AddMaskTexture(clWeaveSparkMask)
+    clWeaveSparkFrame:Hide()
+    frame.clWeaveSpark = clWeaveSparkFrame
+
+    -- Create upcoming weave gap bar (drawn above red bar, same sublayer as weave bar)
+    local upcomingWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, 2)
+    upcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    upcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    upcomingWeaveBar:SetWidth(0)
+    upcomingWeaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+    upcomingWeaveBar:SetColorTexture(0.4, 0.7, 1, 0.8) -- Light blue
+    frame.upcomingWeaveBar = upcomingWeaveBar
+
+    -- Create CL upcoming weave gap bar (drawn below LB bar)
+    local clUpcomingWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, 1)
+    clUpcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    clUpcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    clUpcomingWeaveBar:SetWidth(0)
+    clUpcomingWeaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+    clUpcomingWeaveBar:SetColorTexture(0.2, 0.4, 0.8, 0.8) -- Darker blue
+    frame.clUpcomingWeaveBar = clUpcomingWeaveBar
+
+    -- Add LB icon spark for upcomingWeaveBar
+    local lbIcon2 = "Interface\\Icons\\Spell_Nature_Lightning"
+    if NAG.Spell and NAG.Spell[403] and NAG.Spell[403].icon then
+        lbIcon2 = NAG.Spell[403].icon
+    end
+    -- Create frame for upcoming weave spark
+    local upcomingWeaveSparkFrame = CreateFrame("Frame", nil, frame)
+    upcomingWeaveSparkFrame:SetSize(16, 16)
+    local upcomingWeaveSpark = upcomingWeaveSparkFrame:CreateTexture(nil, "OVERLAY", nil, 3)
+    upcomingWeaveSpark:SetAllPoints()
+    upcomingWeaveSpark:SetTexture(lbIcon2)
+    upcomingWeaveSpark:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+    -- Create mask for circular shape
+    local upcomingWeaveSparkMask = upcomingWeaveSparkFrame:CreateMaskTexture()
+    upcomingWeaveSparkMask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    upcomingWeaveSparkMask:SetAllPoints()
+    upcomingWeaveSpark:AddMaskTexture(upcomingWeaveSparkMask)
+    upcomingWeaveSparkFrame:Hide()
+    frame.upcomingWeaveSpark = upcomingWeaveSparkFrame
+
+    -- Add CL icon spark for clUpcomingWeaveBar
+    local clIcon2 = "Interface\\Icons\\Spell_Nature_ChainLightning"
+    if NAG.Spell and NAG.Spell[421] and NAG.Spell[421].icon then
+        clIcon2 = NAG.Spell[421].icon
+    end
+    -- Create frame for CL upcoming weave spark
+    local clUpcomingWeaveSparkFrame = CreateFrame("Frame", nil, frame)
+    clUpcomingWeaveSparkFrame:SetSize(16, 16)
+    local clUpcomingWeaveSpark = clUpcomingWeaveSparkFrame:CreateTexture(nil, "OVERLAY", nil, 2)
+    clUpcomingWeaveSpark:SetAllPoints()
+    clUpcomingWeaveSpark:SetTexture(clIcon2)
+    clUpcomingWeaveSpark:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+    -- Create mask for circular shape
+    local clUpcomingWeaveSparkMask = clUpcomingWeaveSparkFrame:CreateMaskTexture()
+    clUpcomingWeaveSparkMask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    clUpcomingWeaveSparkMask:SetAllPoints()
+    clUpcomingWeaveSpark:AddMaskTexture(clUpcomingWeaveSparkMask)
+    clUpcomingWeaveSparkFrame:Hide()
+    frame.clUpcomingWeaveSpark = clUpcomingWeaveSparkFrame
+    
+    -- Create current swing timer bar frame
+    local swingFrame = CreateFrame("Frame", nil, frame)
+    swingFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2)
+    swingFrame:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, self.db.profile.bar.height + 2)
+    swingFrame:SetHeight(self.db.profile.bar.swingTimer.height)
+    frame.swingFrame = swingFrame
+    
+    -- Create current swing timer bar (fully transparent)
+    local swingBar = swingFrame:CreateTexture(nil, "ARTWORK")
+    swingBar:SetPoint("TOPLEFT", swingFrame, "TOPLEFT", 0, 0)
+    swingBar:SetPoint("BOTTOMLEFT", swingFrame, "BOTTOMLEFT", 0, 0)
+    swingBar:SetWidth(0)
+    swingBar:SetColorTexture(0, 0, 0, 0) -- Fully transparent
+    frame.swingBar = swingBar
+    
+    -- Create current swing spark texture
+    local spark = swingFrame:CreateTexture(nil, "OVERLAY")
+    spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, self.db.profile.bar.swingTimer.sparkSize)
+    spark:SetPoint("CENTER", swingBar, "RIGHT", 0, 1)
+    spark:SetColorTexture(
+        self.db.profile.bar.swingTimer.sparkColor.r,
+        self.db.profile.bar.swingTimer.sparkColor.g,
+        self.db.profile.bar.swingTimer.sparkColor.b,
+        self.db.profile.bar.swingTimer.sparkColor.a
+    )
+    -- Remove the spark texture and blend mode to make it a solid line
+    spark:SetTexture(nil)
+    spark:SetBlendMode("BLEND")
+    frame.spark = spark
+    
+    -- Create new swing timer background frame
+    local swingBgFrame = CreateFrame("Frame", nil, frame)
+    -- Position at the same height as the spark
+    swingBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    -- Set width to match main bar width
+    swingBgFrame:SetWidth(self.db.profile.bar.width)
+    swingBgFrame:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+    frame.swingBgFrame = swingBgFrame
+
+    -- Create swing timer background bar
+    local swingBgBar = swingBgFrame:CreateTexture(nil, "BACKGROUND")
+    swingBgBar:SetPoint("TOPLEFT", swingBgFrame, "TOPLEFT", 0, 0)
+    swingBgBar:SetPoint("BOTTOMLEFT", swingBgFrame, "BOTTOMLEFT", 0, 0)
+    swingBgBar:SetPoint("TOPRIGHT", swingBgFrame, "TOPRIGHT", 0, 0)
+    swingBgBar:SetPoint("BOTTOMRIGHT", swingBgFrame, "BOTTOMRIGHT", 0, 0)
+    swingBgBar:SetColorTexture(0, 0, 0, 0.3) -- Black color with 30% opacity
+    frame.swingBgBar = swingBgBar
+    
+    -- Set up dragging for the main frame
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+    
+    -- Make all child frames pass mouse events to parent
+    local function makeFrameDraggable(childFrame)
+        if childFrame:GetObjectType() == "Frame" then
+            childFrame:EnableMouse(true)
+            childFrame:RegisterForDrag("LeftButton")
+            childFrame:SetScript("OnDragStart", function()
+                if not self.db.profile.bar.locked and not UnitAffectingCombat("player") then
+                    frame:StartMoving()
+                    isDragging = true
+                end
+            end)
+            childFrame:SetScript("OnDragStop", function()
+                if isDragging then
+                    frame:StopMovingOrSizing()
+                    isDragging = false
+                    
+                    -- Save position
+                    local point, _, _, x, y = frame:GetPoint()
+                    self.db.profile.bar.point = point
+                    self.db.profile.bar.x = x
+                    self.db.profile.bar.y = y
+                end
+            end)
+        end
+    end
+    
+    -- Apply dragging to all child frames
+    makeFrameDraggable(swingFrame)
+    makeFrameDraggable(swingBgFrame)
+    
+    -- Set up main frame drag handlers
+    frame:SetScript("OnDragStart", function()
+        if not self.db.profile.bar.locked and not UnitAffectingCombat("player") then
+            frame:StartMoving()
+            isDragging = true
+        end
+    end)
+    
+    frame:SetScript("OnDragStop", function()
+        if isDragging then
+            frame:StopMovingOrSizing()
+            isDragging = false
+            
+            -- Save position
+            local point, _, _, x, y = frame:GetPoint()
+            self.db.profile.bar.point = point
+            self.db.profile.bar.x = x
+            self.db.profile.bar.y = y
+        end
+    end)
+    
+    -- Apply initial settings
+    self:UpdateFrameSettings()
+end
+
+function ShamanWeaveBar:UpdateFrameSettings()
+    if not frame then return end
+    
+    -- Update size
+    frame:SetSize(self.db.profile.bar.width, self.db.profile.bar.height)
+    
+    -- Update position
+    frame:ClearAllPoints()
+    frame:SetPoint(self.db.profile.bar.point, self.db.profile.bar.x, self.db.profile.bar.y)
+    
+    -- Update alpha
+    frame:SetAlpha(self.db.profile.bar.alpha)
+    
+    -- Update background
+    local barWidth = self.db.profile.bar.width
+    local barHeight = self.db.profile.bar.height
+    local bgWidth = barWidth * 1.45
+    local bgHeight = barHeight * 3.4
+    local bgFile = self.db.profile.bar.background
+    local bgPath = nil
+    if bgFile == "bg2" then
+        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg2.png"
+    elseif bgFile == "bg3" then
+        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg3.png"
+    elseif bgFile == "bg4" then
+        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg4.png"
+    end
+    if frame.bgTexture then
+        if bgPath then
+            frame.bgTexture:SetTexture(bgPath)
+            frame.bgTexture:Show()
+        else
+            frame.bgTexture:SetTexture(nil)
+            frame.bgTexture:Hide()
+        end
+        frame.bgTexture:SetSize(bgWidth, bgHeight)
+        frame.bgTexture:ClearAllPoints()
+        frame.bgTexture:SetPoint("CENTER", frame, "CENTER", 0, 31)
+        local bgColor = self.db.profile.bar.bgColor or { r = 1, g = 1, b = 1, a = 1 }
+        frame.bgTexture:SetVertexColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a)
+    end
+    
+    -- Update weave bar color
+    local colors = self.db.profile.bar.colors
+    frame.weaveBar:SetColorTexture(colors.weave.r, colors.weave.g, colors.weave.b, colors.weave.a)
+    frame.clWeaveBar:SetColorTexture(colors.clweave.r, colors.clweave.g, colors.clweave.b, colors.clweave.a)
+    frame.upcomingWeaveBar:SetColorTexture(colors.upcomingweave.r, colors.upcomingweave.g, colors.upcomingweave.b, colors.upcomingweave.a)
+    frame.clUpcomingWeaveBar:SetColorTexture(colors.clupcomingweave.r, colors.clupcomingweave.g, colors.clupcomingweave.b, colors.clupcomingweave.a)
+    
+    -- Update countdown bar color
+    frame.countdownBar:SetColorTexture(colors.countdown.r, colors.countdown.g, colors.countdown.b, colors.countdown.a)
+    
+    -- Update GCD bar color
+    frame.gcdBar:SetColorTexture(colors.gcd.r, colors.gcd.g, colors.gcd.b, colors.gcd.a)
+    
+    -- Update GCD spark
+    if frame.gcdSpark then
+        frame.gcdSpark:SetSize(self.db.profile.bar.swingTimer.sparkWidth + 2, self.db.profile.bar.swingTimer.sparkSize)
+        frame.gcdSpark:SetColorTexture(0, 0, 0, 1)
+    end
+    
+    -- Update swing timer settings
+    if frame.swingFrame then
+        frame.swingFrame:SetHeight(self.db.profile.bar.swingTimer.height)
+        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, self.db.profile.bar.swingTimer.sparkSize)
+        frame.spark:SetColorTexture(
+            self.db.profile.bar.swingTimer.sparkColor.r,
+            self.db.profile.bar.swingTimer.sparkColor.g,
+            self.db.profile.bar.swingTimer.sparkColor.b,
+            self.db.profile.bar.swingTimer.sparkColor.a
+        )
+        
+        -- Update swing timer background settings
+        frame.swingBgFrame:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
+        frame.swingBgFrame:SetWidth(self.db.profile.bar.width)
+    end
+end
+
+function ShamanWeaveBar:UpdateVisibility()
+    if not frame then return end
+    
+    -- If in positioning mode, always show
+    if isPositioning then
+        frame:Show()
+        return
+    end
+    
+    -- First check if the bar should be shown at all
+    if not self.db.profile.showBar then
+        frame:Hide()
+        return
+    end
+    
+    -- Then check combat state if hideOutOfCombat is enabled
+    if self.db.profile.hideOutOfCombat and not UnitAffectingCombat("player") then
+        frame:Hide()
+    else
+        frame:Show()
+    end
+end
+
+function ShamanWeaveBar:ShouldUseChainLightning()
+    -- Only check in combat and with a target
+    if not UnitAffectingCombat("player") or not UnitExists("target") then
+        return false
+    end
+    
+    -- Count enemies in range (using 10 yards as default range for Chain Lightning)
+    local enemies = NAG:CountEnemiesInRange(10)
+    
+    -- Get weapon speed and cast times
+    local weaponSpeed = NAG:AutoSwingTime(NAG.Types:GetType("SwingType").MainHand)
+    local lbCastTime = NAG:CastTime(LIGHTNING_BOLT_ID)
+    local clCastTime = NAG:CastTime(CHAIN_LIGHTNING_ID)
+    
+    -- Check if we should use CL based on enemy count
+    local shouldUseCLForEnemies = enemies >= MIN_ENEMIES_FOR_CL
+    
+    -- Check if we should use CL based on cast times
+    local shouldUseCLForCastTime = lbCastTime+0.1 > weaponSpeed and clCastTime < weaponSpeed
+    
+    -- Return true if either condition is met
+    return shouldUseCLForEnemies or shouldUseCLForCastTime
+end
+
+-- Helper to position a spark at the outer top end of a bar
+local function PositionBarSpark(bar, spark)
+    if not bar or not spark then return end
+    if bar:IsShown() and bar:GetWidth() > 0 then
+        local left = bar:GetLeft()
+        local top = bar:GetTop()
+        if left and top then
+            local sparkX = left + bar:GetWidth()
+            local sparkY = top + 2
+            spark:ClearAllPoints()
+            spark:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", sparkX, sparkY)
+            spark:Show()
+            return
+        end
+    end
+    spark:Hide()
+end
+
+function ShamanWeaveBar:UpdateDisplay()
+    if not frame or isDragging or not self.db.profile.showBar then return end
+    
+    -- Handle out of combat/no target state
+    if not UnitAffectingCombat("player") or not UnitExists("target") or not self.db.profile.showBar then
+        frame.weaveBar:SetWidth(0)
+        frame.clWeaveBar:SetWidth(0)
+        frame.upcomingWeaveBar:SetWidth(0)
+        frame.clUpcomingWeaveBar:SetWidth(0)
+        frame.countdownBar:SetWidth(0)
+        frame.gcdBar:SetWidth(0)
+        frame.gcdSpark:Hide()
+        frame.swingBar:SetWidth(0)
+        frame.spark:Hide()
+        -- Hide all sparks
+        frame.weaveSpark:Hide()
+        frame.clWeaveSpark:Hide()
+        frame.upcomingWeaveSpark:Hide()
+        frame.clUpcomingWeaveSpark:Hide()
+        return
+    end
+    
+    -- Determine which spell we're using
+    local useChainLightning = self:ShouldUseChainLightning()
+    local currentSpellId = useChainLightning and CHAIN_LIGHTNING_ID or LIGHTNING_BOLT_ID
+    
+    -- Get weave timing information for both spells
+    local lbTimeToWeave = NAG:TimeToNextWeaveGap(LIGHTNING_BOLT_ID)
+    local clTimeToWeave = NAG:TimeToNextWeaveGap(CHAIN_LIGHTNING_ID)
+    local lbCanWeave = NAG:CanWeave(LIGHTNING_BOLT_ID)
+    local clCanWeave = NAG:CanWeave(CHAIN_LIGHTNING_ID)
+    
+    -- Get timing information
+    local lbCastTime = NAG:CastTime(LIGHTNING_BOLT_ID)
+    local clCastTime = NAG:CastTime(CHAIN_LIGHTNING_ID)
+    local weaponSpeed = NAG:AutoSwingTime(NAG.Types:GetType("SwingType").MainHand)
+    local swingTimeLeft, rawSwingTimeLeft = NAG:AutoTimeToNext()
+    local gcd = NAG:GCDTimeToReady() or 0
+    
+    -- Calculate bar widths with smooth interpolation only when decreasing
+    local maxWidth = frame:GetWidth()
+    
+    -- Update LB weave bar (light blue) and spark
+    local lbRemainingGapTime = rawSwingTimeLeft - lbCastTime
+    local epsilon = 1e-3
+    if lbRemainingGapTime > epsilon then
+        local swingProgress = lbRemainingGapTime / weaponSpeed
+        local targetWidth = maxWidth * swingProgress
+        local currentWidth = frame.weaveBar:GetWidth()
+        if targetWidth < currentWidth then
+            local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
+            frame.weaveBar:SetWidth(newWidth)
+        else
+            frame.weaveBar:SetWidth(targetWidth)
+        end
+        frame.weaveBar:Show()
+        PositionBarSpark(frame.weaveBar, frame.weaveSpark)
+    else
+        frame.weaveBar:SetWidth(0)
+        frame.weaveBar:Hide()
+        frame.weaveSpark:Hide()
+    end
+    
+    -- Update CL weave bar (darker blue) and spark
+    local clRemainingGapTime = rawSwingTimeLeft - clCastTime
+    if clRemainingGapTime > epsilon then
+        local swingProgress = clRemainingGapTime / weaponSpeed
+        local targetWidth = maxWidth * swingProgress
+        local currentWidth = frame.clWeaveBar:GetWidth()
+        if targetWidth < currentWidth then
+            local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
+            frame.clWeaveBar:SetWidth(newWidth)
+        else
+            frame.clWeaveBar:SetWidth(targetWidth)
+        end
+        frame.clWeaveBar:Show()
+        PositionBarSpark(frame.clWeaveBar, frame.clWeaveSpark)
+    else
+        frame.clWeaveBar:SetWidth(0)
+        frame.clWeaveBar:Hide()
+        frame.clWeaveSpark:Hide()
+    end
+    
+    -- Update LB upcoming weave gap bar (light blue) and spark
+    local lbNextGapTime = max(0, (weaponSpeed) - lbCastTime)
+    if lbNextGapTime > epsilon then
+        local swingProgress = rawSwingTimeLeft / weaponSpeed
+        local safeOffset = 0.02
+        if swingProgress < 1 - safeOffset then
+            swingProgress = swingProgress + safeOffset
+        end
+        local startPoint = maxWidth * swingProgress 
+        local gapEndTime = min(rawSwingTimeLeft + lbNextGapTime, weaponSpeed)
+        local endProgress = gapEndTime / weaponSpeed
+        local endPoint = maxWidth * endProgress
+        local width = endPoint - startPoint
+        if width < 0 then width = 0 end
+        frame.upcomingWeaveBar:ClearAllPoints()
+        frame.upcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+        frame.upcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+        if width > epsilon then
+            frame.upcomingWeaveBar:SetWidth(width)
+            frame.upcomingWeaveBar:Show()
+            -- Show the spark when the bar is not at its maximum width
+            local maxUpcomingWidth = maxWidth * (1 - swingProgress)
+            if math.abs(width - maxUpcomingWidth) >= 1 then
+                PositionBarSpark(frame.upcomingWeaveBar, frame.upcomingWeaveSpark)
+            else
+                frame.upcomingWeaveSpark:Hide()
+            end
+        else
+            frame.upcomingWeaveBar:ClearAllPoints()
+            frame.upcomingWeaveBar:SetWidth(0)
+            frame.upcomingWeaveBar:Hide()
+            frame.upcomingWeaveSpark:Hide()
+        end
+    else
+        frame.upcomingWeaveBar:ClearAllPoints()
+        frame.upcomingWeaveBar:SetWidth(0)
+        frame.upcomingWeaveBar:Hide()
+        frame.upcomingWeaveSpark:Hide()
+    end
+    
+    -- Update CL upcoming weave gap bar (darker blue) and spark
+    local clNextGapTime = max(0, (weaponSpeed) - clCastTime)
+    if clNextGapTime > epsilon then
+        local swingProgress = rawSwingTimeLeft / weaponSpeed
+        local safeOffset = 0.02
+        if swingProgress < 1 - safeOffset then
+            swingProgress = swingProgress + safeOffset
+        end
+        local startPoint = maxWidth * swingProgress 
+        local gapEndTime = min(rawSwingTimeLeft + clNextGapTime, weaponSpeed)
+        local endProgress = gapEndTime / weaponSpeed
+        local endPoint = maxWidth * endProgress
+        local width = endPoint - startPoint
+        if width < 0 then width = 0 end
+        frame.clUpcomingWeaveBar:ClearAllPoints()
+        frame.clUpcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+        frame.clUpcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+        if width > epsilon then
+            frame.clUpcomingWeaveBar:SetWidth(width)
+            frame.clUpcomingWeaveBar:Show()
+            -- Show the spark when the bar is not at its maximum width
+            local maxUpcomingWidth = maxWidth * (1 - swingProgress)
+            if math.abs(width - maxUpcomingWidth) >= 1 then
+                PositionBarSpark(frame.clUpcomingWeaveBar, frame.clUpcomingWeaveSpark)
+            else
+                frame.clUpcomingWeaveSpark:Hide()
+            end
+        else
+            frame.clUpcomingWeaveBar:ClearAllPoints()
+            frame.clUpcomingWeaveBar:SetWidth(0)
+            frame.clUpcomingWeaveBar:Hide()
+            frame.clUpcomingWeaveSpark:Hide()
+        end
+    else
+        frame.clUpcomingWeaveBar:ClearAllPoints()
+        frame.clUpcomingWeaveBar:SetWidth(0)
+        frame.clUpcomingWeaveBar:Hide()
+        frame.clUpcomingWeaveSpark:Hide()
+    end
+    
+    -- Update countdown bar (red)
+    frame.countdownBar:SetWidth(0)
+    
+    -- Update GCD bar
+    if UnitAffectingCombat("player") and UnitExists("target") then
+        local gcd = NAG:GCDTimeToReady() or 0
+        local weaponSpeed = NAG:AutoSwingTime(NAG.Types:GetType("SwingType").MainHand)
+        local maxWidth = frame:GetWidth()
+        local castTimeLeft = 0
+        local isInstantCast = true
+        if currentCastEndTime and currentCastEndTime > GetTime() and currentCastSpellId then
+            castTimeLeft = currentCastEndTime - GetTime()
+            local castDuration = NAG:CastTime(currentCastSpellId)
+            if castDuration and castDuration > 0.05 then -- treat <=0.05 as instant
+                isInstantCast = false
+            end
+        end
+        local barTime = math.max(gcd, castTimeLeft)
+        local barProgress = barTime / weaponSpeed -- Use weapon speed as maximum length
+        local targetWidth = maxWidth * barProgress
+        local currentWidth = frame.gcdBar:GetWidth()
+
+        -- Color logic
+        local swingTimeLeft = select(2, NAG:AutoTimeToNext()) or 0
+        local nextSwingTime = GetTime() + swingTimeLeft
+        local castEndTime = currentCastEndTime or 0
+        local gcdEndTime = GetTime() + gcd
+        local r, g, b, a = 0.3, 0.3, 0.3, 0.85 -- darker default gray
+
+        -- For instant casts, just use GCD time and default color
+        if isInstantCast then
+            -- Use default darkened gray for instant casts
+            r, g, b, a = 0.3, 0.3, 0.3, 0.85
+        else
+            -- For non-instant casts, check if cast will clip swing
+            if castEndTime >= nextSwingTime then
+                -- Red: cast will clip next swing
+                r, g, b, a = 1, 0.2, 0.2, 0.95
+            else
+                -- Light green: cast will finish before next swing
+                r, g, b, a = 0.4, 1, 0.4, 0.95
+            end
+        end
+
+        frame.gcdBar:SetColorTexture(r, g, b, a)
+
+        -- Only interpolate if we're decreasing
+        if targetWidth < currentWidth then
+            local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
+            frame.gcdBar:SetWidth(newWidth)
+        else
+            frame.gcdBar:SetWidth(targetWidth)
+        end
+        -- Update GCD spark visibility and position
+        if barTime > 0 then
+            frame.gcdSpark:Show()
+            -- Calculate alpha for GCD spark
+            local alpha = 0.5 -- Start at 50% visibility
+            if barProgress < 0.25 then
+                -- Fade from 50% to 100% in the last quarter
+                alpha = 0.5 + ((0.25 - barProgress) * 2.0)
+            end
+            frame.gcdSpark:SetAlpha(alpha)
+        else
+            frame.gcdSpark:Hide()
+        end
+    else
+        frame.gcdBar:SetWidth(0)
+        frame.gcdSpark:Hide()
+    end
+    
+    -- Update current swing timer bar
+    if self.db.profile.bar.swingTimer.enabled then
+        local swingProgress = rawSwingTimeLeft / weaponSpeed
+        local targetWidth = maxWidth * swingProgress
+        local currentWidth = frame.swingBar:GetWidth()
+        
+        -- Only interpolate if we're decreasing
+        if targetWidth < currentWidth then
+            local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
+            frame.swingBar:SetWidth(newWidth)
+        else
+            frame.swingBar:SetWidth(targetWidth)
+        end
+        
+        -- Set fixed spark size and show it
+        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, self.db.profile.bar.swingTimer.sparkSize)
+        frame.spark:Show()
+    else
+        frame.swingBar:SetWidth(0)
+        frame.spark:Hide()
+    end
+end
+
+function ShamanWeaveBar:OnCombatStateChanged()
+    if UnitAffectingCombat("player") then
+        -- Entered combat
+        if not self.db.profile.bar.locked then
+            frame:EnableMouse(false)
+        end
+    else
+        -- Left combat
+        if not self.db.profile.bar.locked then
+            frame:EnableMouse(true)
+        end
+    end
+    -- Update visibility when combat state changes
+    self:UpdateVisibility()
+end
+
+function ShamanWeaveBar:GetOptions()
+    return {
+        type = "group",
+        name = L["LB Weaving Bar"],
+        order = 1,
+        parent = "SHAMAN",
+        childGroups = "tab",
+        width = "full",
+        args = {
+            showBar = {
+                name = L["Show Weaving Bar"],
+                desc = L["Toggle the visibility of the weaving bar"],
+                type = "toggle",
+                width = "full",
+                order = 0,
+                set = function(info, value)
+                    self.db.profile.showBar = value
+                    self:UpdateVisibility()
+                end,
+                get = function(info) return self.db.profile.showBar end
+            },
+            hideOutOfCombat = {
+                name = L["Hide Out of Combat"],
+                desc = L["Hide the weaving bar when out of combat"],
+                type = "toggle",
+                width = "full",
+                order = 1,
+                set = function(info, value)
+                    self.db.profile.hideOutOfCombat = value
+                    self:UpdateVisibility()
+                end,
+                get = function(info) return self.db.profile.hideOutOfCombat end
+            },
+            positionBar = {
+                name = L["Position Bar"],
+                desc = L["Click to enter positioning mode. Drag the bar to position it, then click X when done."],
+                type = "execute",
+                width = "full",
+                order = 2,
+                func = function()
+                    self:StartPositioning()
+                end
+            },
+            barSettings = {
+                name = L["Bar Settings"],
+                type = "group",
+                order = 10,
+                inline = false,
+                args = {
+                    width = { name = L["Width"], type = "range", min = 100, max = 500, step = 1, order = 10, set = function(info, value) self.db.profile.bar.width = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.width end },
+                    height = { name = L["Height"], type = "range", min = 10, max = 50, step = 1, order = 20, set = function(info, value) self.db.profile.bar.height = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.height end },
+                    alpha = { name = L["Alpha"], type = "range", min = 0, max = 1, step = 0.05, order = 30, set = function(info, value) self.db.profile.bar.alpha = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.alpha end },
+                    positionHeader = { name = L["Position"], type = "header", order = 40 },
+                    xOffset = { name = L["X Offset"], type = "range", min = -2000, max = 2000, step = 1, order = 50, set = function(info, value) self.db.profile.bar.x = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.x end },
+                    yOffset = { name = L["Y Offset"], type = "range", min = -2000, max = 2000, step = 1, order = 60, set = function(info, value) self.db.profile.bar.y = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.y end },
+                    lockPosition = { name = L["Lock Position"], type = "toggle", order = 70, set = function(info, value) self.db.profile.bar.locked = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.locked end },
+                    backgroundHeader = { name = L["Background"], type = "header", order = 80 },
+                    background = { name = L["Background"], desc = L["Select a background for the bar"], type = "select", order = 90, values = { none = L["None"], bg2 = "ShamanWeaver BG2", bg3 = "ShamanWeaver BG3", bg4 = "ShamanWeaver BG4" }, set = function(info, value) self.db.profile.bar.background = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.background end },
+                    bgColor = { name = L["Background Color"], desc = L["Set the color and alpha of the background image"], type = "color", hasAlpha = true, order = 91, set = function(info, r, g, b, a) self.db.profile.bar.bgColor = { r = r, g = g, b = b, a = a }; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.bgColor or { r = 1, g = 1, b = 1, a = 1 }; return c.r, c.g, c.b, c.a end },
+                }
+            },
+            appearanceSettings = {
+                name = L["Appearance"],
+                type = "group",
+                order = 20,
+                inline = false,
+                args = {
+                    showBorder = { name = L["Show Border"], type = "toggle", order = 10, set = function(info, value) self.db.profile.bar.showBorder = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.showBorder end },
+                    borderColor = { name = L["Border Color"], type = "color", hasAlpha = true, order = 20, set = function(info, r, g, b, a) self.db.profile.bar.borderColor = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.borderColor; return c.r, c.g, c.b, c.a end },
+                    showCountdownText = { name = L["Show Countdown Text"], type = "toggle", order = 30, set = function(info, value) self.db.profile.bar.showCountdownText = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.showCountdownText end },
+                    textSize = { name = L["Text Size"], type = "range", min = 8, max = 32, step = 1, order = 40, set = function(info, value) self.db.profile.bar.countdownTextSize = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.countdownTextSize end },
+                    textColor = { name = L["Text Color"], type = "color", hasAlpha = true, order = 50, set = function(info, r, g, b, a) self.db.profile.bar.countdownTextColor = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.countdownTextColor; return c.r, c.g, c.b, c.a end },
+                    colorHeader = { name = L["Bar Colors"], type = "header", order = 60 },
+                    weaveColor = { name = L["Weave Bar Color"], type = "color", hasAlpha = true, order = 70, set = function(info, r, g, b, a) self.db.profile.bar.colors.weave = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.weave; return c.r, c.g, c.b, c.a end },
+                    clweaveColor = { name = L["CL Weave Bar Color"], type = "color", hasAlpha = true, order = 80, set = function(info, r, g, b, a) self.db.profile.bar.colors.clweave = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.clweave; return c.r, c.g, c.b, c.a end },
+                    upcomingweaveColor = { name = L["Upcoming Weave Bar Color"], type = "color", hasAlpha = true, order = 90, set = function(info, r, g, b, a) self.db.profile.bar.colors.upcomingweave = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.upcomingweave; return c.r, c.g, c.b, c.a end },
+                    clupcomingweaveColor = { name = L["CL Upcoming Weave Bar Color"], type = "color", hasAlpha = true, order = 100, set = function(info, r, g, b, a) self.db.profile.bar.colors.clupcomingweave = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.clupcomingweave; return c.r, c.g, c.b, c.a end },
+                    gcdColor = { name = L["GCD Bar Color"], type = "color", hasAlpha = true, order = 110, set = function(info, r, g, b, a) self.db.profile.bar.colors.gcd = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.gcd; return c.r, c.g, c.b, c.a end },
+                    countdownColor = { name = L["Countdown Bar Color"], type = "color", hasAlpha = true, order = 120, set = function(info, r, g, b, a) self.db.profile.bar.colors.countdown = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.countdown; return c.r, c.g, c.b, c.a end },
+                    sparkColor = { name = L["Spark Color"], type = "color", hasAlpha = true, order = 130, set = function(info, r, g, b, a) self.db.profile.bar.colors.spark = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.spark; return c.r, c.g, c.b, c.a end },
+                }
+            },
+            swingTimerSettings = {
+                name = L["Swing Timer"],
+                type = "group",
+                order = 30,
+                inline = false,
+                args = {
+                    enabled = { name = L["Enable Swing Timer"], type = "toggle", order = 10, set = function(info, value) self.db.profile.bar.swingTimer.enabled = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.enabled end },
+                    barHeight = { name = L["Bar Height"], type = "range", min = 1, max = 10, step = 1, order = 20, set = function(info, value) self.db.profile.bar.swingTimer.height = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.height end },
+                    sparkSize = { name = L["Spark Size"], type = "range", min = 4, max = 20, step = 1, order = 30, set = function(info, value) self.db.profile.bar.swingTimer.sparkSize = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.sparkSize end },
+                    sparkWidth = { name = L["Spark Width"], type = "range", min = 1, max = 10, step = 1, order = 40, set = function(info, value) self.db.profile.bar.swingTimer.sparkWidth = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.sparkWidth end },
+                    swingSparkColor = { name = L["Spark Color"], type = "color", hasAlpha = true, order = 50, set = function(info, r, g, b, a) self.db.profile.bar.swingTimer.sparkColor = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.swingTimer.sparkColor; return c.r, c.g, c.b, c.a end },
+                }
+            }
+        }
+    }
+end
+
+function ShamanWeaveBar:UNIT_SPELLCAST_START(event, unit, castString, spellId)
+    if unit == "player" and type(spellId) == "number" then
+        local castTime = NAG:CastTime(spellId)
+        if castTime and castTime > 0 then
+            currentCastSpellId = spellId
+            currentCastEndTime = GetTime() + castTime
+        else
+            currentCastSpellId = nil
+            currentCastEndTime = nil
+        end
+    end
+end
+
+function ShamanWeaveBar:UNIT_SPELLCAST_STOP(event, unit)
+    if unit == "player" then
+        currentCastSpellId = nil
+        currentCastEndTime = nil
+    end
+end
+
+function ShamanWeaveBar:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+    if unit == "player" then
+        currentCastSpellId = nil
+        currentCastEndTime = nil
+    end
+end
+
+function ShamanWeaveBar:StartPositioning()
+    if not frame then return end
+    
+    isPositioning = true
+    frame:Show() -- Force show the frame
+    frame:EnableMouse(true) -- Enable mouse interaction
+    
+    -- Create or update the close button
+    if not frame.closeButton then
+        local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
+        closeButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 2, 2)
+        closeButton:SetScript("OnClick", function()
+            self:StopPositioning()
+        end)
+        frame.closeButton = closeButton
+    else
+        frame.closeButton:Show()
+    end
+    
+    -- Show a tooltip on the frame to indicate it's in positioning mode
+    frame:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(frame, "ANCHOR_TOP")
+        GameTooltip:AddLine(L["Positioning Mode"])
+        GameTooltip:AddLine(L["Drag to position the bar. Click X when done."], 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+    frame:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+end
+
+function ShamanWeaveBar:StopPositioning()
+    if not frame then return end
+    
+    isPositioning = false
+    frame:EnableMouse(not self.db.profile.bar.locked)
+    if frame.closeButton then
+        frame.closeButton:Hide()
+    end
+    
+    -- Remove tooltip scripts
+    frame:SetScript("OnEnter", nil)
+    frame:SetScript("OnLeave", nil)
+    
+    -- Update visibility based on normal rules
+    self:UpdateVisibility()
+end
+
+-- Add module to namespace
+ns.ShamanWeaveBar = ShamanWeaveBar 

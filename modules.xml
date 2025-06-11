@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.blizzard.com/wow/ui/" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <!-- Base Module Files -->
+    <Script file="Modules\ModuleBase.lua"/>
+    <Script file="Modules\ClassBase.lua"/>
+    
+    <!-- Debug Base -->
+    <Script file="Modules\Debug\DebugManager.lua"/>
+    <Script file="Modules\Debug\Profiling.lua"/>
+    
+    <!-- Core Modules -->
+    <Script file="Modules\Types.lua"/>
+    <Script file="Modules\APL.lua"/>
+    <Script file="Modules\APLSchema.lua"/>
+    <Script file="Modules\KeybindManager.lua"/>
+    <Script file="Modules\DataWalker.lua"/>
+    <Script file="Modules\DataManager.lua"/>
+    <Script file="Modules\DataLoader.lua"/>
+    <Script file="Modules\StateManager.lua"/>
+    <Script file="Modules\TimerManager.lua"/>
+    <Script file="Modules\SpellTrackingManager.lua"/>
+    <Script file="Modules\TooltipParsingManager.lua"/>
+    <Script file="Modules\TrinketTrackingManager.lua"/>
+    <Script file="Modules\TrinketRegistrationManager.lua"/>
+    <Script file="Modules\TrinketCommunicationManager.lua"/>
+    <Script file="Modules\TTDManager.lua"/>
+    <Script file="Modules\PullTimerManager.lua"/>
+    <Script file="Modules\ThrottleManager.lua"/>
+    <Script file="Modules\GlowManager.lua"/>
+    <Script file="Modules\BurstTrackerManager.lua"/>
+    <Script file="Modules\ResourceBarManager.lua"/>
+    <Script file="Modules\OverlayManager.lua"/>
+    <Script file="Modules\BTK.lua"/>
+    <Script file="Modules\ImportExport.lua"/>
+    <Script file="Modules\RotationManager.lua"/>
+    
+    <!-- SpellLearner Modules -->
+    <Script file="Modules\SpellLearner\SpellLearner.lua"/>
+    <Script file="Modules\SpellLearner\SpellLearner-StateManager.lua"/>
+    <Script file="Modules\SpellLearner\PredictionAPI.lua"/>
+    <Script file="Modules\SpellLearner\PredictionEngine.lua"/>
+    
+    <!-- Debug Modules -->
+    <Script file="Modules\Debug\APLMonitor.lua"/>
+    <Script file="Modules\Debug\EventDebugger.lua"/>
+    <Script file="Modules\Debug\EntityBehaviorTester.lua"/>
+    <Script file="Modules\Debug\CLEUDebugger.lua"/>
+    <Script file="Modules\Debug\EncounterStopwatch.lua"/>
+    
+    <!-- APL Editor -->
+    <Script file="Modules\APLEditor.lua"/>
+
+    <!-- APL Testing Modules -->
+    <Script file="Modules\APLTestData.lua"/>
+    <Script file="Modules\APLTest.lua"/>
+    <Script file="Modules\APLTestUI.lua"/>
+    
+    <!-- Class Modules -->
+    <Script file="Modules\ShamanWeaveModule.lua"/>
+    <Script file="Modules\ShamanWeaveBar.lua"/>
+
+    <!-- New Modules -->
+    <Script file="Modules\UIBackground.lua"/>
+
+</Ui> 

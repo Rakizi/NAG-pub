@@ -1,0 +1,55 @@
+## Interface: 11507
+## Version: 5.0.0
+## Title: Next Action Guides(NAG)
+## Notes: Works with Next Action Guides (https://discorg.gg/ebonhold)
+## Author: Rakizi & Fonsas
+## SavedVariables: NAGDB
+## X-Curse-Project-ID: 1057119
+## X-Wago-Project-ID: BKpqpqGE
+## X-WoWI-ID: 26918
+## OptionalDeps: Ace3, LibCompress, LibDataBroker-1.1, LibDBIcon-1.0, LibRangeCheck-3.0, LibSharedMedia-3.0, LibClassicSwingTimerAPI
+
+# Common Libraries
+libs.xml
+
+# flavor specific Libraries
+Libs\LibClassicSwingTimerAPI\LibClassicSwingTimerAPI.lua
+
+# Localization
+Locales\Locales.xml
+
+# Core Files
+Version.lua
+APICompat.lua
+SpecializationCompat.lua
+
+Core.lua
+NAG.lua
+Utils.lua
+
+# Data Files
+data\Vanilla\Data.xml
+data\sod\Data.xml
+# Entity Behaviors
+EntityBehaviors.lua
+
+# Ace3 Modules
+modules.xml
+
+# APL System
+#APL\APL.xml
+
+# Main addon files
+Dialogs.lua
+Common.lua
+Config.lua
+handlers\handlers.xml
+APLhandlers.lua
+#handlersnew.lua
+
+Vanilla\Vanilla.xml
+sod\sod.xml
+
+Visuals.lua
+Frames.lua
+Options.lua

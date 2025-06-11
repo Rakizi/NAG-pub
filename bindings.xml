@@ -1,0 +1,14 @@
+<Bindings>
+    <Binding name="NAG_TOGGLE_DEBUG_FRAME" category="Next Action Guide"> 
+        NAG:GetModule("APLMonitor"):Toggle() 
+    </Binding>
+    <Binding name="NAG_NEXT_ROTATION" category="Next Action Guide">
+        NAG:GetModule(NAG.CLASS):CycleRotation("next")
+    </Binding>
+    <Binding name="NAG_PREV_ROTATION" category="Next Action Guide">
+        NAG:GetModule(NAG.CLASS):CycleRotation("prev")
+    </Binding>
+    <Binding name="NAG_TOGGLE_ROTATION_MANAGER" category="Next Action Guide">
+        NAG:GetModule("RotationManager"):Toggle()
+    </Binding>
+</Bindings>

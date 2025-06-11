@@ -1,0 +1,3672 @@
+--- ============================ HEADER ============================
+--[[
+    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+
+    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
+        liable for any damages arising from the use of this software.
+
+    You are free to:
+    - Share — copy and redistribute the material in any medium or format
+    - Adapt — remix, transform, and build upon the material
+
+    Under the following terms:
+    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
+        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
+        your use.
+    - NonCommercial — You may not use the material for commercial purposes.
+
+    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
+    Date: 06/01/2024
+
+    STATUS: Development
+    NOTES: State manager for SpellLearner module that tracks state changes during spell casts
+]]
+
+--- ======= LOCALIZE =======
+--Addon
+local _, ns = ...
+--- @class NAG
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+---@class DataManager : ModuleBase
+local DataManager = NAG:GetModule("DataManager")
+---@class TimerManager : ModuleBase
+local TimerManager = NAG:GetModule("TimerManager", true) -- Make it optional
+local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
+
+--Libs
+local LSM = LibStub("LibSharedMedia-3.0")
+local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+
+--WoW API
+local GetSpellCooldown = ns.GetSpellCooldownUnified
+local GetSpellCharges = ns.GetSpellChargesUnified
+local GetSpellInfo = ns.GetSpellInfoUnified
+local UnitAura = ns.UnitAuraUnified
+local UnitBuff = ns.UnitBuffUnified
+local UnitDebuff = ns.UnitDebuffUnified
+local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
+local GetTime = GetTime
+local GetRuneCooldown = GetRuneCooldown
+local GetRuneType = GetRuneType
+
+-- Lua APIs (using WoW's optimized versions where available)
+local format = format or string.format
+local floor = floor or math.floor
+local min = min or math.min
+local max = max or math.max
+local wipe = wipe
+local tinsert = tinsert
+local tremove = tremove
+
+--- ============================ CONTENT ============================
+-- Constants
+local CONSTANTS = {
+    UPDATE_INTERVAL = 0.1,
+    MAX_RESOURCE_TYPES = 10,
+    STATE_UPDATE_INTERVAL = 0.25,  -- How often we capture state
+    STATE_HISTORY_SIZE = 4,        -- Keep 1 second of history (4 * 0.25s)
+    PRECAST_WINDOW = 0.5,          -- Time window to associate cooldown update with cast
+    PRECAST_COOLDOWN = 0.5,        -- Minimum time between pre-cast snapshots
+    POST_CAST_DELAY = 0.15,        -- Delay for post-cast state capture
+    MIN_REFRESH_THRESHOLD = 0.6,    -- Minimum duration increase to consider as refresh
+    MAX_RUNES = 6,                 -- Maximum number of runes
+    MAX_STATE_CHANGES = 40,        -- Maximum number of state changes to store per spell
+    RUNE_TYPE = {                  -- Rune types
+        BLOOD = 1,
+        FROST = 2,
+        UNHOLY = 3,
+        DEATH = 4
+    },
+    DISTANCE_INDEX = {             -- Distance check indices
+        INSPECT = 1,  -- 28 yards
+        TRADE = 2,    -- 11.11 yards
+        DUEL = 3,     -- 9.9 yards
+        FOLLOW = 4    -- 28 yards
+    },
+    MIN_NATURAL_CHANGE_WINDOW = 0.0,  -- Minimum time window to consider a change as natural
+    NATURAL_CHANGE_WINDOW = 0.5,      -- Maximum time window to consider a change as natural
+}
+
+-- Default settings
+local defaults = {
+    global = {
+        version = 1,
+        debugMode = false,
+    },
+    char = {
+        enabled = true,
+        trackResources = true,
+        trackBuffs = true,
+        trackDebuffs = true,
+        trackCooldowns = true,
+    }
+}
+
+---@class SpellLearnerStateManager: ModuleBase
+local SpellLearnerStateManager = NAG:CreateModule("SpellLearnerStateManager", defaults, {
+    optionsCategory = ns.MODULE_CATEGORIES.FEATURE, -- Move to Features tab
+    optionsOrder = 22,
+    childGroups = "tree",
+
+    -- This is defined for documentation, but direct registration is used instead
+    eventHandlers = { },
+
+    -- Default state
+    defaultState = {
+        currentState = {
+            resources = {},
+            buffs = {},
+            debuffs = {},
+            cooldowns = {},
+            gcd = {
+                remaining = 0,
+                startTime = 0,
+            },
+            casting = {
+                spellID = nil,
+                startTime = 0,
+                endTime = 0,
+            },
+        },
+        stateHistory = {}, -- Initialize empty state history
+        lastUpdate = 0,
+        activeCasts = {}, -- Track casts in progress
+        knownSpells = {},
+        spellEffects = {},  -- Track spell -> buff relationships
+        activeBuffs = {},   -- Track active buffs and their sources
+        lastCastGUID = nil,
+        pendingCooldownUpdate = nil,  -- Add this to track pre-cast state
+        lastCooldownUpdateTime = 0,   -- Add this to track when cooldown updates happen
+        lastPreCastSnapshotTime = 0,  -- Add this to track pre-cast snapshot timing
+        trackedNextSpells = {},       -- Track last 2 unique NAG.nextSpell IDs
+        trackedNextSpellsCount = 0,   -- Count of unique spells being tracked
+    },
+})
+
+do -- Ace3 lifecyle methods
+    --- Initialize the module
+    function SpellLearnerStateManager:ModuleInitialize()
+        self:Info("Initializing SpellLearnerStateManager")
+        
+        -- Initialize state from defaultState
+        self.state = CopyTable(self.defaultState)
+        
+        -- Initialize spell effects table
+        self.state.spellEffects = {}
+        
+        -- Initialize aura cache FIRST
+        self.auraCache = {
+            player = {},
+            target = {},
+            lastTargetGUID = nil
+        }
+        
+        -- Initialize spell tracking
+        self:InitializeSpellTracking()
+        
+        -- Initialize resource tracking
+        self:InitializeResourceTracking()
+        
+        -- Using direct registration instead of eventHandlers table for better reliability
+        self:Debug("Registering events directly")
+        
+        -- Register each event handler directly with callback functions
+        self:RegisterEvent("UNIT_SPELLCAST_SENT", function(event, ...) self:OnSpellCastSent(event, ...) end)
+        self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", function(event, ...) self:OnSpellCastSucceeded(event, ...) end)
+        self:RegisterEvent("UNIT_POWER_UPDATE", function(event, ...) self:OnPowerUpdate(event, ...) end)
+        self:RegisterEvent("UNIT_AURA", function(event, ...) self:OnAuraUpdate(event, ...) end)
+        self:RegisterEvent("SPELL_UPDATE_COOLDOWN", function(event, ...) self:OnCooldownUpdate(event, ...) end) 
+        self:RegisterEvent("PLAYER_ENTERING_WORLD", function(event, ...) self:OnEnteringWorld(event, ...) end)
+        self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", function(event, ...) self:COMBAT_LOG_EVENT_UNFILTERED(event, ...) end)
+        self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", function(event, ...) self:OnActionBarUpdateCooldown(event, ...) end)
+        self:RegisterEvent("PLAYER_TARGET_CHANGED", function(event, ...) self:OnTargetChanged(event, ...) end)
+        
+        -- Ensure debug mode is accessible
+        if self:GetGlobal().debugMode == nil then
+            self:GetGlobal().debugMode = true
+            self:Debug("Debug mode was nil, forcing it on")
+        end
+        
+        -- Create state update timer
+        self:CreateStateUpdateTimer()
+        
+        -- Register slash command for state changes
+        self:RegisterChatCommand("nagstates", function(input)
+            if input and input ~= "" then
+                -- Try to convert input to number for spell ID
+                local spellID = tonumber(input)
+                if spellID then
+                    self:InspectStoredChanges(spellID)
+                else
+                    self:Debug("Please provide a valid spell ID")
+                end
+            else
+                -- Show summary of all stored data
+                self:InspectStoredChanges()
+            end
+        end)
+        
+        -- Register slash command for spell effects analysis in ModuleInitialize
+        self:RegisterChatCommand("nagspells", function(input)
+            if input and input ~= "" then
+                -- Try to convert input to number for spell ID
+                local spellID = tonumber(input)
+                if spellID then
+                    self:PrintSpellEffects(spellID)
+                else
+                    self:Debug("Please provide a valid spell ID")
+                end
+            else
+                -- Show summary of all tracked spells
+                self:PrintSpellEffectsSummary()
+            end
+        end)
+        
+        self:Debug("Module initialized with debug mode: " .. tostring(self:GetGlobal().debugMode))
+    end
+
+    --- Enable the module
+    function SpellLearnerStateManager:ModuleEnable()
+        self:Debug("SpellLearnerStateManager enabled")
+        
+        -- Initialize character-specific state
+        self.state = self.state or {}
+        self.state.spellEffects = self.state.spellEffects or {}
+        self.state.currentState = self.state.currentState or {}
+        
+        -- Create event frame if it doesn't exist
+        if not self.eventFrame then
+            self.eventFrame = CreateFrame("Frame")
+            self.eventFrame.module = self
+            
+            -- Set up event handling with safer method calling
+            self.eventFrame:SetScript("OnEvent", function(frame, event, ...)
+                local module = frame.module
+                
+                if event == "UNIT_SPELLCAST_SUCCEEDED" then
+                    if module.OnSpellCastSucceeded then
+                        module:OnSpellCastSucceeded(...)
+                    end
+                elseif event == "PLAYER_REGEN_ENABLED" then
+                    -- Just capture state and debug rather than calling a method
+                    module:Debug("Combat ended")
+                    if module.state then
+                        module.state.inCombat = false
+                        module.state.preCastState = module:CaptureCurrentState()
+                    end
+                elseif event == "PLAYER_REGEN_DISABLED" then
+                    -- Just capture state and debug rather than calling a method
+                    module:Debug("Combat started")
+                    if module.state then
+                        module.state.inCombat = true
+                        module.state.preCastState = module:CaptureCurrentState()
+                    end
+                end
+            end)
+        end
+        
+        -- Register events
+        self.eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+        self.eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+        self.eventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+        
+        -- Directly hook combat log for more reliable spell tracking
+        self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        
+        -- Create debug handlers
+        NAG:RegisterChatCommand("nagspelldbg", function(input)
+            self:GetChar().debugLevel = tonumber(input) or 1
+            NAG:Print("Spell recording debug level set to " .. self:GetChar().debugLevel)
+        end)
+        
+        -- Capture initial state
+        self.state.preCastState = self:CaptureCurrentState()
+        
+        -- Load saved data
+        self:LoadSpellData()
+        
+        -- Print status message
+        NAG:Print("SpellLearner active. Cast spells to record data.")
+    end
+
+    --- Disable the module
+    function SpellLearnerStateManager:ModuleDisable()
+        -- Debug output for cleanup start
+        self:Debug("Starting SpellLearner state manager cleanup")
+        
+        -- Release all states in history
+        if self.state.stateHistory then
+            for _, entry in ipairs(self.state.stateHistory) do
+                if entry.state then
+                    self:ReleaseStateObject(entry.state)
+                end
+            end
+            wipe(self.state.stateHistory)
+        end
+        
+        -- Clean up active casts
+        wipe(self.state.activeCasts)
+        
+        -- Clean up current state
+        if self.state.currentState then
+            self:ReleaseStateObject(self.state.currentState)
+            self.state.currentState = nil
+        end
+        
+        -- Stop the state update timer
+        if self.stateUpdateTimer then
+            self.stateUpdateTimer:Cancel()
+            self.stateUpdateTimer = nil
+        end
+        
+        -- Unregister events
+        self:UnregisterAllEvents()
+        self:Debug("Events unregistered")
+        
+        -- Final cleanup message
+        self:Debug("SpellLearner state manager cleanup complete")
+    end
+end
+
+--- Initialize resource tracking
+function SpellLearnerStateManager:InitializeResourceTracking()
+    -- Initialize resource tracking tables with generic power entries
+    -- This will automatically map to the primary resource of the class (mana/energy/rage/etc)
+    -- and secondary resource (combo points/holy power/etc)
+    self.state.currentState.resources = {
+        power = UnitPower("player"), -- Primary resource (mana, energy, rage, etc)
+        secondary = UnitPower("player", self:GetSecondaryPowerType()), -- Secondary resource if any
+    }
+end
+
+--- Initialize spell tracking
+function SpellLearnerStateManager:InitializeSpellTracking()
+    -- Create knownSpells if it doesn't exist
+    self.state.knownSpells = self.state.knownSpells or {}
+    
+    -- Scan spellbook for known spells
+    for i = 1, GetNumSpellTabs() do
+        local offset, numSpells = select(3, GetSpellTabInfo(i))
+        for j = offset + 1, offset + numSpells do
+            local spellID = select(7, GetSpellInfo(j, BOOKTYPE_SPELL))
+            if spellID then
+                self.state.knownSpells[spellID] = true
+            end
+        end
+    end
+    
+    self:Debug(format("Initialized spell tracking with %d known spells", 
+        ns.tCount(self.state.knownSpells)))
+end
+
+--- Update player buffs with improved data collection
+function SpellLearnerStateManager:UpdatePlayerBuffs()
+    if not self:GetChar().trackBuffs then return end
+    
+    if not self.state then
+        self.state = {}
+    end
+    
+    if not self.state.currentState then
+        self.state.currentState = {}
+    end
+    
+    if not self.state.currentState.buffs then
+        self.state.currentState.buffs = {player = {}, target = {}}
+    end
+    
+    if not self.state.currentState.buffs.player then
+        self.state.currentState.buffs.player = {}
+    else
+        wipe(self.state.currentState.buffs.player)
+    end
+    
+    -- Only track player auras
+    for i = 1, 40 do
+        local name, icon, count, _, duration, expirationTime, unitCaster, _, _, spellID = UnitBuff("player", i)
+        if name and spellID and unitCaster and (unitCaster == "player" or unitCaster == "pet") then
+            self.state.currentState.buffs.player[spellID] = {
+                name = name,
+                icon = icon,
+                duration = duration or 0,
+                expirationTime = expirationTime or 0,
+                remaining = expirationTime and (expirationTime - GetTime()) or 0,
+                stacks = count or 1,
+                caster = unitCaster
+            }
+        end
+    end
+end
+
+--- Update target debuffs with improved data collection
+function SpellLearnerStateManager:UpdateTargetDebuffs()
+    if not self:GetChar().trackBuffs then return end
+    
+    if not self.state then
+        self.state = {}
+    end
+    
+    if not self.state.currentState then
+        self.state.currentState = {}
+    end
+    
+    if not self.state.currentState.buffs then
+        self.state.currentState.buffs = {player = {}, target = {}}
+    end
+    
+    if not self.state.currentState.buffs.target then
+        self.state.currentState.buffs.target = {}
+    else
+        wipe(self.state.currentState.buffs.target)
+    end
+    
+    -- Only track player-applied debuffs if we have a target
+    if not UnitExists("target") then return end
+    
+    for i = 1, 40 do
+        local name, icon, count, _, duration, expirationTime, unitCaster, _, _, spellID = UnitDebuff("target", i)
+        if name and spellID and unitCaster and (unitCaster == "player" or unitCaster == "pet") then
+            self.state.currentState.buffs.target[spellID] = {
+                name = name,
+                icon = icon,
+                duration = duration or 0,
+                expirationTime = expirationTime or 0,
+                remaining = expirationTime and (expirationTime - GetTime()) or 0,
+                stacks = count or 1,
+                caster = unitCaster
+            }
+        end
+    end
+end
+
+--- Update cooldown information for known spells
+function SpellLearnerStateManager:UpdateCooldowns()
+    if not self:GetChar().trackCooldowns then return end
+    
+    if not self.state.currentState then
+        self.state.currentState = {}
+    end
+    
+    if not self.state.currentState.cooldowns then
+        self.state.currentState.cooldowns = {}
+    end
+    
+    -- Check cooldowns for all known spells
+    for spellID in pairs(self.state.knownSpells) do
+        local start, duration = GetSpellCooldown(spellID)
+        if start and duration and start > 0 and duration > 0 then
+            local remaining = start + duration - GetTime()
+            self.state.currentState.cooldowns[spellID] = {
+                start = start,
+                duration = duration,
+                remaining = remaining > 0 and remaining or 0
+            }
+        else
+            -- Spell is not on cooldown
+            self.state.currentState.cooldowns[spellID] = nil
+        end
+    end
+    
+    -- Update GCD info
+    local gcdStart, gcdDuration = GetSpellCooldown(61304) -- 61304 is the GCD spell ID
+    if gcdStart and gcdDuration and gcdStart > 0 and gcdDuration > 0 then
+        self.state.currentState.gcd = {
+            start = gcdStart,
+            duration = gcdDuration,
+            remaining = math.max(0, (gcdStart + gcdDuration) - GetTime())
+        }
+    else
+        self.state.currentState.gcd = {
+            start = 0,
+            duration = 0,
+            remaining = 0
+        }
+    end
+end
+
+--- Create timer for periodic state updates
+function SpellLearnerStateManager:CreateStateUpdateTimer()
+    -- Cancel any existing timer
+    if self.stateUpdateTimer then
+        self.stateUpdateTimer:Cancel()
+        self.stateUpdateTimer = nil
+    end
+    
+    -- Create a repeating timer to update state
+    local interval = 1.0 -- Update every second
+    self.stateUpdateTimer = C_Timer.NewTicker(interval, function()
+        -- Update player buffs/debuffs
+        self:UpdatePlayerBuffs()
+        
+        -- Update target debuffs if target exists
+        if UnitExists("target") then
+            self:UpdateTargetDebuffs()
+        end
+        
+        -- Update rune state for Death Knights
+        if select(2, UnitClass("player")) == "DEATHKNIGHT" then
+            self:UpdateRuneState()
+        end
+    end)
+    
+    self:Debug("State update timer created with interval: " .. interval .. "s")
+end
+
+--- Capture current state and update history
+function SpellLearnerStateManager:CaptureAndUpdateState()
+    -- Capture current state
+    local currentState = self:CaptureCurrentState()
+    
+    -- Update state history
+    if not self.state.stateHistory then
+        self.state.stateHistory = {}
+    end
+    
+    -- Add new state to history
+    table.insert(self.state.stateHistory, {
+        state = currentState,
+        timestamp = GetTime()
+    })
+    
+    -- Limit history size
+    while #self.state.stateHistory > CONSTANTS.STATE_HISTORY_SIZE do
+        local oldState = table.remove(self.state.stateHistory, 1)
+        if oldState and oldState.state then
+            self:ReleaseStateObject(oldState.state)
+        end
+    end
+    
+    -- Update last update timestamp
+    self.state.lastUpdate = GetTime()
+    
+    -- Check if NAG.nextSpell has changed and track it
+    if NAG.nextSpell and type(NAG.nextSpell) == "number" and NAG.nextSpell > 0 then
+        self:UpdateTrackedNextSpells(NAG.nextSpell)
+    end
+end
+
+--- Helper to get the correct secondary power type for the current class/spec
+function SpellLearnerStateManager:GetSecondaryPowerType()
+    local _, class = UnitClass("player")
+    -- Default to 0 (mana) if we can't determine
+    if not class then return 0 end
+    
+    -- Map classes to their secondary resource type
+    local secondaryPowerTypes = {
+        ROGUE = 4,    -- Combo Points
+        PALADIN = 9,  -- Holy Power
+        WARLOCK = 7,  -- Soul Shards
+        PRIEST = 13,  -- Insanity
+        MONK = 12,    -- Chi
+        MAGE = 16,    -- Arcane Charges
+        DRUID = 4,    -- Combo Points (Cat Form)
+    }
+    
+    return secondaryPowerTypes[class] or 0
+end
+
+-- Table pool for state objects
+local statePool = {
+    states = {},
+    resources = {},
+    buffs = {},
+    debuffs = {}
+}
+
+-- Get a table from the pool or create a new one
+local function AcquireTable(pool)
+    local tbl = tremove(pool) or {}
+    wipe(tbl)
+    return tbl
+end
+
+-- Release a table back to the pool
+local function ReleaseTable(pool, tbl)
+    if tbl then
+        wipe(tbl)
+        tinsert(pool, tbl)
+    end
+end
+
+-- Release a state object and all its sub-tables
+function SpellLearnerStateManager:ReleaseStateObject(state)
+    if not state then return end
+    
+    -- Release resources tables
+    if state.resources then
+        ReleaseTable(statePool.resources, state.resources.power)
+        ReleaseTable(statePool.resources, state.resources.secondary)
+        ReleaseTable(statePool.resources, state.resources)
+    end
+    
+    -- Release buffs/debuffs tables
+    if state.buffs then
+        ReleaseTable(statePool.buffs, state.buffs.player)
+        ReleaseTable(statePool.buffs, state.buffs.target)
+        ReleaseTable(statePool.buffs, state.buffs)
+    end
+    
+    if state.debuffs then
+        ReleaseTable(statePool.debuffs, state.debuffs.player)
+        ReleaseTable(statePool.debuffs, state.debuffs.target)
+        ReleaseTable(statePool.debuffs, state.debuffs)
+    end
+    
+    -- Release the main state table
+    ReleaseTable(statePool.states, state)
+end
+
+--- Get a state object from the pool or create a new one
+-- @return table A state object initialized with default structure
+function SpellLearnerStateManager:GetStateObject()
+    -- Get a state from the pool or create a new one
+    local state = tremove(statePool.states) or {}
+    wipe(state)
+    
+    -- Initialize basic structure
+    state.timestamp = GetTime()
+    state.resources = AcquireTable(statePool.resources)
+    state.buffs = AcquireTable(statePool.buffs)
+    state.buffs.player = AcquireTable(statePool.buffs)
+    state.buffs.target = AcquireTable(statePool.buffs)
+    state.debuffs = AcquireTable(statePool.debuffs)
+    state.debuffs.player = AcquireTable(statePool.debuffs)
+    state.debuffs.target = AcquireTable(statePool.debuffs)
+    
+    return state
+end
+
+--- Captures the current player state
+function SpellLearnerStateManager:CaptureCurrentState()
+    local state = {
+        time = GetTime(),
+        resources = {},
+        buffs = {
+            player = {},
+            target = {}
+        },
+        debuffs = {
+            player = {},
+            target = {}
+        },
+        cooldowns = {},
+        runes = {}
+    }
+    
+    -- Capture resources
+    for _, resourceType in ipairs({"mana", "rage", "energy", "combopoints", "chi", "runic", "focus", "holypower", "soulshards"}) do
+        state.resources[resourceType] = UnitPower("player", self:GetPowerTypeIndex(resourceType)) or 0
+    end
+    
+    -- Max resource values
+    for _, resourceType in ipairs({"mana", "rage", "energy", "runic", "focus"}) do
+        state.resources[resourceType .. "Max"] = UnitPowerMax("player", self:GetPowerTypeIndex(resourceType)) or 100
+    end
+    
+    -- Capture player buffs
+    for i = 1, 40 do
+        local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, 
+              shouldConsolidate, spellId = UnitBuff("player", i)
+        
+        if not name then break end
+        
+        if spellId and spellId > 0 then
+            state.buffs.player[spellId] = {
+                name = name,
+                count = count or 1,
+                duration = duration or 0,
+                expirationTime = expirationTime or 0,
+                remaining = (expirationTime or 0) - GetTime(),
+                unitCaster = unitCaster
+            }
+        end
+    end
+    
+    -- Capture target debuffs (that player applied)
+    if UnitExists("target") then
+        for i = 1, 40 do
+            local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, 
+                  shouldConsolidate, spellId = UnitDebuff("target", i, "PLAYER")
+            
+            if not name then break end
+            
+            if spellId and spellId > 0 then
+                state.debuffs.target[spellId] = {
+                    name = name,
+                    count = count or 1,
+                    duration = duration or 0,
+                    expirationTime = expirationTime or 0,
+                    remaining = (expirationTime or 0) - GetTime(),
+                    unitCaster = unitCaster
+                }
+            end
+        end
+        
+        -- Also capture auras on target that might be buffs
+        for i = 1, 40 do
+            local name, icon, count, auraType, duration, expirationTime, unitCaster, isStealable, 
+                  shouldConsolidate, spellId = UnitBuff("target", i, "PLAYER")
+            
+            if not name then break end
+            
+            if spellId and spellId > 0 then
+                state.buffs.target[spellId] = {
+                    name = name,
+                    count = count or 1,
+                    duration = duration or 0,
+                    expirationTime = expirationTime or 0,
+                    remaining = (expirationTime or 0) - GetTime(),
+                    unitCaster = unitCaster
+                }
+            end
+        end
+    end
+    
+    -- Capture cooldowns from spellbook
+    for i = 1, GetNumSpellTabs() do
+        local offset, numSlots = select(3, GetSpellTabInfo(i))
+        for j = offset + 1, offset + numSlots do
+            local spellType, spellId = GetSpellBookItemInfo(j, BOOKTYPE_SPELL)
+            if spellId and spellType == "SPELL" then
+                local start, duration = GetSpellCooldown(spellId)
+                if start and duration and duration > 0 then
+                    local remaining = start + duration - GetTime()
+                    if remaining > 0 then
+                        state.cooldowns[spellId] = remaining
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Capture Death Knight runes if player is a DK
+    local _, class = UnitClass("player")
+    if class == "DEATHKNIGHT" then
+        for i = 1, 6 do
+            state.runes[i] = {
+                type = GetRuneType(i),
+                ready = select(3, GetRuneCooldown(i)),
+                timeLeft = select(2, GetRuneCooldown(i))
+            }
+        end
+    end
+    
+    self:Debug("CaptureCurrentState: Captured player state")
+    return state
+end
+
+--- Gets the power type index for a given resource name
+function SpellLearnerStateManager:GetPowerTypeIndex(resourceType)
+    if resourceType == "mana" then return 0
+    elseif resourceType == "rage" then return 1
+    elseif resourceType == "focus" then return 2
+    elseif resourceType == "energy" then return 3
+    elseif resourceType == "combopoints" then return 4
+    elseif resourceType == "runic" then return 6
+    elseif resourceType == "soulshards" then return 7
+    elseif resourceType == "holypower" then return 9
+    elseif resourceType == "chi" then return 12
+    else return 0 end
+end
+
+--- Format a state snapshot for readable output
+function SpellLearnerStateManager:FormatStateSnapshot(state)
+    local output = {}
+    
+    -- Header
+    tinsert(output, "=== STATE SNAPSHOT ===")
+    tinsert(output, format("Timestamp: %.2f", state.timestamp))
+    
+    -- Resources
+    tinsert(output, "\n=== RESOURCES ===")
+    -- Primary Power
+    local powerTypes = {
+        [0] = "Mana",
+        [1] = "Rage",
+        [2] = "Focus",
+        [3] = "Energy",
+        [6] = "Runic Power"
+    }
+    local primaryType = powerTypes[state.resources.power.type] or state.resources.power.type
+    tinsert(output, format("Primary (%s): %d / %d", 
+        primaryType,
+        state.resources.power.current,
+        state.resources.power.max
+    ))
+    
+    -- Secondary Power
+    local secondaryTypes = {
+        [4] = "Combo Points",
+        [7] = "Soul Shards",
+        [9] = "Holy Power",
+        [12] = "Chi",
+        [13] = "Insanity"
+    }
+    local secondaryType = secondaryTypes[state.resources.secondary.type] or state.resources.secondary.type
+    tinsert(output, format("Secondary (%s): %d / %d", 
+        secondaryType,
+        state.resources.secondary.current,
+        state.resources.secondary.max
+    ))
+    
+    -- Player Buffs
+    tinsert(output, "\n=== PLAYER BUFFS ===")
+    local playerBuffCount = 0
+    for spellId, buff in pairs(state.buffs.player) do
+        playerBuffCount = playerBuffCount + 1
+        local timeLeft = buff.expirationTime > 0 and (buff.expirationTime - GetTime()) or 0
+        tinsert(output, format("%s (ID: %d) - Stacks: %d, Time Left: %.1fs", 
+            buff.name,
+            spellId,
+            buff.count or 1,
+            timeLeft
+        ))
+    end
+    if playerBuffCount == 0 then
+        tinsert(output, "No active buffs")
+    end
+    
+    -- Player Debuffs
+    tinsert(output, "\n=== PLAYER DEBUFFS ===")
+    local playerDebuffCount = 0
+    for spellId, debuff in pairs(state.debuffs.player) do
+        playerDebuffCount = playerDebuffCount + 1
+        local timeLeft = debuff.expirationTime > 0 and (debuff.expirationTime - GetTime()) or 0
+        tinsert(output, format("%s (ID: %d) - Stacks: %d, Time Left: %.1fs, Type: %s", 
+            debuff.name,
+            spellId,
+            debuff.count or 1,
+            timeLeft,
+            debuff.debuffType or "None"
+        ))
+    end
+    if playerDebuffCount == 0 then
+        tinsert(output, "No active debuffs")
+    end
+    
+    -- Target Buffs (if target exists)
+    if UnitExists("target") then
+        tinsert(output, format("\n=== TARGET (%s) BUFFS ===", UnitName("target") or "Unknown"))
+        local targetBuffCount = 0
+        for spellId, buff in pairs(state.buffs.target) do
+            targetBuffCount = targetBuffCount + 1
+            local timeLeft = buff.expirationTime > 0 and (buff.expirationTime - GetTime()) or 0
+            tinsert(output, format("%s (ID: %d) - Stacks: %d, Time Left: %.1fs", 
+                buff.name,
+                spellId,
+                buff.count or 1,
+                timeLeft
+            ))
+        end
+        if targetBuffCount == 0 then
+            tinsert(output, "No active buffs")
+        end
+        
+        -- Target Debuffs
+        tinsert(output, format("\n=== TARGET (%s) DEBUFFS ===", UnitName("target") or "Unknown"))
+        local targetDebuffCount = 0
+        for spellId, debuff in pairs(state.debuffs.target) do
+            targetDebuffCount = targetDebuffCount + 1
+            local timeLeft = debuff.expirationTime > 0 and (debuff.expirationTime - GetTime()) or 0
+            tinsert(output, format("%s (ID: %d) - Stacks: %d, Time Left: %.1fs, Type: %s", 
+                debuff.name,
+                spellId,
+                debuff.count or 1,
+                timeLeft,
+                debuff.debuffType or "None"
+            ))
+        end
+        if targetDebuffCount == 0 then
+            tinsert(output, "No active debuffs")
+        end
+    end
+    
+    tinsert(output, "=====================")
+    return table.concat(output, "\n")
+end
+
+--- Event handler for UNIT_SPELLCAST_SENT
+function SpellLearnerStateManager:OnSpellCastSent(event, unit, target, castGUID, spellID)
+    if unit ~= "player" then return end
+    
+    local currentTime = GetTime()
+    --self:Debug("|cFFFFFF00UNIT_SPELLCAST_SENT fired at " .. format("%.3f", currentTime) .. " for spell " .. (GetSpellInfo(spellID) or "Unknown") .. "|r")
+    
+    -- Clean up any old casts that might not have been processed
+    for guid, data in pairs(self.state.activeCasts) do
+        if currentTime - data.timestamp > 2 then  -- Clear any stale casts older than 2 seconds
+            self.state.activeCasts[guid] = nil
+        end
+    end
+    
+    -- Get the pre-cast state from ACTIONBAR_UPDATE_COOLDOWN
+    local preState = nil
+    if self.state.pendingCooldownUpdate then
+        local timeSinceCooldownUpdate = currentTime - self.state.pendingCooldownUpdate.timestamp
+        
+        if timeSinceCooldownUpdate < CONSTANTS.PRECAST_WINDOW then
+            -- Use the state captured during cooldown update
+            preState = self.state.pendingCooldownUpdate.state
+            self.state.pendingCooldownUpdate = nil  -- Clear it after use
+            
+            --self:Debug("|cFFFFFF00Using pre-cast state from %.3f seconds ago|r", timeSinceCooldownUpdate)
+        --else
+            -- Cooldown update state is too old
+            --self:Debug("|cFFFF0000WARNING: Pre-cast state too old (%.3f seconds) for %s (ID: %d)|r", 
+            --    timeSinceCooldownUpdate,
+            --    GetSpellInfo(spellID) or "Unknown",
+            --    spellID)
+        end
+    --else
+        -- No cooldown update state available
+       -- self:Debug("|cFFFF0000WARNING: No pre-cast state available for %s (ID: %d)|r", 
+       --     GetSpellInfo(spellID) or "Unknown",
+       --     spellID)
+    end
+    
+    -- Store cast info if we have a valid pre-state
+    if preState then
+        self.state.activeCasts[castGUID] = {
+            spellID = spellID,
+            timestamp = currentTime,
+            preState = preState,
+            target = target,
+            targetGUID = target and UnitGUID(target) or nil
+        }
+        
+        -- Store this as the last cast GUID
+        self.state.lastCastGUID = castGUID
+    end
+end
+
+--- Handler for UNIT_SPELLCAST_SUCCEEDED event
+-- @param event string Event name
+-- @param unit string Unit that cast the spell
+-- @param castGUID string GUID of the cast
+-- @param spellID number ID of the spell
+function SpellLearnerStateManager:OnSpellCastSucceeded(event, unit, castGUID, spellID)
+    -- Only track player casts
+    if unit ~= "player" then return end
+    
+    -- Ignore null spells
+    if not spellID or spellID == 0 then return end
+    
+    -- Get spell information
+    local spellName = GetSpellInfo(spellID) or "Unknown"
+    
+    -- Debug output if enabled
+    if self:GetGlobal().debugMode then
+        self:Debug(format("Player cast %s (ID: %d) - Capturing pre-cast state", spellName, spellID))
+    end
+    
+    -- Capture state before spell effects are applied
+    local preCastState = self:CaptureCurrentState()
+    
+    -- Store the cast in our history
+    self:RecordSpellCast(spellID, preCastState)
+    
+    -- Wait a slightly longer delay to ensure all effects have been applied
+    -- GCD is typically 1.5s, so we wait a bit to catch all effects
+    C_Timer.After(0.2, function()
+        -- Update buffs and debuffs first to ensure we have latest data
+        self:UpdatePlayerBuffs()
+        if UnitExists("target") then
+            self:UpdateTargetDebuffs()
+        end
+        
+        local postCastState = self:CaptureCurrentState()
+        
+        if self:GetGlobal().debugMode then
+            self:Debug(format("Analyzing effects of %s (ID: %d) - Capturing post-cast state", spellName, spellID))
+        end
+        
+        self:AnalyzeSpellEffect(spellID, preCastState, postCastState)
+    end)
+end
+
+--- Records a spell cast in the spell history
+-- @param spellID number The ID of the spell that was cast
+-- @param state table The state at the time of casting
+function SpellLearnerStateManager:RecordSpellCast(spellID, state)
+    if not spellID or spellID == 0 then return end
+    
+    -- Initialize spell history if needed
+    if not self.state.spellHistory then
+        self.state.spellHistory = {}
+    end
+    
+    -- Create a new entry
+    local entry = {
+        spellID = spellID,
+        timestamp = GetTime(),
+        state = self:DeepCopy(state or self.state.currentState),
+    }
+    
+    -- Add to history
+    table.insert(self.state.spellHistory, entry)
+    
+    -- Limit history size
+    if #self.state.spellHistory > 100 then
+        local oldEntry = table.remove(self.state.spellHistory, 1)
+        -- Clean up state objects if needed
+        if oldEntry.state then
+            self:ReleaseStateObject(oldEntry.state)
+        end
+    end
+    
+    -- Update last cast information
+    self.state.lastCast = {
+        spellID = spellID,
+        timestamp = entry.timestamp
+    }
+end
+
+--- Analyzes the effect of a spell by comparing pre and post cast states
+-- @param spellID number The ID of the spell that was cast
+-- @param preCastState table The state before the spell was cast
+-- @param postCastState table The state after the spell was cast
+function SpellLearnerStateManager:AnalyzeSpellEffect(spellID, preCastState, postCastState)
+    if not spellID or not preCastState or not postCastState then return end
+    
+    -- Initialize spell effects if needed
+    self.state.spellEffects = self.state.spellEffects or {}
+    if not self.state.spellEffects[spellID] then
+        self.state.spellEffects[spellID] = {
+            resourceChanges = {},
+            buffsApplied = {},
+            debuffsApplied = {},
+            totalCasts = 0,
+            lastCast = 0,
+            damageStats = {
+                totalDamage = 0,
+                hitCount = 0,
+                critCount = 0
+            }
+        }
+    end
+    
+    local effect = self.state.spellEffects[spellID]
+    effect.totalCasts = effect.totalCasts + 1
+    effect.lastCast = GetTime()
+    
+    -- Track resource changes specifically
+    for resourceType, _ in pairs(preCastState.resources or {}) do
+        local before = preCastState.resources[resourceType] or 0
+        local after = postCastState.resources[resourceType] or 0
+        local delta = before - after
+        
+        -- Only record if there was a change
+        if math.abs(delta) > 0.1 then
+            effect.resourceChanges[resourceType] = effect.resourceChanges[resourceType] or {
+                total = 0,
+                count = 0,
+                min = nil,
+                max = nil
+            }
+            
+            local stats = effect.resourceChanges[resourceType]
+            stats.total = stats.total + delta
+            stats.count = stats.count + 1
+            stats.min = stats.min and math.min(stats.min, delta) or delta
+            stats.max = stats.max and math.max(stats.max, delta) or delta
+        end
+    end
+    
+    -- Track buff applications on player
+    if postCastState.buffs and postCastState.buffs.player then
+        for buffID, buffData in pairs(postCastState.buffs.player) do
+            if not (preCastState.buffs and preCastState.buffs.player and preCastState.buffs.player[buffID]) then
+                effect.buffsApplied[buffID] = (effect.buffsApplied[buffID] or 0) + 1
+            end
+        end
+    end
+    
+    -- Track debuff applications on target
+    if postCastState.buffs and postCastState.buffs.target then
+        for debuffID, debuffData in pairs(postCastState.buffs.target) do
+            if not (preCastState.buffs and preCastState.buffs.target and preCastState.buffs.target[debuffID]) then
+                effect.debuffsApplied[debuffID] = (effect.debuffsApplied[debuffID] or 0) + 1
+            end
+        end
+    end
+    
+    -- Save periodically or if auto-save enabled
+    local shouldSave = self:GetGlobal().autoSave or (GetTime() - (self.lastSave or 0) > 60)
+    if shouldSave then
+        self:SaveSpellLearningData()
+        self.lastSave = GetTime()
+    end
+end
+
+--- Calculate state changes between two states with improved efficiency
+function SpellLearnerStateManager:CalculateStateChanges(preState, postState)
+    if not preState or not postState then return nil end
+    
+    local changes = {
+        resources = {},
+        buffs = {
+            added = {},   -- Changed from 'gained' to 'added' for consistency
+            removed = {}, -- Changed from 'lost' to 'removed' for consistency
+            consumed = {},
+            refreshed = {},
+        },
+        dots = {
+            applied = {},
+            removed = {},
+            refreshed = {},
+            consumed = {},
+        }
+    }
+    
+    -- Debug header for state comparison
+    self:Debug("Calculating state changes:")
+    self:Debug("Pre-state timestamp: " .. (preState.timestamp or "unknown"))
+    self:Debug("Post-state timestamp: " .. (postState.timestamp or "unknown"))
+    
+    -- Check resource changes first (most important)
+    if preState.resources and preState.resources.power and 
+       postState.resources and postState.resources.power then
+        
+        local powerDelta = postState.resources.power.current - preState.resources.power.current
+        if math.abs(powerDelta) > 0 then
+            changes.resources.power = {
+                delta = powerDelta,
+                preValue = preState.resources.power.current,
+                postValue = postState.resources.power.current,
+                powerType = preState.resources.power.type
+            }
+            self:Debug(string.format("Power change: %d -> %d (Δ%d) [%s]", 
+                preState.resources.power.current,
+                postState.resources.power.current,
+                powerDelta,
+                preState.resources.power.type or "unknown"
+            ))
+        end
+    end
+    
+    -- Check secondary resource only if it changed
+    if preState.resources and preState.resources.secondary and 
+       postState.resources and postState.resources.secondary then
+        
+        local secondaryDelta = postState.resources.secondary.current - preState.resources.secondary.current
+        if math.abs(secondaryDelta) > 0 then
+            changes.resources.secondary = {
+                delta = secondaryDelta,
+                preValue = preState.resources.secondary.current,
+                postValue = postState.resources.secondary.current,
+                powerType = preState.resources.secondary.type
+            }
+            self:Debug(string.format("Secondary resource change: %d -> %d (Δ%d) [%s]", 
+                preState.resources.secondary.current,
+                postState.resources.secondary.current,
+                secondaryDelta,
+                preState.resources.secondary.type or "unknown"
+            ))
+        end
+    end
+    
+    -- Debug buff changes
+    self:Debug("Checking buff changes:")
+    
+    -- Verify buff tables exist
+    if not preState.buffs then preState.buffs = { player = {}, target = {} } end
+    if not postState.buffs then postState.buffs = { player = {}, target = {} } end
+    if not preState.buffs.player then preState.buffs.player = {} end
+    if not postState.buffs.player then postState.buffs.player = {} end
+    
+    -- Optimize buff checking by using direct table lookups
+    local preBuffs = preState.buffs.player
+    local postBuffs = postState.buffs.player
+    
+    -- Track gained/refreshed buffs
+    for spellId, postBuff in pairs(postBuffs) do
+        local preBuff = preBuffs[spellId]
+        if not preBuff then
+            -- New buff gained
+            changes.buffs.added[spellId] = {
+                id = spellId,
+                name = postBuff.name,
+                count = postBuff.count or 1,
+                duration = postBuff.duration,
+                expirationTime = postBuff.expirationTime
+            }
+            self:Debug(string.format("Buff gained: %s (id: %d, count: %d)", 
+                postBuff.name or "unknown",
+                spellId,
+                postBuff.count or 1
+            ))
+        elseif postBuff.expirationTime > preBuff.expirationTime then
+            -- Buff was refreshed
+            changes.buffs.refreshed[spellId] = {
+                id = spellId,
+                name = postBuff.name,
+                oldExpiration = preBuff.expirationTime,
+                newExpiration = postBuff.expirationTime,
+                timeExtended = postBuff.expirationTime - preBuff.expirationTime
+            }
+            self:Debug(string.format("Buff refreshed: %s (id: %d, duration extended by %.1f seconds)", 
+                postBuff.name or "unknown",
+                spellId,
+                postBuff.expirationTime - preBuff.expirationTime
+            ))
+        end
+    end
+    
+    -- Track lost buffs
+    for spellId, preBuff in pairs(preBuffs) do
+        if not postBuffs[spellId] then
+            -- Check if buff was consumed (still had significant duration)
+            local remainingTime = preBuff.expirationTime - GetTime()
+            if remainingTime > 0.1 then
+                changes.buffs.consumed[spellId] = {
+                    id = spellId,
+                    name = preBuff.name,
+                    remainingTime = remainingTime
+                }
+                self:Debug(string.format("Buff consumed: %s (id: %d, %.1f seconds remaining)", 
+                    preBuff.name or "unknown",
+                    spellId,
+                    remainingTime
+                ))
+            else
+                changes.buffs.removed[spellId] = {
+                    id = spellId,
+                    name = preBuff.name
+                }
+                self:Debug(string.format("Buff expired: %s (id: %d)", 
+                    preBuff.name or "unknown",
+                    spellId
+                ))
+            end
+        end
+    end
+    
+    -- Debug DoT changes
+    self:Debug("Checking DoT changes:")
+    
+    -- Handle DoTs similarly to buffs but with target-specific logic
+    if UnitExists("target") then
+        -- Verify debuff tables exist
+        if not preState.debuffs then preState.debuffs = { player = {}, target = {} } end
+        if not postState.debuffs then postState.debuffs = { player = {}, target = {} } end
+        if not preState.debuffs.target then preState.debuffs.target = {} end
+        if not postState.debuffs.target then postState.debuffs.target = {} end
+    
+        local preDebuffs = preState.debuffs.target
+        local postDebuffs = postState.debuffs.target
+        
+        -- Track gained/refreshed DoTs
+        for spellId, postDebuff in pairs(postDebuffs) do
+            local preDebuff = preDebuffs[spellId]
+            
+            -- Calculate timing info if the debuff existed before
+            local oldTimeLeft, newTimeLeft, timeDiff = 0, 0, 0
+            if preDebuff then
+                oldTimeLeft = preDebuff.expirationTime > 0 and (preDebuff.expirationTime - GetTime()) or 0
+                newTimeLeft = postDebuff.expirationTime > 0 and (postDebuff.expirationTime - GetTime()) or 0
+                timeDiff = newTimeLeft - oldTimeLeft
+            end
+            
+            -- Only consider it a refresh if the duration increased significantly
+            local isRefresh = preDebuff and timeDiff >= CONSTANTS.MIN_REFRESH_THRESHOLD
+            
+            -- Debug output for comparison
+            --if preDebuff then
+                --self:Debug(format("|cFF00FFFF[TARGET] Comparing Debuff: %s (ID: %d)|r", postDebuff.name, spellId))
+                --self:Debug(format("  Old Time Left: %.1f, New Time Left: %.1f, Difference: %.1f%s|r",
+                --    oldTimeLeft,
+                --    newTimeLeft,
+                --    timeDiff,
+                --    isRefresh and " (REFRESH)" or " (NO REFRESH)"))
+            --end
+            
+            -- Only store in state changes if it's actually new or refreshed
+            if not preDebuff or isRefresh then
+                changes.dots.applied[spellId] = {
+                    id = spellId,
+                    name = postDebuff.name,
+                    duration = postDebuff.duration,
+                    expirationTime = postDebuff.expirationTime,
+                    count = postDebuff.count or 1,
+                    isRefresh = isRefresh,
+                    -- Include refresh-specific info if it is a refresh
+                    oldTimeLeft = isRefresh and oldTimeLeft or nil,
+                    newTimeLeft = isRefresh and newTimeLeft or nil,
+                    timeDiff = isRefresh and timeDiff or nil,
+                    oldDuration = isRefresh and preDebuff.duration or nil,
+                    oldExpirationTime = isRefresh and preDebuff.expirationTime or nil
+                }
+                
+                -- Debug output for actual changes
+                self:Debug(format("%s Debuff: %s (ID: %d) - Duration: %.1f", 
+                    isRefresh and "Refreshed" or "New",
+                    postDebuff.name,
+                    spellId,
+                    postDebuff.duration or 0))
+            end
+        end
+        
+        -- Track removed/consumed DoTs
+        for spellId, preDebuff in pairs(preDebuffs) do
+            if not postDebuffs[spellId] then
+                local remainingTime = preDebuff.expirationTime - GetTime()
+                if remainingTime > 0.1 then
+                    changes.dots.consumed[spellId] = {
+                        id = spellId,
+                        name = preDebuff.name,
+                        remainingTime = remainingTime
+                    }
+                    self:Debug(string.format("DoT consumed: %s (id: %d, %.1f seconds remaining)", 
+                        preDebuff.name or "unknown",
+                        spellId,
+                        remainingTime
+                    ))
+                else
+                    changes.dots.removed[spellId] = {
+                        id = spellId,
+                        name = preDebuff.name
+                    }
+                    self:Debug(string.format("DoT expired: %s (id: %d)", 
+                        preDebuff.name or "unknown",
+                        spellId
+                    ))
+                end
+            end
+        end
+    end
+    
+    return changes
+end
+
+--- Alias for CalculateStateChanges to maintain consistent naming with OnSpellCastSucceeded
+function SpellLearnerStateManager:CompareCastStates(preState, postState, spellID)
+    return self:CalculateStateChanges(preState, postState)
+end
+
+--- Print state changes with improved resource reporting
+function SpellLearnerStateManager:PrintStateChanges(changes, spellID)
+    if not self:GetGlobal().debugMode then return end
+    
+    local spellName = GetSpellInfo(spellID) or "Unknown"
+    
+    -- Single line summary of spell cast and its effects
+    local msg = format("Cast %s (ID: %d)", spellName, spellID)
+    
+    -- Add resource changes
+    if changes.resources then
+        for resourceType, change in pairs(changes.resources) do
+            -- Handle change being a table or a number
+            local deltaValue = type(change) == "table" and change.delta or change
+            
+            if deltaValue and deltaValue ~= 0 then
+                local powerTypeName = _G[format("POWER_TYPE_%s", strupper(resourceType))] or resourceType
+                if deltaValue < 0 then
+                    msg = msg .. format(" - Used %d %s", math.abs(deltaValue), powerTypeName)
+                else
+                    msg = msg .. format(" - Gained %d %s", deltaValue, powerTypeName)
+                end
+            end
+        end
+    end
+    
+    -- Add DoT effects if any were applied/consumed
+    if changes.dots and changes.dots.applied then
+        for dotId, dot in pairs(changes.dots.applied) do
+            local dotName = GetSpellInfo(dotId) or "Unknown"
+            msg = msg .. format(" - Applied %s", dotName)
+        end
+    end
+    
+    if changes.dots and changes.dots.consumed then
+        for _, dot in ipairs(changes.dots.consumed) do
+            local dotName = GetSpellInfo(dot.id) or "Unknown"
+            msg = msg .. format(" - Consumed %s", dotName)
+        end
+    end
+    
+    self:Debug(msg)
+end
+
+--- Store state changes for analysis
+function SpellLearnerStateManager:StoreStateChanges(spellID, changes)
+    -- Initialize if needed
+    if not self.db.global.spellChanges then
+        self.db.global.spellChanges = {}
+    end
+    
+    if not self.db.global.spellChanges[spellID] then
+        self.db.global.spellChanges[spellID] = {}
+    end
+    
+    -- Create new entry with timestamp and changes
+    local newEntry = {
+        timestamp = GetTime(),
+        changes = self:DeepCopy(changes) -- Deep copy to prevent reference issues
+    }
+    
+    -- Convert resource change tables to simpler format for storage
+    if newEntry.changes and newEntry.changes.resources then
+        for resourceType, change in pairs(newEntry.changes.resources) do
+            if type(change) == "table" and change.delta then
+                newEntry.changes.resources[resourceType] = {
+                    delta = change.delta,
+                    powerType = change.powerType,
+                    preValue = change.preValue,
+                    postValue = change.postValue
+                }
+            end
+        end
+    end
+    
+    -- Add enhanced metadata for Death Knight spells
+    local _, class = UnitClass("player")
+    if class == "DEATHKNIGHT" and changes.runes then
+        -- Store the rune pattern for easier future analysis
+        newEntry.runePattern = changes.runes.pattern
+        
+        -- Track usage counts by type
+        newEntry.runeUsage = {
+            [CONSTANTS.RUNE_TYPE.BLOOD] = changes.runes.spentByType[CONSTANTS.RUNE_TYPE.BLOOD] or 0,
+            [CONSTANTS.RUNE_TYPE.FROST] = changes.runes.spentByType[CONSTANTS.RUNE_TYPE.FROST] or 0,
+            [CONSTANTS.RUNE_TYPE.UNHOLY] = changes.runes.spentByType[CONSTANTS.RUNE_TYPE.UNHOLY] or 0,
+            [CONSTANTS.RUNE_TYPE.DEATH] = changes.runes.spentByType[CONSTANTS.RUNE_TYPE.DEATH] or 0
+        }
+        
+        -- Count total runes used
+        newEntry.totalRunesUsed = 0
+        for _, count in pairs(newEntry.runeUsage) do
+            newEntry.totalRunesUsed = newEntry.totalRunesUsed + count
+        end
+    end
+    
+    -- Track DoT application/refresh patterns
+    if changes.dots and (changes.dots.applied or changes.dots.refreshed) then
+        newEntry.dotEffects = {}
+        
+        -- Track applied DoTs
+        if changes.dots.applied then
+            for dotId, dotInfo in pairs(changes.dots.applied) do
+                newEntry.dotEffects[dotId] = {
+                    action = "applied",
+                    name = dotInfo.name,
+                    duration = dotInfo.duration,
+                    count = dotInfo.count
+                }
+            end
+        end
+        
+        -- Track refreshed DoTs
+        if changes.dots.refreshed then
+            for dotId, dotInfo in pairs(changes.dots.refreshed) do
+                newEntry.dotEffects[dotId] = {
+                    action = "refreshed",
+                    name = dotInfo.name,
+                    timeExtended = dotInfo.timeExtended
+                }
+            end
+        end
+    end
+    
+    -- Add new entry to the end of the list
+    tinsert(self.db.global.spellChanges[spellID], newEntry)
+    
+    -- Maintain rolling window of entries
+    while #self.db.global.spellChanges[spellID] > CONSTANTS.MAX_STATE_CHANGES do
+        -- Remove oldest entry (first in the list)
+        tremove(self.db.global.spellChanges[spellID], 1)
+    end
+    
+    if self:GetGlobal().debugMode then
+        self:Debug(format("Stored state changes for spell %s (ID: %d)", 
+            GetSpellInfo(spellID) or "Unknown", spellID))
+    end
+end
+
+--- Determines if a debuff is a periodic effect (DoT)
+function SpellLearnerStateManager:IsPeriodicEffect(spellId)
+    -- Known DoTs by spell ID (can be expanded)
+    local knownDoTs = {
+        -- Death Knight
+        [55078] = true,  -- Blood Plague
+        [55095] = true,  -- Frost Fever
+        
+        -- Druid
+        [8921] = true,   -- Moonfire
+        [1822] = true,   -- Rake
+        [1079] = true,   -- Rip
+        
+        -- Hunter
+        [1978] = true,   -- Serpent Sting
+        
+        -- Mage
+        [12654] = true,  -- Ignite
+        [44457] = true,  -- Living Bomb
+        
+        -- Priest
+        [589] = true,    -- Shadow Word: Pain
+        [34914] = true,  -- Vampiric Touch
+        
+        -- Rogue
+        [703] = true,    -- Garrote
+        [1943] = true,   -- Rupture
+        
+        -- Warlock
+        [172] = true,    -- Corruption
+        [980] = true,    -- Agony
+        [30108] = true,  -- Unstable Affliction
+    }
+    
+    -- Direct lookup for known DoTs
+    if knownDoTs[spellId] then
+        return true
+    end
+    
+    -- If not in our hardcoded list, try to determine if it's a DoT by examining
+    -- tooltip or aura info
+    if self.state.dotCache and self.state.dotCache[spellId] ~= nil then
+        return self.state.dotCache[spellId]
+    end
+    
+    -- Initialize cache if needed
+    if not self.state.dotCache then
+        self.state.dotCache = {}
+    end
+    
+    -- Basic fallback - look for damage-over-time effects in tooltip
+    local isPeriodic = false
+    -- Try to get tooltip info if available
+    if GetSpellDescription then
+        local desc = GetSpellDescription(spellId)
+        if desc and (
+            desc:match("damage every") or 
+            desc:match("damage over") or 
+            desc:match("periodic damage") or
+            desc:match("per second")
+        ) then
+            isPeriodic = true
+        end
+    end
+    
+    -- Cache the result
+    self.state.dotCache[spellId] = isPeriodic
+    return isPeriodic
+end
+
+--- Estimates the tick rate of a DoT spell
+--- @param spellId number The spell ID to check
+--- @return number The estimated tick rate in seconds
+function SpellLearnerStateManager:EstimateDoTTickRate(spellId)
+    -- Known tick rates by spell ID
+    local knownTickRates = {
+        -- Death Knight
+        [55078] = 3.0,  -- Blood Plague
+        [55095] = 3.0,  -- Frost Fever
+        
+        -- Druid
+        [8921] = 2.0,   -- Moonfire
+        [1822] = 3.0,   -- Rake
+        [1079] = 2.0,   -- Rip
+        
+        -- Hunter
+        [1978] = 3.0,   -- Serpent Sting
+        
+        -- Mage
+        [12654] = 2.0,  -- Ignite
+        [44457] = 3.0,  -- Living Bomb
+        
+        -- Priest
+        [589] = 3.0,    -- Shadow Word: Pain
+        [34914] = 3.0,  -- Vampiric Touch
+        
+        -- Rogue
+        [703] = 3.0,    -- Garrote
+        [1943] = 2.0,   -- Rupture
+        
+        -- Warlock
+        [172] = 3.0,    -- Corruption
+        [980] = 2.0,    -- Agony
+        [30108] = 3.0,  -- Unstable Affliction
+    }
+    
+    -- Return known tick rate or default to 3 seconds
+    return knownTickRates[spellId] or 3.0
+end
+
+--- Estimates the tick damage of a DoT spell
+--- @param spellId number The spell ID to check
+--- @param stacks number The number of stacks
+--- @return number The estimated tick damage
+function SpellLearnerStateManager:EstimateDoTTickDamage(spellId, stacks)
+    -- This is a placeholder function that could be expanded with actual
+    -- formulae for estimating dot damage based on spell power, attack power, etc.
+    -- For now, we just estimate relative values
+    
+    stacks = stacks or 1
+    
+    -- Very basic estimation - in reality this would use coefficients, player stats, etc.
+    local baseTickDamage = {
+        -- Death Knight
+        [55078] = 200,  -- Blood Plague
+        [55095] = 150,  -- Frost Fever
+        
+        -- Druid
+        [8921] = 300,   -- Moonfire
+        [1822] = 250,   -- Rake
+        [1079] = 400,   -- Rip
+        
+        -- Priest
+        [589] = 250,    -- Shadow Word: Pain
+        [34914] = 350,  -- Vampiric Touch
+    }
+    
+    -- Return base tick damage multiplied by stacks or a generic value scaled by stacks
+    return (baseTickDamage[spellId] or 200) * stacks
+end
+
+--- Estimates the number of remaining DoT ticks
+--- @param spellId number The spell ID to check
+--- @param timeRemaining number The remaining time on the DoT
+--- @return number The estimated number of remaining ticks
+function SpellLearnerStateManager:EstimateRemainingTicks(spellId, timeRemaining)
+    local tickRate = self:EstimateDoTTickRate(spellId)
+    
+    -- Simple calculation: time remaining divided by tick rate
+    -- We round to 1 decimal place to avoid floating point issues
+    return floor((timeRemaining / tickRate) * 10 + 0.5) / 10
+end
+
+--- Handle target changes
+function SpellLearnerStateManager:OnTargetChanged()
+    local currentTargetGUID = UnitGUID("target")
+    if currentTargetGUID ~= self.auraCache.lastTargetGUID then
+        self:Debug(string.format("Target changed from %s to %s", 
+            self.auraCache.lastTargetGUID or "none",
+            currentTargetGUID or "none"))
+        
+        -- Clear target cache
+        wipe(self.auraCache.target)
+        self.auraCache.lastTargetGUID = currentTargetGUID
+        
+        -- Update cache for new target if it exists
+        if UnitExists("target") then
+            self:UpdateAuraCache("target")
+        end
+    end
+end
+
+--- Update the aura cache for a unit
+--- @param unit string The unit to update the cache for
+function SpellLearnerStateManager:UpdateAuraCache(unit)
+    if not unit or (unit ~= "player" and unit ~= "target") then
+        self:Debug("Invalid unit for aura cache update: " .. tostring(unit))
+        return
+    end
+    
+    -- For target, verify GUID hasn't changed
+    if unit == "target" then
+        local currentTargetGUID = UnitGUID("target")
+        if currentTargetGUID ~= self.auraCache.lastTargetGUID then
+            self:Debug("Target GUID changed during cache update, triggering OnTargetChanged")
+            return self:OnTargetChanged()
+        end
+    end
+    
+    local cache = self.auraCache[unit]
+    wipe(cache)
+    
+    -- Helper function to scan auras with a specific filter
+    local function scanAuras(filter)
+        local i = 1
+        while true do
+            local name, _, count, debuffType, duration, expirationTime, sourceUnit, isStealable, shouldConsolidate, spellId = UnitAura(unit, i, filter)
+            if not name then break end
+            
+            cache[spellId] = {
+                name = name,
+                count = count or 1,
+                debuffType = debuffType,
+                duration = duration or 0,
+                expirationTime = expirationTime or 0,
+                sourceUnit = sourceUnit,
+                isStealable = isStealable and 1 or 0,
+                shouldConsolidate = shouldConsolidate and 1 or 0,
+                isHelpful = filter == "HELPFUL",
+                lastUpdate = GetTime()
+            }
+            
+            i = i + 1
+        end
+        return i - 1
+    end
+    
+    -- Scan both beneficial and harmful auras
+    local buffCount = scanAuras("HELPFUL")
+    local debuffCount = scanAuras("HARMFUL")
+    
+    -- Update target GUID if needed
+    if unit == "target" then
+        self.auraCache.lastTargetGUID = UnitGUID("target")
+    end
+    
+    --self:Debug(string.format("Updated aura cache for %s with %d buffs and %d debuffs", 
+    --    unit, buffCount, debuffCount))
+end 
+
+
+-- Add new helper function to manage tracked spells list
+function SpellLearnerStateManager:UpdateTrackedNextSpells(spellID)
+    if not spellID then return end
+    
+    -- Check if spell is already tracked
+    for _, trackedID in pairs(self.state.trackedNextSpells) do
+        if trackedID == spellID then
+            return -- Already tracking this spell
+        end
+    end
+    
+    -- If we have less than 2 spells, just add it
+    if self.state.trackedNextSpellsCount < 2 then
+        self.state.trackedNextSpellsCount = self.state.trackedNextSpellsCount + 1
+        self.state.trackedNextSpells[self.state.trackedNextSpellsCount] = spellID
+        self:Debug(format("Added spell ID %d to tracked spells (slot %d)", spellID, self.state.trackedNextSpellsCount))
+    else
+        -- Shift existing spells and add new one
+        self.state.trackedNextSpells[1] = self.state.trackedNextSpells[2]
+        self.state.trackedNextSpells[2] = spellID
+        self:Debug(format("Updated tracked spells: [%d, %d]", self.state.trackedNextSpells[1], spellID))
+    end
+end
+
+-- Add new helper function to check if a spell is being tracked
+function SpellLearnerStateManager:IsSpellTracked(spellID)
+    if not spellID then return false end
+    
+    for _, trackedID in pairs(self.state.trackedNextSpells) do
+        if trackedID == spellID then
+            return true
+        end
+    end
+    return false
+end
+
+-- Add new function to clear spell changes data
+function SpellLearnerStateManager:ClearSpellChanges()
+    if self.db.global.spellChanges then
+        wipe(self.db.global.spellChanges)
+        self:Debug("|cFF00FF00Successfully cleared all spell changes data|r")
+    else
+        self:Debug("|cFFFF0000No spell changes data to clear|r")
+    end
+end
+
+--- Helper function to determine if a state change was natural or spell-caused
+function SpellLearnerStateManager:IsNaturalChange(preState, postState, changeType, changeData)
+    local currentTime = GetTime()
+    
+    -- For buffs/debuffs
+    if changeType == "buff" or changeType == "debuff" then
+        -- If the buff was about to expire (between 0.2s and 0.5s remaining), consider it natural
+        if changeData.oldExpirationTime and 
+           (changeData.oldExpirationTime - preState.timestamp) <= CONSTANTS.NATURAL_CHANGE_WINDOW and
+           (changeData.oldExpirationTime - preState.timestamp) >= CONSTANTS.MIN_NATURAL_CHANGE_WINDOW then
+            return true
+        end
+        
+        -- If the buff was refreshed with a significant duration increase, consider it spell-caused
+        if changeData.newExpirationTime and changeData.oldExpirationTime and
+           (changeData.newExpirationTime - changeData.oldExpirationTime) > CONSTANTS.MIN_REFRESH_THRESHOLD then
+            return false
+        end
+    end
+    
+    -- For runes
+    if changeType == "rune" then
+        -- If the rune was about to come off cooldown (between 0.2s and 0.5s remaining), consider it natural
+        if changeData.oldTimeLeft and 
+           changeData.oldTimeLeft <= CONSTANTS.NATURAL_CHANGE_WINDOW and
+           changeData.oldTimeLeft >= CONSTANTS.MIN_NATURAL_CHANGE_WINDOW then
+            return true
+        end
+        
+        -- If the rune was spent and another one came off cooldown, consider it spell-caused
+        if changeData.spent and changeData.newTimeLeft and changeData.newTimeLeft > 0 then
+            return false
+        end
+    end
+    
+    -- For resources
+    if changeType == "resource" then
+        -- If the resource was at max and regenerated, consider it natural
+        if changeData.oldValue and changeData.oldValue >= changeData.maxValue then
+            return true
+        end
+        
+        -- If the resource change happened between 0.2s and 0.5s of the state capture, consider it natural
+        if changeData.timeDiff and 
+           changeData.timeDiff <= CONSTANTS.NATURAL_CHANGE_WINDOW and
+           changeData.timeDiff >= CONSTANTS.MIN_NATURAL_CHANGE_WINDOW then
+            return true
+        end
+        
+        -- If the resource was consumed, consider it spell-caused
+        if changeData.delta and changeData.delta < 0 then
+            return false
+        end
+    end
+    
+    -- Default to considering it spell-caused if we can't determine
+    return false
+end
+
+-- Get human-readable name for a rune type
+--- @param runeType number The rune type constant
+--- @return string The human-readable name of the rune type
+function SpellLearnerStateManager:GetRuneTypeName(runeType)
+    if not runeType then return "Unknown" end
+    
+    return runeType == CONSTANTS.RUNE_TYPE.BLOOD and "Blood" 
+        or runeType == CONSTANTS.RUNE_TYPE.FROST and "Frost"
+        or runeType == CONSTANTS.RUNE_TYPE.UNHOLY and "Unholy"
+        or runeType == CONSTANTS.RUNE_TYPE.DEATH and "Death"
+        or "Unknown"
+end
+
+--- Estimates the tick rate of a DoT spell
+--- @param spellId number The spell ID to check
+--- @return number The estimated tick rate in seconds
+function SpellLearnerStateManager:EstimateDoTTickRate(spellId)
+    -- Known tick rates by spell ID
+    local knownTickRates = {
+        -- Death Knight
+        [55078] = 3.0,  -- Blood Plague
+        [55095] = 3.0,  -- Frost Fever
+        
+        -- Druid
+        [8921] = 2.0,   -- Moonfire
+        [1822] = 3.0,   -- Rake
+        [1079] = 2.0,   -- Rip
+        
+        -- Hunter
+        [1978] = 3.0,   -- Serpent Sting
+        
+        -- Mage
+        [12654] = 2.0,  -- Ignite
+        [44457] = 3.0,  -- Living Bomb
+        
+        -- Priest
+        [589] = 3.0,    -- Shadow Word: Pain
+        [34914] = 3.0,  -- Vampiric Touch
+        
+        -- Rogue
+        [703] = 3.0,    -- Garrote
+        [1943] = 2.0,   -- Rupture
+        
+        -- Warlock
+        [172] = 3.0,    -- Corruption
+        [980] = 2.0,    -- Agony
+        [30108] = 3.0,  -- Unstable Affliction
+    }
+    
+    -- Return known tick rate or default to 3 seconds
+    return knownTickRates[spellId] or 3.0
+end
+
+--- Estimates the number of remaining DoT ticks
+--- @param spellId number The spell ID to check
+--- @param timeRemaining number The remaining time on the DoT
+--- @return number The estimated number of remaining ticks
+function SpellLearnerStateManager:EstimateRemainingTicks(spellId, timeRemaining)
+    local tickRate = self:EstimateDoTTickRate(spellId)
+    
+    -- Simple calculation: time remaining divided by tick rate
+    -- We round to 1 decimal place to avoid floating point issues
+    return floor((timeRemaining / tickRate) * 10 + 0.5) / 10
+end
+
+--- Calculate expected resource regeneration between timestamps
+function SpellLearnerStateManager:CalculateExpectedRegeneration(preState, postState)
+    if not preState or not postState then return nil end
+    
+    local regeneration = {
+        power = 0,
+        secondary = 0
+    }
+    
+    -- Calculate power regeneration
+    local powerDelta = postState.resources.power.current - preState.resources.power.current
+    if math.abs(powerDelta) > 0 then
+        local powerType = preState.resources.power.type
+        local powerMax = UnitPowerMax("player", powerType)
+        local powerRegen = powerDelta / (postState.timestamp - preState.timestamp)
+        regeneration.power = powerRegen * (powerMax - preState.resources.power.current)
+    end
+    
+    -- Calculate secondary resource regeneration
+    local secondaryDelta = postState.resources.secondary.current - preState.resources.secondary.current
+    if math.abs(secondaryDelta) > 0 then
+        local secondaryMax = UnitPowerMax("player", preState.resources.secondary.type)
+        local secondaryRegen = secondaryDelta / (postState.timestamp - preState.timestamp)
+        regeneration.secondary = secondaryRegen * (secondaryMax - preState.resources.secondary.current)
+    end
+    
+    return regeneration
+end
+
+--- Event handler for PLAYER_ENTERING_WORLD
+function SpellLearnerStateManager:OnEnteringWorld(event)
+    -- Initialize everything when entering world
+    self:Debug("Player entered world, initializing state tracking")
+    
+    -- Initialize cache
+    self.auraCache = {
+        player = {},
+        target = {},
+        lastTargetGUID = nil
+    }
+    
+    -- Capture initial state
+    self:UpdatePlayerBuffs()
+    if UnitExists("target") then
+        self:UpdateTargetDebuffs()
+    end
+    self:UpdateCooldowns()
+    
+    -- Create state update timer if not already created
+    if not self.stateUpdateTimer then
+        self:CreateStateUpdateTimer()
+    end
+end
+
+--- Event handler for COMBAT_LOG_EVENT_UNFILTERED
+function SpellLearnerStateManager:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
+    local timestamp, event, _, sourceGUID, sourceName, _, _, destGUID, destName, _, _, spellID, spellName = CombatLogGetCurrentEventInfo()
+    
+    -- Only track player spells
+    if sourceGUID ~= UnitGUID("player") then return end
+    
+    -- Only track certain events
+    if event == "SPELL_CAST_SUCCESS" then
+        self:Debug("COMBAT_LOG: " .. event .. " - " .. (spellName or "Unknown") .. " (" .. (spellID or "nil") .. ")")
+        
+        -- Process the spell cast
+        if spellID and spellID > 0 then
+            -- If we have pre-cast state, process this cast
+            if self.state.preCastState then
+                -- Capture current state as post-cast state
+                local postCastState = self:CaptureCurrentState()
+                
+                -- Record the spell cast
+                self:RecordSpellCast(spellID, self.state.preCastState, postCastState)
+                
+                -- Prepare for next cast
+                C_Timer.After(0.1, function()
+                    self.state.preCastState = self:CaptureCurrentState()
+                end)
+            else
+                -- Initialize pre-cast state for future casts
+                self.state.preCastState = self:CaptureCurrentState()
+            end
+        end
+    end
+end
+
+--- Event handler for ACTIONBAR_UPDATE_COOLDOWN
+function SpellLearnerStateManager:OnActionBarUpdateCooldown(event)
+    local currentTime = GetTime()
+    
+    -- Don't process too frequent updates (can be spammy)
+    if currentTime - self.state.lastCooldownUpdateTime < 0.1 then 
+        return
+    end
+    
+    -- Update last cooldown update time
+    self.state.lastCooldownUpdateTime = currentTime
+    
+    -- Capture current state before potential spell cast
+    if not self.state.pendingCooldownUpdate or 
+       currentTime - self.state.pendingCooldownUpdate.timestamp > CONSTANTS.PRECAST_WINDOW then
+        
+        -- Only update if enough time has passed since last pre-cast snapshot
+        if currentTime - self.state.lastPreCastSnapshotTime > CONSTANTS.PRECAST_COOLDOWN then
+            self.state.lastPreCastSnapshotTime = currentTime
+            
+            -- Capture state for potential upcoming spell cast
+            self.state.pendingCooldownUpdate = {
+                state = self:CaptureCurrentState(),
+                timestamp = currentTime
+            }
+            
+            --self:Debug(string.format("Captured pre-cast state at %.3f", currentTime))
+        end
+    end
+    
+    -- Update cooldowns in current state
+    self:UpdateCooldowns()
+end
+
+--- Deep copies a table
+-- @param orig table The table to copy
+-- @return table A deep copy of the original table
+function SpellLearnerStateManager:DeepCopy(orig)
+    if type(orig) ~= "table" then return orig end
+    
+    local copy = {}
+    for orig_key, orig_value in pairs(orig) do
+        if type(orig_value) == "table" then
+            copy[orig_key] = self:DeepCopy(orig_value)
+        else
+            copy[orig_key] = orig_value
+        end
+    end
+    
+    return copy
+end
+
+--- Event handler for UNIT_POWER_UPDATE
+function SpellLearnerStateManager:OnPowerUpdate(event, unit)
+    -- Only process player power updates
+    if unit ~= "player" then return end
+    
+    -- Update resources in current state
+    if self.state.currentState and self.state.currentState.resources then
+        self.state.currentState.resources.power = UnitPower("player")
+        self.state.currentState.resources.secondary = UnitPower("player", self:GetSecondaryPowerType())
+    end
+end
+
+--- Event handler for UNIT_AURA
+function SpellLearnerStateManager:OnAuraUpdate(event, unit)
+    -- Only process player and target aura updates
+    if unit ~= "player" and unit ~= "target" then return end
+    
+    -- Update cached aura data
+    self:UpdateAuraCache(unit)
+    
+    -- Update buffs or debuffs in current state
+    if unit == "player" then
+        self:UpdatePlayerBuffs()
+    elseif unit == "target" then
+        self:UpdateTargetDebuffs()
+    end
+end
+
+--- Event handler for SPELL_UPDATE_COOLDOWN
+function SpellLearnerStateManager:OnCooldownUpdate(event)
+    -- Update cooldowns in current state
+    self:UpdateCooldowns()
+end
+
+--- Prints a summary of all tracked spell effects
+function SpellLearnerStateManager:PrintSpellEffectsSummary()
+    if not self.state.spellEffects then
+        self:Print("No spell effects have been tracked yet.")
+        return
+    end
+    
+    local count = 0
+    local output = "Tracked Spell Effects:"
+    
+    for spellID, effect in pairs(self.state.spellEffects) do
+        count = count + 1
+        local name = GetSpellInfo(spellID) or "Unknown"
+        output = output .. string.format("\n%d. %s (ID: %d) - Cast %d times", 
+            count, name, spellID, effect.totalCasts or 0)
+    end
+    
+    if count == 0 then
+        output = output .. "\nNo spells have been tracked yet."
+    else
+        output = output .. "\n\nUse /nagspells <spellID> to view detailed analysis."
+    end
+    
+    self:Print(output)
+end
+
+--- Prints detailed analysis of a specific spell's effects
+-- @param spellID number The ID of the spell to analyze
+function SpellLearnerStateManager:PrintSpellEffects(spellID)
+    if not spellID or not self.state.spellEffects or not self.state.spellEffects[spellID] then
+        self:Print("No data available for spell ID: " .. (spellID or "nil"))
+        return
+    end
+    
+    local effect = self.state.spellEffects[spellID]
+    local name = GetSpellInfo(spellID) or "Unknown"
+    
+    local output = string.format("Analysis for %s (ID: %d):", name, spellID)
+    output = output .. string.format("\nCast %d times, last cast %.1f seconds ago", 
+        effect.totalCasts or 0, 
+        GetTime() - (effect.lastCast or 0))
+    
+    -- Resource changes
+    if effect.resourceChanges and next(effect.resourceChanges) then
+        output = output .. "\n\nResource Changes:"
+        for resourceType, stats in pairs(effect.resourceChanges) do
+            output = output .. string.format("\n  %s: Avg: %.1f (Min: %d, Max: %d)", 
+                resourceType, 
+                stats.count > 0 and (stats.total / stats.count) or 0,
+                stats.min or 0,
+                stats.max or 0)
+        end
+    end
+    
+    -- Buffs applied
+    if effect.buffsApplied and next(effect.buffsApplied) then
+        output = output .. "\n\nBuffs Applied:"
+        for buffID, data in pairs(effect.buffsApplied) do
+            local buffName = data.name or GetSpellInfo(buffID) or "Unknown"
+            output = output .. string.format("\n  %s (ID: %d): %.1f%%%% chance", 
+                buffName, buffID, (data.chance or 0) * 100)
+        end
+    end
+    
+    -- Debuffs applied
+    if effect.debuffsApplied and next(effect.debuffsApplied) then
+        output = output .. "\n\nDebuffs Applied:"
+        for debuffID, data in pairs(effect.debuffsApplied) do
+            local debuffName = data.name or GetSpellInfo(debuffID) or "Unknown"
+            output = output .. string.format("\n  %s (ID: %d): %.1f%%%% chance", 
+                debuffName, debuffID, (data.chance or 0) * 100)
+            if data.duration then
+                output = output .. string.format(", Duration: %.1fs", data.duration)
+            end
+        end
+    end
+    
+    self:Print(output)
+end
+
+-- Add rune tracking function
+function SpellLearnerStateManager:UpdateRuneState()
+    if select(2, UnitClass("player")) ~= "DEATHKNIGHT" then return end
+    
+    if not self.state then
+        self.state = {}
+    end
+    
+    if not self.state.currentState then
+        self.state.currentState = {}
+    end
+    
+    if not self.state.currentState.runes then
+        self.state.currentState.runes = {}
+    end
+    
+    -- Safely handle API calls
+    local GetRuneCooldown = GetRuneCooldown or function() return 0, 0, false end
+    local GetRuneType = GetRuneType or function() return 0 end
+    
+    -- Track each rune's state
+    for i = 1, 6 do
+        local start, duration, runeReady = GetRuneCooldown(i)
+        local runeType = GetRuneType(i)
+        
+        -- Default values for safety
+        start = start or 0
+        duration = duration or 0
+        runeReady = runeReady or false
+        runeType = runeType or 0
+        
+        self.state.currentState.runes[i] = {
+            type = runeType,
+            ready = runeReady,
+            start = start,
+            duration = duration,
+            timeLeft = runeReady and 0 or (start + duration - GetTime())
+        }
+    end
+    
+    -- Report rune state in debug if something changed
+    if self.state.lastRuneState then
+        local changed = false
+        local output = "Rune state changed:"
+        
+        for i = 1, 6 do
+            local lastRune = self.state.lastRuneState[i]
+            local currentRune = self.state.currentState.runes[i]
+            
+            if lastRune and currentRune then
+                if lastRune.ready ~= currentRune.ready or lastRune.type ~= currentRune.type then
+                    changed = true
+                    output = output .. string.format("\nRune %d: %s -> %s", 
+                        i,
+                        lastRune.ready and "READY" or string.format("COOLDOWN (%.1fs)", lastRune.timeLeft or 0),
+                        currentRune.ready and "READY" or string.format("COOLDOWN (%.1fs)", currentRune.timeLeft or 0)
+                    )
+                end
+            end
+        end
+        
+        if changed then
+            self:Debug(output)
+            
+            -- Store rune state for spell effect analysis
+            if self.state.pendingSpellCast and self.state.pendingSpellCast.preCastRunes then
+                self.state.pendingSpellCast.postCastRunes = self:DeepCopy(self.state.currentState.runes)
+            end
+        end
+    end
+    
+    -- Store current rune state for next comparison
+    self.state.lastRuneState = self:DeepCopy(self.state.currentState.runes)
+end
+
+function SpellLearnerStateManager:RecordSpellCast(unitID, spellID, spellName)
+    if unitID ~= "player" or not spellID then return end
+    
+    -- Store previous pending cast if it exists (should not happen)
+    if self.state.pendingSpellCast and not self.state.pendingSpellCast.processed then
+        self:Debug("Warning: Recording new spell cast while previous cast is still pending! Processing previous cast first.")
+        self:ProcessSpellCast(self.state.pendingSpellCast.spellID, self.state.pendingSpellCast.preCastState)
+    end
+    
+    -- Capture pre-cast state
+    local preCastState = self:CaptureCurrentState()
+    
+    -- Store pre-cast rune state specifically
+    if select(2, UnitClass("player")) == "DEATHKNIGHT" then
+        preCastState.preCastRunes = self:DeepCopy(preCastState.runes)
+    end
+    
+    -- Record this spell cast
+    self.state.pendingSpellCast = {
+        spellID = spellID,
+        spellName = spellName,
+        preCastState = preCastState,
+        castTime = GetTime(),
+        processed = false
+    }
+    
+    self:Debug(string.format("Recorded spell cast: %s (ID: %d)", spellName or "Unknown", spellID))
+    
+    -- Update our tracked spells list
+    self.state.trackedSpells = self.state.trackedSpells or {}
+    self.state.trackedSpells[spellID] = true
+end
+
+-- Helper function to get resource types for the current class
+function SpellLearnerStateManager:GetResourceTypes()
+    local _, class = UnitClass("player")
+    local resources = {"mana", "rage", "energy", "runic", "focus"}
+    
+    -- Add class-specific resources
+    if class == "PALADIN" then
+        table.insert(resources, "holypower")
+    elseif class == "WARLOCK" then
+        table.insert(resources, "soulshards")
+    elseif class == "PRIEST" then
+        table.insert(resources, "shadoworbs")
+    end
+    
+    return resources
+end
+
+-- Helper function to get resource index by name
+function SpellLearnerStateManager:GetResourceIndex(resourceType)
+    local resourceMap = {
+        mana = 0,
+        rage = 1,
+        energy = 3,
+        focus = 2,
+        runic = 6,
+        holypower = 9,
+        soulshards = 7,
+        shadoworbs = 13
+    }
+    
+    return resourceMap[resourceType] or 0
+end
+
+-- Display rune usage information for Death Knights
+function SpellLearnerStateManager:ShowRuneUsagePatterns()
+    if select(2, UnitClass("player")) ~= "DEATHKNIGHT" then
+        self:Print("This command is only available for Death Knights.")
+        return
+    end
+    
+    if not self.state.spellEffects or not next(self.state.spellEffects) then
+        self:Print("No spell effects have been recorded yet.")
+        return
+    end
+    
+    local output = "Death Knight Rune Usage Patterns:\n"
+    local runeTypeNames = {
+        ["1"] = "Blood",
+        ["2"] = "Frost", 
+        ["3"] = "Unholy",
+        ["4"] = "Death"
+    }
+    
+    -- Find spells with rune usage data
+    local spellsWithRuneData = {}
+    for spellID, effects in pairs(self.state.spellEffects) do
+        if effects.runeUsage and effects.runeUsage.count > 0 then
+            table.insert(spellsWithRuneData, spellID)
+        end
+    end
+    
+    -- Sort spells by name
+    table.sort(spellsWithRuneData, function(a, b)
+        local nameA = GetSpellInfo(a) or ""
+        local nameB = GetSpellInfo(b) or ""
+        return nameA < nameB
+    end)
+    
+    -- Display rune usage for each spell
+    for _, spellID in ipairs(spellsWithRuneData) do
+        local effects = self.state.spellEffects[spellID]
+        local spellName = GetSpellInfo(spellID) or "Unknown"
+        
+        output = output .. "\n" .. spellName .. " (ID: " .. spellID .. "):\n"
+        
+        -- Sort patterns by usage count
+        local sortedPatterns = {}
+        for pattern, count in pairs(effects.runeUsage.typePatterns) do
+            table.insert(sortedPatterns, {pattern = pattern, count = count})
+        end
+        
+        table.sort(sortedPatterns, function(a, b) return a.count > b.count end)
+        
+        -- Display patterns
+        for _, data in ipairs(sortedPatterns) do
+            local readablePattern = ""
+            for i = 1, #data.pattern do
+                local runeType = data.pattern:sub(i, i)
+                readablePattern = readablePattern .. (runeTypeNames[runeType] or "Unknown") .. " "
+            end
+            
+            local percentage = (data.count / effects.runeUsage.count) * 100
+            output = output .. "  " .. readablePattern .. "- " .. 
+                data.count .. " times (" .. string.format("%.1f", percentage) .. "%)\n"
+        end
+    end
+    
+    -- Display in multi-line format
+    self:Print(output)
+end
+
+-- Display spell effect learning information
+function SpellLearnerStateManager:ShowLearningStatus()
+    if not self.state.spellEffects or not next(self.state.spellEffects) then
+        self:Print("No spell effects have been recorded yet.")
+        return
+    end
+    
+    local output = "Spell Learning Status:\n"
+    
+    -- Count total spells tracked
+    local totalSpells = 0
+    for _ in pairs(self.state.spellEffects) do
+        totalSpells = totalSpells + 1
+    end
+    
+    output = output .. string.format("Tracking %d spells\n", totalSpells)
+    
+    -- Gather spells by category
+    local spellsByEffect = {
+        resourceChangers = {},
+        buffAppliers = {},
+        debuffAppliers = {},
+        runeUsers = {}
+    }
+    
+    for spellID, effects in pairs(self.state.spellEffects) do
+        -- Check resource changers
+        local hasResourceEffect = false
+        for resourceType, change in pairs(effects.resourceChanges or {}) do
+            if change.count > 0 then
+                hasResourceEffect = true
+                break
+            end
+        end
+        
+        if hasResourceEffect then
+            table.insert(spellsByEffect.resourceChangers, spellID)
+        end
+        
+        -- Check buff appliers
+        if next(effects.buffsApplied or {}) then
+            table.insert(spellsByEffect.buffAppliers, spellID)
+        end
+        
+        -- Check debuff appliers
+        if next(effects.debuffsApplied or {}) then
+            table.insert(spellsByEffect.debuffAppliers, spellID)
+        end
+        
+        -- Check rune users
+        if effects.runeUsage and effects.runeUsage.count > 0 then
+            table.insert(spellsByEffect.runeUsers, spellID)
+        end
+    end
+    
+    -- Sort spells by name within each category
+    local sortByName = function(a, b)
+        local nameA = GetSpellInfo(a) or ""
+        local nameB = GetSpellInfo(b) or ""
+        return nameA < nameB
+    end
+    
+    table.sort(spellsByEffect.resourceChangers, sortByName)
+    table.sort(spellsByEffect.buffAppliers, sortByName)
+    table.sort(spellsByEffect.debuffAppliers, sortByName)
+    table.sort(spellsByEffect.runeUsers, sortByName)
+    
+    -- Display resource changers
+    if #spellsByEffect.resourceChangers > 0 then
+        output = output .. "\nResource Changing Spells:\n"
+        for _, spellID in ipairs(spellsByEffect.resourceChangers) do
+            local effects = self.state.spellEffects[spellID]
+            local spellName = GetSpellInfo(spellID) or "Unknown"
+            
+            output = output .. "  " .. spellName .. " (ID: " .. spellID .. "): "
+            
+            local resourceList = {}
+            for resourceType, change in pairs(effects.resourceChanges) do
+                if change.count > 0 then
+                    local avg = change.total / change.count
+                    table.insert(resourceList, string.format("%s %+.1f", resourceType, avg))
+                end
+            end
+            output = output .. table.concat(resourceList, ", ") .. "\n"
+        end
+    end
+    
+    -- Display buff appliers
+    if #spellsByEffect.buffAppliers > 0 then
+        output = output .. "\nBuff Applying Spells:\n"
+        for _, spellID in ipairs(spellsByEffect.buffAppliers) do
+            local effects = self.state.spellEffects[spellID]
+            local spellName = GetSpellInfo(spellID) or "Unknown"
+            
+            output = output .. "  " .. spellName .. " (ID: " .. spellID .. "): "
+            
+            local buffList = {}
+            for buffID, count in pairs(effects.buffsApplied) do
+                local buffName = GetSpellInfo(buffID) or "Unknown"
+                local chance = count / effects.totalCasts
+                table.insert(buffList, string.format("%s (%.0f%%)", buffName, chance * 100))
+            end
+            output = output .. table.concat(buffList, ", ") .. "\n"
+        end
+    end
+    
+    -- Display debuff appliers
+    if #spellsByEffect.debuffAppliers > 0 then
+        output = output .. "\nDebuff Applying Spells:\n"
+        for _, spellID in ipairs(spellsByEffect.debuffAppliers) do
+            local effects = self.state.spellEffects[spellID]
+            local spellName = GetSpellInfo(spellID) or "Unknown"
+            
+            output = output .. "  " .. spellName .. " (ID: " .. spellID .. "): "
+            
+            local debuffList = {}
+            for debuffID, count in pairs(effects.debuffsApplied) do
+                local debuffName = GetSpellInfo(debuffID) or "Unknown"
+                local chance = count / effects.totalCasts
+                table.insert(debuffList, string.format("%s (%.0f%%)", debuffName, chance * 100))
+            end
+            output = output .. table.concat(debuffList, ", ") .. "\n"
+        end
+    end
+    
+    -- For Death Knights, show rune usage summary
+    if select(2, UnitClass("player")) == "DEATHKNIGHT" and #spellsByEffect.runeUsers > 0 then
+        output = output .. "\nRune Using Spells: (use /nagrunes for details)\n"
+        for _, spellID in ipairs(spellsByEffect.runeUsers) do
+            local effects = self.state.spellEffects[spellID]
+            local spellName = GetSpellInfo(spellID) or "Unknown"
+            
+            output = output .. "  " .. spellName .. " (ID: " .. spellID .. "): " ..
+                effects.runeUsage.count .. " rune patterns recorded\n"
+        end
+    end
+    
+    -- Display in multi-line format
+    self:Print(output)
+end
+
+function SpellLearnerStateManager:ProcessSpellCast(spellID, preCastState)
+    if not spellID or not preCastState then return end
+    
+    -- Capture post-cast state after a short delay to allow effects to register
+    C_Timer.After(0.2, function()
+        -- Skip if the module was disabled
+        if not self.state then return end
+        
+        -- Capture the state after the spell effects
+        local postCastState = self:CaptureCurrentState()
+        
+        -- Debug output
+        self:Debug(string.format("Processing spell cast: %s (ID: %d)", GetSpellInfo(spellID) or "Unknown", spellID))
+        self:Debug("Pre-state timestamp: " .. (preCastState.timestamp or 0))
+        self:Debug("Post-state timestamp: " .. (postCastState.timestamp or 0))
+        
+        -- For Death Knights, look at rune changes
+        if select(2, UnitClass("player")) == "DEATHKNIGHT" then
+            self:Debug("Checking rune changes:")
+            
+            -- Log pre-cast rune state
+            if preCastState.runes then
+                for i = 1, 6 do
+                    local rune = preCastState.runes[i]
+                    if rune then
+                        local runeType = rune.type
+                        local runeTypeStr = runeType == 1 and "Blood" or 
+                                           runeType == 2 and "Frost" or
+                                           runeType == 3 and "Unholy" or
+                                           runeType == 4 and "Death" or "Unknown"
+                        
+                        self:Debug(string.format("  Pre-cast Rune %d: Type=%s, Ready=%s", 
+                            i, runeTypeStr, tostring(rune.ready)))
+                    end
+                end
+            end
+            
+            -- Log post-cast rune state
+            if postCastState.runes then
+                for i = 1, 6 do
+                    local rune = postCastState.runes[i]
+                    if rune then
+                        local runeType = rune.type
+                        local runeTypeStr = runeType == 1 and "Blood" or 
+                                           runeType == 2 and "Frost" or
+                                           runeType == 3 and "Unholy" or
+                                           runeType == 4 and "Death" or "Unknown"
+                        
+                        self:Debug(string.format("  Post-cast Rune %d: Type=%s, Ready=%s", 
+                            i, runeTypeStr, tostring(rune.ready)))
+                    end
+                end
+            end
+        end
+        
+        -- Analyze spell effect
+        self:AnalyzeSpellEffect(spellID, preCastState, postCastState)
+        
+        -- Mark the cast as processed
+        if self.state.pendingSpellCast and self.state.pendingSpellCast.spellID == spellID then
+            self.state.pendingSpellCast.processed = true
+        end
+    end)
+end
+
+-- Add handler methods for events
+function SpellLearnerStateManager:OnUnitSpellcastSucceeded(event, unit, _, spellID)
+    if unit == "player" and spellID then
+        local spellName = GetSpellInfo(spellID)
+        self:RecordSpellCast(unit, spellID, spellName)
+    end
+end
+
+function SpellLearnerStateManager:OnUnitPowerUpdate(event, unit)
+    if unit == "player" then
+        -- Update the current state
+        if not self.state.currentState then
+            self.state.currentState = {}
+        end
+        
+        -- Force update runes for Death Knights on power change
+        if select(2, UnitClass("player")) == "DEATHKNIGHT" then
+            self:UpdateRuneState()
+        end
+    end
+end
+
+function SpellLearnerStateManager:OnUnitAura(event, unit)
+    if unit == "player" then
+        self:UpdatePlayerBuffs()
+    elseif unit == "target" then
+        self:UpdateTargetDebuffs()
+    end
+end
+
+function SpellLearnerStateManager:OnPlayerTargetChanged()
+    self:UpdateTargetDebuffs()
+end
+
+function SpellLearnerStateManager:OnRunePowerUpdate()
+    self:UpdateRuneState()
+end
+
+function SpellLearnerStateManager:OnRuneTypeUpdate()
+    self:UpdateRuneState()
+end
+
+-- Initialize default settings
+function SpellLearnerStateManager:InitializeDefaults()
+    local char = self:GetChar()
+    
+    -- Set defaults if not already set
+    if char.trackBuffs == nil then char.trackBuffs = true end
+    if char.trackCooldowns == nil then char.trackCooldowns = true end
+    if char.trackResources == nil then char.trackResources = true end
+    if char.trackCasts == nil then char.trackCasts = true end
+    
+    -- Initialize analyzer settings
+    char.analyzer = char.analyzer or {}
+    if char.analyzer.enabled == nil then char.analyzer.enabled = true end
+    if char.analyzer.threshold == nil then char.analyzer.threshold = 0.7 end
+    
+    self:Debug("Default settings initialized")
+end
+
+-- Helper function to get character-specific settings
+function SpellLearnerStateManager:GetChar()
+    if not self.db then
+        self.db = {
+            char = {}
+        }
+    end
+    
+    if not self.db.char then
+        self.db.char = {}
+    end
+    
+    return self.db.char
+end
+
+-- Helper function to deep copy a table
+function SpellLearnerStateManager:DeepCopy(orig)
+    if type(orig) ~= "table" then return orig end
+    
+    local copy = {}
+    for k, v in pairs(orig) do
+        if type(v) == "table" then
+            copy[k] = self:DeepCopy(v)
+        else
+            copy[k] = v
+        end
+    end
+    
+    return copy
+end
+
+-- Add the missing InspectStoredChanges method
+function SpellLearnerStateManager:InspectStoredChanges(spellID)
+    if not spellID then
+        self:Print("Usage: /nagchanges <spellID>")
+        return
+    end
+    
+    spellID = tonumber(spellID)
+    if not spellID then
+        self:Print("Invalid spell ID. Please provide a valid number.")
+        return
+    end
+    
+    -- Check if we have data for this spell
+    if not self.state.spellEffects or not self.state.spellEffects[spellID] then
+        self:Print("No data found for spell ID: " .. spellID)
+        return
+    end
+    
+    local spellName = GetSpellInfo(spellID) or "Unknown Spell"
+    local effects = self.state.spellEffects[spellID]
+    
+    -- Create a detailed output of the spell's effects
+    local output = string.format("Detailed analysis for %s (ID: %d):\n", spellName, spellID)
+    output = output .. string.format("Total casts recorded: %d\n", effects.totalCasts or 0)
+    
+    -- Resource changes
+    if effects.resourceChanges and next(effects.resourceChanges) then
+        output = output .. "\nResource Changes:\n"
+        for resourceType, stats in pairs(effects.resourceChanges) do
+            if stats.count > 0 then
+                local avg = stats.total / stats.count
+                output = output .. string.format("  %s: Avg %+.1f (Min: %+.1f, Max: %+.1f) - %d samples\n", 
+                    resourceType, avg, stats.min, stats.max, stats.count)
+            end
+        end
+    end
+    
+    -- Buff applications
+    if effects.buffsApplied and next(effects.buffsApplied) then
+        output = output .. "\nBuffs Applied:\n"
+        for buffID, count in pairs(effects.buffsApplied) do
+            local buffName = GetSpellInfo(buffID) or "Unknown"
+            local chance = count / effects.totalCasts
+            output = output .. string.format("  %s (ID: %d): %d times (%.1f%%)\n", 
+                buffName, buffID, count, chance * 100)
+        end
+    end
+    
+    -- Buff removals
+    if effects.buffsRemoved and next(effects.buffsRemoved) then
+        output = output .. "\nBuffs Removed:\n"
+        for buffID, count in pairs(effects.buffsRemoved) do
+            local buffName = GetSpellInfo(buffID) or "Unknown"
+            local chance = count / effects.totalCasts
+            output = output .. string.format("  %s (ID: %d): %d times (%.1f%%)\n", 
+                buffName, buffID, count, chance * 100)
+        end
+    end
+    
+    -- Debuff applications
+    if effects.debuffsApplied and next(effects.debuffsApplied) then
+        output = output .. "\nDebuffs Applied:\n"
+        for debuffID, count in pairs(effects.debuffsApplied) do
+            local debuffName = GetSpellInfo(debuffID) or "Unknown"
+            local chance = count / effects.totalCasts
+            output = output .. string.format("  %s (ID: %d): %d times (%.1f%%)\n", 
+                debuffName, debuffID, count, chance * 100)
+        end
+    end
+    
+    -- Debuff removals
+    if effects.debuffsRemoved and next(effects.debuffsRemoved) then
+        output = output .. "\nDebuffs Removed:\n"
+        for debuffID, count in pairs(effects.debuffsRemoved) do
+            local debuffName = GetSpellInfo(debuffID) or "Unknown"
+            local chance = count / effects.totalCasts
+            output = output .. string.format("  %s (ID: %d): %d times (%.1f%%)\n", 
+                debuffName, debuffID, count, chance * 100)
+        end
+    end
+    
+    -- Rune usage for Death Knights
+    if effects.runeUsage and effects.runeUsage.count > 0 then
+        output = output .. "\nRune Usage Patterns:\n"
+        local runeTypeNames = {
+            ["1"] = "Blood",
+            ["2"] = "Frost", 
+            ["3"] = "Unholy",
+            ["4"] = "Death"
+        }
+        
+        local sortedPatterns = {}
+        for pattern, count in pairs(effects.runeUsage.typePatterns) do
+            table.insert(sortedPatterns, {pattern = pattern, count = count})
+        end
+        
+        table.sort(sortedPatterns, function(a, b) return a.count > b.count end)
+        
+        for _, data in ipairs(sortedPatterns) do
+            local readablePattern = ""
+            for i = 1, #data.pattern do
+                local runeType = data.pattern:sub(i, i)
+                readablePattern = readablePattern .. (runeTypeNames[runeType] or "Unknown") .. " "
+            end
+            
+            local percentage = (data.count / effects.runeUsage.count) * 100
+            output = output .. string.format("  %s- %d times (%.1f%%)\n", 
+                readablePattern, data.count, percentage)
+        end
+    end
+    
+    -- Display detailed results
+    self:Print(output)
+end
+
+--- Verifies that data is being correctly saved to saved variables
+-- @return boolean True if data is being saved correctly
+function SpellLearnerStateManager:VerifyDataSaving()
+    -- Check if we have a reference to our saved variables
+    if not self:GetChar() then
+        self:Debug("VerifyDataSaving: No character data table found")
+        return false
+    end
+    
+    -- Create a test entry if we don't have any data yet
+    if not self.state.spellEffects or not next(self.state.spellEffects) then
+        -- Create a test marker in our state
+        self.state.testMarker = GetTime()
+        self:Debug(format("VerifyDataSaving: Created test marker: %.2f", self.state.testMarker))
+        
+        -- Force a save by simulating a logout
+        self:OnDisable()
+        self:OnEnable()
+        
+        -- Check if our test marker was preserved
+        if self.state.testMarker then
+            self:Debug(format("VerifyDataSaving: Test marker preserved: %.2f", self.state.testMarker))
+            return true
+        else
+            self:Debug("VerifyDataSaving: Test marker was not preserved in saved variables")
+            return false
+        end
+    else
+        -- We already have data, verify sample entries
+        local spellsFound = 0
+        for spellID, _ in pairs(self.state.spellEffects) do
+            spellsFound = spellsFound + 1
+            if spellsFound >= 3 then break end -- Only check a few
+        end
+        
+        self:Debug(format("VerifyDataSaving: Found %d spell entries in state data", spellsFound))
+        
+        -- Force a save/load cycle and check if data is preserved
+        local stateSize = ns.tCount(self.state.spellEffects)
+        self:OnDisable()
+        self:OnEnable()
+        local newStateSize = ns.tCount(self.state.spellEffects)
+        
+        if stateSize == newStateSize and newStateSize > 0 then
+            self:Debug(format("VerifyDataSaving: Data preserved across save/load: %d entries", newStateSize))
+            return true
+        else
+            self:Debug(format("VerifyDataSaving: Data changed across save/load: %d -> %d entries", stateSize, newStateSize))
+            return false
+        end
+    end
+end
+
+-- Add slash command for data verification
+NAG:RegisterChatCommand("nagverify", function()
+    local StateManager = NAG:GetModule("SpellLearnerStateManager")
+    if not StateManager then
+        NAG:Print("SpellLearner StateManager is not available")
+        return
+    end
+    
+    local result = StateManager:VerifyDataSaving()
+    NAG:Print(format("Data saving verification: %s", result and "PASSED" or "FAILED"))
+    
+    -- Show additional stats
+    if StateManager.state and StateManager.state.spellEffects then
+        local spellCount = ns.tCount(StateManager.state.spellEffects)
+        NAG:Print(format("Current spell effects: %d spells tracked", spellCount))
+        
+        local totalCasts = 0
+        for _, data in pairs(StateManager.state.spellEffects) do
+            totalCasts = totalCasts + (data.totalCasts or 0)
+        end
+        NAG:Print(format("Total spell casts recorded: %d", totalCasts))
+    else
+        NAG:Print("No spell effects data found")
+    end
+end)
+
+--- Ensures that spell data is correctly saved to persistent storage
+function SpellLearnerStateManager:SaveSpellData()
+    -- Get reference to our saved variables database
+    if not self:GetChar() then
+        self:Debug("SaveSpellData: No character database found")
+        return false
+    end
+    
+    -- Create spellData section if it doesn't exist
+    self:GetChar().spellData = self:GetChar().spellData or {}
+    
+    -- Check if we have spell effects to save
+    if not self.state or not self.state.spellEffects then
+        self:Debug("SaveSpellData: No spell effects to save")
+        return false
+    end
+    
+    -- Count before save
+    local spellCount = 0
+    for _ in pairs(self.state.spellEffects) do
+        spellCount = spellCount + 1
+    end
+    
+    -- Save spell effect data
+    self:Debug(format("SaveSpellData: Saving %d spells", spellCount))
+    
+    -- Clear existing data first to avoid stale entries
+    wipe(self:GetChar().spellData)
+    
+    -- Copy current spell effects to saved variables
+    for spellID, effectData in pairs(self.state.spellEffects) do
+        -- Skip invalid spell IDs
+        if type(spellID) == "number" and spellID > 0 then
+            -- Create a clean copy
+            self:GetChar().spellData[spellID] = {
+                spellName = GetSpellInfo(spellID) or "Unknown",
+                totalCasts = effectData.totalCasts or 0,
+                lastCast = effectData.lastCast or 0
+            }
+            
+            -- Copy resource changes
+            if effectData.resourceChanges and next(effectData.resourceChanges) then
+                self:GetChar().spellData[spellID].resourceChanges = {}
+                for resourceType, stats in pairs(effectData.resourceChanges) do
+                    self:GetChar().spellData[spellID].resourceChanges[resourceType] = {
+                        total = stats.total,
+                        count = stats.count,
+                        min = stats.min,
+                        max = stats.max
+                    }
+                end
+            end
+            
+            -- Copy buff applications
+            if effectData.buffsApplied and next(effectData.buffsApplied) then
+                self:GetChar().spellData[spellID].buffsApplied = {}
+                for buffID, count in pairs(effectData.buffsApplied) do
+                    self:GetChar().spellData[spellID].buffsApplied[buffID] = count
+                end
+            end
+            
+            -- Copy buff removals
+            if effectData.buffsRemoved and next(effectData.buffsRemoved) then
+                self:GetChar().spellData[spellID].buffsRemoved = {}
+                for buffID, count in pairs(effectData.buffsRemoved) do
+                    self:GetChar().spellData[spellID].buffsRemoved[buffID] = count
+                end
+            end
+        else
+            self:Debug(format("SaveSpellData: Skipping invalid spell ID: %s", tostring(spellID)))
+        end
+    end
+    
+    -- Force DB update (if needed by AceDB)
+    if self.db and self.db.RegisterCallback then
+        self.db.callbacks:Fire("OnDatabaseShutdown")
+    end
+    
+    return true
+end
+
+--- Loads saved spell data from persistent storage
+function SpellLearnerStateManager:LoadSpellData()
+    -- Get reference to our saved variables database
+    if not self:GetChar() then
+        self:Debug("LoadSpellData: No character database found")
+        return false
+    end
+    
+    -- Check if we have saved spell data
+    if not self:GetChar().spellData then
+        self:Debug("LoadSpellData: No saved spell data found")
+        return false
+    end
+    
+    -- Initialize spell effects table if needed
+    if not self.state then
+        self.state = {}
+    end
+    
+    self.state.spellEffects = self.state.spellEffects or {}
+    
+    -- Count existing entries
+    local existingCount = 0
+    for _ in pairs(self.state.spellEffects) do
+        existingCount = existingCount + 1
+    end
+    
+    -- Count saved entries
+    local savedCount = 0
+    local invalidCount = 0
+    for spellID in pairs(self:GetChar().spellData) do
+        if type(spellID) == "number" and spellID > 0 then
+            savedCount = savedCount + 1
+        else
+            invalidCount = invalidCount + 1
+            -- Remove invalid entries
+            self:GetChar().spellData[spellID] = nil
+        end
+    end
+    
+    -- Log results
+    if invalidCount > 0 then
+        self:Debug(format("LoadSpellData: Removed %d invalid entries from saved data", invalidCount))
+    end
+    
+    -- Load spell data from saved variables
+    self:Debug(format("LoadSpellData: Loading %d spells (existing: %d)", savedCount, existingCount))
+    
+    -- Copy saved data to state
+    for spellID, savedData in pairs(self:GetChar().spellData) do
+        -- Skip invalid spell IDs
+        if type(spellID) == "number" and spellID > 0 then
+            -- Create or update spell data
+            self.state.spellEffects[spellID] = self.state.spellEffects[spellID] or {
+                spellName = GetSpellInfo(spellID) or "Unknown",
+                totalCasts = 0,
+                lastCast = 0,
+                resourceChanges = {},
+                buffsApplied = {},
+                buffsRemoved = {}
+            }
+            
+            -- Update basic stats
+            self.state.spellEffects[spellID].totalCasts = savedData.totalCasts or self.state.spellEffects[spellID].totalCasts
+            self.state.spellEffects[spellID].lastCast = savedData.lastCast or self.state.spellEffects[spellID].lastCast
+            self.state.spellEffects[spellID].spellName = savedData.spellName or GetSpellInfo(spellID) or "Unknown"
+            
+            -- Copy resource changes
+            if savedData.resourceChanges and next(savedData.resourceChanges) then
+                self.state.spellEffects[spellID].resourceChanges = self.state.spellEffects[spellID].resourceChanges or {}
+                for resourceType, stats in pairs(savedData.resourceChanges) do
+                    self.state.spellEffects[spellID].resourceChanges[resourceType] = {
+                        total = stats.total or 0,
+                        count = stats.count or 0,
+                        min = stats.min,
+                        max = stats.max
+                    }
+                end
+            end
+            
+            -- Copy buff applications
+            if savedData.buffsApplied and next(savedData.buffsApplied) then
+                self.state.spellEffects[spellID].buffsApplied = self.state.spellEffects[spellID].buffsApplied or {}
+                for buffID, count in pairs(savedData.buffsApplied) do
+                    if type(buffID) == "number" and buffID > 0 then
+                        self.state.spellEffects[spellID].buffsApplied[buffID] = count
+                    end
+                end
+            end
+            
+            -- Copy buff removals
+            if savedData.buffsRemoved and next(savedData.buffsRemoved) then
+                self.state.spellEffects[spellID].buffsRemoved = self.state.spellEffects[spellID].buffsRemoved or {}
+                for buffID, count in pairs(savedData.buffsRemoved) do
+                    if type(buffID) == "number" and buffID > 0 then
+                        self.state.spellEffects[spellID].buffsRemoved[buffID] = count
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Also initialize pre-cast state
+    if not self.state.preCastState then
+        self.state.preCastState = self:CaptureCurrentState()
+    end
+    
+    -- Sync with PredictionEngine if we have data
+    if savedCount > 0 then
+        self:Debug("LoadSpellData: Scheduling sync with PredictionEngine")
+        C_Timer.After(5, function()
+            -- Use the nagsyncall command to sync all data
+            local cmd = NAG.SlashCmdList and NAG.SlashCmdList["NAGSYNCALL"]
+            if cmd then
+                cmd()
+            else
+                self:Debug("LoadSpellData: nagsyncall command not found")
+            end
+        end)
+    end
+    
+    return true
+end
+
+-- Override OnEnable to load saved spell data
+local originalOnEnable = SpellLearnerStateManager.OnEnable
+function SpellLearnerStateManager:OnEnable()
+    if originalOnEnable then
+        originalOnEnable(self)
+    end
+    
+    -- Initialize state
+    self.state = self.state or {}
+    
+    -- Load saved spell data
+    self:LoadSpellData()
+    
+    -- Capture initial state for spell cast comparison
+    self:Debug("OnEnable: Capturing initial state")
+    self.state.preCastState = self:CaptureCurrentState()
+    
+    -- Add debug message to confirm module started
+    NAG:Print("SpellLearner StateManager enabled. Type /nagdata to view recorded spells.")
+end
+
+-- Override OnDisable to save spell data
+local originalOnDisable = SpellLearnerStateManager.OnDisable
+function SpellLearnerStateManager:OnDisable()
+    -- Save spell data before disabling
+    self:SaveSpellData()
+    
+    if originalOnDisable then
+        originalOnDisable(self)
+    end
+end
+
+-- Add hooks for session end/reload
+local persistenceFrame = CreateFrame("Frame")
+persistenceFrame:RegisterEvent("PLAYER_LOGOUT")
+persistenceFrame:SetScript("OnEvent", function(_, event)
+    if event == "PLAYER_LOGOUT" then
+        -- Make sure we save on logout
+        local StateManager = NAG:GetModule("SpellLearnerStateManager")
+        if StateManager then
+            StateManager:SaveSpellData()
+        end
+    end
+end)
+
+--- Record a spell cast with improved data capture and validation
+function SpellLearnerStateManager:RecordSpellCast(spellID, preCastState, postCastState)
+    -- Strict validation on spell ID
+    if not spellID or type(spellID) ~= "number" or spellID <= 0 then
+        self:Debug("RecordSpellCast: Invalid spell ID: " .. tostring(spellID))
+        return false
+    end
+    
+    if not preCastState or not postCastState then 
+        self:Debug("RecordSpellCast: Missing state data")
+        return false
+    end
+    
+    -- Ensure we have the spell effects table
+    self.state = self.state or {}
+    self.state.spellEffects = self.state.spellEffects or {}
+    
+    -- Get spell name for better logging
+    local spellName = GetSpellInfo(spellID) or "Unknown"
+    self:Debug(format("RecordSpellCast: Processing %s (ID: %d)", spellName, spellID))
+    
+    -- Initialize spell data if needed
+    if not self.state.spellEffects[spellID] then
+        self.state.spellEffects[spellID] = {
+            spellName = spellName,
+            resourceChanges = {},
+            buffsApplied = {},
+            buffsRemoved = {},
+            totalCasts = 0,
+            lastCast = 0
+        }
+        self:Debug(format("RecordSpellCast: Created new entry for %s (ID: %d)", spellName, spellID))
+    end
+    
+    -- Update basic cast statistics
+    self.state.spellEffects[spellID].totalCasts = (self.state.spellEffects[spellID].totalCasts or 0) + 1
+    self.state.spellEffects[spellID].lastCast = GetTime()
+    
+    -- Calculate and record the effects of this cast
+    local success, result = pcall(function()
+        return self:AnalyzeSpellEffect(spellID, preCastState, postCastState)
+    end)
+    
+    if not success then
+        self:Debug("RecordSpellCast: Error in AnalyzeSpellEffect: " .. tostring(result))
+    end
+    
+    -- Force a save to ensure data persistence
+    if self.state.spellEffects[spellID].totalCasts % 5 == 0 then
+        -- Save every 5 casts of a spell
+        self:SaveSpellData()
+        self:Debug(format("RecordSpellCast: Saved data after %d casts of %s (ID: %d)", 
+            self.state.spellEffects[spellID].totalCasts, spellName, spellID))
+            
+        -- Also sync with PredictionEngine
+        self:SyncWithPredictionEngine(spellID)
+    end
+    
+    -- Debug output for verification
+    self:Debug(format("RecordSpellCast: Recorded cast #%d of %s (ID: %d)", 
+        self.state.spellEffects[spellID].totalCasts,
+        spellName,
+        spellID))
+        
+    return true
+end
+
+--- Analyzes spell effect with improved error handling and debugging
+function SpellLearnerStateManager:AnalyzeSpellEffect(spellID, preCastState, postCastState)
+    if not spellID or type(spellID) ~= "number" or spellID <= 0 then
+        self:Debug("AnalyzeSpellEffect: Invalid spell ID: " .. tostring(spellID))
+        return false
+    end
+    
+    if not preCastState or not postCastState then 
+        self:Debug("AnalyzeSpellEffect: Missing required data")
+        return false
+    end
+    
+    -- Calculate changes between states with error handling
+    local changes = nil
+    local success, errorMsg = pcall(function()
+        changes = self:CalculateStateChanges(preCastState, postCastState)
+    end)
+    
+    if not success then
+        self:Debug(format("AnalyzeSpellEffect: Error calculating state changes: %s", errorMsg))
+        return false
+    end
+    
+    if not changes then
+        self:Debug("AnalyzeSpellEffect: No changes detected")
+        return false
+    end
+    
+    -- Store spell effect data
+    if not self.state.spellEffects[spellID] then
+        self:Debug(format("AnalyzeSpellEffect: Spell %d not initialized", spellID))
+        return false
+    end
+    
+    -- Get reference to spell effect data
+    local effect = self.state.spellEffects[spellID]
+    
+    -- Track resource changes
+    if changes.resources then
+        for resourceType, change in pairs(changes.resources) do
+            -- Handle change being a table or a number
+            local deltaValue
+            if type(change) == "table" and change.delta then
+                deltaValue = change.delta
+            elseif type(change) == "number" then
+                deltaValue = change
+            else
+                self:Debug(format("AnalyzeSpellEffect: Invalid resource change format for %s", resourceType))
+                deltaValue = 0
+            end
+            
+            -- Initialize resource tracking if needed
+            if not effect.resourceChanges[resourceType] then
+                effect.resourceChanges[resourceType] = {
+                    total = 0,
+                    count = 0,
+                    min = nil,
+                    max = nil
+                }
+            end
+            
+            -- Update resource statistics
+            local stats = effect.resourceChanges[resourceType]
+            stats.total = (stats.total or 0) + deltaValue
+            stats.count = (stats.count or 0) + 1
+            stats.min = stats.min and math.min(stats.min, deltaValue) or deltaValue
+            stats.max = stats.max and math.max(stats.max, deltaValue) or deltaValue
+            
+            self:Debug(format("AnalyzeSpellEffect: Resource %s changed by %.1f", resourceType, deltaValue))
+        end
+    end
+    
+    -- Track buff applications
+    if changes.buffsAdded and next(changes.buffsAdded) then
+        effect.buffsApplied = effect.buffsApplied or {}
+        
+        for buffID in pairs(changes.buffsAdded) do
+            effect.buffsApplied[buffID] = (effect.buffsApplied[buffID] or 0) + 1
+            local buffName = GetSpellInfo(buffID) or "Unknown"
+            self:Debug(format("AnalyzeSpellEffect: Buff applied %s (ID: %d)", buffName, buffID))
+        end
+    end
+    
+    -- Track buff removals
+    if changes.buffsRemoved and next(changes.buffsRemoved) then
+        effect.buffsRemoved = effect.buffsRemoved or {}
+        
+        for buffID in pairs(changes.buffsRemoved) do
+            effect.buffsRemoved[buffID] = (effect.buffsRemoved[buffID] or 0) + 1
+            local buffName = GetSpellInfo(buffID) or "Unknown"
+            self:Debug(format("AnalyzeSpellEffect: Buff removed %s (ID: %d)", buffName, buffID))
+        end
+    end
+    
+    self:Debug(format("AnalyzeSpellEffect: Successfully analyzed spell effect for %d", spellID))
+    return true
+end
+
+--- Synchronizes a spell's data with the PredictionEngine
+function SpellLearnerStateManager:SyncWithPredictionEngine(spellID)
+    -- Make sure we have a valid spell ID
+    if not spellID or type(spellID) ~= "number" or spellID <= 0 then
+        self:Debug("SyncWithPredictionEngine: Invalid spell ID: " .. tostring(spellID))
+        return false
+    end
+    
+    -- Get the PredictionEngine module
+    local PredictionEngine = NAG:GetModule("PredictionEngine")
+    if not PredictionEngine then
+        self:Debug("SyncWithPredictionEngine: PredictionEngine module not found")
+        return false
+    end
+    
+    -- Make sure the PredictionEngine has a character database
+    if not PredictionEngine:GetChar() then
+        self:Debug("SyncWithPredictionEngine: PredictionEngine has no character database")
+        return false
+    end
+    
+    -- Ensure compiled data table exists
+    PredictionEngine:GetChar().compiled = PredictionEngine:GetChar().compiled or {}
+    
+    -- Get the spell effect data
+    local effectData = self.state.spellEffects[spellID]
+    if not effectData then
+        self:Debug("SyncWithPredictionEngine: No data for spell " .. tostring(spellID))
+        return false
+    end
+    
+    -- Create or get the spell's compiled data
+    PredictionEngine:GetChar().compiled[spellID] = PredictionEngine:GetChar().compiled[spellID] or {}
+    local compiledData = PredictionEngine:GetChar().compiled[spellID]
+    
+    -- Ensure default context exists
+    compiledData["default"] = compiledData["default"] or {}
+    local defaultContext = compiledData["default"]
+    
+    -- Process resource costs/generation
+    if effectData.resourceChanges and next(effectData.resourceChanges) then
+        defaultContext.cost = defaultContext.cost or {}
+        defaultContext.generates = defaultContext.generates or {}
+        
+        for resourceType, stats in pairs(effectData.resourceChanges) do
+            if stats.count > 0 then
+                local avgChange = stats.total / stats.count
+                if avgChange < 0 then
+                    -- Negative change = cost
+                    defaultContext.cost[resourceType] = math.abs(avgChange)
+                    self:Debug(format("SyncWithPredictionEngine: %s costs %.1f %s", 
+                        GetSpellInfo(spellID) or spellID, defaultContext.cost[resourceType], resourceType))
+                else
+                    -- Positive change = generation
+                    defaultContext.generates[resourceType] = avgChange
+                    self:Debug(format("SyncWithPredictionEngine: %s generates %.1f %s", 
+                        GetSpellInfo(spellID) or spellID, defaultContext.generates[resourceType], resourceType))
+                end
+            end
+        end
+    end
+    
+    -- Process buff applications
+    if effectData.buffsApplied and next(effectData.buffsApplied) then
+        defaultContext.applies = defaultContext.applies or {}
+        
+        for buffID, count in pairs(effectData.buffsApplied) do
+            if count > 0 and effectData.totalCasts > 0 then
+                local chance = count / effectData.totalCasts
+                defaultContext.applies[buffID] = chance
+                self:Debug(format("SyncWithPredictionEngine: %s applies %s with %.1f%% chance", 
+                    GetSpellInfo(spellID) or tostring(spellID), GetSpellInfo(buffID) or tostring(buffID), chance * 100))
+            end
+        end
+    end
+    
+    -- Process buff removals
+    if effectData.buffsRemoved and next(effectData.buffsRemoved) then
+        defaultContext.removes = defaultContext.removes or {}
+        
+        for buffID, count in pairs(effectData.buffsRemoved) do
+            if count > 0 and effectData.totalCasts > 0 then
+                local chance = count / effectData.totalCasts
+                defaultContext.removes[buffID] = chance
+                self:Debug(format("SyncWithPredictionEngine: %s removes %s with %.1f%% chance", 
+                    GetSpellInfo(spellID) or tostring(spellID), GetSpellInfo(buffID) or tostring(buffID), chance * 100))
+            end
+        end
+    end
+    
+    -- Set last updated time
+    defaultContext.lastUpdated = GetTime()
+    
+            -- Force save the PredictionEngine data
+    if PredictionEngine.SaveCompiledData then
+        PredictionEngine:SaveCompiledData()
+        self:Debug(format("SyncWithPredictionEngine: Saved compiled data for %s (ID: %d)", 
+            GetSpellInfo(spellID) or tostring(spellID), spellID))
+    else
+        self:Debug("SyncWithPredictionEngine: PredictionEngine.SaveCompiledData not found")
+    end
+    
+    return true
+end
+
+--- Enhanced spell cast handler with debug tracking
+function SpellLearnerStateManager:OnSpellCastSucceeded(unit, castGUID, spellID)
+    -- For Classic/BC compatibility - need to check various arguments
+    local actualSpellID = spellID
+    
+    -- Handle different API versions
+    if not unit or not actualSpellID then
+        -- This could mean we're in Classic where the arguments are different
+        -- Try to get the first three arguments as unit, castGUID, spellID
+        unit, castGUID, actualSpellID = unit, castGUID, spellID
+    end
+    
+    -- Make sure we have a player spell cast
+    if unit ~= "player" then return end
+    if not self:GetChar().trackCasts then return end
+    
+    -- Double-check spell ID from the cast GUID for Classic
+    if not actualSpellID or actualSpellID == 0 then
+        -- Try to extract it from castGUID for Classic
+        if castGUID then
+            -- In some Classic versions, the second parameter is actually the spellID
+            if type(castGUID) == "number" and castGUID > 0 then
+                actualSpellID = castGUID
+            end
+        end
+    end
+    
+    -- Make sure we have a valid spell ID after all our checks
+    if not actualSpellID or actualSpellID == 0 then
+        self:Debug("OnSpellCastSucceeded: Could not determine a valid spell ID")
+        return
+    end
+    
+    -- Verify this is a real spell
+    local spellName = GetSpellInfo(actualSpellID)
+    if not spellName then
+        self:Debug("OnSpellCastSucceeded: GetSpellInfo failed for ID " .. tostring(actualSpellID))
+        return
+    end
+    
+    -- Get the current state before proceeding with analysis
+    local preCastState = self.state.preCastState
+    if not preCastState then
+        self:Debug(format("OnSpellCastSucceeded: No pre-cast state for spell %s (ID: %d)", spellName, actualSpellID))
+        
+        -- Create pre-cast state if it doesn't exist
+        preCastState = self:CaptureCurrentState()
+        self.state.preCastState = preCastState
+    end
+    
+    -- Debug info
+    self:Debug(format("OnSpellCastSucceeded: Player cast %s (ID: %d)", spellName, actualSpellID))
+    
+    -- Only print the first few casts to avoid spamming
+    if not self.state.castCount then self.state.castCount = 0 end
+    self.state.castCount = self.state.castCount + 1
+    
+    if self.state.castCount <= 3 then
+        NAG:Print(format("Recorded spell: %s (ID: %d)", spellName, actualSpellID))
+    elseif self.state.castCount == 4 then
+        NAG:Print("Recording spells... (further messages suppressed)")
+    end
+    
+    -- Capture the post-cast state after a short delay to allow effects to apply
+    C_Timer.After(0.5, function()
+        local postCastState = self:CaptureCurrentState()
+        if not postCastState then
+            self:Debug("OnSpellCastSucceeded: Failed to capture post-cast state")
+            return
+        end
+        
+        -- Record the spell cast with both states
+        local success = self:RecordSpellCast(actualSpellID, preCastState, postCastState)
+        
+        -- Debug output for verification
+        if success then
+            self:Debug(format("OnSpellCastSucceeded: Processed cast of %s (ID: %d)", spellName, actualSpellID))
+        else
+            self:Debug(format("OnSpellCastSucceeded: Failed to process cast of %s (ID: %d)", spellName, actualSpellID))
+        end
+    end)
+    
+    -- Prepare for next cast
+    C_Timer.After(0.6, function()
+        self.state.preCastState = self:CaptureCurrentState()
+        self:Debug("OnSpellCastSucceeded: Updated pre-cast state for next spell")
+    end)
+end
+
+-- Combat state handling
+function SpellLearnerStateManager:OnCombatStart()
+    self:Debug("OnCombatStart called")
+    self.state.inCombat = true
+    
+    -- Capture initial combat state
+    self.state.combatStartState = self:CaptureCurrentState()
+    self.state.combatStartTime = GetTime()
+    
+    -- Ensure we have a pre-cast state
+    if not self.state.preCastState then
+        self.state.preCastState = self.state.combatStartState
+    end
+end
+
+function SpellLearnerStateManager:OnCombatEnd()
+    self:Debug("OnCombatEnd called")
+    self.state.inCombat = false
+    
+    -- Capture final combat state
+    self.state.combatEndState = self:CaptureCurrentState()
+    self.state.combatEndTime = GetTime()
+    local combatDuration = self.state.combatEndTime - (self.state.combatStartTime or self.state.combatEndTime)
+    
+    -- Debug output
+    self:Debug(format("Combat ended after %.1f seconds", combatDuration))
+    
+    -- Save data periodically after combat
+    if GetTime() - (self.state.lastSave or 0) > 60 then
+        self:SaveSpellData()
+        self.state.lastSave = GetTime()
+        self:Debug("Saved spell data after combat")
+    end
+end
+
+-- Add SaveSpellLearningData function to properly persist learned data
+function SpellLearnerStateManager:SaveSpellLearningData()
+    if not self.state.spellEffects then return end
+    
+    -- Ensure we have a place to store
+    self:GetChar().spellData = self:GetChar().spellData or {}
+    
+    for spellID, effectData in pairs(self.state.spellEffects) do
+        -- Skip invalid entries
+        if not spellID or spellID == 0 or type(spellID) ~= "number" then
+            self:Debug("Skipping invalid spell ID: " .. tostring(spellID))
+        else
+            -- Extract and store comprehensive data
+            self:GetChar().spellData[spellID] = {
+                spellName = GetSpellInfo(spellID) or "Unknown",
+                totalCasts = effectData.totalCasts or 0,
+                lastCast = effectData.lastCast or 0,
+                
+                -- Resource costs
+                costs = effectData.resourceChanges or {},
+                
+                -- Buffs and debuffs
+                buffsApplied = effectData.buffsApplied or {},
+                debuffsApplied = effectData.debuffsApplied or {},
+                
+                -- Statistical data for analysis
+                statistics = {
+                    resources = {},
+                    procs = {},
+                    damage = effectData.damageStats or {}
+                }
+            }
+            
+            -- Process resource statistics
+            if effectData.resourceChanges then
+                for resourceType, change in pairs(effectData.resourceChanges) do
+                    if change.count and change.count > 0 then
+                        self:GetChar().spellData[spellID].statistics.resources[resourceType] = {
+                            min = change.min,
+                            max = change.max,
+                            avg = change.total / change.count
+                        }
+                    end
+                end
+            end
+            
+            -- Log successful save
+            self:Debug("Saved learning data for " .. (GetSpellInfo(spellID) or tostring(spellID)))
+        end
+    end
+    
+    -- Signal to PredictionEngine that data is available for compilation
+    local PredictionEngine = self:GetModule("PredictionEngine", true)
+    if PredictionEngine then
+        PredictionEngine:QueueDataCompilation()
+    end
+end
+
+-- Enhanced AnalyzeSpellEffect function to collect comprehensive data
+function SpellLearnerStateManager:AnalyzeSpellEffect(spellID, preCastState, postCastState)
+    if not spellID or not preCastState or not postCastState then return end
+    
+    -- Initialize spell effects if needed
+    self.state.spellEffects = self.state.spellEffects or {}
+    if not self.state.spellEffects[spellID] then
+        self.state.spellEffects[spellID] = {
+            resourceChanges = {},
+            buffsApplied = {},
+            debuffsApplied = {},
+            totalCasts = 0,
+            lastCast = 0,
+            damageStats = {
+                totalDamage = 0,
+                hitCount = 0,
+                critCount = 0
+            }
+        }
+    end
+    
+    local effect = self.state.spellEffects[spellID]
+    effect.totalCasts = effect.totalCasts + 1
+    effect.lastCast = GetTime()
+    
+    -- Track resource changes specifically
+    for resourceType, _ in pairs(preCastState.resources or {}) do
+        local before = preCastState.resources[resourceType] or 0
+        local after = postCastState.resources[resourceType] or 0
+        local delta = before - after
+        
+        -- Only record if there was a change
+        if math.abs(delta) > 0.1 then
+            effect.resourceChanges[resourceType] = effect.resourceChanges[resourceType] or {
+                total = 0,
+                count = 0,
+                min = nil,
+                max = nil
+            }
+            
+            local stats = effect.resourceChanges[resourceType]
+            stats.total = stats.total + delta
+            stats.count = stats.count + 1
+            stats.min = stats.min and math.min(stats.min, delta) or delta
+            stats.max = stats.max and math.max(stats.max, delta) or delta
+        end
+    end
+    
+    -- Track buff applications on player
+    if postCastState.buffs and postCastState.buffs.player then
+        for buffID, buffData in pairs(postCastState.buffs.player) do
+            if not (preCastState.buffs and preCastState.buffs.player and preCastState.buffs.player[buffID]) then
+                effect.buffsApplied[buffID] = (effect.buffsApplied[buffID] or 0) + 1
+            end
+        end
+    end
+    
+    -- Track debuff applications on target
+    if postCastState.buffs and postCastState.buffs.target then
+        for debuffID, debuffData in pairs(postCastState.buffs.target) do
+            if not (preCastState.buffs and preCastState.buffs.target and preCastState.buffs.target[debuffID]) then
+                effect.debuffsApplied[debuffID] = (effect.debuffsApplied[debuffID] or 0) + 1
+            end
+        end
+    end
+    
+    -- Save periodically or if auto-save enabled
+    local shouldSave = self:GetGlobal().autoSave or (GetTime() - (self.lastSave or 0) > 60)
+    if shouldSave then
+        self:SaveSpellLearningData()
+        self.lastSave = GetTime()
+    end
+end
+
+-- Add OnModuleDisable to ensure data is saved when module is disabled
+function SpellLearnerStateManager:OnModuleDisable()
+    self:SaveSpellLearningData()
+end
+
+-- Enhanced ProcessCommand to handle explicit data saving
+function SpellLearnerStateManager:ProcessCommand(command)
+    if command == "save" then
+        self:SaveSpellLearningData()
+        self:Print("Spell learning data saved")
+        return true
+    elseif command == "clear" then
+        self.state.spellEffects = {}
+        self:GetChar().spellData = {}
+        self:Print("Spell learning data cleared")
+        return true
+    end
+    
+    return false -- Continue command processing if not handled here
+end
+
+-- Ensure proper formatting for debug messages
+local function SafeFormat(pattern, ...)
+    local args = {...}
+    for i=1, select("#", ...) do
+        if args[i] == nil then
+            args[i] = "<nil>"
+        elseif type(args[i]) == "number" then
+            args[i] = tostring(args[i])
+        end
+    end
+    
+    -- Use pcall to catch any format errors
+    local success, result = pcall(format, pattern, unpack(args))
+    if success then
+        return result
+    else
+        return pattern .. " (format error: " .. result .. ")"
+    end
+end
+
+-- Add a safer Debug wrapper
+local originalDebug = SpellLearnerStateManager.Debug
+SpellLearnerStateManager.Debug = function(self, pattern, ...)
+    if type(pattern) ~= "string" then
+        return originalDebug(self, tostring(pattern))
+    end
+    
+    -- If no additional arguments, don't try to format
+    if select("#", ...) == 0 then
+        return originalDebug(self, pattern)
+    end
+    
+    return originalDebug(self, SafeFormat(pattern, ...))
+end

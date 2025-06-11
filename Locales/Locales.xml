@@ -1,0 +1,32 @@
+<!-- 
+    NAG Localization System
+    See .cursorrules for localization conventions and standards.
+    
+    Supported Languages:
+    - enUS (Base/Default)
+    - ruRU
+    - deDE
+    - esES
+    - esMX
+    - frFR
+    - ptBR
+    
+    Planned Support:
+    - zhCN
+    - zhTW
+    - itIT
+    - koKR
+-->
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Include file="Locales\enUS.lua"/>
+    <Include file="Locales\ruRU.lua"/>
+    <Include file="Locales\zhCN.lua"/>
+    <Include file="Locales\zhTW.lua"/>
+    <Include file="Locales\deDE.lua"/>
+    <Include file="Locales\esES.lua"/>
+    <Include file="Locales\esMX.lua"/>
+    <Include file="Locales\frFR.lua"/>
+    <Include file="Locales\itIT.lua"/>
+    <Include file="Locales\koKR.lua"/>
+    <Include file="Locales\ptBR.lua"/>
+</Ui>

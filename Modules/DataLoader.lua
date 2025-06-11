@@ -1,0 +1,164 @@
+--- ============================ HEADER ============================
+--[[
+    See LICENSE for full license text.
+    Authors: Rakizi
+    Module Purpose: DataLoader module for handling version-specific data loading across different WoW versions. Responsible for selecting the appropriate version's data based on the current game version.
+    STATUS: Stable
+    TODO: 
+        - Add support for new expansions as needed
+    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+    https://creativecommons.org/licenses/by-nc/4.0/
+
+    Supported Data Files Structure:
+    /data
+    ├── Classic/           -- Classic Era data
+    │   ├── Racials.lua   -- Classic racial abilities
+    │   ├── Spells.lua    -- Classic spells and abilities
+    │   └── Items.lua     -- Classic items
+    ├── SoD/              -- Season of Discovery data
+    │   ├── Racials.lua   -- SoD racial abilities
+    │   ├── Spells.lua    -- SoD spells and abilities
+    │   └── Items.lua     -- SoD items
+    ├── Cata/             -- Cataclysm data
+    │   ├── Racials.lua   -- Cataclysm racial abilities
+    │   ├── Spells.lua    -- Cataclysm spells and abilities
+    │   └── Items.lua     -- Cataclysm items
+    └── Retail/           -- Retail data
+        ├── Racials.lua   -- Retail racial abilities
+        ├── Spells.lua    -- Retail spells and abilities
+        └── Items.lua     -- Retail items
+
+    Each version's data files contain:
+    - Racial abilities and passives
+    - Class spells and abilities
+    - Common spells and buffs
+    - Raid buffs and debuffs
+    - Items and their effects
+
+    Processed Data Sections:
+    Spells.lua:
+    - commonSpells        -- Spells available to all classes
+    - classSpells        -- Class-specific spells and abilities
+    - raidBuffs          -- Raid-wide buff spells
+    - raidDebuffs        -- Raid-wide debuff spells
+    - individualBuffs    -- Individual target buff spells
+    - petSpells         -- Pet-specific abilities and spells
+
+    Racials.lua:
+    - racialsByRaceID   -- Racial abilities indexed by race ID
+    - racialSpells      -- List of all racial spell IDs
+
+    Items.lua:
+    - consumables       -- Consumable items (food, potions, etc.)
+    - equipment        -- Equipment items with special effects
+    - questItems       -- Quest-related items
+    - reagents         -- Crafting and spell reagents
+]]
+
+--- ============================ LOCALIZE ============================
+local _, ns = ...
+---@class NAG
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+---@class Version : ModuleBase
+local Version = ns.Version
+
+-- Lua APIs (using WoW's optimized versions where available)
+local format = format or string.format -- WoW's optimized version if available
+local floor = floor or math.floor
+local ceil = ceil or math.ceil
+local min = min or math.min
+local max = max or math.max
+local abs = abs or math.abs
+
+-- String manipulation (WoW's optimized versions)
+local strmatch = strmatch -- WoW's version
+local strfind = strfind   -- WoW's version
+local strsub = strsub     -- WoW's version
+local strlower = strlower -- WoW's version
+local strupper = strupper -- WoW's version
+local strsplit = strsplit -- WoW's specific version
+local strjoin = strjoin   -- WoW's specific version
+
+-- Table operations (WoW's optimized versions)
+local tinsert = tinsert     -- WoW's version
+local tremove = tremove     -- WoW's version
+local wipe = wipe           -- WoW's specific version
+local tContains = tContains -- WoW's specific version
+
+-- Standard Lua functions (no WoW equivalent)
+local sort = table.sort     -- No WoW equivalent
+local concat = table.concat -- No WoW equivalent
+
+--- ============================ CONTENT ============================
+
+local defaults = {
+    global = {
+        debug = false,
+    },
+}
+
+
+---@class DataLoader : ModuleBase
+local DataLoader = NAG:CreateModule("DataLoader", defaults)
+
+-- ============================ ACE3 LIFECYCLE ============================
+do
+    --- Initializes the DataLoader module
+    function DataLoader:ModuleInitialize()
+        -- Load version-specific data
+        self:LoadVersionSpecificData()
+    end
+end
+
+-- ============================ HELPERS & PUBLIC API ============================
+--- Loads data specific to the current WoW version
+function DataLoader:LoadVersionSpecificData()
+    local expansionKey = Version:GetExpansion()
+    self:Debug("Loading data for expansion: " .. tostring(expansionKey))
+
+    -- If SoD, use Vanilla data
+    if expansionKey == "sod" then
+        expansionKey = "vanilla"
+    end
+
+    -- Helper function for deep copy
+    local function deepCopy(orig)
+        local copy
+        if type(orig) == "table" then
+            copy = {}
+            for k, v in pairs(orig) do
+                copy[k] = deepCopy(v)
+            end
+            setmetatable(copy, deepCopy(getmetatable(orig)))
+        else
+            copy = orig
+        end
+        return copy
+    end
+
+    -- Start with global/common data
+    local baseData = {}
+    if ns.data.Global then
+        baseData = deepCopy(ns.data.Global)
+    end
+
+    -- Use expansion key directly as the data namespace key
+    local versionData = expansionKey and ns.data[expansionKey] or nil
+
+    -- Simply copy all version-specific data
+    if versionData then
+        for k, v in pairs(versionData) do
+            baseData[k] = deepCopy(v)
+        end
+    else
+        self:Warn("Warning: No version-specific data found for " .. tostring(expansionKey))
+    end
+
+    -- Set the final merged data
+    ns.data = baseData
+    -- Notify that version data is selected
+    self:SendMessage("NAG_VERSION_DATA_SELECTED")
+end
+
+-- Expose in private namespace
+ns.DataLoader = DataLoader

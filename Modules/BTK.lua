@@ -1,0 +1,133 @@
+--- ============================ HEADER ============================
+--[[
+    See LICENSE for full license text.
+    Authors: Unknown (original), please update as needed
+    Module Purpose: Handles character emote behaviors and version checking.
+    STATUS: Stable
+    TODO: Add more emote types, improve group logic
+    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+]]
+---@diagnostic disable: undefined-global, undefined-field
+
+--- ============================ LOCALIZE ============================
+local _, ns = ...
+---@class NAG
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+
+-- Lua APIs (using WoW's optimized versions where available)
+local format = format or string.format -- WoW's optimized version if available
+local floor = floor or math.floor
+local ceil = ceil or math.ceil
+local min = min or math.min
+local max = max or math.max
+local abs = abs or math.abs
+
+-- String manipulation (WoW's optimized versions)
+local strmatch = strmatch -- WoW's version
+local strfind = strfind   -- WoW's version
+local strsub = strsub     -- WoW's version
+local strlower = strlower -- WoW's version
+local strupper = strupper -- WoW's version
+local strsplit = strsplit -- WoW's specific version
+local strjoin = strjoin   -- WoW's specific version
+
+-- Table operations (WoW's optimized versions)
+local tinsert = tinsert     -- WoW's version
+local tremove = tremove     -- WoW's version
+local wipe = wipe           -- WoW's specific version
+local tContains = tContains -- WoW's specific version
+
+-- Standard Lua functions (no WoW equivalent)
+local sort = table.sort     -- No WoW equivalent
+local concat = table.concat -- No WoW equivalent
+
+--- ============================ CONTENT ============================
+-- Constants
+local DEFAULT_TIMER = 90
+local GROUP_TIMER_BASE = 900
+local GROUP_TIMER_VARIANCE = 40
+local SPECIAL_MAP_ID = 1423
+local SPECIAL_MAP_TIMER = 180
+
+local EMOTE_CHANCES = {
+    NONE = 10,   -- 10% chance to do nothing
+    SALUTE = 30, -- 30% chance to salute
+    KNEEL = 60   -- 60% chance to kneel
+}
+
+---@class BTK: ModuleBase
+local BTK = NAG:CreateModule("BTK", nil, {
+    moduleType = ns.MODULE_TYPES.CORE,
+    -- No defaults needed
+    -- No options needed
+    -- Event registration using events table
+    events = {
+        CHAT_MSG_ADDON = "OnAddonMessage"
+    },
+    -- Default state (will be properly initialized in ModuleInitialize)
+    defaultState = {
+        lastEmoteTime = 0
+    },
+})
+
+--- ============================ ORGANIZATION ============================
+do -- Ace3 lifecycle methods
+    function BTK:ModuleInitialize()
+        -- Register addon message prefix
+        if not C_ChatInfo.IsAddonMessagePrefixRegistered("NAGgodtier") then
+            C_ChatInfo.RegisterAddonMessagePrefix("NAGgodtier")
+        end
+        -- Initialize with offset to allow immediate emote
+        -- Done here rather than in defaultState to ensure GetTime() is called at the right moment
+        self.state.lastEmoteTime = GetTime() - 300
+    end
+end
+
+do -- Event handlers
+    --- Handles the CHAT_MSG_ADDON event.
+    --- @param self BTK
+    --- @param event string The event name.
+    --- @param prefix string The addon message prefix.
+    --- @param message string The message content.
+    --- @param channel string The channel type.
+    --- @param sender string The sender name.
+    function BTK:OnAddonMessage(event, prefix, message, channel, sender)
+        if prefix == "NAGgodtier" then
+            self:HandleGodTierMessage()
+        end
+    end
+end
+
+--- ============================ HELPERS & PUBLIC API ============================
+function BTK:HandleGodTierMessage()
+    local timer = self:GetEmoteTimer()
+    if not UnitAffectingCombat("player") and (GetTime() - self.state.lastEmoteTime > timer) then
+        self:PerformRandomEmote()
+    end
+end
+
+function BTK:GetEmoteTimer()
+    if IsInGroup() then
+        return GROUP_TIMER_BASE + math.random(-GROUP_TIMER_VARIANCE, GROUP_TIMER_VARIANCE)
+    end
+    if (C_Map.GetBestMapForUnit("player")) == SPECIAL_MAP_ID then
+        return SPECIAL_MAP_TIMER
+    end
+    return DEFAULT_TIMER
+end
+
+function BTK:PerformRandomEmote()
+    if ns.eating or ns.l99 then return end
+    self.state.lastEmoteTime = GetTime()
+    local chance = math.random(1, 100)
+    if chance <= EMOTE_CHANCES.NONE then
+        -- Do nothing
+    elseif chance <= (EMOTE_CHANCES.NONE + EMOTE_CHANCES.SALUTE) then
+        DoEmote("SALUTE", "none")
+    else
+        DoEmote("KNEEL", "none")
+    end
+end
+
+--- ============================ MODULE EXPOSURE ============================
+ns.BTK = BTK
