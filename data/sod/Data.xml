@@ -1,0 +1,15 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+    <!-- SoD Data Files - Spells/Items must be first to not overwrite Spells/Items table-->-->
+    <Script file="schema.lua"/>
+    <Script file="Spells.lua"/>
+    <Script file="ClassSpellsV2.lua"/>
+    <Script file="Racials.lua"/>
+    <Script file="Consumables.lua"/>
+    <Script file="OtherItems.lua"/>
+    <Script file="Trinkets.lua"/>
+    <Script file="TierSets.lua"/>
+
+</Ui>
+
+
