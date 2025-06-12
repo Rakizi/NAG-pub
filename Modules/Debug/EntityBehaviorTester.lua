@@ -82,7 +82,7 @@ local EntityBehaviorTester = NAG:CreateModule("EntityBehaviorTester", defaults, 
     childGroups = "tree",
     libs = { "AceTimer-3.0" },
     -- Hide this module's options unless debug mode is enabled
-    hidden = function() return not NAG:IsDebugEnabled() end,
+    hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
 --- ============================ HELPERS & PUBLIC API ============================

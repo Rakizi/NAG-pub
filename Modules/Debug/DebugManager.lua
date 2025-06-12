@@ -157,7 +157,7 @@ function DebugManager:ShouldLog(severity)
     end
 
     -- For other severities, check if debug is enabled and check debug level
-    if not NAG:IsDebugEnabled() then
+    if not NAG:IsDevModeEnabled() then
         return false
     end
 
@@ -340,7 +340,7 @@ do
             inline = true,
             set = function(info, value) NAG:GetGlobal()[info[#info]] = value end,
             get = function(info) return NAG:GetGlobal()[info[#info]] end,
-            hidden = function() return not NAG:IsDebugEnabled() end,
+            hidden = function() return not NAG:IsDevModeEnabled() end,
             args = {
                 enableFakeExecute = {
                     type = "toggle",

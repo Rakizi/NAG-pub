@@ -60,7 +60,7 @@ local ProfilingUtility = NAG:CreateModule("ProfilingUtility", defaults, {
     optionsOrder = 200,
     childGroups = "tree",
     -- Hide this module's options unless debug mode is enabled
-    hidden = function() return not NAG:IsDebugEnabled() end,
+    hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
 -- Initialize module state

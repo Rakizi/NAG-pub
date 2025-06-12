@@ -77,7 +77,7 @@ local EventDebugger = NAG:CreateModule("EventDebugger", defaults, {
     optionsOrder = 30,
     childGroups = "tree",
     -- Hide this module's options unless debug mode is enabled
-    hidden = function() return not NAG:IsDebugEnabled() end,
+    hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
 -- ============================ ACE3 LIFECYCLE ============================

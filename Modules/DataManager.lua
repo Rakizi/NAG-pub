@@ -1534,6 +1534,9 @@ do --========================================================================== 
     function DataManager:ModuleEnable()
         self:ProcessPetAbilities()
         self:ImportConsumableEnumToId()
+        if NAG:IsDevModeEnabled() then
+            self:LogData()
+        end
     end
 end
 do -- Event Handlers
@@ -1550,7 +1553,7 @@ do -- Event Handlers
             self:SendMessage("NAG_DATA_LOADED")
 
             -- Schedule delayed summary print
-            if NAG:IsDebugEnabled() then self:ScheduleTimer(function() self:PrintSummary() end, 3) end
+            if NAG:IsDevModeEnabled() then self:ScheduleTimer(function() self:PrintSummary() end, 3) end
         else
             DebugManager:Warn("No data available after version selection")
         end

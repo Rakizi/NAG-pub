@@ -324,10 +324,10 @@ do -- Core ACE3 functions --
                         AceConfigDialog:Open("NAG")
                     end
                 elseif button == "RightButton" then
-                    if IsShiftKeyDown() and self:IsDebugEnabled() then
+                    if IsShiftKeyDown() and self:IsDevModeEnabled() then
                         -- Show debug menu when shift-right clicking in debug mode
                         local menu = {
-                            { text = "Next Action Guide Debug", isTitle = true },
+                            { text = "Next Action Guide Dev", isTitle = true },
                             {
                                 text = "Encounter Stopwatch",
                                 func = function() self:GetModule("EncounterStopwatch"):Toggle() end
@@ -355,8 +355,8 @@ do -- Core ACE3 functions --
                 tooltip:AddLine("Next Action Guide")
                 tooltip:AddLine("|cFFFFFFFFLeft Click|r to open settings")
                 tooltip:AddLine("|cFFFFFFFFRight Click|r to toggle edit mode")
-                if self:IsDebugEnabled() then
-                    tooltip:AddLine("|cFFFFFFFFShift-Right Click|r to open debug menu")
+                if self:IsDevModeEnabled() then
+                    tooltip:AddLine("|cFFFFFFFFShift-Right Click|r to open dev menu")
                 end
             end,
         })
@@ -747,7 +747,7 @@ do -- Rando helper functions
     --- Debug Functions
 
     function NAG:ToggleScriptErrors()
-        if not self:IsDebugEnabled() then return end
+        if not self:IsDevModeEnabled() then return end
         if GetCVar("scriptErrors") == "1" then
             SetCVar("scriptErrors", "0")
             self:Print("Script errors disabled")
@@ -778,10 +778,10 @@ do -- Rando helper functions
         return self:GetChar().enableOutOfCombat
     end
 
-    --- Checks if debug mode is enabled.
+    --- Checks if dev mode is enabled.
     --- @param self NAG The addon object
     --- @return boolean True if debug mode is enabled, false otherwise
-    function NAG:IsDebugEnabled()
+    function NAG:IsDevModeEnabled()
         -- During initial loading, before DB is initialized, use the default value
         if not self.db then
             return false

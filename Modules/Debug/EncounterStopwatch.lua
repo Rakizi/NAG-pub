@@ -55,7 +55,7 @@ local EncounterStopwatch = NAG:CreateModule("EncounterStopwatch", {
     childGroups = "tree",
     -- Show module if debug mode is enabled OR we're in a trial area with a training dummy
     hidden = function() 
-        return not (NAG:IsDebugEnabled() or (ns.IsTrainingDummy() and UnitExists("target") and UnitCreatureType("target") == "Mechanical"))
+        return not (NAG:IsDevModeEnabled() or (ns.IsTrainingDummy() and UnitExists("target") and UnitCreatureType("target") == "Mechanical"))
     end
 })
 

@@ -127,7 +127,7 @@ do
         self.maxDepth = 250
         self.skipPaths = {}
         -- Set default debug state
-        self.debug = NAG:IsDebugEnabled()
+        self.debug = NAG:IsDevModeEnabled()
     end
 end
 

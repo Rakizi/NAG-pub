@@ -605,7 +605,7 @@ do --== Display Options ==--
                                         min = 1,
                                         max = 100,
                                         step = 1,
-                                        hidden = function() return NAG:IsDebugEnabled() end,
+                                        hidden = function() return NAG:IsDevModeEnabled() end,
                                     },
                                 },
                             },
