@@ -468,37 +468,13 @@ do --== Rotation Functions ==--
                 name = "expression",
                 pattern = false,
                 validate = function(arg)
-                    -- Check for NAG function calls first
-                    if arg:match("NAG:") then
-                        -- Handle parenthesized expressions with NAG calls
-                        if arg:match("^%(.*%)$") then
-                            -- Strip outer parentheses for validation
-                            local inner = arg:match("^%((.*)%)$")
-                            -- Split on basic operators
-                            for part in inner:gmatch("[^%+%-%*%/]+") do
-                                local trimmed = part:match("^%s*(.-)%s*$")
-                                if trimmed:match("^NAG:") then
-                                    local valid, err = validateNAGFunctionCall(trimmed)
-                                    if not valid then
-                                        return false, err
-                                    end
-                                elseif not trimmed:match("^%d+%.?%d*$") then
-                                    return false, "Invalid numeric value in expression"
-                                end
-                            end
-                            return true, nil
-                        end
-                        return validateNAGFunctionCall(arg)
-                    end
-                    -- Allow basic mathematical expressions
-                    if arg:match(patterns.expression) then
+                    -- Try to load the expression as a Lua chunk
+                    local chunk, err = loadstring("return " .. arg)
+                    if chunk then
                         return true, nil
+                    else
+                        return false, "Invalid expression: " .. (err or "unknown error")
                     end
-                    -- Allow math library functions
-                    if arg:match("math%.") then
-                        return true, nil
-                    end
-                    return false, "Invalid expression format"
                 end
             },
             threshold = {
@@ -533,11 +509,19 @@ do --== Rotation Functions ==--
                     return num ~= nil and num >= 0, "Invalid range value (must be >= 0)"
                 end
             },
-            func = {
-                name = "func",
-                pattern = "^function.*end$",
+            callable = {
+                name = "callable",
+                pattern = false,
                 validate = function(arg)
-                    return type(arg) == "string" and arg:match("^function.*end$") ~= nil, "Invalid function format (must be inline function definition)"
+                    -- Accept inline function
+                    if type(arg) == "string" and arg:match("^function.*end$") then
+                        return true, nil
+                    end
+                    -- Accept NAG function call
+                    if type(arg) == "string" and arg:match("^NAG:[%w_]+%b()$") then
+                        return true, nil
+                    end
+                    return false, "Invalid callable: must be inline function or NAG function call"
                 end
             },
             sequenceName = {
@@ -569,37 +553,13 @@ do --== Rotation Functions ==--
             name = "expression",
             pattern = false,
             validate = function(arg)
-                -- Check for NAG function calls first
-                if arg:match("NAG:") then
-                    -- Handle parenthesized expressions with NAG calls
-                    if arg:match("^%(.*%)$") then
-                        -- Strip outer parentheses for validation
-                        local inner = arg:match("^%((.*)%)$")
-                        -- Split on basic operators
-                        for part in inner:gmatch("[^%+%-%*%/]+") do
-                            local trimmed = part:match("^%s*(.-)%s*$")
-                            if trimmed:match("^NAG:") then
-                                local valid, err = validateNAGFunctionCall(trimmed)
-                                if not valid then
-                                    return false, err
-                                end
-                            elseif not trimmed:match("^%d+%.?%d*$") then
-                                return false, "Invalid numeric value in expression"
-                            end
-                        end
-                        return true, nil
-                    end
-                    return validateNAGFunctionCall(arg)
-                end
-                -- Allow basic mathematical expressions
-                if arg:match(patterns.expression) then
+                -- Try to load the expression as a Lua chunk
+                local chunk, err = loadstring("return " .. arg)
+                if chunk then
                     return true, nil
+                else
+                    return false, "Invalid expression: " .. (err or "unknown error")
                 end
-                -- Allow math library functions
-                if arg:match("math%.") then
-                    return true, nil
-                end
-                return false, "Invalid expression format"
             end
         }
 
@@ -666,8 +626,8 @@ do --== Rotation Functions ==--
             TimeRemaining = { required = {} },
             TimeRemainingPercent = { required = {} },
             Wait = { required = { "expression" } },
-            WaitUntil = { required = { "function" } },
-            Schedule = { required = { "time", "func" } },
+            WaitUntil = { required = { "expression" } },
+            Schedule = { required = { "time", "callable" } },
 
             -- Resource functions
             CurrentHealth = { required = {} },
@@ -720,10 +680,12 @@ do --== Rotation Functions ==--
             PetSpellIsReady = { required = { "id" } },
             PetCast = { required = { "id" } },
 
+            EnergyThreshold = { required = { "expression" } },
             -- Class-specific functions
             TotemRemainingTime = { required = { {"typeValidator", "TotemType"} } },
             CatExcessEnergy = { required = {} },
             CatNewSavageRoarDuration = { required = {} },
+
             WarlockShouldRecastDrainSoul = { required = {} },
             WarlockShouldRefreshCorruption = { optional = { "targetUnit" } },
             WarlockPetIsActive = { required = {} },
