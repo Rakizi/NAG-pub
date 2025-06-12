@@ -355,6 +355,7 @@ do -- ================================= Funnel Generic Functions ===============
     end
 
     NAG.AuraIsKnown = NAG.IsKnown
+    NAG.SpellIsKnown = NAG.IsKnown
 
     --- Checks if a spell, trinket, tinker, or item is ready.
     --- @usage (NAG:IsReady(73643))

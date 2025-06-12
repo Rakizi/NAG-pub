@@ -1045,3 +1045,32 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
         self.lastSwingTimestampOH = 0
     end
 end
+
+--- Predicts the player's energy after a given duration (in seconds).
+--- @function NAG:CatEnergyAfterDuration
+--- @param self NAG
+--- @param duration number The duration in seconds to predict energy for
+--- @usage NAG:CatEnergyAfterDuration(3.5) >= 60
+--- @return number The predicted energy after the given duration (capped at max)
+function NAG:CatEnergyAfterDuration(duration)
+    if not duration or type(duration) ~= "number" or duration <= 0 then
+        return self:CurrentEnergy()
+    end
+    local currentEnergy = self:CurrentEnergy()
+    local maxEnergy = self.MaxEnergy and self:MaxEnergy() or 100
+    local tickRate = 2.0 -- Energy ticks every 2 seconds
+    local energyPerTick = 10 -- 10 energy per tick
+    local timeToNextTick = self.TimeToEnergyTick and self:TimeToEnergyTick() or tickRate
+
+    -- How many full ticks fit in the duration (after the next tick)
+    local ticks = 0
+    if timeToNextTick < duration then
+        ticks = 1 + math.floor((duration - timeToNextTick) / tickRate)
+    end
+    local predictedEnergy = currentEnergy + (ticks * energyPerTick)
+    return math.min(predictedEnergy, maxEnergy)
+end
+
+function NAG:EnergyThreshold(threshold)
+    return self:CurrentEnergy() <= threshold
+end
