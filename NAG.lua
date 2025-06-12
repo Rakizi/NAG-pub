@@ -541,9 +541,12 @@ do -- Core ACE3 functions --
             return
         end
 
-        -- If user has explicitly set a default potion, do not override
         if char.defaultBattlePotion then
             self:Debug("UpdateDefaultBattlePotion: Character already has defaultBattlePotion set: %s", tostring(char.defaultBattlePotion))
+            local DataManager = NAG:GetModule("DataManager")
+            if DataManager and not DataManager:GetItem(char.defaultBattlePotion) then
+                DataManager:AddItem(char.defaultBattlePotion, {"BattlePotion", ns.Version:GetVersionInfo().expansion}, {flags = {battlepotion = true}})
+            end
             return
         end
 
@@ -587,6 +590,11 @@ do -- Core ACE3 functions --
         if potion then
             char.defaultBattlePotion = potion
             self:Debug("Updated default battle potion to " .. potion)
+
+            local DataManager = NAG:GetModule("DataManager")
+            if DataManager and not DataManager:GetItem(potion) then
+                DataManager:AddItem(potion, {"BattlePotion", ns.Version:GetVersionInfo().expansion}, {flags = {battlepotion = true}})
+            end
         end
     end
 end

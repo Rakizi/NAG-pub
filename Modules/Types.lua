@@ -374,7 +374,7 @@ Types.RuneSlot = TypeRegistry:Register("RuneSlot", {
     description = "Death Knight rune slots"
 })
 
---[[
+
 Types.AttackType = TypeRegistry:Register("AttackType", {
     Unknown = 0,
     Any = 1,
@@ -386,9 +386,9 @@ Types.AttackType = TypeRegistry:Register("AttackType", {
     category = TYPE_CATEGORIES.COMBAT,
     description = "Types of attacks"
 })
-]]
+
 -- I do not see these in cata, but are in sod so may need to add if ppl try to use?
---[[
+
 Types.SwingType = TypeRegistry:Register("SwingType", {
     MainHand = 3,
     OffHand = 4,
@@ -397,9 +397,9 @@ Types.SwingType = TypeRegistry:Register("SwingType", {
     category = TYPE_CATEGORIES.COMBAT,
     description = "Types of weapon swings"
 })
-]]
 
---[[
+
+
 Types.RuneType = TypeRegistry:Register("RuneType", {
     RuneUnknown = 0,
     RuneBlood = 1,
@@ -410,9 +410,9 @@ Types.RuneType = TypeRegistry:Register("RuneType", {
     category = TYPE_CATEGORIES.CLASS,
     description = "Death Knight rune types"
 })
-]]
 
---[[
+
+
 Types.EclipsePhase = TypeRegistry:Register("EclipsePhase", {
     UnknownPhase = 0,
     NeutralPhase = 1,
@@ -422,9 +422,9 @@ Types.EclipsePhase = TypeRegistry:Register("EclipsePhase", {
     category = TYPE_CATEGORIES.CLASS,
     description = "Druid Eclipse phases"
 })
-]]
 
---[[
+
+
 Types.SwapSet = TypeRegistry:Register("SwapSet", {
     Unknown = 0,
     Main = 1,
@@ -433,7 +433,7 @@ Types.SwapSet = TypeRegistry:Register("SwapSet", {
     category = TYPE_CATEGORIES.CLASS,
     description = "SwapSet"
 })
-]]
+
 
 -- ============================ ACE3 LIFECYCLE ============================
 do

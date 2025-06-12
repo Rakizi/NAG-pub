@@ -2694,3 +2694,16 @@ NAG.SpellTimeToReady = NAG.TimeToReadySpell
 NAG.AuraIsActiveWithReactionTime = NAG.IsActive
 NAG.AuraIsActive = NAG.IsActive
 NAG.UnitIsMoving = NAG.IsPlayerMoving
+
+--- Checks if the player is currently tanking (has aggro) on a specific unit (default: 'target').
+--- @function NAG:IsTanking
+--- @param self NAG
+--- @param unit string? The unit to check threat against (default: 'target')
+--- @return boolean True if the player is tanking, false otherwise.
+function NAG:IsPrimaryTarget(unit)
+    unit = unit or "target"
+    if not UnitExists(unit) then return false end
+    local threat = UnitThreatSituation("player", unit)
+    return threat ~= nil and threat >= 2
+end
+NAG.HasAggro = NAG.IsPrimaryTarget
