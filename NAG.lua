@@ -47,7 +47,7 @@ local strtrim = string.trim   -- Added for strtrim function
 local GetAddOnMetadata = ns.GetAddOnMetadataUnified
 
 -- Table operations (WoW's optimized versions)
-local EXPERIMENTAL_FEATURES = false
+local EXPERIMENTAL_FEATURES = true
 ns.EXPERIMENTAL_FEATURES = EXPERIMENTAL_FEATURES or false
 --- ======= LOCALIZE =======
 -- Module category constants
