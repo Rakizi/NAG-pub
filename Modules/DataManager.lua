@@ -1675,6 +1675,31 @@ do --========================================================================== 
 
     --- @param self DataManager
     function DataManager:ImportConsumableEnumToId()
+        local CATEGORY_KEYWORDS = {
+            tinker = "tinker",
+            explosive = "explosive",
+            conjured = "conjured",
+            food = "food",
+            potion = "potion",
+            elixir = "elixir",
+            flask = "flask",
+            hands = "hands",
+            -- Add more as needed
+        }
+        local function getCategoryPathFromName(name)
+            local path = {}
+            if not name then return path end
+            local nameLower = name:lower()
+            for keyword, flag in pairs(CATEGORY_KEYWORDS) do
+                if nameLower:find(keyword) then
+                    table.insert(path, flag)
+                end
+            end
+            if #path == 0 then
+                table.insert(path, "consumable")
+            end
+            return path
+        end
         local APLSchema = NAG:GetModule("APLSchema")
         if not APLSchema then
             DebugManager:Error("APLSchema module not loaded")
@@ -1685,24 +1710,25 @@ do --========================================================================== 
             local data = entry.Simple or entry
             if type(data) == "table" and data.id and data.type then
                 local idType = type(data.id)
+                local schemaName = data.name or enumKey -- Prefer schema name if present
                 if idType == "string" or idType == "number" then
                     -- Single id
+                    local path = getCategoryPathFromName(schemaName)
+                    DebugManager:DebugLog("ImportConsumableEnumToId", format("Importing: enumKey=%s, schemaName=%s, id=%s, path=%s", tostring(enumKey), tostring(schemaName), tostring(data.id), table.concat(path, ".")))
                     if data.type == "item" then
-                        self:Info(format("Importing consumable enum to id: %s", tostring(data.id)))
-                        self:AddItem(data.id, {"ConsumableEnum", enumKey}, { flags = { consumable = true } })
+                        self:AddItem(data.id, path, { flags = { consumable = true } })
                     elseif data.type == "spell" then
-                        self:Info(format("Importing consumable enum to id: %s", tostring(data.id)))
-                        self:AddSpell(data.id, {"ConsumableEnum", enumKey}, { flags = { consumable = true } })
+                        self:AddSpell(data.id, path, { flags = { consumable = true } })
                     end
                 elseif idType == "table" then
                     -- Multiple ids
                     for _, singleId in ipairs(data.id) do
+                        local path = getCategoryPathFromName(schemaName)
+                        DebugManager:DebugLog("ImportConsumableEnumToId", format("Importing: enumKey=%s, schemaName=%s, id=%s, path=%s", tostring(enumKey), tostring(schemaName), tostring(singleId), table.concat(path, ".")))
                         if data.type == "item" then
-                            self:Info(format("Importing consumable enum to id: %s", tostring(singleId)))
-                            self:AddItem(singleId, {"ConsumableEnum", enumKey}, { flags = { consumable = true } })
+                            self:AddItem(singleId, path, { flags = { consumable = true } })
                         elseif data.type == "spell" then
-                            self:Info(format("Importing consumable enum to id: %s", tostring(singleId)))
-                            self:AddSpell(singleId, {"ConsumableEnum", enumKey}, { flags = { consumable = true } })
+                            self:AddSpell(singleId, path, { flags = { consumable = true } })
                         end
                     end
                 else
