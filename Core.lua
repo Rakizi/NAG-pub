@@ -213,23 +213,22 @@ ns.COLORS = {
 --- @param colorName string The name of the color to get
 --- @param format? string Optional format: "table" (default), "rgba", "hex", "rgbaTable"
 --- @return table|number[]|string|{r:number,g:number,b:number,a:number} The color in the requested format
-function ns.GetColor(colorName, format)
+function ns.GetColor(colorName, formatType) -- Changed variable name from 'format' to 'formatType'
     local color = ns.COLORS[colorName] or ns.COLORS.WHITE
-    format = format or "table"
+    formatType = formatType or "table"
 
-    if format == "table" then
+    if formatType == "table" then
         return color
-    elseif format == "rgba" then
+    elseif formatType == "rgba" then
         return color.r, color.g, color.b, color.a
-    elseif format == "hex" then
-        return format("|cff%02x%02x%02x",
+    elseif formatType == "hex" then
+        return string.format("|cff%02x%02x%02x", -- Use string.format directly
             math.floor(color.r * 255),
             math.floor(color.g * 255),
             math.floor(color.b * 255))
-    elseif format == "rgbaTable" then
+    elseif formatType == "rgbaTable" then
         return { color.r, color.g, color.b, color.a }
     end
 
     return color
 end
-

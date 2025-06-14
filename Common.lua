@@ -149,13 +149,13 @@ do --== PRE-PULL/ROTATION/THROTTLER FUNCTIONS ==--
 end
 
 function NAG:HasGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     return StateManager:HasGlyph(glyphId)
 end
 
 function NAG:HasPrimeGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     -- Check prime glyph slots (type 0)
     for i = 1, GetNumGlyphSockets() do
@@ -169,7 +169,7 @@ function NAG:HasPrimeGlyph(glyphId)
 end
 
 function NAG:HasMajorGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     -- Check major glyph slots (type 1)
     for i = 1, GetNumGlyphSockets() do
@@ -183,7 +183,7 @@ function NAG:HasMajorGlyph(glyphId)
 end
 
 function NAG:HasMinorGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     -- Check minor glyph slots (type 2)
     for i = 1, GetNumGlyphSockets() do

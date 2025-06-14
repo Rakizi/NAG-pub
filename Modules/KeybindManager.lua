@@ -125,19 +125,55 @@ end
 --- @return string|nil The formatted keybind string, or nil if no key provided
 function KeybindManager:FormatKeybind(key)
     if not key then return nil end
-    return key:gsub("ALT%-", "A")
-        :gsub("CTRL%-", "C")
-        :gsub("SHIFT%-", "S")
-        :gsub("NUMPAD", "N")
-        :gsub("BUTTON", "M")
-        :gsub("MOUSEWHEELUP", "WU")
-        :gsub("MOUSEWHEELDOWN", "WD")
-        :gsub("MOUSEWHEELLEFT", "WL")
-        :gsub("MOUSEWHEELRIGHT", "WR")
-        :gsub("DIVIDE", "/")
-        :gsub("MULTIPLY", "*")
-        :gsub("MINUS", "-")
-        :gsub("ADD", "+")
+
+    -- Define the replacements
+    local replacements = {
+        ["MOUSEWHEELUP"] = "WU",
+        ["MOUSEWHEELDOWN"] = "WD",
+        ["MOUSEWHEELLEFT"] = "WL",
+        ["MOUSEWHEELRIGHT"] = "WR",
+        ["NUMPADADD"] = "N+",
+        ["NUMPADDIVIDE"] = "N/",
+        ["NUMPADMULTIPLY"] = "N*",
+        ["NUMPADMINUS"] = "N-",
+        ["BUTTON"] = "M",
+        ["NUMPAD"] = "N",
+        ["ALT"] = "A",
+        ["CTRL"] = "C",
+        ["SHIFT"] = "S",
+    }
+
+    -- Create an ordered list of keys to ensure longest match is found first
+    local orderedKeys = {}
+    for k in pairs(replacements) do
+        table.insert(orderedKeys, k)
+    end
+    table.sort(orderedKeys, function(a, b) return #a > #b end)
+
+    local parts = {strsplit("-", key)}
+    local modifierString = ""
+    local mainKey = ""
+
+    -- Process modifiers first
+    for i = 1, #parts - 1 do
+        local part = parts[i]
+        modifierString = modifierString .. (replacements[part] or part)
+    end
+    
+    -- Process the main key (the last part)
+    mainKey = parts[#parts]
+    for _, k in ipairs(orderedKeys) do
+        if mainKey:find("^"..k) then
+            mainKey = mainKey:gsub(k, replacements[k], 1)
+            break
+        end
+    end
+
+    if modifierString ~= "" then
+        return modifierString .. "-" .. mainKey
+    else
+        return mainKey
+    end
 end
 
 -- Button configuration by addon

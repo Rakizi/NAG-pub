@@ -368,8 +368,14 @@ function RotationManager:CreateFrame()
 end
 
 function RotationManager:SaveFramePosition(frame)
+    -- ** THE FIX: Add checks to ensure db and char tables exist **
+    if not self.db or not self.db.char then
+        self:Debug("Cannot save frame position, database not initialized.")
+        return
+    end
+
     local charDB = self:GetChar()
-    local point, relativeTo, relativePoint, x, y = frame.frame:GetPoint()
+    local point, _, relativePoint, x, y = frame.frame:GetPoint()
     charDB.framePosition.point = point
     charDB.framePosition.relativePoint = relativePoint
     charDB.framePosition.x = x

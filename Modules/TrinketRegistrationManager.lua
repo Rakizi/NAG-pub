@@ -2024,28 +2024,38 @@ function TrinketRegistrationManager:DebugRegisteredTrinkets()
 
     self:Debug("=== User Registered Trinkets ===")
     for itemId, data in pairs(customTrinkets) do
-        local itemName = GetItemInfo(itemId)
-        local buffName = GetSpellInfo(data.buffId)
-        self:Debug(format(
-            "Trinket: %s (ID: %d)\n" ..
-            "  Buff: %s (ID: %d)\n" ..
-            "  Duration: %.1f seconds",
-            itemName or "Unknown", itemId,
-            buffName or "Unknown", data.buffId,
-            data.duration
-        ))
-        
-        if data.stats and #data.stats > 0 then
-            self:Debug("  Stats:")
-            for _, statId in ipairs(data.stats) do
-                for _, statType in ipairs(CONSTANTS.STAT_TYPES) do
-                    if statType.id == statId then
-                        self:Debug(format("    - %s (ID: %d)", statType.name, statId))
+        if not itemId or not data then
+            self:Debug("[WARN] Skipping entry with missing itemId or data: %s", tostring(itemId))
+        else
+            local itemName = GetItemInfo(itemId)
+            local buffName = data.buffId and GetSpellInfo(data.buffId) or nil
+            local safeItemId = tonumber(itemId) or 0
+            local safeBuffId = tonumber(data.buffId) or 0
+            local safeDuration = tonumber(data.duration) or 0
+            if not data.buffId or not data.duration then
+                self:Debug("[WARN] Trinket %s (ID: %s) missing buffId or duration, skipping.", itemName or "Unknown", tostring(itemId))
+            else
+                self:Debug(format(
+                    "Trinket: %s (ID: %d)\n" ..
+                    "  Buff: %s (ID: %d)\n" ..
+                    "  Duration: %.1f seconds",
+                    itemName or "Unknown", safeItemId,
+                    buffName or "Unknown", safeBuffId,
+                    safeDuration
+                ))
+                if data.stats and #data.stats > 0 then
+                    self:Debug("  Stats:")
+                    for _, statId in ipairs(data.stats) do
+                        for _, statType in ipairs(CONSTANTS.STAT_TYPES) do
+                            if statType.id == statId then
+                                self:Debug(format("    - %s (ID: %d)", statType.name, statId))
+                            end
+                        end
                     end
+                else
+                    self:Debug("  Stats: None")
                 end
             end
-        else
-            self:Debug("  Stats: None")
         end
     end
     self:Debug("==============================")
