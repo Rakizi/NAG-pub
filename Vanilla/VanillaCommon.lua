@@ -6,10 +6,10 @@
     Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
     Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
     Date: 06/01/2024
-]]
+]]  
 
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local Version = ns.Version
 if not Version:IsClassicEra() then return end

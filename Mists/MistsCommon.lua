@@ -9,10 +9,10 @@
 ]]
 
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@class StateManager : ModuleBase
+---@type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
 
 local GetStablePetInfo = ns.GetStablePetInfoUnified

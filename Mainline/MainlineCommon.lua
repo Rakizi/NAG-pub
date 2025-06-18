@@ -9,7 +9,7 @@
 ]]
 
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Lua APIs (using WoW's optimized versions where available)

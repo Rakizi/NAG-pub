@@ -9,7 +9,7 @@
 ]]
 
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local Version = ns.Version
 if not Version:IsSoD() then return end
