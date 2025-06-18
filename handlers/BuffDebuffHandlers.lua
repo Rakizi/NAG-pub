@@ -1,49 +1,33 @@
---BuffDebuffHandlers.lua
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-      liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-      made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your
-      use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS:good
-
-]]
+--- Handles buff and debuff tracking functionality for the NAG addon.
+---
+--- This module provides functions for checking and managing buffs and debuffs,
+--- including raid buffs, aura stacks, and buff/debuff durations.
+--- @module "BuffDebuffHandlers"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--
 -- luacheck: ignore GetSpellInfo
---- ======= LOCALIZE =======
---Addon
+-- ============================ LOCALIZE ============================
+-- Addon
 local _, ns = ...
 
---- @class NAG
+--- @type NAG|AceAddon 
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class Types : ModuleBase
+--- @type Types|ModuleBase|AceModule
 local Types = NAG:GetModule("Types")
----@class StateManager : ModuleBase
+--- @type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
----@class SpellTrackingManager : ModuleBase
+--- @type SpellTrackingManager|ModuleBase|AceModule
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
----@class OverlayManager : ModuleBase
+--- @type OverlayManager|ModuleBase|AceModule
 local OverlayManager = NAG:GetModule("OverlayManager")
---Libs
+-- Libs
 
---WoW API
+-- WoW API
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
 local UnitAura = ns.UnitAuraUnified
@@ -51,7 +35,7 @@ local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
 local GetItemInfo = ns.GetItemInfoUnified
 
 -- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
@@ -59,39 +43,40 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 local setmetatable = setmetatable
 local next = next
 
---File
+-- File
 
 -- Add tinkers/trinkets/items to generic functions
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
---local GetItemSpell = C_Item.GetItemSpell
-
---- ======= GLOBALIZE =======
+-- local GetItemSpell = C_Item.GetItemSpell
 
 --- ============================ CONTENT ============================
 
 do -- == ============================== Raid Buff/Debuffs Functions ==================================================
-    ---@TODO: Add more mutually exclusive buffs
+    --- Table of mutually exclusive buff groups.
+    --- @class mutuallyExclusiveBuffs
+    --- @field BLESSINGS table Buffs that are mutually exclusive in the Blessings group
+    --- @field SHOUTS table Buffs that are mutually exclusive in the Shouts group
     local mutuallyExclusiveBuffs = {
         BLESSINGS = {
             [19740] = true, -- Blessing of Might
@@ -103,7 +88,9 @@ do -- == ============================== Raid Buff/Debuffs Functions ============
         },
     }
 
-    -- Helper function to check if a buff is already active from its exclusive group
+    --- Helper function to check if a buff is already active from its exclusive group.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if another exclusive buff is active, false otherwise
     local function hasActiveExclusiveBuff(self, spellId)
         -- Find which group this spell belongs to
         for groupName, spells in pairs(mutuallyExclusiveBuffs) do
@@ -121,8 +108,6 @@ do -- == ============================== Raid Buff/Debuffs Functions ============
     end
 
     --- Checks if a raid debuff type is active on the target.
-    --- @function NAG:RaidDebuffIsActive
-    --- @param self NAG
     --- @param debuffType number The type of raid debuff to check from Types:GetType("DebuffType")
     --- @return boolean True if the debuff type is active, false otherwise
     --- @usage NAG:RaidDebuffIsActive(Types:GetType("DebuffType").PHYSICAL_DAMAGE)
@@ -152,8 +137,6 @@ do -- == ============================== Raid Buff/Debuffs Functions ============
     end
 
     --- Checks if a raid buff type is active on the player.
-    --- @function NAG:RaidBuffIsActive
-    --- @param self NAG
     --- @param buffType number The type of raid buff to check from Types:GetType("BuffType")
     --- @return boolean True if the buff type is active, false otherwise
     --- @usage NAG:RaidBuffIsActive(Types:GetType("BuffType").STAMINA)
@@ -181,10 +164,10 @@ do -- == ============================== Raid Buff/Debuffs Functions ============
         return false
     end
 
-    --- Checks and recommends raid buffs based on missing buffs in group/raid
-    --- @param self NAG The NAG addon object
-    --- @param percentNeed number The percentage threshold of units needing buffs (0-100). Defaults to 40 if not specified.
+    --- Checks and recommends raid buffs based on missing buffs in group/raid.
+    --- @param percentNeed? number The percentage threshold of units needing buffs (0-100). Defaults to 40 if not specified.
     --- @return nil
+    --- @usage NAG:CheckRaidBuffs(50)
     function NAG:CheckRaidBuffs(percentNeed)
         -- Validate inputs and initialize
         percentNeed = percentNeed or 40
@@ -260,8 +243,8 @@ do -- == ============================== Raid Buff/Debuffs Functions ============
     end
 
     --- Checks if any abilities of the same type are on the target and recommends abilities if none are found.
-    --- @param self NAG The NAG addon object
     --- @return nil
+    --- @usage NAG:CheckRaidDebuffs()
     function NAG:CheckRaidDebuffs()
         -- Validate inputs and initialize
         if not UnitExists("target") then return end
@@ -304,12 +287,10 @@ end
 
 do -- ================================= Aura APLValue Functions ================================= --
     --- Returns the number of stacks of a specific aura on the player.
-    --- @function NAG:AuraNumStacks
-    --- @param self NAG
     --- @param spellId number The spell ID of the aura.
     --- @param sourceUnit? string The unit to check (defaults to "player")
-    --- @usage NAG:AuraNumStacks(73643) >= x
     --- @return number The number of stacks of the aura.
+    --- @usage NAG:AuraNumStacks(73643) >= x
     function NAG:AuraNumStacks(spellId, sourceUnit)
         if not spellId then return 0 end
         sourceUnit = sourceUnit or "player"
@@ -351,12 +332,10 @@ do -- ================================= Aura APLValue Functions ================
     end
 
     --- Gets the remaining time of a specific aura on the player or specified unit.
-    --- @function NAG:AuraRemainingTime
-    --- @param self NAG
     --- @param spellId number The ID of the spell to check.
     --- @param sourceUnit? string The unit to check (defaults to "player")
-    --- @usage NAG:AuraRemainingTime(73643) >= x
     --- @return number The remaining time of the aura.
+    --- @usage NAG:AuraRemainingTime(73643) >= x
     function NAG:AuraRemainingTime(spellId, sourceUnit)
         if not spellId then
             self:Error("AuraRemainingTime called with nil spellId")
@@ -391,11 +370,9 @@ do -- ================================= Aura APLValue Functions ================
     end
 
     --- Gets the remaining time of a specific aura on the player's pet.
-    --- @function NAG:AuraRemainingTimePet
-    --- @param self NAG
     --- @param spellId number The ID of the spell to check.
-    --- @usage NAG:AuraRemainingTimePet(73643) >= x
     --- @return number The remaining time of the aura.
+    --- @usage NAG:AuraRemainingTimePet(73643) >= x
     function NAG:AuraRemainingTimePet(spellId)
         if not spellId then return 0 end
         if not UnitExists("pet") then return 0 end
@@ -413,11 +390,9 @@ do -- ================================= Aura APLValue Functions ================
     NAG.PetAuraRemainingTime = NAG.AuraRemainingTimePet
 
     --- Returns the number of stacks of a specific aura on the pet.
-    --- @function NAG:AuraNumStacksPet
-    --- @param self NAG
     --- @param spellId number The spell ID of the aura.
-    --- @usage NAG:AuraNumStacksPet(73643) >= x
     --- @return number The number of stacks of the aura.
+    --- @usage NAG:AuraNumStacksPet(73643) >= x
     function NAG:AuraNumStacksPet(spellId)
         if not spellId then return 0 end
         if not UnitExists("pet") then return 0 end
@@ -431,8 +406,6 @@ do -- ================================= Aura APLValue Functions ================
     end
 
     --- Determines if an aura should be refreshed based on remaining time and overlap.
-    --- @function NAG:AuraShouldRefresh
-    --- @param self NAG
     --- @param spellId number The spell ID of the aura.
     --- @param maxOverlap number The overlap time.
     --- @param sourceUnit? string The unit to check (defaults to "player")
@@ -448,8 +421,6 @@ do -- ================================= Aura APLValue Functions ================
     end
 
     --- Returns the remaining internal cooldown (ICD) for a given spell.
-    --- @function NAG:AuraRemainingICD
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param sourceUnit? string The unit to check (defaults to "player")
     --- @return number The remaining ICD time or 0 if the spell is not found.
@@ -476,8 +447,6 @@ do -- ================================= Aura APLValue Functions ================
     NAG.AuraInternalCooldown = NAG.AuraRemainingICD
 
     --- Checks if the internal cooldown (ICD) for a given spell is ready.
-    --- @function NAG:AuraICDIsReady
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param sourceUnit? string The unit to check (defaults to "player")
     --- @return boolean True if the ICD is ready, false otherwise.
@@ -502,8 +471,6 @@ do                              -- ================================= FindAura Ut
     local auraCache = setmetatable({}, { __mode = "v" })
 
     --- Finds an aura on a unit by spell ID or spell name.
-    --- @function NAG:FindAura
-    --- @param self NAG
     --- @param unit string The unit to check.
     --- @param spellId number The spell ID of the aura.
     --- @param isGlobal? boolean Whether to check global auras.
@@ -517,6 +484,7 @@ do                              -- ================================= FindAura Ut
     --- @return number|nil isStealable 1 if stealable, 0 if not
     --- @return number|nil shouldConsolidate 1 if should consolidate, 0 if not
     --- @return number|nil auraSpellId The spell ID of the aura
+    --- @usage local name, icon, count = NAG:FindAura("player", 12345)
     function NAG:FindAura(unit, spellId, isGlobal)
         if not unit or not spellId then
             self:Debug("FindAura: Invalid input - unit: " .. tostring(unit) .. ", spellId: " .. tostring(spellId))
@@ -697,11 +665,10 @@ do                              -- ================================= FindAura Ut
     end)
     
     --- Lists all auras on a unit with their spell IDs and other information.
-    --- @function NAG:ListAuras
-    --- @param self NAG
     --- @param unit string The unit to check.
     --- @param filter? string Optional filter ("HELPFUL", "HARMFUL", "HELPFUL|PLAYER", "HARMFUL|PLAYER", etc.)
     --- @return table A table containing all auras, each with id, name, count, duration, and expires
+    --- @usage local auras = NAG:ListAuras("player", "HELPFUL")
     function NAG:ListAuras(unit, filter)
         if not unit then
             self:Debug("ListAuras: Invalid input - unit is nil")
@@ -776,10 +743,9 @@ do                              -- ================================= FindAura Ut
     end
     
     --- Prints all auras on a unit to the chat.
-    --- @function NAG:PrintAuras
-    --- @param self NAG
     --- @param unit string The unit to check.
     --- @param filter? string Optional filter ("HELPFUL", "HARMFUL", "HELPFUL|PLAYER", "HARMFUL|PLAYER", etc.)
+    --- @usage NAG:PrintAuras("player", "HELPFUL")
     function NAG:PrintAuras(unit, filter)
         -- Just call ListAuras which now prints directly
         return self:ListAuras(unit, filter)

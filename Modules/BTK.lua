@@ -7,11 +7,12 @@
     TODO: Add more emote types, improve group logic
     License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 ]]
----@diagnostic disable: undefined-global, undefined-field
+--- @module "BTK"
+--- @diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon Main addon reference
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -55,7 +56,9 @@ local EMOTE_CHANCES = {
     KNEEL = 60   -- 60% chance to kneel
 }
 
----@class BTK: ModuleBase
+--- Behavior and Timer Keeper module for handling character emotes and version checking
+--- @class BTK : ModuleBase
+--- @field state table Module state containing lastEmoteTime
 local BTK = NAG:CreateModule("BTK", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
     -- No defaults needed
@@ -72,6 +75,8 @@ local BTK = NAG:CreateModule("BTK", nil, {
 
 --- ============================ ORGANIZATION ============================
 do -- Ace3 lifecycle methods
+    --- Initialize the BTK module
+    --- Registers addon message prefix and sets initial emote timer
     function BTK:ModuleInitialize()
         -- Register addon message prefix
         if not C_ChatInfo.IsAddonMessagePrefixRegistered("NAGgodtier") then
@@ -84,13 +89,12 @@ do -- Ace3 lifecycle methods
 end
 
 do -- Event handlers
-    --- Handles the CHAT_MSG_ADDON event.
-    --- @param self BTK
-    --- @param event string The event name.
-    --- @param prefix string The addon message prefix.
-    --- @param message string The message content.
-    --- @param channel string The channel type.
-    --- @param sender string The sender name.
+    --- Handles incoming addon messages for the BTK module
+    --- @param event string The event name
+    --- @param prefix string The addon message prefix
+    --- @param message string The message content
+    --- @param channel string The channel type
+    --- @param sender string The sender name
     function BTK:OnAddonMessage(event, prefix, message, channel, sender)
         if prefix == "NAGgodtier" then
             self:HandleGodTierMessage()
@@ -99,6 +103,8 @@ do -- Event handlers
 end
 
 --- ============================ HELPERS & PUBLIC API ============================
+
+--- Process a received god tier message and potentially trigger an emote
 function BTK:HandleGodTierMessage()
     local timer = self:GetEmoteTimer()
     if not UnitAffectingCombat("player") and (GetTime() - self.state.lastEmoteTime > timer) then
@@ -106,6 +112,8 @@ function BTK:HandleGodTierMessage()
     end
 end
 
+--- Calculate the appropriate emote timer based on current conditions
+--- @return number The calculated timer duration in seconds
 function BTK:GetEmoteTimer()
     if IsInGroup() then
         return GROUP_TIMER_BASE + math.random(-GROUP_TIMER_VARIANCE, GROUP_TIMER_VARIANCE)
@@ -116,6 +124,8 @@ function BTK:GetEmoteTimer()
     return DEFAULT_TIMER
 end
 
+--- Perform a random emote based on predefined chances
+--- Will not perform if player is eating or has l99 flag set
 function BTK:PerformRandomEmote()
     if ns.eating or ns.l99 then return end
     self.state.lastEmoteTime = GetTime()

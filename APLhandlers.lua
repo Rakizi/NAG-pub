@@ -1,53 +1,39 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- Handles Action Priority List (APL) logic and value functions for the NAG addon.
+---
+--- This module provides utility, funnel, casting, target/unit, spell, dot, class, and pet APL value functions for the Next Action Guide (NAG) addon.
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-      liable for any damages arising from the use of this software.
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-      made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your
-      use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS:good
-    TODO: Should it be implied if we should auraremainingtime that it needs the aura on?  I'd think so...
-
-]]
+-- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 -- luacheck: ignore GetSpellInfo
---- ======= LOCALIZE =======
---Addon
+
+-- ============================ LOCALIZE ============================
 local _, ns = ...
 
----@class NAG
+-- Addon references
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class StateManager : ModuleBase
+--- @type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
----@class Types : ModuleBase
+--- @type Types|ModuleBase|AceModule
 local Types = NAG:GetModule("Types")
----@class TTDManager : ModuleBase
+--- @type TTDManager|ModuleBase|AceModule
 local TTD = NAG:GetModule("TTDManager")
----@class TimerManager : ModuleBase
+--- @type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
----@class OverlayManager : ModuleBase
+--- @type OverlayManager|ModuleBase|AceModule
 local OverlayManager = NAG:GetModule("OverlayManager")
---Libs
+
+-- Libraries
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local RC = LibStub("LibRangeCheck-3.0")
 
---WoW API
+-- WoW API (Unified wrappers)
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
 local UnitBuff = ns.UnitBuffUnified
@@ -58,49 +44,38 @@ local IsUsableItem = ns.IsUsableItemUnified
 local GetItemSpell = ns.GetItemSpellUnified
 local GetTalentInfo = ns.GetTalentInfoUnified
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+-- Lua APIs (WoW optimized where available)
+-- Math operations (WoW optimized)
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
--- Helper function to translate spell IDs
---TODO: make this be native to the parser
-local function translateSpellId(id)
-    if id == 58146 then
-        return 79634
-    end
-    return id
-end
+-- String operations (WoW optimized)
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
--- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
-
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+-- Table operations (WoW optimized)
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
-
---File
-
--- Add tinkers/trinkets/items to generic functions
-local C_GetItemCooldown = _G.C_Container.GetItemCooldown
---local GetItemSpell = C_Item.GetItemSpell
-
---- ======= GLOBALIZE =======
+local sort = table.sort
+local concat = table.concat
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local tostring = tostring
+local tonumber = tonumber
 
 --- ============================ CONTENT ============================
 
@@ -109,7 +84,6 @@ local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 do -- ================================= Utility Fn's =========================================== --
     --- Placeholder function for spell casting.
     ---@function NAG:CastPlaceholder
-    ---@param self NAG
     ---@param spellId number The ID of the spell to cast.
     ---@return boolean True if the spell ID is valid, false otherwise.
     function NAG:CastPlaceholder(spellId)
@@ -123,7 +97,6 @@ do -- ================================= Utility Fn's ===========================
 
     --- Returns the last cast spell.
     --- @usage NAG:SpellLastCast()
-    --- @param self NAG
     --- @return number The timestamp of the last cast spell.
     function NAG:SpellLastCast()
         return StateManager:GetLastCastId() or 0
@@ -132,7 +105,6 @@ do -- ================================= Utility Fn's ===========================
     -- TODO: Fix/test
     --- Cancel an aura.
     --- @function NAG:CancelAura
-    --- @param self NAG
     --- @param auraId number The ID of the aura.
     --- @usage NAG:CancelAura(73643)
     --- @return boolean True if the aura was successfully canceled, false otherwise.
@@ -171,7 +143,6 @@ end
 do -- ================================= Funnel Generic Functions =================================
     --- Cast a spell, trinket, tinker, or item based on the provided id.
     --- @usage (NAG:Cast(73643))
-    --- @param self NAG
     --- @param id number The id of the spell, trinket, tinker, or item to cast.
     --- @param tolerance number|nil Optional tolerance value for casting spells.
     --- @return boolean True if the cast was successful, false otherwise.
@@ -225,7 +196,6 @@ do -- ================================= Funnel Generic Functions ===============
 
     --- Checks if a spell, trinket, tinker, or item is known.
     --- @usage (NAG:IsKnown(73643))
-    --- @param self NAG
     --- @param id number The id of the spell, trinket, tinker, or item.
     --- @return boolean isKnown True if the id is known, false otherwise.
     function NAG:IsKnown(id)
@@ -359,7 +329,6 @@ do -- ================================= Funnel Generic Functions ===============
 
     --- Checks if a spell, trinket, tinker, or item is ready.
     --- @usage (NAG:IsReady(73643))
-    --- @param self NAG
     --- @param id number The id of the spell, trinket, tinker, or item.
     --- @return boolean isReady True if the id is ready, false otherwise.
     function NAG:IsReady(id)
@@ -401,7 +370,6 @@ do -- ================================= Funnel Generic Functions ===============
 
     --- Checks if a spell, trinket, tinker, or item is active.
     ---
-    --- @param self NAG
     --- @param id number The ID or alias ("trinket1" or "trinket2") of the item.
     --- @usage NAG:IsActive(73643)
     --- @return boolean True if the item is active; false otherwise.
@@ -457,7 +425,6 @@ do -- ================================= Funnel Generic Functions ===============
     end
 
     --- Returns the cooldown time for a spell, trinket, tinker, or item.
-    --- @param self NAG
     --- @param id number The ID of the item.
     --- @usage NAG:TimeToReady(73643) >= x
     --- @return number|boolean seconds The time in seconds until the item is ready.
@@ -497,7 +464,6 @@ do -- ================================= Funnel Generic Functions ===============
     end
 
     --- Gets the remaining active time for an item.
-    --- @param self NAG
     --- @param id number The ID of the item.
     --- @usage NAG:ItemRemainingTime(73643) >= x
     --- @return number|boolean The remaining time in seconds.
@@ -522,7 +488,6 @@ do -- ================================= Funnel Generic Functions ===============
     end
 
     --- Gets the remaining active time for a tinker.
-    --- @param self NAG
     --- @param id number The ID of the tinker.
     --- @usage NAG:TinkerRemainingTime(73643) >= x
     --- @return number|boolean The remaining time in seconds.
@@ -546,7 +511,6 @@ do -- ================================= Funnel Generic Functions ===============
         return entity:RemainingTime()
     end
     --- Gets the number of stacks for a spell, item, aura, or DoT.
-    --- @param self NAG
     --- @param id number The ID of the spell or item.
     --- @usage NAG:NumStacks(73643)
     --- @return number|boolean The number of stacks, or false if not applicable.
@@ -587,7 +551,6 @@ end
 
 do -- ================================= Casting functions ========================================== --
     --- Casts a trinket if available and ready.
-    --- @param self NAG
     --- @param itemId number The ID of the trinket.
     --- @usage NAG:CastTrinket(73643)
     --- @return boolean False if the trinket cannot be cast.
@@ -613,7 +576,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Casts a tinker spell if available and ready.
-    --- @param self NAG
     --- @param spellId number The ID of the tinker spell.
     --- @usage NAG:CastTinker(73643)
     --- @return boolean False if the tinker cannot be cast.
@@ -630,7 +592,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Casts a spell if available and ready, with optional casting tolerance.
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param tolerance number|nil Optional casting tolerance in seconds.
     --- @usage NAG:CastSpell(73643, 0)
@@ -702,7 +663,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Casts a debuff spell if available and ready, with optional tolerance.
-    --- @param self NAG
     --- @param id number The ID of the debuff spell.
     --- @param tolerance number Optional casting tolerance in seconds.
     --- @usage NAG:CastDebuff(7386, 0)
@@ -764,7 +724,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Casts a buff spell if available and ready, with optional tolerance.
-    --- @param self NAG
     --- @param id number The ID of the buff spell.
     --- @param tolerance number Optional casting tolerance in seconds.
     --- @usage NAG:CastBuff(6673, 0)
@@ -828,7 +787,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Casts and monitors a channeled spell with optional interrupt and recast conditions.
-    --- @param self NAG
     --- @param spellId number The ID of the spell to channel.
     --- @param interruptCondition function|boolean Optional interrupt condition or recast flag.
     --- @param recast boolean Optional recast condition.
@@ -947,7 +905,6 @@ do -- ================================= Casting functions ======================
     NAG.Channel = NAG.ChannelSpellBypass
     NAG.ChannelSpell = NAG.ChannelSpellBypass
     --- Determines if a spell or item is classified as a secondary action.
-    --- @param self NAG
     --- @param id number The ID of the spell or item.
     --- @usage NAG:IsSecondarySpell(73643)
     --- @return boolean True if the action is secondary; otherwise false.
@@ -973,7 +930,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Adds a spell or item to the secondary spells list if not already present.
-    --- @param self NAG
     --- @param ID number The ID of the spell or item.
     --- @usage NAG:AddSecondarySpell(73643)
     --- @return boolean True if the spell was added; otherwise false.
@@ -989,7 +945,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Automatically casts other cooldowns such as trinkets and items.
-    --- @param self NAG
     --- @param enableTrinketSlot1 boolean|nil Whether to cast trinket slot 1 (default: true)
     --- @param enableTrinketSlot2 boolean|nil Whether to cast trinket slot 2 (default: true)
     --- @param enableDefaultBattlePotion boolean|nil Whether to cast the default battle potion (default: true)
@@ -1082,7 +1037,6 @@ do -- ================================= Casting functions ======================
     end
 
     --- Handle multi-shield logic.
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param maxShields number The maximum number of shields.
     --- @param maxOverlap number The maximum overlap allowed.
@@ -1099,7 +1053,6 @@ end
 do -- ================================= Targets/Units APLValue Functions ======================================
     --- Returns the distance to the target in yards.
     --- @function NAG:DistanceToTarget
-    --- @param self NAG The NAG object.
     --- @param maxRange? number Optional maximum range to check (default: 100)
     --- @return number The distance to target in yards, or 0 if target is out of range/not found
     --- @usage (NAG:DistanceToTarget() >= x)
@@ -1137,7 +1090,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Get the number of targets.
     --- @function NAG:NumberTargets
-    --- @param self NAG The NAG object.
     --- @usage NAG:NumberTargets()
     --- @return number The number of targets.
     function NAG:NumberTargets()
@@ -1146,7 +1098,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Count the number of enemies in range.
     --- @function NAG:CountEnemiesInRange
-    --- @param self NAG The NAG object.
     --- @param maxRange number The maximum range to check (1-100 yards).
     --- @usage NAG:CountEnemiesInRange(30)
     --- @return number The number of enemies in range.
@@ -1185,7 +1136,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Check if the target is in execute phase.
     --- @function NAG:IsExecutePhase
-    --- @param self NAG The NAG object.
     --- @param threshold number The health percentage threshold for execute phase.
     --- @usage NAG:IsExecutePhase(20)
     --- @return boolean True if the target is in execute phase, false otherwise.
@@ -1235,7 +1185,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Check if the boss is casting a specific spell.
     --- @function NAG:BossSpellIsCasting
-    --- @param self NAG The NAG object.
     --- @param spellId number The spell ID to check.
     --- @usage NAG:BossSpellIsCasting(12345)
     --- @return boolean True if the boss is casting the spell, false otherwise.
@@ -1249,7 +1198,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Get the time until a boss spell is ready.
     --- @function NAG:BossTimeToReadySpell
-    --- @param self NAG The NAG object.
     --- @param spellId number The spell ID to check.
     --- @usage NAG:BossTimeToReadySpell(12345) <= 10
     --- @return number The time in seconds until the spell is ready.
@@ -1276,7 +1224,6 @@ do -- ================================= Targets/Units APLValue Functions =======
     NAG.BossSpellTimeToReady = NAG.BossTimeToReadySpell
     --- Get the time until a boss spell is ready (new method).
     --- @function NAG:BossTimeToReadySpellNew
-    --- @param self NAG The NAG object.
     --- @param spellId number The spell ID to check.
     --- @usage NAG:BossTimeToReadySpellNew(12345) <= 10
     --- @return number The time in seconds until the spell is ready.
@@ -1301,7 +1248,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Check if the unit is stealthed.
     --- @function NAG:UnitIsStealthed
-    --- @param self NAG
     --- @usage NAG:UnitIsStealthed()
     --- @return boolean True if the unit is stealthed, false otherwise.
     function NAG:UnitIsStealthed()
@@ -1322,7 +1268,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Check if the player is moving.
     --- @function NAG:IsPlayerMoving
-    --- @param self NAG
     --- @usage NAG:IsPlayerMoving()
     --- @return boolean True if the player has been moving for longer than NAG.moveDuration, false otherwise.
     function NAG:IsPlayerMoving()
@@ -1331,7 +1276,6 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Move to specified range from target (no-op function that always returns false).
     --- @function NAG:MoveToRange
-    --- @param self NAG The NAG object.
     --- @param range number The target range to move to.
     --- @usage NAG:MoveToRange(30)
     --- @return boolean Always returns false as this is a no-op function.
@@ -1346,7 +1290,6 @@ end
 do -- ================================= Spell APLValueFunctions ================================ --
     --- Checks if a spell is known.
     --- @function NAG:IsKnownSpell
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the spell is known, false otherwise.
     --- @usage (NAG:IsKnownSpell(73643))
@@ -1383,7 +1326,6 @@ do -- ================================= Spell APLValueFunctions ================
     --- Checks if a spell is ready to cast.
     --- TODO: Modified for rogue 3/6 to account for pooling issues.
     --- @function NAG:SpellCanCast
-    --- @param self NAG
     --- @param spellId number The ID of the spell to check.
     --- @param tolerance number|nil A tolerance in seconds, if needed.
     --- @usage NAG:SpellCanCast(12345, 0.5)
@@ -1483,7 +1425,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Checks if a spell is ready to cast.
     --- @function NAG:IsReadySpell
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param tolerance number|nil The tolerance in seconds for the spell cooldown.
     --- @return boolean True if the spell is ready, false otherwise.
@@ -1506,7 +1447,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Gets the time until a spell is ready to cast.
     --- @function NAG:TimeToReadySpell
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The time in seconds until the spell is ready, or -1 if the spellId is invalid.
     --- @usage (NAG:TimeToReadySpell(73643) >= 0)
@@ -1523,7 +1463,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Returns the cast time of a spell in seconds.
     --- @function NAG:SpellCastTime
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The cast time in seconds, or 0 if the spellId is nil.
     --- @usage (NAG:SpellCastTime(73643) >= 0)
@@ -1553,7 +1492,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Returns the channel clip delay.
     --- @function NAG:ChannelClipDelay
-    --- @param self NAG
     --- @return number The channel clip delay.
     --- @usage (NAG:ChannelClipDelay())
     function NAG:ChannelClipDelay()
@@ -1568,7 +1506,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Returns the travel time of a spell.
     --- @function NAG:SpellTravelTime
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The travel time in seconds, or 0 if the spellId is nil or not found.
     --- @usage (NAG:SpellTravelTime(73643) >= 0)
@@ -1582,7 +1519,6 @@ do -- ================================= Spell APLValueFunctions ================
     NAG.TravelTime = NAG.SpellTravelTime
     --- Calculates the CPM (Casts Per Minute) for a spell.
     --- @function NAG:SpellCPM
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The CPM of the spell, or 0 if not tracked.
     --- @usage (NAG:SpellCPM(73643) >= 0)
@@ -1596,7 +1532,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Returns the tick frequency of a DoT spell.
     --- @function NAG:SpellTickFrequency
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @usage NAG:SpellTickFrequency(73643) == 0
     --- @return number The tick frequency in seconds, or 0 if the spellId is nil or not found.
@@ -1612,7 +1547,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Checks if a spell is currently being channeled.
     --- @function NAG:SpellIsChanneling
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the spell is being channeled, false otherwise.
     --- @usage (NAG:SpellIsChanneling(73643))
@@ -1631,7 +1565,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Checks if a spell is a known enchant.
     --- @function NAG:IsKnownEnchant
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the spell is a known enchant, false otherwise.
     --- @usage (NAG:IsKnownEnchant(73643))
@@ -1643,7 +1576,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Checks if a spell is an active enchant.
     --- @function NAG:IsActiveEnchant
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @usage NAG:IsActiveEnchant(73643)
     --- @return boolean True if the spell is an active enchant, false otherwise.
@@ -1660,7 +1592,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Gets the time until an enchant spell is ready to cast.
     --- @function NAG:TimeToReadyEnchant
-    --- @param self NAG
     --- @param spellId number The ID of the enchant spell.
     --- @usage NAG:TimeToReadyEnchant(12345) >= 0
     --- @return number The time in seconds until the enchant spell is ready, or -1 if the spellId is invalid.
@@ -1678,7 +1609,6 @@ do -- ================================= Spell APLValueFunctions ================
     -- TODO: Implement this function
     --- Returns the number of ticks for a channeled spell.
     --- @function NAG:SpellChanneledTicks
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @usage NAG:SpellChanneledTicks(73643) == 0
     --- @return number Always returns 0.
@@ -1692,7 +1622,6 @@ do -- ================================= Spell APLValueFunctions ================
     -- TODO: Implement this function, not sure any APL use currently
     --- Returns the current cost of a spell.
     --- @function NAG:SpellCurrentCost
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @usage NAG:SpellCurrentCost(73643) == 0
     --- @return number Always returns 0.
@@ -1705,7 +1634,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Returns the remaining channel time of a spell.
     --- @function NAG:SpellChannelTime
-    --- @param self NAG
     --- @usage NAG:SpellChannelTime() == 0
     --- @return number The remaining channel time in seconds.
     function NAG:SpellChannelTime()
@@ -1718,7 +1646,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Checks if a spell is queued.
     --- @function NAG:SpellIsQueued
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @usage NAG:SpellIsQueued(73643)
     -- @return boolean True if the spell is queued, false otherwise.
@@ -1745,7 +1672,6 @@ do -- ================================= Spell APLValueFunctions ================
 
     --- Gets the remaining time for a totem.
     --- @function NAG:TotemRemainingTime
-    --- @param self NAG
     --- @param totemType number The type of the totem.
     --- @usage NAG:TotemRemainingTime(1) >= x
     --- @return number The remaining time for the totem.
@@ -1759,7 +1685,6 @@ end
 do -- ================================= IsActive APLValue Functions ================================ --
     --- Checks if the player's pet has a specific aura.
     --- @function NAG:IsActivePetAura
-    --- @param self NAG
     --- @param spellId number The ID of the spell to check.
     --- @usage NAG:IsActivePetAura(73643)
     --- @return boolean True if the pet has the aura, false otherwise.
@@ -1777,7 +1702,6 @@ do -- ================================= IsActive APLValue Functions ============
 
     --- Checks if the player has a specific aura.
     --- @function NAG:IsActiveAura
-    --- @param self NAG
     --- @param spellId number The ID of the spell to check.
     --- @usage NAG:IsActiveAura(73643)
     --- @return boolean True if the player has the aura, false otherwise.
@@ -1825,7 +1749,6 @@ do -- ================================= IsActive APLValue Functions ============
 
     --- Checks if an aura is active with reaction time consideration
     --- @function NAG:AuraIsActiveWithReactionTime
-    --- @param self NAG
     --- @param spellId number The ID of the aura to check
     --- @param sourceUnit? string The unit to check (defaults to "player")
     --- @param reactionTime? number Reaction time in seconds (defaults to input delay)
@@ -1844,7 +1767,6 @@ do -- ================================= IsActive APLValue Functions ============
 
     --- Checks if an aura is inactive or about to expire within a reaction time window.
     --- @function NAG:AuraIsInactiveWithReactionTime
-    --- @param self NAG
     --- @param spellId number The ID of the aura to check
     --- @param sourceUnit? string The unit to check (defaults to "player")
     --- @param reactionTime? number Reaction time in seconds (defaults to input delay)
@@ -1867,7 +1789,6 @@ end
 do -- ================================= Dot APLValue Functions ================================== --
     --- Gets the number of stacks of a specific debuff on the player.
     --- @function NAG:DebuffNumStacks
-    --- @param self NAG
     --- @param spellId number The ID of the spell to check.
     --- @usage NAG:DebuffNumStacks(73643) >= x
     --- @return number The number of stacks of the debuff.
@@ -1885,7 +1806,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Checks if a DoT (Damage over Time) spell is active on the target.
     --- @function NAG:IsActiveDot
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the DoT is active, false otherwise.
     --- @usage (NAG:IsActiveDot(73643))
@@ -1901,7 +1821,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Checks if a DoT (Damage over Time) spell is active on any target globally.
     --- @function NAG:IsActiveDotGlobal
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the DoT is active, false otherwise.
     --- @usage (NAG:IsActiveDotGlobal(73643))
@@ -1917,7 +1836,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Returns the remaining time for a DoT (Damage over Time) spell on the target.
     --- @function NAG:DotRemainingTime
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The remaining time or -1 if the spell is not found.
     --- @usage (NAG:DotRemainingTime(73643) >= x)
@@ -1935,7 +1853,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Returns the remaining time for a DoT (Damage over Time) spell on any target globally.
     --- @function NAG:DotRemainingTimeGlobal
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The remaining time or -1 if the spell is not found.
     --- @usage (NAG:DotRemainingTimeGlobal(73643) >= x)
@@ -1952,7 +1869,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Returns the number of stacks for a DoT (Damage over Time) spell on the target.
     --- @function NAG:DotNumStacks
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The number of stacks or 0 if the spell is not found.
     --- @usage (NAG:DotNumStacks(73643) >= x)
@@ -1988,7 +1904,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Returns the number of stacks for a DoT (Damage over Time) spell on any target globally.
     --- @function NAG:DotNumStacksGlobal
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @return number The number of stacks or 0 if the spell is not found.
     --- @usage (NAG:DotNumStacksGlobal(73643) >= x)
@@ -2005,7 +1920,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Checks if a DoT (Damage over Time) spell should be refreshed based on overlap time.
     --- @function NAG:DotShouldRefresh
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param overlap number The overlap time.
     --- @return boolean True if the DoT should be refreshed, false otherwise.
@@ -2022,7 +1936,6 @@ do -- ================================= Dot APLValue Functions =================
 
     --- Checks if a DoT (Damage over Time) spell should be refreshed on any target globally based on overlap time.
     --- @function NAG:DotShouldRefreshGlobal
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param overlap number The overlap time.
     --- @return boolean True if the DoT should be refreshed, false otherwise.
@@ -2050,7 +1963,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Gets the remaining or total duration of Fire Elemental
     --- Accounts for Glyph of Fire Elemental if present
-    --- @param self NAG
     --- @return number duration Duration in seconds (remaining or total if not active)
     function NAG:ShamanFireElementalDuration()
         -- Check if Fire Elemental is currently active
@@ -2084,7 +1996,6 @@ do -- ================================= Class Specific APLValue functions ======
     local DMF_CARD_VOLCANIC_ID = 89091 -- Darkmoon Card: Volcanic
 
     --- Checks if current buffs would create a stronger Fire Elemental than currently active
-    --- @param self NAG
     --- @return boolean canSnapshot True if current buffs would create a stronger Fire Elemental
     function NAG:ShamanCanSnapshotStrongerFireElemental()
         -- If no Fire Elemental is active, return false
@@ -2151,7 +2062,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Determines the excess energy for Cat form.
     --- @function NAG:CatExcessEnergy
-    --- @param self NAG
     --- @return number Excess energy.
     --- @usage (NAG:CatExcessEnergy())
     function NAG:CatExcessEnergy()
@@ -2160,7 +2070,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Calculates the duration of the new Savage Roar for Feral Druids.
     --- @function NAG:FeralNewSavageRoarDuration
-    --- @param self NAG
     --- @return number Duration of Savage Roar.
     --- @usage (NAG:FeralNewSavageRoarDuration() >= x)
     function NAG:FeralNewSavageRoarDuration()
@@ -2171,7 +2080,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Determines if the current Drain Soul should be recast for a better snapshot.
     --- @function NAG:WarlockShouldRecastDrainSoul
-    --- @param self NAG
     --- @return boolean True if Drain Soul should be recast, false otherwise.
     --- @usage (NAG:WarlockShouldRecastDrainSoul())
     function NAG:WarlockShouldRecastDrainSoul()
@@ -2181,7 +2089,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Determines if the current Corruption should be recast for a better snapshot.
     --- @function NAG:WarlockShouldRefreshCorruption
-    --- @param self NAG
     --- @param unit string The unit to check.
     --- @return boolean True if Corruption should be refreshed, false otherwise.
     --- @usage (NAG:WarlockShouldRefreshCorruption("unit"))
@@ -2196,7 +2103,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Retrieves the input delay from the global settings.
     --- @function NAG:InputDelay
-    --- @param self NAG
     --- @return number Input delay.
     --- @usage (NAG:InputDelay() >= x)
     function NAG:InputDelay()
@@ -2205,7 +2111,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Triggers pooling for rogues via WeakAuras.
     --- @function NAG:Pooling
-    --- @param self NAG
     --- @return boolean Always returns false.
     function NAG:Pooling()
         if _G["WeakAuras"] and _G["WeakAuras"].ScanEvents then
@@ -2215,7 +2120,6 @@ do -- ================================= Class Specific APLValue functions ======
     end
     --- Triggers pooling for rogues via WeakAuras.
     --- @function NAG:RogueHaT
-    --- @param self NAG
     --- @return boolean Always returns false.
     function NAG:RogueHaT()
         if _G["WeakAuras"] and _G["WeakAuras"].ScanEvents then
@@ -2226,7 +2130,6 @@ do -- ================================= Class Specific APLValue functions ======
 
     --- Triggers Deadly Calm for warriors via WeakAuras.
     --- @function NAG:DeadlyCalm
-    --- @param self NAG
     --- @return boolean Always returns false.
     function NAG:DeadlyCalm()
         if _G["WeakAuras"] and _G["WeakAuras"].ScanEvents then
@@ -2288,7 +2191,6 @@ do -- =-=============================== SOD APLValue functions
 
     --- Checks if a specific rune is equipped.
     --- @function NAG:RuneIsEquipped
-    --- @param self NAG
     --- @param runeId number The ID of the rune to check.
     --- @return boolean True if the rune is equipped, false otherwise.
     function NAG:RuneIsEquipped(runeId)
@@ -2302,7 +2204,6 @@ end
 do -- ================================= Class Functions ==================================================== --
     --- Determine the current Eclipse phase for a Balance Druid.
     --- @function NAG:CurrentEclipsePhase
-    --- @param self NAG
     --- @usage NAG:CurrentEclipsePhase() == "SolarPhase"
     --- @return string The current Eclipse phase.
     function NAG:CurrentEclipsePhase()
@@ -2373,7 +2274,6 @@ do -- ================================= Dot Functions ==========================
     end
 
     --- Handle multi-dot logic.
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param maxDots number The maximum number of dots.
     --- @param maxOverlap number The maximum overlap allowed.
@@ -2464,7 +2364,6 @@ end
 do -- ================================= Pet APLValue Functions (4/4V) ================================= --
     --- Checks if a pet is currently active. (V)
     --- @function NAG:PetIsActive
-    --- @param self NAG
     --- @return boolean True if a pet is active, false otherwise
     --- @usage NAG:PetIsActive()
     function NAG:PetIsActive()
@@ -2473,7 +2372,6 @@ do -- ================================= Pet APLValue Functions (4/4V) ==========
 
     --- Gets the current health of the pet. (V)
     --- @function NAG:PetHealth
-    --- @param self NAG
     --- @return number The current health of the pet
     --- @usage NAG:PetHealth() >= x
     function NAG:PetHealth()
@@ -2483,7 +2381,6 @@ do -- ================================= Pet APLValue Functions (4/4V) ==========
 
     --- Gets the current health percentage of the pet. (V)
     --- @function NAG:PetHealthPercent
-    --- @param self NAG
     --- @return number The current health percentage of the pet
     --- @usage NAG:PetHealthPercent() >= x
     function NAG:PetHealthPercent()
@@ -2497,7 +2394,6 @@ do -- ================================= Pet APLValue Functions (4/4V) ==========
     --- Checks if a pet spell is ready to be cast. (V)
     --- This does not validate if the spell is an actual pet spell
     --- @function NAG:PetSpellIsReady
-    --- @param self NAG
     --- @param spellId number The ID of the pet spell to check
     --- @return boolean True if the pet spell is ready, false otherwise
     --- @usage NAG:PetSpellIsReady(12345)
@@ -2521,7 +2417,6 @@ end
 do -- ================================= Target State Functions (4/4V) ================================= --
     --- Gets the current health percentage of the target. (V)
     --- @function NAG:TargetHealthPercent
-    --- @param self NAG
     --- @return number The target's health percentage (0-100)
     --- @usage NAG:TargetHealthPercent() <= 20
     function NAG:TargetHealthPercent()
@@ -2534,7 +2429,6 @@ do -- ================================= Target State Functions (4/4V) ==========
 
     --- Gets the distance to the current target. (V)
     --- @function NAG:TargetDistance
-    --- @param self NAG
     --- @return number The distance to target in yards, or 999 if no target
     --- @usage NAG:TargetDistance() <= 30
     function NAG:TargetDistance()
@@ -2544,7 +2438,6 @@ do -- ================================= Target State Functions (4/4V) ==========
 
     --- Checks if the target is currently casting. (V)
     --- @function NAG:TargetIsCasting
-    --- @param self NAG
     --- @return boolean True if target is casting, false otherwise
     --- @usage NAG:TargetIsCasting()
     function NAG:TargetIsCasting()
@@ -2557,7 +2450,6 @@ do -- ================================= Target State Functions (4/4V) ==========
 
     --- Gets the remaining cast time of the target's current cast. (V)
     --- @function NAG:TargetCastTimeRemaining
-    --- @param self NAG
     --- @return number Remaining cast time in seconds, or 0 if not casting
     --- @usage NAG:TargetCastTimeRemaining() >= 1.5
     function NAG:TargetCastTimeRemaining()
@@ -2665,7 +2557,6 @@ end
 
 --- Checks if a DoT (Damage over Time) spell is active on the target or specified unit.
 --- @function NAG:DotIsActive
---- @param self NAG
 --- @param spellId number The ID of the spell.
 --- @param targetUnit? string The unit to check (defaults to "target")
 --- @return boolean True if the DoT is active, false otherwise.
@@ -2680,11 +2571,10 @@ end
 
 --- Returns the tick frequency of a DoT spell on the target or specified unit.
 --- @function NAG:DotTickFrequency
---- @param self NAG
 --- @param spellId number The ID of the spell.
 --- @param targetUnit? string The unit to check (defaults to "target")
---- @usage NAG:DotTickFrequency(73643) == 0
 --- @return number The tick frequency in seconds, or 0 if the spellId is nil or not found.
+--- @usage NAG:DotTickFrequency(73643) == 0
 function NAG:DotTickFrequency(spellId, targetUnit)
     if not spellId then return 0 end
     targetUnit = targetUnit or "target"
@@ -2698,7 +2588,6 @@ NAG.UnitIsMoving = NAG.IsPlayerMoving
 
 --- Checks if the player is currently tanking (has aggro) on a specific unit (default: 'target').
 --- @function NAG:IsTanking
---- @param self NAG
 --- @param unit string? The unit to check threat against (default: 'target')
 --- @return boolean True if the player is tanking, false otherwise.
 function NAG:IsPrimaryTarget(unit)

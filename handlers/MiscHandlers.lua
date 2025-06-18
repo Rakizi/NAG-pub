@@ -1,97 +1,78 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-      liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-      made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your
-      use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS:good
-
-]]
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
-
+--- Miscellaneous handler functions for NAG addon
+---
+--- This module provides timing, sequence, swing timer, and utility functions
+--- for the Next Action Guide (NAG) addon, including scheduling, strict and
+--- regular sequences, time tracking, and swing/autoattack helpers.
+--- @module "MiscHandlers"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--
+-- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 -- luacheck: ignore GetSpellInfo
---- ======= LOCALIZE =======
---Addon
+
+-- ============================ LOCALIZE ============================
 local _, ns = ...
 
----@class NAG
+-- Addon references
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
-local Version = ns.Version
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class StateManager : ModuleBase
+---@type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
----@class Types : ModuleBase
+---@type TrinketTrackingManager|ModuleBase|AceModule
+local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
+---@type Version
+local Version = ns.Version
+---@type Types|ModuleBase|AceModule
 local Types = NAG:GetModule("Types")
----@class TimerManager : ModuleBase
+---@type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
 
 local swingTimerLib = LibStub("LibClassicSwingTimerAPI")
 
---WoW API
+-- WoW API (unified wrappers)
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+-- Math operations (WoW optimized)
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
--- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+-- String operations (WoW optimized)
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+-- Table operations (WoW optimized)
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
-
+local sort = table.sort
+local concat = table.concat
 local setmetatable = setmetatable
 local next = next
 
---File
-
--- Add tinkers/trinkets/items to generic functions
+-- WoW API direct
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
---local GetItemSpell = C_Item.GetItemSpell
-
---- ======= GLOBALIZE =======
 
 --- ============================ CONTENT ============================
 ---
 do -- ================================= Timing functions =========================================== --
     --- Schedules an action after a specified delay.
-    --- @param self NAG
     --- @param time number Delay in seconds.
     --- @param action function The function to execute after the delay.
     --- @usage NAG:Schedule(5, function() print("Action performed") end)
@@ -126,7 +107,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Waits until a specified condition is met.
-    --- @param self NAG
     --- @param func function The function to evaluate the condition.
     --- @return boolean True if the wait is still in progress, false otherwise.
     --- @usage (NAG:WaitUntil(func))
@@ -142,7 +122,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Waits for a specified duration.
-    --- @param self NAG
     --- @param duration number The duration to wait in seconds.
     --- @return boolean True if the wait is still in progress, false if it has completed.
     --- @usage NAG:Wait(5)
@@ -163,7 +142,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Initializes a strict sequence of actions.
-    --- @param self NAG
     --- @param name string The name of the sequence.
     --- @param ... any The actions to be performed in sequence.
     --- @return boolean True if the sequence is initialized successfully.
@@ -202,7 +180,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Executes the next action in the spell cast sequence.
-    --- @param self NAG
     --- @return boolean True if the sequence is still active, false if it has completed or encountered an error.
     --- @usage NAG:SpellCastSequence()
     --- @see NAG:StrictSequence
@@ -250,7 +227,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Executes a strict sequence of functions.
-    --- @param self NAG
     --- @param ... function The functions to be executed in sequence.
     --- @return boolean True if the sequence is still active, false if it has completed or encountered an error.
     --- @usage NAG:StrictSequenceByFunc(func1, func2, ...)
@@ -288,7 +264,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Executes a strict sequence of spells by their IDs.
-    --- @param self NAG
     --- @param sequenceName string The name of the sequence.
     --- @param ... number The spell IDs to be executed in sequence.
     --- @return boolean True if the sequence is still active, false if it has completed or encountered an error.
@@ -349,7 +324,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Handles the completion of a spell cast.
-    --- @param self NAG
     --- @param spellId number The ID of the spell that was cast.
     --- @return boolean True if the spell cast was handled successfully, false otherwise.
     --- @usage NAG:SpellCastSucceeded(73643)
@@ -468,7 +442,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Initializes a sequence of actions.
-    --- @param self NAG
     --- @param name string The name of the sequence.
     --- @param ... any The actions to be performed in sequence.
     --- @usage NAG:Sequence("sequenceName", action1, action2, ...)
@@ -490,7 +463,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Resets all sequences.
-    --- @param self NAG
     --- @usage NAG:ResetSequences()
     --- @return boolean True if the sequences are reset successfully.
     function NAG:ResetSequences()
@@ -500,7 +472,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Resets all strict sequences.
-    --- @param self NAG
     --- @usage NAG:ResetStrictSequences()
     --- @return boolean True if the strict sequences are reset successfully.
     function NAG:ResetStrictSequences()
@@ -510,7 +481,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Resets a specific sequence.
-    --- @param self NAG
     --- @param name string The name of the sequence to reset.
     --- @usage NAG:ResetSequence("sequenceName")
     --- @return boolean True if the sequence is reset successfully.
@@ -521,7 +491,6 @@ do -- ================================= Timing functions =======================
     end
 
     --- Resets a specific strict sequence.
-    --- @param self NAG
     --- @param name string The name of the strict sequence to reset.
     --- @usage NAG:ResetStrictSequence("strictSequenceName")
     --- @return boolean True if the strict sequence is reset successfully.
@@ -533,7 +502,6 @@ do -- ================================= Timing functions =======================
 
     --- Checks if a sequence is complete.
     --- @function NAG:SequenceIsComplete
-    --- @param self NAG
     --- @param name string The name of the sequence.
     --- @return boolean True if the sequence is complete, false otherwise.
     --- @usage (NAG:SequenceIsComplete("sequenceName"))
@@ -547,7 +515,6 @@ do -- ================================= Timing functions =======================
 
     --- Checks if a sequence is ready.
     --- @function NAG:SequenceIsReady
-    --- @param self NAG
     --- @param name string The name of the sequence.
     --- @param ... number The spells in the sequence.
     --- @return boolean True if the sequence is ready, false otherwise.
@@ -560,7 +527,6 @@ do -- ================================= Timing functions =======================
 
     --- Checks if a strict sequence is ready.
     --- @function NAG:StrictSequenceIsReady
-    --- @param self NAG
     --- @param sequence table The spells in the strict sequence.
     --- @return boolean True if the strict sequence is ready, false otherwise.
     --- @usage (NAG:StrictSequenceIsReady({73643, 12345}))
@@ -570,7 +536,6 @@ do -- ================================= Timing functions =======================
 
     --- Returns the time to ready for a sequence.
     --- @function NAG:SequenceTimeToReady
-    --- @param self NAG
     --- @param sequenceName string The name of the sequence.
     --- @param ... number The spells in the sequence.
     --- @return number The maximum time to ready for the sequence.
@@ -588,7 +553,6 @@ do -- ================================= Timing functions =======================
 
     --- Returns the time to ready for a strict sequence.
     --- @function NAG:StrictSequenceTimeToReady
-    --- @param self NAG
     --- @param sequence table The spells in the strict sequence.
     --- @return number The maximum time to ready for the strict sequence.
     --- @usage (NAG:StrictSequenceTimeToReady({73643, 12345}) <= x)
@@ -608,7 +572,6 @@ end
 do -- ================================= Time APLValue Functions ========================================== --
     --- Get the current combat time.
     --- @function NAG:TimeCurrent
-    --- @param self NAG The NAG object.
     --- @usage NAG:TimeCurrent() >= 10
     --- @return number The current combat time in seconds.
     function NAG:TimeCurrent()
@@ -620,15 +583,6 @@ do -- ================================= Time APLValue Functions ================
         -- If not in combat, return 0
         if not UnitAffectingCombat("player") then
             return 0
-        end
-
-        -- Ensure StateManager is initialized
-        if not StateManager then
-            ---@class StateManager : ModuleBase
-            StateManager = self:GetModule("StateManager")
-            if not StateManager then
-                return 0
-            end
         end
 
         -- Ensure StateManager is enabled
@@ -651,7 +605,6 @@ NAG.CurrentTime = NAG.TimeCurrent
 
     --- Get the time spent on the current target.
     --- @function NAG:TimeOnTarget
-    --- @param self NAG The NAG object.
     --- @usage NAG:TimeOnTarget() >= 10
     --- @return number The time spent on the current target in seconds.
     function NAG:TimeOnTarget()
@@ -672,7 +625,6 @@ NAG.CurrentTime = NAG.TimeCurrent
 
     --- Get the current time as a percentage of the total time.
     --- @function NAG:TimeCurrentPercent
-    --- @param self NAG The NAG object.
     --- @usage NAG:TimeCurrentPercent() >= 50
     --- @return number The current time percentage.
     function NAG:TimeCurrentPercent()
@@ -697,7 +649,6 @@ NAG.CurrentTime = NAG.TimeCurrent
     NAG.CurrentTimePercent = NAG.TimeCurrentPercent
     --- Get the remaining time.
     --- @function NAG:TimeRemaining
-    --- @param self NAG The NAG object.
     --- @usage NAG:TimeRemaining()
     --- @return number The remaining time.
     function NAG:TimeRemaining()
@@ -741,7 +692,6 @@ NAG.CurrentTime = NAG.TimeCurrent
     NAG.RemainingTime = NAG.TimeRemaining
     --- Get the remaining time as a percentage.
     --- @function NAG:TimeRemainingPercent
-    --- @param self NAG The NAG object.
     --- @usage NAG:TimeRemainingPercent()
     --- @return number The remaining time percentage.
     function NAG:TimeRemainingPercent()
@@ -769,7 +719,6 @@ end
 do -- ================================= GCD/Swing/Auto APLValue Functions =============================== --
     --- Gets the auto swing time for the specified weapon type.
     --- @function NAG:AutoSwingTime
-    --- @param self NAG
     --- @param weaponType? string "MainHand", "OffHand", or "Ranged". Defaults to MainHand if not provided.
     --- @return number The swing time in seconds, or 0 if invalid.
     function NAG:AutoSwingTime(weaponType)
@@ -792,12 +741,11 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
 
     --- Checks if a spell is currently in flight
     --- @function NAG:SpellInFlight
-    --- @param self NAG
     --- @param spellId number The spell ID to check
     --- @return boolean True if the spell is in flight, false otherwise
     --- @usage NAG:SpellInFlight(12345)
     function NAG:SpellInFlight(spellId)
-        ---@type SpellTrackingManager
+        ---@type SpellTrackingManager | AceModule
         local SpellTracker = self:GetModule("SpellTrackingManager")
         if not SpellTracker then return false end
         return SpellTracker:IsSpellInFlight(spellId)
@@ -806,7 +754,6 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
     -- GCD values
     --- Checks if the global cooldown (GCD) is ready.
     --- @function NAG:GCDIsReady
-    --- @param self NAG
     --- @usage NAG:GCDIsReady()
     --- @return boolean True if the GCD is ready, false otherwise.
     function NAG:GCDIsReady()
@@ -815,7 +762,6 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
 
     --- Returns the time until the global cooldown (GCD) is ready.
     --- @function NAG:GCDTimeToReady
-    --- @param self NAG
     --- @usage NAG:GCDTimeToReady() <= x
     --- @return number The time until the GCD is ready.
     function NAG:GCDTimeToReady()
@@ -835,7 +781,6 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
     --- For instant cast spells, always returns true since they can't clip auto attacks.
     --- For non-instant casts, it verifies that the total cast time (input delay + cast time + GCD time) 
     --- is less than the time left until the next auto attack.
-    --- @param self NAG
     --- @param spellId number The spell ID to check.
     --- @return boolean True if the spell can be cast, false otherwise.
     function NAG:CanWeave(spellId)
@@ -859,7 +804,6 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
 
     --- Estimates the time until the next opportunity to weave a spell.
     --- This is useful when CanWeave returns false, to know when to try weaving again.
-    --- @param self NAG
     --- @param spellId number The spell ID to check.
     --- @return number The estimated time in seconds until the next weave gap, or math.huge if weaving is impossible.
     function NAG:TimeToNextWeaveGap(spellId)
@@ -902,7 +846,6 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
 
     --- Returns the time until the next auto attack.
     --- @function NAG:AutoTimeToNext
-    --- @param self NAG
     --- @usage NAG:AutoTimeToNext() <= x
     --- @return number The time until the next auto attack (GCD affected)
     --- @return number The raw time until the next auto attack (not affected by GCD)
@@ -954,7 +897,6 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
 
     --- Calculates the difference between mainhand and offhand swing times.
     --- @function NAG:SwingTimeDifference
-    --- @param self NAG
     --- @return number The difference in swing times, and whether sync is recommended
     --- @usage local diff = NAG:SwingTimeDifference()
     function NAG:SwingTimeDifference()
@@ -1016,7 +958,6 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
     end
 
     --- Checks if the current target is of a specific mob type.
-    --- @param self NAG
     --- @param mobType string The type of mob to check for
     --- @return boolean True if the target is of the specified mob type, false otherwise
     --- @usage NAG:IsTargetMobType(NAG.Types:GetType("MobType").Undead)
@@ -1048,7 +989,6 @@ end
 
 --- Predicts the player's energy after a given duration (in seconds).
 --- @function NAG:CatEnergyAfterDuration
---- @param self NAG
 --- @param duration number The duration in seconds to predict energy for
 --- @usage NAG:CatEnergyAfterDuration(3.5) >= 60
 --- @return number The predicted energy after the given duration (capped at max)
@@ -1071,6 +1011,11 @@ function NAG:CatEnergyAfterDuration(duration)
     return math.min(predictedEnergy, maxEnergy)
 end
 
+--- Checks if the player's current energy is below or equal to a threshold.
+--- @function NAG:EnergyThreshold
+--- @param threshold number The energy threshold to check against
+--- @usage NAG:EnergyThreshold(35)
+--- @return boolean True if current energy is less than or equal to the threshold, false otherwise
 function NAG:EnergyThreshold(threshold)
     return self:CurrentEnergy() <= threshold
 end

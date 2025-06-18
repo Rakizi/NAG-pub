@@ -1,93 +1,69 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-      liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-      made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your
-      use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS:good
-    TODO: Should it be implied if we should auraremainingtime that it needs the aura on?  I'd think so...
-
-]]
+--- Handles item, trinket, and tinker tracking and logic for the NAG addon.
+---
+--- This module provides functions for checking and managing item-based effects, trinket procs, tinker states, and tier set bonuses.
+--- @module "ItemHandlers"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--
 -- luacheck: ignore GetSpellInfo
---- ======= LOCALIZE =======
---Addon
+
+-- ============================ LOCALIZE ============================
 local _, ns = ...
 
----@class NAG
+-- Addon references
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class StateManager : ModuleBase
+---@type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
----@class TrinketTrackingManager : ModuleBase
+---@type TrinketTrackingManager|ModuleBase|AceModule
 local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
----@class Version : ModuleBase
+---@type Version
 local Version = ns.Version
---Libs
 
---WoW API
+-- WoW API (unified wrappers)
 local GetItemCooldown = ns.GetItemCooldownUnified
 local GetItemInfo = ns.GetItemInfoUnified
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+-- Math operations (WoW optimized)
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
--- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+-- String operations (WoW optimized)
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+-- Table operations (WoW optimized)
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
-
+local sort = table.sort
+local concat = table.concat
 local setmetatable = setmetatable
 local next = next
 
---File
-
--- Add tinkers/trinkets/items to generic functions
+-- WoW API direct
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
---local GetItemSpell = C_Item.GetItemSpell
-
---- ======= GLOBALIZE =======
 
 --- ============================ CONTENT ============================
 
 do -- ================================= Item APLValue Functions ========================== --
     --- Gets the remaining time on a trinket buff
-    --- @param self NAG
     --- @param id number The trinket ID
     --- @return number Time in seconds remaining
     function NAG:TrinketRemainingTime(id)
@@ -100,7 +76,6 @@ do -- ================================= Item APLValue Functions ================
     end
 
     --- Checks if a tinker is equipped
-    --- @param self NAG
     --- @param id number The spell ID associated with the tinker
     --- @return boolean True if equipped
     function NAG:IsKnownTinker(id)
@@ -127,7 +102,6 @@ do -- ================================= Item APLValue Functions ================
     end
 
     --- Checks if a tinker buff is active
-    --- @param self NAG
     --- @param id number The spell ID associated with the tinker
     --- @return boolean True if active
     function NAG:IsActiveTinker(id)
@@ -141,7 +115,6 @@ do -- ================================= Item APLValue Functions ================
     end
 
     --- Gets the time until a tinker is ready to use
-    --- @param self NAG
     --- @param id number The spell ID associated with the tinker
     --- @return number Time in seconds until ready (-1 if invalid)
     function NAG:TimeToReadyTinker(id)
@@ -170,7 +143,6 @@ do -- ================================= Item APLValue Functions ================
     end
 
     --- Checks if a tinker is ready to use
-    --- @param self NAG
     --- @param id number The spell ID associated with the tinker
     --- @return boolean True if ready
     function NAG:IsReadyTinker(id)
@@ -203,7 +175,6 @@ end
 
 do -- ================================= Tiersets Functions
     --- Retrieves the tier set for a given item ID
-    --- @param self NAG
     --- @param id number The item ID
     --- @return string|nil The tier set if found
     function NAG:GetItemTier(id)
@@ -226,7 +197,6 @@ do -- ================================= Tiersets Functions
     end
 
     --- Checks if a specific tier set is equipped
-    --- @param self NAG
     --- @param tier string The tier set to check
     --- @param count number The number of pieces needed
     --- @return boolean True if enough pieces are equipped
@@ -309,7 +279,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
     end
 
     --- Gets the maximum remaining ICD time for equipped trinkets matching the given stat types
-    --- @param self NAG
     --- @param statType1 number First stat type to match
     --- @param statType2 number|nil Second stat type to match (optional)
     --- @param statType3 number|nil Third stat type to match (optional)
@@ -448,7 +417,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
 
     --- Gets the number of equipped trinkets that match specified stat types. -- (V)
     --- @function NAG:NumEquippedStatProcTrinkets
-    --- @param self NAG
     --- @param statType1? number First stat type to check (optional)
     --- @param statType2? number Second stat type to check (optional)
     --- @param statType3? number Third stat type to check (optional)
@@ -493,7 +461,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
 
     --- Checks if all equipped trinkets of specified stat types have active procs.
     --- @function NAG:AllTrinketStatProcsActive
-    --- @param self NAG
     --- @param statType1? number First stat type to check (optional)
     --- @param statType2? number Second stat type to check (optional)
     --- @param statType3? number Third stat type to check (optional)
@@ -584,7 +551,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
 
     --- Checks if any equipped trinket of specified stat types has an active proc.
     --- @function NAG:AnyTrinketStatProcsActive
-    --- @param self NAG
     --- @param statType1? number First stat type to check (optional)
     --- @param statType2? number Second stat type to check (optional)
     --- @param statType3? number Third stat type to check (optional)
@@ -624,7 +590,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
     end
 
     --- Gets the number of equipped trinkets that provide stat buffs when used
-    --- @param self NAG
     --- @param statType1 number First stat type to check (-1 to ignore)
     --- @param statType2 number Second stat type to check (-1 to ignore)
     --- @param statType3 number Third stat type to check (-1 to ignore)
@@ -652,7 +617,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
 
     --- Casts all available stat buff cooldowns that match the given stat types.
     --- @function NAG:CastAllStatBuffCooldowns
-    --- @param self NAG
     --- @param statType1 number First stat type to check (-1 to ignore)
     --- @param statType2 number Second stat type to check (-1 to ignore)
     --- @param statType3 number Third stat type to check (-1 to ignore)
@@ -672,7 +636,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
 
     --- Triggers the internal cooldown for an aura.
     --- @function NAG:TriggerICD
-    --- @param self NAG
     --- @param auraId number The ID of the aura.
     --- @return boolean Always returns true for APL compatibility.
     --- @usage NAG:TriggerICD(73643)
@@ -693,7 +656,6 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
 
     --- Changes the current target to a new unit.
     --- @function NAG:ChangeTarget
-    --- @param self NAG
     --- @param newTarget string The new target unit.
     --- @return boolean Always returns true for APL compatibility.
     --- @usage NAG:ChangeTarget("focus")
@@ -721,6 +683,9 @@ do -- ================================= Trinket/Proc Functions (0/6V) ==========
 end
 
 -- TODO: Needs to be fixed
+--- Swaps items according to the provided swap set.
+--- @param swapSet table The set of items to swap in.
+--- @return boolean True if the swap overlay was shown, false otherwise.
 function NAG:ItemSwap(swapSet)
     if not swapSet then return false end
 

@@ -1,41 +1,64 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- Handles resource tracking and prediction for the NAG addon.
+--- Provides functions for checking, predicting, and retrieving player resource values (mana, energy, rage, chi, runes, etc.), including class-specific logic and Cataclysm-specific formulas.
+--- @module "ResourceHandlers"
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-      liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-      made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your
-      use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS:good
-
-]]
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--
 -- luacheck: ignore GetSpellInfo
---- ======= LOCALIZE =======
---Addon
+--
+-- ============================ LOCALIZE ============================
 local _, ns = ...
 
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Types : ModuleBase
+--- @type Types|AceModule
 local Types = NAG:GetModule("Types")
----@class StateManager : ModuleBase
+--- @type StateManager|AceModule
 local StateManager = NAG:GetModule("StateManager")
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
+
+-- ============================ FUNCTION LOCALIZATION ============================
+-- Math operations (WoW optimized)
+local format = format or string.format
+local floor = floor or math.floor
+local ceil = ceil or math.ceil
+local min = min or math.min
+local max = max or math.max
+local abs = abs or math.abs
+
+-- String operations (WoW optimized)
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
+
+-- Table operations (WoW optimized)
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
+
+-- Standard Lua functions (no WoW equivalent)
+local sort = table.sort
+local concat = table.concat
+local setmetatable = setmetatable
+local next = next
+
+-- WoW API
+local GetSpellCooldown = ns.GetSpellCooldownUnified
+local GetSpellCharges = ns.GetSpellChargesUnified
+local GetSpellInfo = ns.GetSpellInfoUnified
+local GetSpellPowerCost = ns.GetSpellPowerCostUnified
+local C_GetItemCooldown = _G.C_Container.GetItemCooldown
+
+--- ============================ CONTENT ============================
 
 -- Module level variables
 local spellNames = {}
@@ -74,48 +97,11 @@ NAG:RegisterEvent("PLAYER_LOGIN", function()
     end
 end)
 
---WoW API
-local GetSpellCooldown = ns.GetSpellCooldownUnified
-local GetSpellCharges = ns.GetSpellChargesUnified
-local GetSpellInfo = ns.GetSpellInfoUnified
-local GetSpellPowerCost = ns.GetSpellPowerCostUnified
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
-local floor = floor or math.floor
-local ceil = ceil or math.ceil
-local min = min or math.min
-local max = max or math.max
-local abs = abs or math.abs
-
--- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
-
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
-
--- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
-local setmetatable = setmetatable
-local next = next
-local C_GetItemCooldown = _G.C_Container.GetItemCooldown
-
---- ============================ CONTENT ============================
 do --== RESOURCE CHECKS ==--
     local costCache = {}
     --- Checks if the player has enough of the specified resource for a spell.
     --- @function NAG:HasResource
-    --- @param self NAG
     --- @param spellId number The ID of the spell.
     --- @param powerType Enum.PowerType The type of resource to check.
     --- @usage NAG:HasResource(73643, Enum.PowerType.Mana)
@@ -161,7 +147,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Combo Points for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Combo Points, false otherwise
     function NAG:HasComboPoints(spellId)
@@ -184,7 +169,6 @@ do --== RESOURCE CHECKS ==--
 
     
     --- Checks if the player has enough Chi for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Chi, false otherwise
     function NAG:HasChi(spellId)
@@ -219,7 +203,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Runic Power for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Runic Power, false otherwise
     function NAG:HasRunicPower(spellId)
@@ -227,7 +210,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Rage for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Rage, false otherwise
     function NAG:HasRage(spellId)
@@ -235,7 +217,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Mana for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Mana, false otherwise
     function NAG:HasMana(spellId)
@@ -243,7 +224,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Energy for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Energy, false otherwise
     function NAG:HasEnergy(spellId)
@@ -251,7 +231,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Soul Shards for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Soul Shards, false otherwise
     function NAG:HasSoulShards(spellId)
@@ -259,7 +238,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Lunar Power for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Lunar Power, false otherwise
     function NAG:HasLunarPower(spellId)
@@ -267,7 +245,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Holy Power for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Holy Power, false otherwise
     function NAG:HasHolyPower(spellId)
@@ -275,7 +252,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Checks if the player has enough Focus for a spell.
-    --- @param self NAG The NAG addon object
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Focus, false otherwise
     function NAG:HasFocus(spellId)
@@ -283,7 +259,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Determines the resource type of the player.
-    --- @param self NAG The NAG addon object
     --- @return Enum.PowerType|nil powerType The type of resource the player uses
     function NAG:GetResourceType()
         local powerType = UnitPowerType("player")
@@ -295,7 +270,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Calculates the current resource value of the player.
-    --- @param self NAG The NAG addon object
     --- @param powerType? number The type of power to check or self:GetResourceType()
     --- @return number currentResource The current amount of the specified resource
     function NAG:GetCurrentResource(powerType)
@@ -308,7 +282,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Calculates the current resource value of the player as a percentage.
-    --- @param self NAG The NAG addon object
     --- @param powerType? number The type of power to check
     --- @return number currentResourcePercent The current percentage of the specified resource
     function NAG:GetCurrentResourcePercent(powerType)
@@ -336,7 +309,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Predicts the resource value after a certain period.
-    --- @param self NAG The NAG addon object
     --- @param time number The time in seconds to predict the resource value for
     --- @param resourceType number The type of resource to predict (e.g., Mana, Energy, Rage)
     --- @return number predictedResource The predicted resource value after the specified time
@@ -391,7 +363,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Predicts the resource value as a percentage after a certain period.
-    --- @param self NAG The NAG addon object
     --- @param time number The time in seconds to predict the resource value for
     --- @param resourceType number The type of resource to predict (e.g., Mana, Energy, Rage)
     --- @return number predictedResourcePercent The predicted resource percentage after the specified time
@@ -416,14 +387,12 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Gets the runic power regeneration rate for Death Knights.
-    --- @param self NAG The NAG addon object
     --- @return number runicPowerRegen The runic power regeneration rate per second
     function NAG:GetRunicPowerRegen()
         return 10 -- Base Runic Power regeneration rate for Death Knights in Cataclysm
     end
 
     --- Retrieves the haste factor for the player.
-    --- @param self NAG The NAG addon object
     --- @return number hasteFactor The current haste multiplier (1 + haste percentage)
     function NAG:GetHasteFactor()
         local haste = GetMeleeHaste()
@@ -438,7 +407,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Retrieves the rage regeneration rate for the player.
-    --- @param self NAG The NAG addon object
     --- @return number rageRegen The rage regeneration rate per second
     function NAG:GetRageRegen()
         local baseRegen = 0 -- Default is no passive rage regeneration
@@ -455,7 +423,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Retrieves the energy regeneration rate for the player.
-    --- @param self NAG The NAG addon object
     --- @return number energyRegen The energy regeneration rate per second
     function NAG:GetEnergyRegen()
         -- Energy regenerates at a fixed rate of 10 per second in Cataclysm
@@ -473,7 +440,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Retrieves the focus regeneration rate for the player.
-    --- @param self NAG The NAG addon object
     --- @return number focusRegen The focus regeneration rate per second
     function NAG:GetFocusRegen()
         -- Base focus regeneration is 4 per second in Cataclysm
@@ -488,7 +454,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Retrieves the mana regeneration rate for the player.
-    --- @param self NAG The NAG addon object
     --- @return number manaRegen The mana regeneration rate per second
     function NAG:GetManaRegen()
         -- Spirit-based mana regeneration formula for Cataclysm
@@ -523,7 +488,6 @@ do --== RESOURCE CHECKS ==--
     end
 
     --- Calculates the spirit regeneration rate for the player.
-    --- @param self NAG The NAG addon object
     --- @return number spiritRegen The spirit-based mana regeneration rate per second
     function NAG:SpiritRegen()
         -- (0.001 + (SPI x sqrt(INT) x BASE_REGEN[LEVEL])) x 5
@@ -546,7 +510,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current health of the player
     --- @function NAG:CurrentHealth
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentHealth() >= x)
     --- @return number The current health of the player
     function NAG:CurrentHealth()
@@ -568,7 +531,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current mana of the player
     --- @function NAG:CurrentMana
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentMana() >= x)
     --- @return number The current mana of the player
     function NAG:CurrentMana()
@@ -577,7 +539,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current mana percentage of the player
     --- @function NAG:CurrentManaPercent
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentManaPercent() >= x)
     --- @return number The current mana percentage of the player
     function NAG:CurrentManaPercent()
@@ -587,7 +548,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current rage of the player
     --- @function NAG:CurrentRage
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentRage() >= x)
     --- @return number The current rage of the player
     function NAG:CurrentRage()
@@ -596,7 +556,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current energy of the player
     --- @function NAG:CurrentEnergy
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentEnergy() >= x)
     --- @return number The current energy of the player
     function NAG:CurrentEnergy()
@@ -605,7 +564,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current combo points of the player (global)
     --- @function NAG:CurrentComboPointsGlobal
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentComboPointsGlobal() >= x)
     --- @return number The current combo points of the player
     function NAG:CurrentComboPointsGlobal()
@@ -627,7 +585,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current runic power of the player
     --- @function NAG:CurrentRunicPower
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentRunicPower() >= x)
     --- @return number The current runic power of the player
     function NAG:CurrentRunicPower()
@@ -636,7 +593,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the maximum runic power capacity of the player, accounting for talents
     --- @function NAG:MaxRunicPower
-    --- @param self NAG The NAG object.
     --- @usage local maxRP = NAG:MaxRunicPower()
     --- @return number The maximum runic power capacity
     function NAG:MaxRunicPower()
@@ -766,7 +722,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current focus of the player
     --- @function NAG:CurrentFocus
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentFocus() >= x)
     --- @return number The current focus of the player
     function NAG:CurrentFocus()
@@ -775,7 +730,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current soul shards of the player
     --- @function NAG:CurrentSoulShards
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentSoulShards() >= x)
     --- @return number The current soul shards of the player
     function NAG:CurrentSoulShards()
@@ -784,7 +738,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current lunar energy of the player
     --- @function NAG:CurrentLunarEnergy
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentLunarEnergy() >= x)
     --- @return number The current lunar energy of the player
     function NAG:CurrentLunarEnergy()
@@ -793,7 +746,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current solar energy of the player
     --- @function NAG:CurrentSolarEnergy
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentSolarEnergy() >= x)
     --- @return number The current solar energy of the player
     function NAG:CurrentSolarEnergy()
@@ -802,7 +754,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current holy power of the player
     --- @function NAG:CurrentHolyPower
-    --- @param self NAG
     --- @usage (NAG:CurrentHolyPower() >= x)
     --- @return number The current holy power of the player
     function NAG:CurrentHolyPower()
@@ -811,7 +762,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current alternate power of the player
     --- @function NAG:CurrentAlternate
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentAlternate() >= x)
     --- @return number The current alternate power of the player
     function NAG:CurrentAlternate()
@@ -820,7 +770,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current maelstrom of the player
     --- @function NAG:CurrentMaelstrom
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentMaelstrom() >= x)
     --- @return number The current maelstrom of the player
     function NAG:CurrentMaelstrom()
@@ -829,7 +778,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Get the current chi of the player
     --- @function NAG:CurrentChi
-    --- @param self NAG The NAG object.
     --- @usage (NAG:CurrentChi() >= x)
     --- @return number The current chi of the player
     function NAG:CurrentChi()
@@ -841,7 +789,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the current count of active runes of a specific type.
     --- @function NAG:CurrentRuneCount
-    --- @param self NAG
     --- @param runeType number The type of rune to count.
     --- @usage NAG:CurrentRuneCount(runeType) >= x
     --- @return number The number of active runes of the specified type, or 0 if the player is not a Death Knight.
@@ -910,7 +857,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the number of non-death runes of a specific type that are ready.
     --- @function NAG:NumNonDeathRunes
-    --- @param self NAG
     --- @param runeType number The type of rune to count.
     --- @usage NAG:NumNonDeathRunes(runeType) >= x
     --- @return number The number of non-death runes of the specified type that are ready, or 0 if the player is not a Death Knight.
@@ -936,10 +882,9 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Checks if a specific rune slot contains a death rune.
     --- @function NAG:CurrentRuneDeath
-    --- @param self NAG
     --- @param runeSlot number The rune slot to check.
     --- @usage NAG:CurrentRuneDeath(runeSlot)
-    -- @return boolean True if the rune slot contains a death rune, false otherwise.
+    --- @return boolean True if the rune slot contains a death rune, false otherwise.
     function NAG:CurrentRuneDeath(runeSlot)
         if not runeSlot then
             self:Error("CurrentRuneDeath called with nil runeSlot")
@@ -954,10 +899,9 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Checks if a specific rune slot is active.
     --- @function NAG:CurrentRuneActive
-    --- @param self NAG
     --- @param runeSlot number The rune slot to check.
     --- @usage NAG:CurrentRuneActive(runeSlot)
-    -- @return boolean True if the rune slot is active, false otherwise.
+    --- @return boolean True if the rune slot is active, false otherwise.
     function NAG:CurrentRuneActive(runeSlot)
         if not runeSlot then
             self:Error("CurrentRuneActive called with nil runeSlot")
@@ -973,10 +917,9 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Checks if a specific rune is ready.
     --- @function NAG:RuneReady
-    --- @param self NAG
     --- @param index number The index of the rune to check.
     --- @usage NAG:RuneReady(index)
-    -- @return boolean True if the rune is ready, false otherwise.
+    --- @return boolean True if the rune is ready, false otherwise.
     function NAG:RuneReady(index)
         if not index then
             self:Error("RuneReady called with nil index")
@@ -992,7 +935,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the number of runes of a specific type that are ready.
     --- @function NAG:NumRunes
-    --- @param self NAG
     --- @param runeType number The type of rune to count.
     --- @usage NAG:NumRunes(runeType) > 0
     --- @return number The number of runes of the specified type that are ready, or 0 if the player is not a Death Knight.
@@ -1017,7 +959,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the highest cooldown time among runes of a specific type.
     --- @function NAG:NextRuneCooldown
-    --- @param self NAG
     --- @param runeType number The type of rune to check.
     --- @usage NAG:NextRuneCooldown(runeType) <= x
     --- @return number The highest cooldown time among runes of the specified type, or 0 if the player is not a Death Knight.
@@ -1047,7 +988,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the lowest cooldown time among runes of a specific type.
     --- @function NAG:RuneCooldown
-    --- @param self NAG
     --- @param runeType number The type of rune to check (1-4).
     --- @usage NAG:RuneCooldown(runeType) <= x
     --- @return number The lowest cooldown time among runes of the specified type, or 0 if the player is not a Death Knight.
@@ -1108,7 +1048,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the cooldown time for a specific rune slot.
     --- @function NAG:RuneSlotCooldownNew
-    --- @param self NAG
     --- @param runeSlot number The rune slot to check.
     --- @usage NAG:RuneSlotCooldownNew(runeSlot) <= x
     --- @return number The cooldown time for the specified rune slot, or 0 if the player is not a Death Knight.
@@ -1131,7 +1070,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the cooldown time for a specific rune slot.
     --- @function NAG:RuneSlotCooldown
-    --- @param self NAG
     --- @param runeSlot number The rune slot to check.
     --- @usage NAG:RuneSlotCooldown(runeSlot) <= x
     --- @return number The cooldown time for the specified rune slot, or 0 if the player is not a Death Knight.
@@ -1150,7 +1088,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the grace period for a specific rune type.
     --- @function NAG:RuneGrace
-    --- @param self NAG
     --- @param runeType number The type of rune to check.
     --- @usage NAG:RuneGrace(runeType) <= x
     --- @return number The grace period for the specified rune type, or 0 if the player is not a Death Knight.
@@ -1173,7 +1110,6 @@ do -- ================================= Resource APLValue Functions ============
 
     --- Returns the grace period for a specific rune slot.
     --- @function NAG:RuneSlotGrace
-    --- @param self NAG
     --- @param runeSlot number The rune slot to check.
     --- @usage NAG:RuneSlotGrace(runeSlot) <= x
     --- @return number The grace period for the specified rune slot, or 0 if the player is not a Death Knight.
@@ -1190,7 +1126,6 @@ do -- ================================= Resource APLValue Functions ============
     end
 
     --- Calculates the time until the next energy tick for Rogues and Feral Druids.
-    --- @param self NAG
     --- @function NAG:TimeToEnergyTick
     --- @return number Time in seconds until the next energy tick
     function NAG:TimeToEnergyTick()
@@ -1211,7 +1146,6 @@ end
 do -- ================================= Resource APLValue Functions (4/4V) ================================= --
     --- Gets the current amount of Demonic Fury. (V)
     --- @function NAG:CurrentDemonicFury
-    --- @param self NAG
     --- @return number The current amount of Demonic Fury
     --- @usage NAG:CurrentDemonicFury() >= x
     function NAG:CurrentDemonicFury()
@@ -1220,7 +1154,6 @@ do -- ================================= Resource APLValue Functions (4/4V) =====
 
     --- Gets the current number of Arcane Charges. (V)
     --- @function NAG:CurrentArcaneCharges
-    --- @param self NAG
     --- @return number The current number of Arcane Charges
     --- @usage NAG:CurrentArcaneCharges() >= x
     function NAG:CurrentArcaneCharges()
@@ -1229,7 +1162,6 @@ do -- ================================= Resource APLValue Functions (4/4V) =====
 
     --- Gets the current number of Burning Embers. (V)
     --- @function NAG:CurrentBurningEmbers
-    --- @param self NAG
     --- @return number The current number of Burning Embers
     --- @usage NAG:CurrentBurningEmbers() >= x
     function NAG:CurrentBurningEmbers()
