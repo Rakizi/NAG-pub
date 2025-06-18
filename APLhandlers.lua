@@ -1,7 +1,7 @@
 --- Handles Action Priority List (APL) logic and value functions for the NAG addon.
 ---
 --- This module provides utility, funnel, casting, target/unit, spell, dot, class, and pet APL value functions for the Next Action Guide (NAG) addon.
-
+--- @module "APLhandlers"
 -- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold

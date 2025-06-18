@@ -1,17 +1,13 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    See LICENSE for full license text.
-
-    Author: Rakizi
-    Date: 03/19/2024
-
-    STATUS: Active
-    NOTES: UI Background module for NAG, allowing users to select and customize background icons
-]]
+--- Handles UI background management and customization for NAG.
+--- @module "UIBackground"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local LSM = LibStub("LibSharedMedia-3.0")

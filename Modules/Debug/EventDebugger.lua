@@ -1,19 +1,19 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Debug utilities for development and troubleshooting
-    STATUS: ok
-    TODO: 
-        - None
-]]
+--- Debug utilities for development and troubleshooting.
+---
+--- Provides a module for managing debug settings, logging messages, and
+--- debugging conditions.
+--- @module "EventDebugger"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 ---@diagnostic disable: ...
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
---- @class NAG : AceAddon-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DebugManager : ModuleBase
+--- @type DebugManager|ModuleBase|AceModule
 local Debug = NAG:GetModule("DebugManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

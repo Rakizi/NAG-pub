@@ -1,71 +1,56 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- ============================ Options ============================
+--- Handles all options, configuration, and settings UI for NAG addon
+---
+--- This module defines and manages all Ace3 options tables, configuration UI, and related logic for the Next Action Guide addon.
+---
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+---     TODO: Modify to dynamically retrieve class icons, druid/deathknight icons weren't correct in last attempt
+---     TODO: remove any toggle functions, add methods(tooltips)
+---     TODO: Verify all table returns, make sure all return correct
+---     TODO: Change glow color selection to dropdown with color swatches (or use a color picker)
+---     TODO: rewrite burst tracker options to have similar structure to resource bar options
+---     TODO: Fix last selected group not being remembered
+--- @module "Options"
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS: GOOD: Organized, Error handling added
-    TODO: Modify to dynamically retrieve class icons, druid/deathknight icons weren't correct in last attempt
-    TODO: remove any toggle functions, add methods(tooltips)
-    TODO: Verify all table returns, make sure all return correct
-    TODO: Change glow color selection to dropdown with color swatches
-    TODO: rewrite burst tracker options to have similar structure to resource bar options
-    TODO: Fix last selected group not being remembered
-
-
-
-    ]]
-
---- ======= LOCALIZE =======
---Addon
+--- ============================ LOCALIZE ============================
+-- Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon Main addon reference
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---Libs
 
+-- Libs
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
 
-
 local GetItemInfo = ns.GetItemInfoUnified
+
 -- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
-
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local tostring = tostring
+local tonumber = tonumber
+local unpack = unpack
 
---File
---- ======= GLOBALIZE =======
 --- ============================ CONTENT ============================
 
 --Local Helper Functions ==============================================================================================

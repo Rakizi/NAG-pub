@@ -1,17 +1,13 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: NextActionGuide Team
-    Module Purpose: UI for displaying APL test results and running tests
-    STATUS: Active
-    TODO: Add localization, improve error display, support filtering
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Date: 30/09/2024
-]]
+--- Provides a UI for displaying APL test results and running tests
+--- @module "APLTestUI"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 --- ============================ LOCALIZE ============================
 local addonName, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")

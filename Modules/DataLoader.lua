@@ -1,13 +1,13 @@
---- ============================ HEADER ============================
+--- Handles version-specific data loading across different WoW versions.
+---
+--- Responsible for selecting the appropriate version's data based on the current game version.
+--- @module "DataLoader"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+
 --[[
-    See LICENSE for full license text.
-    Authors: Rakizi
-    Module Purpose: DataLoader module for handling version-specific data loading across different WoW versions. Responsible for selecting the appropriate version's data based on the current game version.
-    STATUS: Stable
-    TODO: 
-        - Add support for new expansions as needed
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    https://creativecommons.org/licenses/by-nc/4.0/
 
     Supported Data Files Structure:
     /data
@@ -57,9 +57,9 @@
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
+--- @type Version|ModuleBase
 local Version = ns.Version
 
 -- Lua APIs (using WoW's optimized versions where available)

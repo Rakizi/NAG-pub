@@ -1,16 +1,15 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi
-    Module Purpose: Type registry and enum system for NAG modules, including schema integration and type normalization utilities.
-    STATUS: Active
-    TODO: Expand schema import support, add more type categories as needed
-]]
+--- Manages type registry and enum system for NAG modules, including schema integration and type normalization utilities.
+--- @module "Types"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+
 ---@diagnostic disable: duplicate-set-field, undefined-global, unused-local
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")

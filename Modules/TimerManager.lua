@@ -1,17 +1,17 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Unknown (original), please update.
-    Module Purpose: Timer Management System - centralized timer management and tracking functionality. Facade for Ace3 timer operations and ensures proper cleanup.
-    STATUS: Production
-    TODO: Document timer usage patterns and add more categories if needed.
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
+--- Manages timer functionality for NAG.
+---
+--- This module provides functions for creating, canceling, and checking timers.
+--- @module "TimerManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Lua APIs (using WoW's optimized versions where available)

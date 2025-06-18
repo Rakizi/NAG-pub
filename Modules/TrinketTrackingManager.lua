@@ -1,25 +1,18 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- Manages trinket proc tracking and ICD learning.
+--- @module "TrinketTrackingManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
-    TrinketTrackingManager
-    ----------------------
-    Manages trinket proc tracking and ICD learning.
-
-    Responsibilities:
-    - Track trinket proc states
-    - Learn trinket ICDs and durations
-    - Track proc uptime and cooldowns
-    - Provide proc prediction and timing information
-]]
 --- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class Types : ModuleBase
+---@type Types|ModuleBase|AceModule
 local Types = NAG:GetModule("Types")
 
 --WoW API

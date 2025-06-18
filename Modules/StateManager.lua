@@ -1,18 +1,25 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
---- ======= LOCALIZE =======
+--- Manages the state of the NAG addon.
+---
+--- This module provides functions for checking and managing the state of the NAG addon.
+--- @module "StateManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--
+-- luacheck: ignore GetSpellInfo
+-- ============================ LOCALIZE ============================
+
 -- Addon
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class Version : ModuleBase
+---@type Version
 local Version = ns.Version
----@class Types : ModuleBase
+---@type Types|ModuleBase|AceModule
 local Types = NAG:GetModule("Types")
 --Libs
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)

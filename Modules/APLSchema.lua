@@ -1,14 +1,17 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Author: NextActionGuide Team
-    Date: 30/09/2024
-]]
+--- Provides a module for managing and displaying the APL schema for NAG.
+---
+--- Provides a UI for browsing and exploring the APL schema, message types,
+--- and field definitions.
+--- @module "APLSchema"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
---- ======= LOCALIZE =======
+--- ============================ LOCALIZE ============================
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")

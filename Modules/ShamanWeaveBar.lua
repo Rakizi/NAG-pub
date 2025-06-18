@@ -1,23 +1,23 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    
-    Author: Rakizi
-    Date: 2024
-]]
---- ======= LOCALIZE =======
+--- Module for Shaman weave optimization
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--- ============================ LOCALIZE ============================
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG")
+---@type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
 
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class TimerManager
+---@type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
--- Add reference to ShamanWeaveModule for sync threshold
-local ShamanWeaveModule = ns.ShamanWeaveModule
+---@type ShamanWeaveModule|ModuleBase|AceModule
+local ShamanWeaveModule = NAG:GetModule("ShamanWeaveModule", true)
 
 -- Check if player is a Shaman
 local _, playerClass = UnitClass("player")

@@ -1,37 +1,27 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- Handles pull timer management and countdown functionality for NAG.
+--- @module "PullTimerManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-             Fonsas: @Fonsas http://discord.gg/ebonhold
-    
-
-    Pull Timer Management System
-    --------------------------
-    The PullTimerManager provides centralized management of pull timers and countdown functionality.
-    Handles both pull timer tracking and pre-pull spell casting.
-
-    STATUS: 
-    TODO:   
-
-]]
 ---@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
 --- ============================ LOCALIZE ============================
 -- Addon
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@class TimerManager : ModuleBase
+---@type TimerManager|ModuleBase|AceAddon
 local Timer = NAG:GetModule("TimerManager")
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceAddon
 local DataManager = NAG:GetModule("DataManager")
+---@type StateManager|ModuleBase|AceAddon
+local StateManager = NAG:GetModule("StateManager")
+
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true) -- Enable silent fallback
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-
----@class StateManager : ModuleBase
-local StateManager = NAG:GetModule("StateManager")
 
 -- WoW API Compatibility
 local GetSpellInfo = ns.GetSpellInfoUnified

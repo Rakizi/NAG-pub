@@ -1,19 +1,18 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (original authors, add as needed)
-    Module Purpose: Manages the UI and logic for user rotation management in NAG.
-    STATUS: Active
-    TODO: (add any TODOs here)
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
+--- Module for managing user rotations in NAG
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- @module "RotationManager"
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 ---@diagnostic disable: undefined-field
 
 --- ============================ LOCALIZE ============================
+
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
+---@type Version|ModuleBase|AceModule
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceGUI = LibStub("AceGUI-3.0")

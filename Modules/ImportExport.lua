@@ -1,17 +1,15 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Author: Rakizi
-    Module Purpose: Handles import and export of rotation configurations, including validation and registration of entities.
-    STATUS: Production
-    TODO: Add more robust error handling and support for additional data types.
-]]
+--- Handles import and export of rotation configurations, including validation and registration of entities.
+--- @module "ImportExport"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)

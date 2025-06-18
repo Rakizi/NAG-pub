@@ -1,35 +1,35 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- Manages spell-related state tracking.
+---
+---  Responsibilities:
+---    - Track spell travel times
+---    - Track periodic effects (DoTs/HoTs)
+---    - Track cast counts
+---
+---  State Structure:
+---    ---------------
+---    state = {
+---        travelTime = {},      -- {spellId = {STT = number, inFlight = timestamp, projectileSpeed = number}}
+---        periodicEffects = {}, -- {spellId = {targets = {[guid] = {lastTickTime = timestamp, tickDamage = number}}, spellId = number, auraId = number}}
+---        castTracking = {},    -- {spellId = {recentCasts = {timestamp, ...}, lastCast = timestamp}}
+---        icdTracking = {},     -- {spellId = {duration = number, lastProc = number}} -- Track both ICD duration and last proc time
+---    }
 
-    SpellTrackingManager
-    -------------------
-    Manages spell-related state tracking.
+--- @module "SpellTrackingManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
-    Responsibilities:
-    - Track spell travel times
-    - Track periodic effects (DoTs/HoTs)
-    - Track cast counts
-
-    State Structure:
-    ---------------
-    state = {
-        travelTime = {},      -- {spellId = {STT = number, inFlight = timestamp, projectileSpeed = number}}
-        periodicEffects = {}, -- {spellId = {targets = {[guid] = {lastTickTime = timestamp, tickDamage = number}}, spellId = number, auraId = number}}
-        castTracking = {},    -- {spellId = {recentCasts = {timestamp, ...}, lastCast = timestamp}}
-        icdTracking = {},     -- {spellId = {duration = number, lastProc = number}} -- Track both ICD duration and last proc time
-    }
-]]
---- ======= LOCALIZE =======
+-- ============================ LOCALIZE ============================
 -- Addon
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class TimerManager : ModuleBase
+---@type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
----@class StateManager : ModuleBase
+---@type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
 
 -- Lua APIs (using WoW's optimized versions where available)

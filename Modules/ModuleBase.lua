@@ -1,10 +1,15 @@
+--- Provides a base class for all modules in NAG.
+--- @module "ModuleBase"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+
 ---@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
--- ModuleBase.lua
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
-
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

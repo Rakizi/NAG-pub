@@ -1,54 +1,53 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: APL Monitor module for debugging and visualizing action priority lists
-    STATUS: good
-    TODO: 
-        - Add more filter toggles in options
-        - Improve grouped view formatting
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
-
----@diagnostic disable: ...
+--- Debugging and visualizing action priority lists (APL) for NAG
+---
+--- Provides a UI for monitoring and analyzing APL conditions in real time.
+--- Useful for developers and advanced users to debug rotations.
+--- @module "APLMonitor"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--
+-- luacheck: ignore GetSpellInfo
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
---- @class NAG : AceAddon-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 
----@class DataManager
+--- @type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+-- Lua APIs (WoW-optimized versions where available)
+-- Math operations
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
--- String manipulation (WoW's optimized versions)
-local strmatch = string.match -- WoW's version
-local strfind = string.find   -- WoW's version
-local strsub = string.sub     -- WoW's version
-local strlower = string.lower -- WoW's version
-local strupper = string.upper -- WoW's version
-local strsplit = string.split -- WoW's specific version
-local strjoin = string.join   -- WoW's specific version
+-- String operations
+local strmatch = strmatch -- WoW's optimized version
+local strfind = strfind   -- WoW's optimized version
+local strsub = strsub     -- WoW's optimized version
+local strlower = strlower -- WoW's optimized version
+local strupper = strupper -- WoW's optimized version
+local strsplit = strsplit -- WoW-specific
+local strjoin = strjoin   -- WoW-specific
 
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+-- Table operations
+local tinsert = tinsert     -- WoW's optimized version
+local tremove = tremove     -- WoW's optimized version
+local wipe = wipe           -- WoW-specific
+local tContains = tContains -- WoW-specific
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 --- ============================ CONTENT ============================
 

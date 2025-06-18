@@ -1,19 +1,17 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Debug management module for centralized logging and debugging
-    STATUS: good
-    TODO: 
-        - (none)
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
+--- Handles centralized logging and debugging functionality for the NAG addon.
+---
+--- Provides a module for managing debug settings, logging messages, and
+--- debugging conditions.
+--- @module "DebugManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
---- @class NAG : AceAddon-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

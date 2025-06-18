@@ -1,22 +1,17 @@
---- ============================ HEADER ============================
---[[
-    Module Purpose: Automated APL (Action Priority List) test suite for NAG. Provides batch and randomized testing of APL actions and values, with result recording and reporting.
-    Authors: NextActionGuide Team
-    Contact: See LICENSE for contact info
-    STATUS: Active
-    TODO: 
-      - Add more test types
-      - Improve error reporting
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    See LICENSE for full license text.
-    Date: 30/09/2024
-]]
+--- Automated APL (Action Priority List) test suite for NAG.
+---
+--- Provides batch and randomized testing of APL actions and values, with result recording and reporting.
+--- @module "APLTest"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local addonName, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")

@@ -1,54 +1,64 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- ============================ NAG Main ============================
+--- Main entry point and core logic for the Next Action Guide addon
+---
+--- This module initializes the NAG addon, manages core settings, options, slash commands, and provides the main API for all modules.
+---
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+---
+--- @module "NAG"
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-    STATUS: good?  Added localization to non-info prints and to /nag slash command. translations i imagine may need verification?
-
-
-]]
-
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
---Addon
+--- ============================ LOCALIZE ============================
+-- Addon
 local _, ns = ...
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local SpecializationCompat = ns.SpecializationCompat
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = string.match -- WoW's version
-local strfind = string.find   -- WoW's version
-local strsub = string.sub     -- WoW's version
-local strlower = string.lower -- WoW's version
-local strupper = string.upper -- WoW's version
-local strsplit = string.split -- WoW's specific version
-local strjoin = string.join   -- WoW's specific version
-local strtrim = string.trim   -- Added for strtrim function
+local strmatch = string.match
+local strfind = string.find
+local strsub = string.sub
+local strlower = string.lower
+local strupper = string.upper
+local strsplit = string.split
+local strjoin = string.join
+local strtrim = string.trim
 
---WoW API
+-- WoW API
 local GetAddOnMetadata = ns.GetAddOnMetadataUnified
 
 -- Table operations (WoW's optimized versions)
 local EXPERIMENTAL_FEATURES = true
 ns.EXPERIMENTAL_FEATURES = EXPERIMENTAL_FEATURES or false
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
+
+-- Standard Lua functions
+local sort = table.sort
+local concat = table.concat
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local tostring = tostring
+local tonumber = tonumber
+local unpack = unpack
+local error = error
+local select = select
+local next = next
+local format = format or string.format
+local floor = floor or math.floor
+local ceil = ceil or math.ceil
+local min = min or math.min
+local max = max or math.max
+local abs = abs or math.abs
+
+--- ============================ CONTENT ============================
+
 --- ======= LOCALIZE =======
 -- Module category constants
 ns.MODULE_CATEGORIES = {

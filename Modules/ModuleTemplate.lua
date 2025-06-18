@@ -1,50 +1,18 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-    STATUS: Template
-    NOTES: Template module demonstrating best practices for NAG modules
-
-    Timer Usage:
-    This module uses the TimerManager for all timer-related operations. The TimerManager
-    provides centralized timer management and ensures proper cleanup. Example usage:
-
-    - Creating a timer:
-      ns.TimerManager:Create(ns.TimerManager.Categories.UI_NOTIFICATION, "UpdateDisplay", self.OnUpdate, 0.1, true)
-
-    - Canceling a timer:
-      ns.TimerManager:Cancel(ns.TimerManager.Categories.UI_NOTIFICATION, "UpdateDisplay")
-
-    - Checking if a timer is active:
-      ns.TimerManager:IsTimerActive(ns.TimerManager.Categories.UI_NOTIFICATION, "UpdateDisplay")
-]]
+--- Template module demonstrating best practices for NAG modules
+--- @module "ModuleTemplate"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 --- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
---- @class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
----@class TimerManager : ModuleBase
+---@type TimerManager|ModuleBase|AceModule
 local TimerManager = NAG:GetModule("TimerManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

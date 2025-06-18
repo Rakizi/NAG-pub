@@ -1,40 +1,18 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- Handles common functionality for the NAG addon.
+--- @module "Common"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS: good
-    NOTES: Add any additional comments or notes
-
-]]
-
---- ======= LOCALIZE =======
---Addon
+--- ============================ LOCALIZE ============================
 local _, ns = ...
 
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class StateManager : ModuleBase
+---@type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
----@class PullTimerManager : ModuleBase
+---@type PullTimerManager|ModuleBase|AceModule
 local PullTimer = NAG:GetModule("PullTimerManager")
 
 --WoW API

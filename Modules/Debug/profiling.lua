@@ -1,21 +1,16 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Profiling utility for measuring and reporting code performance in NAG. Provides function timing, cumulative timing, and reporting tools for debugging and optimization.
-    STATUS: GOOD: Error handling added
-    TODO: 
-        - Add more advanced memory profiling
-        - Integrate with external profiling tools if needed
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
-
+--- Provides a module for measuring and reporting code performance in NAG.
+---
+--- Provides function timing, cumulative timing, and reporting tools for debugging and optimization.
+--- @module "ProfilingUtility"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 ---@diagnostic disable: undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

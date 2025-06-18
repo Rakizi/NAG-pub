@@ -1,17 +1,15 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Manages custom glow effects for UI frames using LibCustomGlow-1.0
-    STATUS: Initial implementation
-    TODO: Add more glow types and configuration options
-]]
+--- Manages custom glow effects for UI frames using LibCustomGlow-1.0
+--- @module "GlowManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

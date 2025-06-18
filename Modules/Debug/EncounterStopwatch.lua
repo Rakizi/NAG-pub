@@ -1,22 +1,21 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (Unknown, please update if needed)
-    Module Purpose: Displays current time, remaining time, and percentage values for encounters.
-    STATUS: Stable
-    TODO: (None listed)
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
+--- Displays current time, remaining time, and percentage values for encounters.
+---
+--- Provides a module for monitoring and visualizing encounter progress.
+--- @module "EncounterStopwatch"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class TimerManager : ModuleBase
+--- @type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
----@class StateManager : ModuleBase
+--- @type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
 
 -- Lua APIs

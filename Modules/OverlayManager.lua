@@ -1,21 +1,18 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (add author names and contact info here)
-    Module Purpose: OverlayManager - Handles creation, display, and management of overlays (icons, notifications, text) on frames for the NAG addon.
-    STATUS: Active
-    TODO: (add any outstanding tasks here)
-]]
----@diagnostic disable: ...
+--- Handles creation, display, and management of overlays (icons, notifications, text) on frames for the NAG addon.
+--- @module "OverlayManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class TimerManager : ModuleBase
+---@type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
 local LSM = LibStub("LibSharedMedia-3.0")
 

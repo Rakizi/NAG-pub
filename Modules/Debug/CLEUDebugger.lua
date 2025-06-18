@@ -1,22 +1,19 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Debug utilities for monitoring Combat Log Event Unfiltered (CLEU)
-    STATUS: ok
-    TODO: 
-        - Add more event filters as needed
-        - Improve output formatting options
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
+--- Debug utilities for monitoring Combat Log Event Unfiltered (CLEU) events.
+---
+--- Provides a module for filtering and logging CLEU events based on various
+--- conditions and parameters.
+--- @module "CLEUDebugger"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
---- @class NAG : AceAddon-3.0, AceConsole-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DebugManager : ModuleBase
+--- @type DebugManager|ModuleBase|AceModule
 local Debug = NAG:GetModule("DebugManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

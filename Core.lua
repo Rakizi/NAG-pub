@@ -1,38 +1,22 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- Handles core functionality for the NAG addon.
+--- @module "Core"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-    STATUS: good
-    NOTES: Core utility functions that don't depend on NAG
-]]
-
+--- ============================ LOCALIZE ============================
 local _, ns = ...
-
---WoW API
 
 -- Lua APIs (using WoW's optimized versions where available)
 local format = format or string.format -- WoW's optimized version if available
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
+
+local bit = bit
+
+-- Lua APIs (using WoW's optimized versions where available)
 local max = max or math.max
 local abs = abs or math.abs
 

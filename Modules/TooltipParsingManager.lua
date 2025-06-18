@@ -1,27 +1,20 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (original authors, update as needed)
-    Module Purpose: Advanced tooltip parsing for items, especially trinkets.
-    STATUS: Production
-    TODO: 
-      - Improve proc spell detection
-      - Add more robust PvP detection
-      - Expand stat keyword coverage
-    
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    For full license text, see LICENSE
-]]
+--- Manages tooltip parsing for items, especially trinkets.
+--- @module "TooltipParsingManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+
 ---@diagnostic disable: undefined-global, undefined-field, redundant-parameter, missing-parameter, param-type-mismatch
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@class Types : ModuleBase
+---@type Types|ModuleBase|AceModule
 local Types = NAG:GetModule("Types")
----@class DataManager : ModuleBase
+---@type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
 
 --WoW API

@@ -4,7 +4,7 @@
 
 local _, ns = ...
 local Version = ns.Version
-
+--- @class SpecializationCompat
 local SpecializationCompat = {}
 
 -- MoP+ standard specID mapping (base)

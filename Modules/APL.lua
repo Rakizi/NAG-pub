@@ -1,19 +1,13 @@
---- ============================ HEADER ============================
---[[
-    Module Purpose: Implements the APL (Action Priority List) core logic for NAG, including schema-driven function generation and implementation registration.
-    Authors: NextActionGuide Team
-    Contact: See project repository
-    STATUS: Active
-    TODO: 
-      - Expand schema support for new action/value types
-      - Improve error reporting for user scripts
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    See LICENSE for full license text.
-]]
+--- Implements the APL (Action Priority List) core logic for NAG, including schema-driven function generation and implementation registration.
+--- @module "APL"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 --- ============================ LOCALIZE ============================
 local addonName, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")

@@ -1,23 +1,17 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (original authors, update as needed)
-    Module Purpose: Time To Death (TTD) Management System
-    STATUS: Production
-    TODO: 
-      - Add more advanced prediction models
-      - Integrate with encounter modules
-    
-    The TTDManager provides time-to-death predictions for units using health sampling
-    and linear regression analysis.
-]]
+--- Manages time-to-death (TTD) predictions for units using health sampling and linear regression analysis.
+--- @module "TTDManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class TimerManager : ModuleBase
+---@type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
 
 -- Lua APIs (using WoW's optimized versions where available)

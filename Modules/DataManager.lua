@@ -1,33 +1,23 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi
-    Module Purpose: DataManager module for managing, processing, and indexing all versioned and runtime data entities (spells, items, sets, etc) in NAG. Handles entity relationships, type/flag indexing, and provides high-level data access APIs.
-    STATUS: In Progress
-    TODO:
-        - Refactor and clean up legacy logic
-        - Improve flag/type/relationship indexing
-        - Add more robust error handling and validation
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    https://creativecommons.org/licenses/by-nc/4.0/
-]]
-
---- ============================ LOCALIZE ============================
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
-
+--- Handles data management and processing for the NAG addon.
+---
+--- This module provides functions for managing, processing, and indexing all versioned and runtime data entities (spells, items, sets, etc) in NAG. Handles entity relationships, type/flag indexing, and provides high-level data access APIs.
+--- @module "DataManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
 -- ISSUES: Clean it all up
 -- 1. big issue is only first item added gives the behavior, the rest are just added as flags.
+---@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
 
 
---- ======= LOCALIZE =======
+--- ============================ LOCALIZE ============================
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Types : ModuleBase
-local Types = NAG:GetModule("Types") -- Get the Types module reference
-
----@class DebugManager : ModuleBase
+--- @type Types|ModuleBase|AceModule
+local Types = NAG:GetModule("Types")
+--- @type DebugManager|ModuleBase|AceModule
 local DebugManager = NAG:GetModule("DebugManager")
 
 --WoW API

@@ -1,26 +1,17 @@
--- EntityBehaviorTester.lua
--- For use with Cube addon ( https://github.com/kurapica/Cube )in World of Warcraft
--- Tests NAG EntityBehaviors implementation
-
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Entity Behavior testing module for debugging and visualizing entity behaviors
-    STATUS: good
-    TODO: 
-        - (none)
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
+--- Tests NAG EntityBehaviors implementation
+--- @module "EntityBehaviorTester"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
---- @class NAG : AceAddon-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|ModuleBase|AceModule
 local DataManager = NAG:GetModule("DataManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

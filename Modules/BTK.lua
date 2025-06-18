@@ -1,18 +1,14 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Unknown (original), please update as needed
-    Module Purpose: Handles character emote behaviors and version checking.
-    STATUS: Stable
-    TODO: Add more emote types, improve group logic
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
+--- Handles character emote behaviors and version checking.
 --- @module "BTK"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 --- @diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
---- @type NAG|AceAddon Main addon reference
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Lua APIs (using WoW's optimized versions where available)

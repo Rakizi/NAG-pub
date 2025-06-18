@@ -1,18 +1,14 @@
---- ============================ HEADER ============================
---[[
-    Module Purpose: Test data generation helpers for APL schema and related field types.
-    Authors: NextActionGuide Team
-    Contact: See LICENSE for full license text.
-    STATUS: Stable
-    TODO: None
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Date: 30/09/2024
-]]
+--- Test data generation helpers for APL schema and related field types.
+--- @module "APLTestData"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 ---@diagnostic disable: undefined-global, unused-local
 
 --- ============================ LOCALIZE ============================
 local addonName, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

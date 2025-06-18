@@ -1,23 +1,23 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Unknown (original), please update.
-    Module Purpose: Throttle Management System - centralized management of throttled operations like TTD tracking and other periodic updates that need rate limiting.
-    STATUS: Production
-    TODO: Add more granular control for throttling categories if needed.
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
+--- Manages throttling and rate limiting for NAG.
+---
+--- This module provides functions for throttling and rate limiting for NAG.
+--- @module "ThrottleManager"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
+--
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
 local _, ns = ...
----@class NAG
+---@type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class TimerManager : ModuleBase
+---@type TimerManager|ModuleBase|AceModule
 local Timer = NAG:GetModule("TimerManager")
----@class TTDManager : ModuleBase
+---@type TTDManager|ModuleBase|AceModule
 local TTD = NAG:GetModule("TTDManager")
----@class StateManager : ModuleBase
+---@type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 

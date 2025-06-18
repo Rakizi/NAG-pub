@@ -1,19 +1,17 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Author: Rakizi
-    Module Purpose: Walks and processes hierarchical data structures for NAG modules, providing flexible processors for different entity types.
-    STATUS: Production
-    TODO: Add more robust error handling and support for additional data types.
-]]
+--- Walks and processes hierarchical data structures for NAG modules, providing flexible processors for different entity types.
+--- @module "DataWalker"
+-- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+-- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+-- Discord: https://discord.gg/ebonhold
+-- Status: good
 
 ---@diagnostic disable: undefined-global, undefined-field
 
 --- ============================ LOCALIZE ============================
-local _, ns = ...
----@class NAG
+local addonName, ns = ...
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DebugManager : ModuleBase
+--- @type DebugManager|ModuleBase|AceModule
 local DebugManager = NAG:GetModule("DebugManager")
 
 --WoW API
