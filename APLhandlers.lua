@@ -79,7 +79,14 @@ local tonumber = tonumber
 
 --- ============================ CONTENT ============================
 
-
+-- Helper function to translate spell IDs
+--TODO: make this be native to the parser
+local function translateSpellId(id)
+    if id == 58146 then
+        return 79634
+    end
+    return id
+end
 
 do -- ================================= Utility Fn's =========================================== --
     --- Placeholder function for spell casting.
@@ -376,7 +383,7 @@ do -- ================================= Funnel Generic Functions ===============
     function NAG:IsActive(id, sourceUnit)
         if not id then return false end
         --TODO: make this be native to the parser
-        --id = translateSpellId(id)
+        id = translateSpellId(id)
         -- Validate ID
         if not tonumber(id) then
             self:Error(format("IsActive: ID %s is not a number", tostring(id)))
@@ -1709,7 +1716,7 @@ do -- ================================= IsActive APLValue Functions ============
     function NAG:IsActiveAura(spellId)
         if not spellId then return false end
         --TODO: make this be native to the parser
-        --id = translateSpellId(id)
+        id = translateSpellId(id)
         local entry = DataManager:Get(spellId, DataManager.EntityTypes.SPELL)
         if not entry then
             self:Error(format("IsActiveAura: spellId not found in Spell table: %s", tostring(spellId)))
