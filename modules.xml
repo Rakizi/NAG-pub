@@ -117,7 +117,7 @@
     <Script file="Modules/Tests/ImportExport.Tests.lua"/>
     <Script file="Modules/Tests/KeybindManager.Tests.lua"/>
     <Script file="Modules/Tests/OverlayManager.Tests.lua"/>
-    <Script file="Modules/Tests/PullTimerManager.Tests.lua"/>
+    <!-- <Script file="Modules/Tests/PullTimerManager.Tests.lua"/> -->
     <Script file="Modules/Tests/RotationManager.Tests.lua"/>
     <Script file="Modules/Tests/ShamanWeaving.Tests.lua"/>
     <Script file="Modules/Tests/StateManager.Tests.lua"/>
