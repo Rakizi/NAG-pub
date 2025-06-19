@@ -78,7 +78,7 @@ defaults.class.specSpellLocations = {
             49039,  -- Lichborne
             48982   -- Rune Tap
         },
-        BELOW = {},
+        BELOW = {77575},
         RIGHT = {46584},
         LEFT = {
             45529,  -- Blood Tap
@@ -117,7 +117,7 @@ defaults.class.specSpellLocations = {
             49039,  -- Lichborne
             48982   -- Rune Tap
         },
-        BELOW = {},
+        BELOW = {77575},
         RIGHT = { 46584 },  -- Raise Dead
         LEFT = { 
             63560, 

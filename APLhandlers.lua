@@ -1097,10 +1097,18 @@ do -- ================================= Targets/Units APLValue Functions =======
 
     --- Get the number of targets.
     --- @function NAG:NumberTargets
-    --- @usage NAG:NumberTargets()
-    --- @return number The number of targets.
-    function NAG:NumberTargets()
-        return TTD:GetTargetCount() or 0
+    --- @param range number|nil Optional range to use for counting targets (substitutes for hardcoded distances)
+    --- @usage NAG:NumberTargets() -- Uses default ranges
+    --- @usage NAG:NumberTargets(10) -- Uses 10 yards for both melee and ranged fallback
+    --- @return number The number of targets. 
+    function NAG:NumberTargets(range)
+        if range then
+            -- If a single range is provided, use it for both melee and ranged scenarios
+            return TTD:GetTargetCount(range, range) or 0
+        else
+            -- Use default behavior (7 for melee, target distance + 5 for ranged)
+            return TTD:GetTargetCount() or 0
+        end
     end
 
     --- Count the number of enemies in range.
@@ -1299,36 +1307,60 @@ do -- ================================= Spell APLValueFunctions ================
     --- @function NAG:IsKnownSpell
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the spell is known, false otherwise.
-    --- @usage (NAG:IsKnownSpell(73643))
+    --- @usage (NAG:IsKnownSpell(138228))
     --- @see NAG:IsReadyTinker
     function NAG:IsKnownSpell(spellId)
         if not spellId then return false end
         if not (tostring(type(tonumber(spellId))) == "number") then return false end
+        
         -- Special case for Sunfire
         if tonumber(spellId) == 93402 then
             local currRank = select(5, GetTalentInfo(1, 20))
             return currRank >= 1 and UnitPower("player", Enum.PowerType.Balance) > 0
         end
-        if ns.Version:IsMoP() and not(IsSpellKnown(spellId) or IsSpellKnown(spellId, true)) then
 
-            --TODO: hardcoding shit bcs blizzard is incompetent
+        -- First try the standard IsSpellKnown check
+        if IsSpellKnown(spellId) or IsSpellKnown(spellId, true) then
+            return true
+        end
+
+        -- Special hardcoded cases for MoP
+        if ns.Version:IsMoP() then
             if ((spellId == 49143 or spellId == 55050) and self.CLASS == "DEATHKNIGHT") 
             or ((spellId == 77767) and self.CLASS == "HUNTER")
+            or ((spellId == 138228) and self.CLASS == "MONK")
             or ((spellId == 20243) and self.CLASS == "WARRIOR") then
                 return true
-            end 
+            end
 
-            local name =  GetSpellInfo(spellId)
-            local _, _, _, _, _, _, id =  GetSpellInfo(name)
-            spellId = id
+            -- Get the spell name for the ID we're checking
+            local spellName = GetSpellInfo(spellId)
+            if not spellName then return false end
+
+            -- Iterate through all spell tabs
+            for i = 1, GetNumSpellTabs() do
+                local _, _, offset, numSpells = GetSpellTabInfo(i)
+                if offset and numSpells then
+                    -- Iterate through all spells in this tab
+                    for j = offset + 1, offset + numSpells do
+                        local bookSpellName = GetSpellBookItemName(j, "spell")
+                        if bookSpellName == spellName then
+                            -- Found a matching spell name in spellbook
+                            return true
+                        end
+                    end
+                end
+            end
+
+            -- If we got here and didn't find a match, try one more time with the spell ID from the name
+            local _, _, _, _, _, _, id = GetSpellInfo(spellName)
             if type(id) == "number" then
-                return IsSpellKnown(spellId) or IsSpellKnown(spellId, true)
-            else
-                return false
+                return IsSpellKnown(id) or IsSpellKnown(id, true)
             end
         end
-        -- Check both player spells and pet spells
-        return IsSpellKnown(spellId) or IsSpellKnown(spellId, true)
+
+        -- If we got here and nothing matched, return false
+        return false
     end
 
     --- Checks if a spell is ready to cast.
@@ -1388,9 +1420,9 @@ do -- ================================= Spell APLValueFunctions ================
                 return false
             end
         elseif self.CLASS == "MONK" then
-            if not self:HasEnergy(spellId) then
-                return true
-            end
+            --if not self:HasEnergy(spellId) then
+            --    return true
+            --end
             if spellId == 116740 then 
                 return NAG:AuraNumStacks(125195) >= 1
             end

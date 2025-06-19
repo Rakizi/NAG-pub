@@ -57,6 +57,8 @@ local GetSpellCharges = ns.GetSpellChargesUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
 local GetSpellPowerCost = ns.GetSpellPowerCostUnified
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
+local GetTalentTabInfo = GetTalentTabInfo
+local C_SpecializationInfo = _G.C_SpecializationInfo
 
 --- ============================ CONTENT ============================
 
@@ -174,6 +176,17 @@ do --== RESOURCE CHECKS ==--
     function NAG:HasChi(spellId)
         -- Handle special cases for monk abilities
         if self.CLASS == "MONK" then
+            -- Special case for Tiger Palm (100787) in Brewmaster spec
+            if spellId == 100787 then
+                -- Check if Brewmaster is the active spec using C_SpecializationInfo
+                if C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
+                    local specIndex = C_SpecializationInfo.GetSpecialization()
+                    if specIndex == 1 then -- 1 = Brewmaster
+                        return true -- No chi cost in Brewmaster spec
+                    end
+                end
+            end
+
             local spellName = GetSpellInfo(spellId)
             if spellName then
                 -- Check 1 Chi abilities

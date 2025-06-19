@@ -18,14 +18,31 @@ end
 
 local defaults = ns.InitializeClassDefaults()
 
+-- MoP Paladin spec spell locations
 defaults.class.specSpellLocations = {
-    ['*'] = {
+    [CLASS_SPECS.HOLY] = {
         ABOVE = {},
         BELOW = {},
         RIGHT = {},
         LEFT = {},
         AOE = {}
     },
+    [CLASS_SPECS.PROTECTION] = {
+        ABOVE = {},
+        BELOW = {},
+        RIGHT = {},
+        LEFT = { 86150, 633, 1022, 853, 6940, 31884, 498, 31801, 85696, 31821, 31842,
+            1044, 1038, 31850, 20925, 70940, 642, 31884, 20154, 54428 },
+        AOE = {}
+    },
+    [CLASS_SPECS.RETRIBUTION] = {
+        ABOVE = {},
+        BELOW = {},
+        RIGHT = {},
+        LEFT = { 86150, 633, 1022, 853, 6940, 31884, 498, 31801, 85696, 31821, 31842,
+            1044, 1038, 31850, 20925, 70940, 642, 31884, 20154, 54428 },
+        AOE = {}
+    }
 }
 
 -- ================================================================================================

@@ -16,17 +16,31 @@ for i, name in ipairs(specNames) do
     CLASS_SPECS[name] = SpecializationCompat:GetSpecID("MAGE", i)
 end
 
-
 local defaults = ns.InitializeClassDefaults()
 
+-- MoP Mage spec spell locations
 defaults.class.specSpellLocations = {
-    ['*'] = {
-        ABOVE = {},
+    [CLASS_SPECS.ARCANE] = {
+        ABOVE = {11129},
         BELOW = {},
-        RIGHT = {},
-        LEFT = {},
+        RIGHT = {2136},
+        LEFT = { 55342, 12051, 36799, 82731, 12042, 12043, 26297, 33702 },
         AOE = {}
     },
+    [CLASS_SPECS.FIRE] = {
+        ABOVE = {11129},
+        BELOW = {},
+        RIGHT = {2136},
+        LEFT = { 55342, 12051, 36799, 82731, 12042, 12043, 26297, 33702 },
+        AOE = {}
+    },
+    [CLASS_SPECS.FROST] = {
+        ABOVE = {11129},
+        BELOW = {},
+        RIGHT = {2136},
+        LEFT = { 55342, 12051, 36799, 82731, 12042, 12043, 26297, 33702 },
+        AOE = {}
+    }
 }
 
 -- ================================================================================================
@@ -47,7 +61,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.ARCANE, "Arcane", {
     rotationString = [[
     ]],
 })
-ns.AddRotationToDefaults(defaults, CLASS_SPECS.ARCANE, "Arcane", {
+
+ns.AddRotationToDefaults(defaults, CLASS_SPECS.FIRE, "Fire", {
     default = true,
     enabled = true,
     experimental = false,

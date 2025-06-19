@@ -18,14 +18,29 @@ end
 
 local defaults = ns.InitializeClassDefaults()
 
+-- MoP Priest spec spell locations
 defaults.class.specSpellLocations = {
-    ['*'] = {
+    [CLASS_SPECS.DISCIPLINE] = {
+        ABOVE = {},
+        BELOW = { 34433 },
+        RIGHT = {},
+        LEFT = { 26297, 87151, 82174 },
+        AOE = {}
+    },
+    [CLASS_SPECS.HOLY] = {
         ABOVE = {},
         BELOW = {},
         RIGHT = {},
         LEFT = {},
         AOE = {}
     },
+    [CLASS_SPECS.SHADOW] = {
+        ABOVE = {},
+        BELOW = { 34433 },
+        RIGHT = {},
+        LEFT = { 26297, 87151, 82174 },
+        AOE = {}
+    }
 }
 
 -- ================================================================================================

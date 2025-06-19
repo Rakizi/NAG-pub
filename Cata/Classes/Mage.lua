@@ -22,9 +22,9 @@ local defaults = ns.InitializeClassDefaults()
 -- Add spec-level spell locations to defaults
 defaults.class.specSpellLocations = {
     [CLASS_SPECS.ARCANE] = {
-        ABOVE = {},
+        ABOVE = {11129},
         BELOW = {},
-        RIGHT = {},
+        RIGHT = {2136},
         LEFT = { 55342, 12051, 36799, 82731, 12042, 12043, 26297, 33702 },
         AOE = {}
     },
