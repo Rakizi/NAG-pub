@@ -346,7 +346,7 @@ end
 function ShamanWeaveModule:GetOptions()
     return {
         type = "group",
-        name = L["LB Weaving"],
+        name = "Auto Weapon Sync",
         order = 1,
         parent = "SHAMAN",
         childGroups = "tab",

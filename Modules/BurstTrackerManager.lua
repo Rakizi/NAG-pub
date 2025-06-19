@@ -103,6 +103,8 @@ local BurstTrackerManager = NAG:CreateModule("BurstTrackerManager", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.FEATURE,
     optionsOrder = 450,
     childGroups = "tree",
+    hidden = function() return true end,
+    disabled = function() return true end,
     eventHandlers = {
         ["PLAYER_REGEN_DISABLED"] = "OnCombatStateChanged",
         ["PLAYER_REGEN_ENABLED"] = "OnCombatStateChanged",
@@ -112,12 +114,16 @@ local BurstTrackerManager = NAG:CreateModule("BurstTrackerManager", defaults, {
     messageHandlers = {
         ["NAG_ROTATION_CHANGED"] = "OnRotationChanged",
         ["NAG_ROTATION_SAVED"] = "OnRotationChanged",
+    },
+    dependencies = {
+        "LibSharedMedia-3.0"
     }
 })
 
 -- Module variables
 BurstTrackerManager.trackers = {}
 BurstTrackerManager.activeGlows = {}
+BurstTrackerManager.LSM = LibStub("LibSharedMedia-3.0")
 
 --- ============================ ORGANIZATION ============================
 do -- Ace3 lifecycle methods
@@ -222,7 +228,9 @@ end
 -- Helper: Sets up the stack count font string
 local function SetupStackCountDisplay(frame, fontPath, fontSize, fontOutline, fontColor)
     frame.stackCount = frame:CreateFontString(nil, "OVERLAY")
-    frame.stackCount:SetFont(fontPath, fontSize, fontOutline)
+    local fontPath = self.LSM:Fetch("font", self.db.char.appearance.stackFont) or self.LSM:GetDefault("font")
+    frame.stackCount:SetFont(fontPath, self.db.char.appearance.stackFontSize,
+        self.db.char.appearance.stackFontOutline)
     frame.stackCount:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
     frame.stackCount:SetTextColor(unpack(fontColor))
     frame.stackCount:SetText("")

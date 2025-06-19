@@ -174,7 +174,6 @@ local rotationDeathKnightBloodSimple = [[
     or (NAG:CurrentTime() <= 3.0) and NAG:Cast(55050)
     or (NAG:RemainingTime() <= 3.0) and NAG:Cast(49998)
     or (NAG:RemainingTime() <= 3.0) and NAG:Cast(55050)
-    or NAG:SpellIsReady(49028) and NAG:Cast(NAG:GetBattlePotion())
     or  (NAG:IsExecutePhase(35) and NAG:Cast(114866))
     or (((NAG:DotIsActive(55078) and (NAG:DotRemainingTime(55078) < 3)) or (NAG:DotIsActive(55095) and (NAG:DotRemainingTime(55095) < 3))) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0)) and NAG:Cast(123693))
     or (NAG:SpellIsReady(49028) and NAG:AuraIsActive(53365) and NAG:AuraIsKnown(53365)) and NAG:Cast(26297)

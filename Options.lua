@@ -645,7 +645,7 @@ do --== Display Options ==--
                         order = 1,
                         fontSize = "medium",
                     },
-                    enableWAResourceBar = {
+                   --[[ enableWAResourceBar = {
                         type = "toggle",
                         name = "Use WeakAuras Resource Bar",
                         desc = "Use WeakAuras version of the resource bar instead of the built-in frame",
@@ -690,7 +690,7 @@ do --== Display Options ==--
                                 end
                             end
                         end,
-                    },
+                    },]]
                 },
             },
 

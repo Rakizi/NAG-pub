@@ -12,8 +12,8 @@ local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 ---@type StateManager|ModuleBase|AceModule
 local StateManager = NAG:GetModule("StateManager")
----@type PullTimerManager|ModuleBase|AceModule
-local PullTimer = NAG:GetModule("PullTimerManager")
+---@class PullTimerManager : ModuleBase
+--local PullTimer = NAG:GetModule("PullTimerManager")
 
 --WoW API
 local GetSpellCooldown = ns.GetSpellCooldownUnified
@@ -95,7 +95,7 @@ do --== PRE-PULL/ROTATION/THROTTLER FUNCTIONS ==--
     --- @return nil
     function NAG:Update(rotation)
         if self.isLoadScreenRecent then return end
-        if PullTimer:GetTimeToZero() then return end
+        --if PullTimer:GetTimeToZero() then return end
         local chk = ns.check()
         local shouldReturn = not chk or not self:ShouldShowDisplay()
 

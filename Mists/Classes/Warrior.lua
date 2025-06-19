@@ -23,18 +23,18 @@ local defaults = ns.InitializeClassDefaults()
 defaults.class.specSpellLocations = {
     [CLASS_SPECS.ARMS] = {
         LEFT   = {6673, 20572, 18499}, -- Battle Shout, Blood Fury, Berserker Rage
-        RIGHT  = {845, 78},                   -- Cleave, Heroic Strike
-        ABOVE  = {6544},                      -- Heroic Leap
-        BELOW  = {46924},                     -- Bladestorm
+        RIGHT  = {845, 46924, 12328, 1680, 6343},                   -- Cleave, 
+        ABOVE  = {6544, 78},                      -- Heroic Leap Heroic Strike
+        BELOW  = {},                     
         AOE = {},
         --DEFAULT = {86346, 5308, 12294, 7384, 1464, 12328, 6343}, -- Colossus Smash, Execute, Mortal Strike, Overpower, Slam, Sweeping Strikes, Thunder Clap
     },
     [CLASS_SPECS.FURY] = {
-        ABOVE = {6544, 6673, 18499},
-        BELOW = { 2458, 2457 },
-        RIGHT = {},
-        LEFT = { 33697, 1719, 12292, 1134 },
-        AOE = { 1680 }
+            LEFT   = {6673, 20572, 18499}, -- Battle Shout, Blood Fury, Berserker Rage
+            RIGHT  = {845, 46924, 12328, 1680, 6343},                   -- Cleave, 
+            ABOVE  = {6544, 78},                      -- Heroic Leap Heroic Strike
+            BELOW  = {},                     
+            AOE = {}
     },
     [CLASS_SPECS.PROTECTION] = {
         ABOVE = {6544, 6673, 18499},
@@ -47,20 +47,21 @@ defaults.class.specSpellLocations = {
 
 local rotationStringWarriorArms = [[
 NAG:AutocastOtherCooldowns()
-    or     ((not NAG:IsActive(6673)) and NAG:Cast(6673))
-    or     (NAG:DistanceToTarget() > 7 and NAG:Cast(100))
     or     ((not NAG:IsActive(12880)) and NAG:Cast(18499))
-    or     ((NAG:NumberTargets() > 3.0) and NAG:Cast(6343))
+    or     ((NAG:NumberTargets() > 3.0) and (not NAG:DotIsActive(115768)) and NAG:Cast(6343))    
+    or     ((NAG:NumberTargets() > 3.0) and NAG:IsActive(12328) and NAG:Cast(1680))
     or     ((NAG:NumberTargets() > 1.0) and NAG:Cast(12328))
     or     ((NAG:NumberTargets() > 2.0) and NAG:Cast(46924))
     or     ((NAG:AnyTrinketStatProcsActive(6, -1, -1, 110)) and NAG:Cast(33697))
     or     ((((NAG:CurrentRage() >= 100.0) and (NAG:NumberTargets() == 1.0))) and NAG:Cast(78))
     or     ((((NAG:CurrentRage() >= 100.0) and (NAG:NumberTargets() > 1.0))) and NAG:Cast(845))
+    or     (NAG:DistanceToTarget() > 7 and NAG:Cast(100))
+    or     ((not NAG:IsActive(6673)) and NAG:Cast(6673))
     or     NAG:Cast(12294)
     -- Hide: or (((NAG:CurrentRage() < 75.0) and (NAG:AutoTimeToNext() >= 2.5) and (not (NAG:IsActive(2825) or NAG:IsActive(85730) or NAG:IsActive(1719))) and NAG:IsReady(100)) and NAG:MoveToRange(9))
     or     (((NAG:DotIsActive(86346) or ((NAG:TimeToReady(86346) > 5) and (NAG:TimeRemaining() > 60)))) and NAG:Cast(6544))
-    or     (((not NAG:DotIsActive(86346)) and (NAG:TimeRemaining() > 1)) and NAG:Cast(86346))
-    or     ((((NAG:CurrentRage() >= 80.0)and (not NAG:IsExecutePhase(20))) or ((NAG:CurrentRage() <= 80.0) and (not NAG:IsExecutePhase(20)) and NAG:DotIsActive(86346)) or ((NAG:CurrentRage() <= 80.0) and NAG:IsExecutePhase(20) and (NAG:NumberTargets() > 1.0))) and NAG:Cast(1464))
+    or     (((not NAG:DotIsActive(86346)) and NAG:TimeRemaining() > 1) and NAG:Cast(86346))
+    or     ((((NAG:CurrentRage() >= 80.0) and (not NAG:IsExecutePhase(20))) or ((NAG:CurrentRage() <= 80.0) and (not NAG:IsExecutePhase(20)) and NAG:DotIsActive(86346)) or ((NAG:CurrentRage() <= 80.0) and NAG:IsExecutePhase(20) and (NAG:NumberTargets() > 1.0))) and NAG:Cast(1464))
     or     NAG:Cast(5308)
     or     ((((NAG:CurrentRage() >= 25.0) and (not NAG:IsExecutePhase(20)) and NAG:IsActive(60503)) or (NAG:IsExecutePhase(20) and NAG:IsActive(60503)) or {}) and NAG:Cast(7384))
     or     NAG:Cast(6673)

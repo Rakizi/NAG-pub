@@ -1306,7 +1306,8 @@ do -- ================================= Spell APLValueFunctions ================
 
             --TODO: hardcoding shit bcs blizzard is incompetent
             if ((spellId == 49143 or spellId == 55050) and self.CLASS == "DEATHKNIGHT") 
-            or ((spellId == 77767) and self.CLASS == "HUNTER") then
+            or ((spellId == 77767) and self.CLASS == "HUNTER")
+            or ((spellId == 20243) and self.CLASS == "WARRIOR") then
                 return true
             end 
 

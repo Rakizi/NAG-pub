@@ -4,4 +4,5 @@
     <Script file="ItemHandlers.lua"/>
     <Script file="MiscHandlers.lua"/>
     <Script file="ResourceHandlers.lua"/>
+    <Script file="Snapshoter.lua"/>
 </Ui>

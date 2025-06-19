@@ -318,17 +318,17 @@ end
 function ThrottleManager:UpdateDisplayVisibility()
     -- Update burst trackers visibility
     ---@type BurstTrackerManager
-    local BurstTrackerManager = NAG:GetModule("BurstTrackerManager")
-    if BurstTrackerManager and BurstTrackerManager:IsEnabled() then
-        BurstTrackerManager:UpdateAllTrackersVisibility()
-    end
+    --local BurstTrackerManager = NAG:GetModule("BurstTrackerManager", true)
+    --if BurstTrackerManager and BurstTrackerManager.IsEnabled and BurstTrackerManager:IsEnabled() then
+    --    BurstTrackerManager:UpdateAllTrackersVisibility()
+    --end
 
     -- Update resource bar visibility
     ---@type ResourceBarManager
-    local ResourceBarManager = NAG:GetModule("ResourceBarManager")
-    if ResourceBarManager and ResourceBarManager:IsEnabled() then
-        ResourceBarManager:UpdateBarVisibility()
-    end
+    --local ResourceBarManager = NAG:GetModule("ResourceBarManager", true)
+    --if ResourceBarManager and ResourceBarManager.IsEnabled and ResourceBarManager:IsEnabled() then
+    --    ResourceBarManager:UpdateBarVisibility()
+    --end
 end
 
 function ThrottleManager:Update()

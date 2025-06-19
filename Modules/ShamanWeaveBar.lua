@@ -56,6 +56,10 @@ local defaults = {
             showCountdownText = true,
             countdownTextSize = 14,
             countdownTextColor = {r = 1, g = 1, b = 1, a = 1},
+            -- Individual bar heights
+            lbBarHeightPct = 0.15, -- 15% of universal height
+            clBarHeightPct = 0.15,
+            ebBarHeightPct = 0.15,
             -- Bar colors
             colors = {
                 background = {r = 0.2, g = 0.2, b = 0.2, a = 0.8},
@@ -70,15 +74,19 @@ local defaults = {
             -- Swing timer settings
             swingTimer = {
                 enabled = true,
-                height = 2,
-                sparkSize = 20, -- Fixed height
                 sparkWidth = 2, -- Fixed width
                 sparkColor = {r = 0.8, g = 0.8, b = 0.8, a = 1}, -- Light gray color
                 nextSwingEnabled = true,
-                nextSparkColor = {r = 0.8, g = 0.8, b = 0.8, a = 0.7} -- Same light gray but slightly transparent for next swing
+                nextSparkColor = {r = 0.8, g = 0.8, b = 0.8, a = 0.7},
+                backgroundBar = {
+                    enabled = true,
+                    alpha = 0.3
+                },
+                -- universalBarHeight removed
             },
-            background = "none", -- options: "none", "bg2", "bg3", "bg4"
-            bgColor = { r = 1, g = 1, b = 1, a = 1 }, -- default: no tint, fully opaque
+            background = "none",
+            bgColor = { r = 1, g = 1, b = 1, a = 1 },
+            borderArtHeightPct = 1.7, -- default 170% of bar height
         }
     }
 }
@@ -281,41 +289,21 @@ function ShamanWeaveBar:CreateFrames()
     frame:SetSize(self.db.profile.bar.width, self.db.profile.bar.height)
     frame:SetPoint(self.db.profile.bar.point, self.db.profile.bar.x, self.db.profile.bar.y)
 
+    -- Create swing timer background bar as a texture on the main frame FIRST so it's always at the back
+    local swingBgBar = frame:CreateTexture(nil, "BACKGROUND", nil, -8) -- Render at the lowest allowed sublevel
+    swingBgBar:SetAllPoints()
+    swingBgBar:SetColorTexture(0, 0, 0, 0.3)
+    frame.swingBgBar = swingBgBar
+
     -- Create background texture (just behind bars, slightly larger)
-    local barWidth = self.db.profile.bar.width
-    local barHeight = self.db.profile.bar.height
-    local bgWidth = barWidth * 1.45
-    local bgHeight = barHeight * 3.4
     local bgTexture = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
-    local bgFile = self.db.profile.bar.background
-    local bgPath = nil
-    if bgFile == "bg2" then
-        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg2.png"
-    elseif bgFile == "bg3" then
-        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg3.png"
-    elseif bgFile == "bg4" then
-        bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg4.png"
-    end
-    if bgPath then
-        bgTexture:SetTexture(bgPath)
-        bgTexture:Show()
-    else
-        bgTexture:SetTexture(nil)
-        bgTexture:Hide()
-    end
-    bgTexture:SetSize(bgWidth, bgHeight)
-    bgTexture:ClearAllPoints()
-    bgTexture:SetPoint("CENTER", frame, "CENTER", 0, 31)
-    local bgColor = self.db.profile.bar.bgColor or { r = 1, g = 1, b = 1, a = 1 }
-    bgTexture:SetVertexColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a)
+    bgTexture:SetPoint("CENTER", frame, "CENTER", 0, 0)
     frame.bgTexture = bgTexture
 
     -- Create countdown bar (drawn first, lowest sublayer)
     local countdownBar = frame:CreateTexture(nil, "ARTWORK", nil, -8)
-    countdownBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    countdownBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    countdownBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
     countdownBar:SetWidth(0)
-    countdownBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
     countdownBar:SetColorTexture(
         self.db.profile.bar.colors.countdown.r,
         self.db.profile.bar.colors.countdown.g,
@@ -324,36 +312,29 @@ function ShamanWeaveBar:CreateFrames()
     )
     frame.countdownBar = countdownBar
 
-    -- Create CL weave bar (drawn below LB bar)
-    local clWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, -7)
-    clWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    clWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    clWeaveBar:SetWidth(0)
-    clWeaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
-    clWeaveBar:SetColorTexture(0.2, 0.4, 0.8, 0.8) -- Darker blue
-    frame.clWeaveBar = clWeaveBar
-
     -- Create weave bar (drawn above CL bar)
     local weaveBar = frame:CreateTexture(nil, "ARTWORK", nil, -6)
-    weaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    weaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    weaveBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
     weaveBar:SetWidth(0)
-    weaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
     weaveBar:SetColorTexture(0.4, 0.7, 1, 0.8) -- Light blue
     frame.weaveBar = weaveBar
 
+    -- Create CL weave bar (drawn below LB bar)
+    local clWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, -7)
+    clWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
+    clWeaveBar:SetWidth(0)
+    clWeaveBar:SetColorTexture(0.2, 0.4, 0.8, 0.8) -- Darker blue
+    frame.clWeaveBar = clWeaveBar
+
     -- Create GCD bar (drawn above all other bars)
     local gcdBar = frame:CreateTexture(nil, "ARTWORK", nil, 6)
-    gcdBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    gcdBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    gcdBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
     gcdBar:SetWidth(0)
-    gcdBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
     gcdBar:SetColorTexture(0.4, 0.4, 0.4, 0.95) -- Dark gray with 85% alpha
     frame.gcdBar = gcdBar
 
     -- Create GCD spark texture (highest strata)
     local gcdSpark = frame:CreateTexture(nil, "OVERLAY", nil, 7)
-    gcdSpark:SetSize(self.db.profile.bar.swingTimer.sparkWidth + 2, self.db.profile.bar.swingTimer.sparkSize)
     gcdSpark:SetPoint("CENTER", gcdBar, "RIGHT", 0, 0)
     gcdSpark:SetColorTexture(0, 0, 0, 1) -- Solid black
     -- Remove the spark texture and blend mode to make it a solid line
@@ -403,19 +384,15 @@ function ShamanWeaveBar:CreateFrames()
 
     -- Create upcoming weave gap bar (drawn above red bar, same sublayer as weave bar)
     local upcomingWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, 2)
-    upcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    upcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    upcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
     upcomingWeaveBar:SetWidth(0)
-    upcomingWeaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
     upcomingWeaveBar:SetColorTexture(0.4, 0.7, 1, 0.8) -- Light blue
     frame.upcomingWeaveBar = upcomingWeaveBar
 
     -- Create CL upcoming weave gap bar (drawn below LB bar)
     local clUpcomingWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, 1)
-    clUpcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    clUpcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+    clUpcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
     clUpcomingWeaveBar:SetWidth(0)
-    clUpcomingWeaveBar:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
     clUpcomingWeaveBar:SetColorTexture(0.2, 0.4, 0.8, 0.8) -- Darker blue
     frame.clUpcomingWeaveBar = clUpcomingWeaveBar
 
@@ -461,22 +438,18 @@ function ShamanWeaveBar:CreateFrames()
     
     -- Create current swing timer bar frame
     local swingFrame = CreateFrame("Frame", nil, frame)
-    swingFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2)
-    swingFrame:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, self.db.profile.bar.height + 2)
-    swingFrame:SetHeight(self.db.profile.bar.swingTimer.height)
+    swingFrame:SetAllPoints()
     frame.swingFrame = swingFrame
     
     -- Create current swing timer bar (fully transparent)
     local swingBar = swingFrame:CreateTexture(nil, "ARTWORK")
-    swingBar:SetPoint("TOPLEFT", swingFrame, "TOPLEFT", 0, 0)
-    swingBar:SetPoint("BOTTOMLEFT", swingFrame, "BOTTOMLEFT", 0, 0)
+    swingBar:SetPoint("LEFT", swingFrame, "LEFT", 0, 0)
     swingBar:SetWidth(0)
     swingBar:SetColorTexture(0, 0, 0, 0) -- Fully transparent
     frame.swingBar = swingBar
     
     -- Create current swing spark texture
     local spark = swingFrame:CreateTexture(nil, "OVERLAY")
-    spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, self.db.profile.bar.swingTimer.sparkSize)
     spark:SetPoint("CENTER", swingBar, "RIGHT", 0, 1)
     spark:SetColorTexture(
         self.db.profile.bar.swingTimer.sparkColor.r,
@@ -489,23 +462,51 @@ function ShamanWeaveBar:CreateFrames()
     spark:SetBlendMode("BLEND")
     frame.spark = spark
     
-    -- Create new swing timer background frame
-    local swingBgFrame = CreateFrame("Frame", nil, frame)
-    -- Position at the same height as the spark
-    swingBgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-    -- Set width to match main bar width
-    swingBgFrame:SetWidth(self.db.profile.bar.width)
-    swingBgFrame:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
-    frame.swingBgFrame = swingBgFrame
+    -- Create EB weave bar (light purple)
+    local ebWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, -6)
+    ebWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
+    ebWeaveBar:SetWidth(0)
+    ebWeaveBar:SetColorTexture(0.7, 0.5, 1, 0.8)
+    frame.ebWeaveBar = ebWeaveBar
 
-    -- Create swing timer background bar
-    local swingBgBar = swingBgFrame:CreateTexture(nil, "BACKGROUND")
-    swingBgBar:SetPoint("TOPLEFT", swingBgFrame, "TOPLEFT", 0, 0)
-    swingBgBar:SetPoint("BOTTOMLEFT", swingBgFrame, "BOTTOMLEFT", 0, 0)
-    swingBgBar:SetPoint("TOPRIGHT", swingBgFrame, "TOPRIGHT", 0, 0)
-    swingBgBar:SetPoint("BOTTOMRIGHT", swingBgFrame, "BOTTOMRIGHT", 0, 0)
-    swingBgBar:SetColorTexture(0, 0, 0, 0.3) -- Black color with 30% opacity
-    frame.swingBgBar = swingBgBar
+    -- Create EB upcoming weave bar (light purple)
+    local ebUpcomingWeaveBar = frame:CreateTexture(nil, "ARTWORK", nil, -5)
+    ebUpcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
+    ebUpcomingWeaveBar:SetWidth(0)
+    ebUpcomingWeaveBar:SetColorTexture(0.7, 0.5, 1, 0.8)
+    frame.ebUpcomingWeaveBar = ebUpcomingWeaveBar
+
+    -- Add EB icon spark for ebWeaveBar
+    local ebIcon = "Interface\\Icons\\shaman_talent_elementalblast" -- Blizzard's icon name for Elemental Blast
+    if NAG.Spell and NAG.Spell[117014] and NAG.Spell[117014].icon then
+        ebIcon = NAG.Spell[117014].icon
+    end
+    local ebWeaveSparkFrame = CreateFrame("Frame", nil, frame)
+    ebWeaveSparkFrame:SetSize(16, 16)
+    local ebWeaveSpark = ebWeaveSparkFrame:CreateTexture(nil, "OVERLAY", nil, 2)
+    ebWeaveSpark:SetAllPoints()
+    ebWeaveSpark:SetTexture(ebIcon)
+    ebWeaveSpark:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+    local ebWeaveSparkMask = ebWeaveSparkFrame:CreateMaskTexture()
+    ebWeaveSparkMask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    ebWeaveSparkMask:SetAllPoints()
+    ebWeaveSpark:AddMaskTexture(ebWeaveSparkMask)
+    ebWeaveSparkFrame:Hide()
+    frame.ebWeaveSpark = ebWeaveSparkFrame
+
+    -- Add EB icon spark for ebUpcomingWeaveBar
+    local ebUpcomingWeaveSparkFrame = CreateFrame("Frame", nil, frame)
+    ebUpcomingWeaveSparkFrame:SetSize(16, 16)
+    local ebUpcomingWeaveSpark = ebUpcomingWeaveSparkFrame:CreateTexture(nil, "OVERLAY", nil, 2)
+    ebUpcomingWeaveSpark:SetAllPoints()
+    ebUpcomingWeaveSpark:SetTexture(ebIcon)
+    ebUpcomingWeaveSpark:SetTexCoord(0.15, 0.85, 0.15, 0.85)
+    local ebUpcomingWeaveSparkMask = ebUpcomingWeaveSparkFrame:CreateMaskTexture()
+    ebUpcomingWeaveSparkMask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    ebUpcomingWeaveSparkMask:SetAllPoints()
+    ebUpcomingWeaveSpark:AddMaskTexture(ebUpcomingWeaveSparkMask)
+    ebUpcomingWeaveSparkFrame:Hide()
+    frame.ebUpcomingWeaveSpark = ebUpcomingWeaveSparkFrame
     
     -- Set up dragging for the main frame
     frame:SetMovable(true)
@@ -540,7 +541,7 @@ function ShamanWeaveBar:CreateFrames()
     
     -- Apply dragging to all child frames
     makeFrameDraggable(swingFrame)
-    makeFrameDraggable(swingBgFrame)
+    makeFrameDraggable(swingBgBar)
     
     -- Set up main frame drag handlers
     frame:SetScript("OnDragStart", function()
@@ -580,11 +581,65 @@ function ShamanWeaveBar:UpdateFrameSettings()
     -- Update alpha
     frame:SetAlpha(self.db.profile.bar.alpha)
     
+    -- Update bar heights and vertical positions
+    local barHeight = self.db.profile.bar.height
+    local lbBarHeight = barHeight * (self.db.profile.bar.lbBarHeightPct or 0.15)
+    local clBarHeight = barHeight * (self.db.profile.bar.clBarHeightPct or 0.15)
+    local ebBarHeight = barHeight * (self.db.profile.bar.ebBarHeightPct or 0.15)
+    
+    -- Proportional offsets for stacking, with clamping to fit inside the main bar
+    local halfBarHeight = barHeight / 2
+    
+    -- Calculate Y offset for the bottom bar (LB)
+    -- Start with a -25% offset and clamp it so the bar stays within the bottom half.
+    local desiredLbYOffset = -barHeight * 0.25
+    local minLbYOffset = -halfBarHeight + (lbBarHeight / 2)
+    local lbBarYOffset = math.max(desiredLbYOffset, minLbYOffset)
+
+    -- Calculate Y offset for the top bars (CL & EB)
+    -- Start with a +25% offset and clamp it so the bars stay within the top half.
+    local desiredClYOffset = barHeight * 0.25
+    local maxClYOffset = halfBarHeight - (clBarHeight / 2)
+    local clBarYOffset = math.min(desiredClYOffset, maxClYOffset)
+    
+    local desiredEbYOffset = barHeight * 0.25
+    local maxEbYOffset = halfBarHeight - (ebBarHeight / 2)
+    local ebBarYOffset = math.min(desiredEbYOffset, maxEbYOffset)
+    
+    frame.weaveBar:SetHeight(lbBarHeight)
+    frame.weaveBar:ClearAllPoints()
+    frame.weaveBar:SetPoint("LEFT", frame, "LEFT", 0, lbBarYOffset)
+    
+    frame.clWeaveBar:SetHeight(clBarHeight)
+    frame.clWeaveBar:ClearAllPoints()
+    frame.clWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, clBarYOffset)
+
+    frame.ebWeaveBar:SetHeight(ebBarHeight)
+    frame.ebWeaveBar:ClearAllPoints()
+    frame.ebWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, ebBarYOffset)
+
+    frame.upcomingWeaveBar:SetHeight(lbBarHeight)
+    frame.upcomingWeaveBar:ClearAllPoints()
+    frame.upcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, lbBarYOffset)
+
+    frame.clUpcomingWeaveBar:SetHeight(clBarHeight)
+    frame.clUpcomingWeaveBar:ClearAllPoints()
+    frame.clUpcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, clBarYOffset)
+    
+    frame.ebUpcomingWeaveBar:SetHeight(ebBarHeight)
+    frame.ebUpcomingWeaveBar:ClearAllPoints()
+    frame.ebUpcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", 0, ebBarYOffset)
+    
+    frame.countdownBar:SetHeight(barHeight)
+    frame.countdownBar:ClearAllPoints()
+    frame.countdownBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
+    
+    frame.gcdBar:SetHeight(barHeight)
+    frame.gcdBar:ClearAllPoints()
+    frame.gcdBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
+
     -- Update background
     local barWidth = self.db.profile.bar.width
-    local barHeight = self.db.profile.bar.height
-    local bgWidth = barWidth * 1.45
-    local bgHeight = barHeight * 3.4
     local bgFile = self.db.profile.bar.background
     local bgPath = nil
     if bgFile == "bg2" then
@@ -602,9 +657,9 @@ function ShamanWeaveBar:UpdateFrameSettings()
             frame.bgTexture:SetTexture(nil)
             frame.bgTexture:Hide()
         end
-        frame.bgTexture:SetSize(bgWidth, bgHeight)
+        frame.bgTexture:SetSize(barWidth * 1.45, barHeight * (self.db.profile.bar.borderArtHeightPct or 1.7))
         frame.bgTexture:ClearAllPoints()
-        frame.bgTexture:SetPoint("CENTER", frame, "CENTER", 0, 31)
+        frame.bgTexture:SetPoint("CENTER", frame, "CENTER", 0, 0)
         local bgColor = self.db.profile.bar.bgColor or { r = 1, g = 1, b = 1, a = 1 }
         frame.bgTexture:SetVertexColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a)
     end
@@ -624,14 +679,14 @@ function ShamanWeaveBar:UpdateFrameSettings()
     
     -- Update GCD spark
     if frame.gcdSpark then
-        frame.gcdSpark:SetSize(self.db.profile.bar.swingTimer.sparkWidth + 2, self.db.profile.bar.swingTimer.sparkSize)
+        frame.gcdSpark:SetSize(self.db.profile.bar.swingTimer.sparkWidth + 2, barHeight)
         frame.gcdSpark:SetColorTexture(0, 0, 0, 1)
     end
     
     -- Update swing timer settings
     if frame.swingFrame then
-        frame.swingFrame:SetHeight(self.db.profile.bar.swingTimer.height)
-        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, self.db.profile.bar.swingTimer.sparkSize)
+        frame.swingBar:SetHeight(barHeight)
+        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, barHeight)
         frame.spark:SetColorTexture(
             self.db.profile.bar.swingTimer.sparkColor.r,
             self.db.profile.bar.swingTimer.sparkColor.g,
@@ -640,8 +695,16 @@ function ShamanWeaveBar:UpdateFrameSettings()
         )
         
         -- Update swing timer background settings
-        frame.swingBgFrame:SetHeight(self.db.profile.bar.swingTimer.sparkSize)
-        frame.swingBgFrame:SetWidth(self.db.profile.bar.width)
+        if frame.swingBgBar then
+            frame.swingBgBar:SetWidth(barWidth)
+            frame.swingBgBar:SetHeight(barHeight)
+            frame.swingBgBar:SetColorTexture(0, 0, 0, self.db.profile.bar.swingTimer.backgroundBar.alpha)
+            if self.db.profile.bar.swingTimer.backgroundBar.enabled then
+                frame.swingBgBar:Show()
+            else
+                frame.swingBgBar:Hide()
+            end
+        end
     end
 end
 
@@ -692,17 +755,27 @@ function ShamanWeaveBar:ShouldUseChainLightning()
     return shouldUseCLForEnemies or shouldUseCLForCastTime
 end
 
--- Helper to position a spark at the outer top end of a bar
-local function PositionBarSpark(bar, spark)
+-- Helper to position a spark at the outer top or bottom end of a bar
+local function PositionBarSpark(bar, spark, alignTop, alignBottom)
     if not bar or not spark then return end
     if bar:IsShown() and bar:GetWidth() > 0 then
         local left = bar:GetLeft()
         local top = bar:GetTop()
-        if left and top then
+        local bottom = bar:GetBottom()
+        if left and top and bottom then
             local sparkX = left + bar:GetWidth()
-            local sparkY = top + 2
+            local sparkY
+            if alignTop then
+                sparkY = top
+            elseif alignBottom then
+                sparkY = bottom - ((spark:GetHeight() or 16) / 2)
+            else
+                local barCenterY = (top + bottom) / 2
+                local sparkHeight = spark:GetHeight() or 16
+                sparkY = barCenterY - (sparkHeight / 2)
+            end
             spark:ClearAllPoints()
-            spark:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", sparkX, sparkY)
+            spark:SetPoint("LEFT", UIParent, "BOTTOMLEFT", sparkX, sparkY)
             spark:Show()
             return
         end
@@ -712,6 +785,25 @@ end
 
 function ShamanWeaveBar:UpdateDisplay()
     if not frame or isDragging or not self.db.profile.showBar then return end
+    
+    -- Recalculate proportional Y offsets with clamping
+    local barHeight = self.db.profile.bar.height
+    local lbBarHeight = barHeight * (self.db.profile.bar.lbBarHeightPct or 0.15)
+    local clBarHeight = barHeight * (self.db.profile.bar.clBarHeightPct or 0.15)
+    local ebBarHeight = barHeight * (self.db.profile.bar.ebBarHeightPct or 0.15)
+    local halfBarHeight = barHeight / 2
+
+    local desiredLbYOffset = -barHeight * 0.25
+    local minLbYOffset = -halfBarHeight + (lbBarHeight / 2)
+    local lbBarYOffset = math.max(desiredLbYOffset, minLbYOffset)
+
+    local desiredClYOffset = barHeight * 0.25
+    local maxClYOffset = halfBarHeight - (clBarHeight / 2)
+    local clBarYOffset = math.min(desiredClYOffset, maxClYOffset)
+    
+    local desiredEbYOffset = barHeight * 0.25
+    local maxEbYOffset = halfBarHeight - (ebBarHeight / 2)
+    local ebBarYOffset = math.min(desiredEbYOffset, maxEbYOffset)
     
     -- Handle out of combat/no target state
     if not UnitAffectingCombat("player") or not UnitExists("target") or not self.db.profile.showBar then
@@ -766,7 +858,7 @@ function ShamanWeaveBar:UpdateDisplay()
             frame.weaveBar:SetWidth(targetWidth)
         end
         frame.weaveBar:Show()
-        PositionBarSpark(frame.weaveBar, frame.weaveSpark)
+        PositionBarSpark(frame.weaveBar, frame.weaveSpark, false)
     else
         frame.weaveBar:SetWidth(0)
         frame.weaveBar:Hide()
@@ -785,8 +877,16 @@ function ShamanWeaveBar:UpdateDisplay()
         else
             frame.clWeaveBar:SetWidth(targetWidth)
         end
-        frame.clWeaveBar:Show()
-        PositionBarSpark(frame.clWeaveBar, frame.clWeaveSpark)
+        -- Only show CL bar if EB is on cooldown
+        local ebStart, ebDuration = GetSpellCooldown(117014)
+        local ebOnCD = ebDuration and ebDuration > 1.5 and (ebStart + ebDuration - GetTime()) > 0
+        if ebOnCD then
+            frame.clWeaveBar:Show()
+            PositionBarSpark(frame.clWeaveBar, frame.clWeaveSpark, true)
+        else
+            frame.clWeaveBar:Hide()
+            frame.clWeaveSpark:Hide()
+        end
     else
         frame.clWeaveBar:SetWidth(0)
         frame.clWeaveBar:Hide()
@@ -808,15 +908,14 @@ function ShamanWeaveBar:UpdateDisplay()
         local width = endPoint - startPoint
         if width < 0 then width = 0 end
         frame.upcomingWeaveBar:ClearAllPoints()
-        frame.upcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-        frame.upcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+        frame.upcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", startPoint, lbBarYOffset)
         if width > epsilon then
             frame.upcomingWeaveBar:SetWidth(width)
             frame.upcomingWeaveBar:Show()
             -- Show the spark when the bar is not at its maximum width
             local maxUpcomingWidth = maxWidth * (1 - swingProgress)
             if math.abs(width - maxUpcomingWidth) >= 1 then
-                PositionBarSpark(frame.upcomingWeaveBar, frame.upcomingWeaveSpark)
+                PositionBarSpark(frame.upcomingWeaveBar, frame.upcomingWeaveSpark, false)
             else
                 frame.upcomingWeaveSpark:Hide()
             end
@@ -848,16 +947,22 @@ function ShamanWeaveBar:UpdateDisplay()
         local width = endPoint - startPoint
         if width < 0 then width = 0 end
         frame.clUpcomingWeaveBar:ClearAllPoints()
-        frame.clUpcomingWeaveBar:SetPoint("TOPLEFT", frame, "TOPLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
-        frame.clUpcomingWeaveBar:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", startPoint, self.db.profile.bar.height + 2 + (self.db.profile.bar.swingTimer.sparkSize / 2))
+        frame.clUpcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", startPoint, clBarYOffset)
         if width > epsilon then
             frame.clUpcomingWeaveBar:SetWidth(width)
-            frame.clUpcomingWeaveBar:Show()
-            -- Show the spark when the bar is not at its maximum width
-            local maxUpcomingWidth = maxWidth * (1 - swingProgress)
-            if math.abs(width - maxUpcomingWidth) >= 1 then
-                PositionBarSpark(frame.clUpcomingWeaveBar, frame.clUpcomingWeaveSpark)
+            -- Only show CL upcoming bar if EB is on cooldown
+            local ebStart, ebDuration = GetSpellCooldown(117014)
+            local ebOnCD = ebDuration and ebDuration > 1.5 and (ebStart + ebDuration - GetTime()) > 0
+            if ebOnCD then
+                frame.clUpcomingWeaveBar:Show()
+                local maxUpcomingWidth = maxWidth * (1 - swingProgress)
+                if math.abs(width - maxUpcomingWidth) >= 1 then
+                    PositionBarSpark(frame.clUpcomingWeaveBar, frame.clUpcomingWeaveSpark, true)
+                else
+                    frame.clUpcomingWeaveSpark:Hide()
+                end
             else
+                frame.clUpcomingWeaveBar:Hide()
                 frame.clUpcomingWeaveSpark:Hide()
             end
         else
@@ -959,11 +1064,87 @@ function ShamanWeaveBar:UpdateDisplay()
         end
         
         -- Set fixed spark size and show it
-        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, self.db.profile.bar.swingTimer.sparkSize)
+        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, barHeight)
         frame.spark:Show()
     else
         frame.swingBar:SetWidth(0)
         frame.spark:Hide()
+    end
+
+    -- Update EB weave bar (light purple) and spark
+    local EB_ID = 117014
+    -- Only show EB bars if EB is off cooldown
+    local ebStart, ebDuration = GetSpellCooldown(EB_ID)
+    local ebOnCD = ebDuration and ebDuration > 1.5 and (ebStart + ebDuration - GetTime()) > 0
+    if not ebOnCD then
+        local ebCastTime = NAG:CastTime(EB_ID)
+        local ebRemainingGapTime = rawSwingTimeLeft - ebCastTime
+        if ebRemainingGapTime > epsilon then
+            local swingProgress = ebRemainingGapTime / weaponSpeed
+            local targetWidth = maxWidth * swingProgress
+            local currentWidth = frame.ebWeaveBar:GetWidth()
+            if targetWidth < currentWidth then
+                local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
+                frame.ebWeaveBar:SetWidth(newWidth)
+            else
+                frame.ebWeaveBar:SetWidth(targetWidth)
+            end
+            frame.ebWeaveBar:Show()
+            PositionBarSpark(frame.ebWeaveBar, frame.ebWeaveSpark, true) -- Changed to alignTop like CL
+        else
+            frame.ebWeaveBar:SetWidth(0)
+            frame.ebWeaveBar:Hide()
+            frame.ebWeaveSpark:Hide()
+        end
+    else
+        frame.ebWeaveBar:SetWidth(0)
+        frame.ebWeaveBar:Hide()
+        frame.ebWeaveSpark:Hide()
+    end
+    -- Update EB upcoming weave gap bar (light purple) and spark
+    if not ebOnCD then
+        local ebCastTime = NAG:CastTime(EB_ID)
+        local ebNextGapTime = max(0, (weaponSpeed) - ebCastTime)
+        if ebNextGapTime > epsilon then
+            local swingProgress = rawSwingTimeLeft / weaponSpeed
+            local safeOffset = 0.02
+            if swingProgress < 1 - safeOffset then
+                swingProgress = swingProgress + safeOffset
+            end
+            local startPoint = maxWidth * swingProgress 
+            local gapEndTime = min(rawSwingTimeLeft + ebNextGapTime, weaponSpeed)
+            local endProgress = gapEndTime / weaponSpeed
+            local endPoint = maxWidth * endProgress
+            local width = endPoint - startPoint
+            if width < 0 then width = 0 end
+            frame.ebUpcomingWeaveBar:ClearAllPoints()
+            frame.ebUpcomingWeaveBar:SetPoint("LEFT", frame, "LEFT", startPoint, ebBarYOffset)
+            if width > epsilon then
+                frame.ebUpcomingWeaveBar:SetWidth(width)
+                frame.ebUpcomingWeaveBar:Show()
+                local maxUpcomingWidth = maxWidth * (1 - swingProgress)
+                if math.abs(width - maxUpcomingWidth) >= 1 then
+                    PositionBarSpark(frame.ebUpcomingWeaveBar, frame.ebUpcomingWeaveSpark, true) -- Changed to alignTop like CL
+                else
+                    frame.ebUpcomingWeaveSpark:Hide()
+                end
+            else
+                frame.ebUpcomingWeaveBar:ClearAllPoints()
+                frame.ebUpcomingWeaveBar:SetWidth(0)
+                frame.ebUpcomingWeaveBar:Hide()
+                frame.ebUpcomingWeaveSpark:Hide()
+            end
+        else
+            frame.ebUpcomingWeaveBar:ClearAllPoints()
+            frame.ebUpcomingWeaveBar:SetWidth(0)
+            frame.ebUpcomingWeaveBar:Hide()
+            frame.ebUpcomingWeaveSpark:Hide()
+        end
+    else
+        frame.ebUpcomingWeaveBar:ClearAllPoints()
+        frame.ebUpcomingWeaveBar:SetWidth(0)
+        frame.ebUpcomingWeaveBar:Hide()
+        frame.ebUpcomingWeaveSpark:Hide()
     end
 end
 
@@ -1034,14 +1215,36 @@ function ShamanWeaveBar:GetOptions()
                 args = {
                     width = { name = L["Width"], type = "range", min = 100, max = 500, step = 1, order = 10, set = function(info, value) self.db.profile.bar.width = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.width end },
                     height = { name = L["Height"], type = "range", min = 10, max = 50, step = 1, order = 20, set = function(info, value) self.db.profile.bar.height = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.height end },
+                    barHeightsHeader = { name = L["Bar Heights"], type = "header", order = 25 },
+                    lbBarHeightPct = { name = L["Lightning Bolt Bar Height"], type = "range", min = 0.05, max = 1.0, step = 0.01, order = 26, isPercent = true, set = function(info, value) self.db.profile.bar.lbBarHeightPct = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.lbBarHeightPct end },
+                    clBarHeightPct = { name = L["Chain Lightning Bar Height"], type = "range", min = 0.05, max = 1.0, step = 0.01, order = 27, isPercent = true, set = function(info, value) self.db.profile.bar.clBarHeightPct = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.clBarHeightPct end },
+                    ebBarHeightPct = { name = L["Elemental Blast Bar Height"], type = "range", min = 0.05, max = 1.0, step = 0.01, order = 28, isPercent = true, set = function(info, value) self.db.profile.bar.ebBarHeightPct = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.ebBarHeightPct end },
                     alpha = { name = L["Alpha"], type = "range", min = 0, max = 1, step = 0.05, order = 30, set = function(info, value) self.db.profile.bar.alpha = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.alpha end },
                     positionHeader = { name = L["Position"], type = "header", order = 40 },
                     xOffset = { name = L["X Offset"], type = "range", min = -2000, max = 2000, step = 1, order = 50, set = function(info, value) self.db.profile.bar.x = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.x end },
                     yOffset = { name = L["Y Offset"], type = "range", min = -2000, max = 2000, step = 1, order = 60, set = function(info, value) self.db.profile.bar.y = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.y end },
                     lockPosition = { name = L["Lock Position"], type = "toggle", order = 70, set = function(info, value) self.db.profile.bar.locked = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.locked end },
-                    backgroundHeader = { name = L["Background"], type = "header", order = 80 },
-                    background = { name = L["Background"], desc = L["Select a background for the bar"], type = "select", order = 90, values = { none = L["None"], bg2 = "ShamanWeaver BG2", bg3 = "ShamanWeaver BG3", bg4 = "ShamanWeaver BG4" }, set = function(info, value) self.db.profile.bar.background = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.background end },
-                    bgColor = { name = L["Background Color"], desc = L["Set the color and alpha of the background image"], type = "color", hasAlpha = true, order = 91, set = function(info, r, g, b, a) self.db.profile.bar.bgColor = { r = r, g = g, b = b, a = a }; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.bgColor or { r = 1, g = 1, b = 1, a = 1 }; return c.r, c.g, c.b, c.a end },
+                    backgroundHeader = { name = L["Border Art"], type = "header", order = 80 },
+                    background = { name = L["Border Art"], desc = L["Select a border art for the bar"], type = "select", order = 90, values = { none = L["None"], bg2 = "ShamanWeaver BG2", bg3 = "ShamanWeaver BG3", bg4 = "ShamanWeaver BG4" }, set = function(info, value) self.db.profile.bar.background = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.background end },
+                    bgColor = { name = L["Border Art Color"], desc = L["Set the color and alpha of the border art image"], type = "color", hasAlpha = true, order = 91, set = function(info, r, g, b, a) self.db.profile.bar.bgColor = { r = r, g = g, b = b, a = a }; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.bgColor or { r = 1, g = 1, b = 1, a = 1 }; return c.r, c.g, c.b, c.a end },
+                    borderArtHeightPct = {
+                        name = L["Border Art Height"],
+                        desc = L["Set the height of the border art as a percentage of the bar height"],
+                        type = "range",
+                        min = 0.5, max = 3.0, step = 0.01, order = 92,
+                        set = function(info, value) self.db.profile.bar.borderArtHeightPct = value; self:UpdateFrameSettings() end,
+                        get = function(info) return self.db.profile.bar.borderArtHeightPct or 1.7 end,
+                        isPercent = true,
+                    },
+                    -- Swing Timer options moved here
+                    swingTimerHeader = { name = L["Swing Timer"], type = "header", order = 100 },
+                    swingTimerEnabled = { name = L["Enable Swing Timer"], type = "toggle", order = 101, set = function(info, value) self.db.profile.bar.swingTimer.enabled = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.enabled end },
+                    swingTimerSparkWidth = { name = L["Spark Width"], type = "range", min = 1, max = 10, step = 1, order = 104, set = function(info, value) self.db.profile.bar.swingTimer.sparkWidth = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.sparkWidth end },
+                    swingTimerSparkColor = { name = L["Spark Color"], type = "color", hasAlpha = true, order = 105, set = function(info, r, g, b, a) self.db.profile.bar.swingTimer.sparkColor = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.swingTimer.sparkColor; return c.r, c.g, c.b, c.a end },
+                    -- Background Bar options
+                    backgroundBarHeader = { name = L["Background Bar"], type = "header", order = 110 },
+                    backgroundBarEnabled = { name = L["Enable Background Bar"], type = "toggle", order = 111, set = function(info, value) self.db.profile.bar.swingTimer.backgroundBar.enabled = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.backgroundBar.enabled end },
+                    backgroundBarAlpha = { name = L["Background Bar Alpha"], type = "range", min = 0, max = 1, step = 0.05, order = 113, set = function(info, value) self.db.profile.bar.swingTimer.backgroundBar.alpha = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.backgroundBar.alpha end },
                 }
             },
             appearanceSettings = {
@@ -1063,19 +1266,6 @@ function ShamanWeaveBar:GetOptions()
                     gcdColor = { name = L["GCD Bar Color"], type = "color", hasAlpha = true, order = 110, set = function(info, r, g, b, a) self.db.profile.bar.colors.gcd = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.gcd; return c.r, c.g, c.b, c.a end },
                     countdownColor = { name = L["Countdown Bar Color"], type = "color", hasAlpha = true, order = 120, set = function(info, r, g, b, a) self.db.profile.bar.colors.countdown = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.countdown; return c.r, c.g, c.b, c.a end },
                     sparkColor = { name = L["Spark Color"], type = "color", hasAlpha = true, order = 130, set = function(info, r, g, b, a) self.db.profile.bar.colors.spark = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.colors.spark; return c.r, c.g, c.b, c.a end },
-                }
-            },
-            swingTimerSettings = {
-                name = L["Swing Timer"],
-                type = "group",
-                order = 30,
-                inline = false,
-                args = {
-                    enabled = { name = L["Enable Swing Timer"], type = "toggle", order = 10, set = function(info, value) self.db.profile.bar.swingTimer.enabled = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.enabled end },
-                    barHeight = { name = L["Bar Height"], type = "range", min = 1, max = 10, step = 1, order = 20, set = function(info, value) self.db.profile.bar.swingTimer.height = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.height end },
-                    sparkSize = { name = L["Spark Size"], type = "range", min = 4, max = 20, step = 1, order = 30, set = function(info, value) self.db.profile.bar.swingTimer.sparkSize = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.sparkSize end },
-                    sparkWidth = { name = L["Spark Width"], type = "range", min = 1, max = 10, step = 1, order = 40, set = function(info, value) self.db.profile.bar.swingTimer.sparkWidth = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.sparkWidth end },
-                    swingSparkColor = { name = L["Spark Color"], type = "color", hasAlpha = true, order = 50, set = function(info, r, g, b, a) self.db.profile.bar.swingTimer.sparkColor = {r = r, g = g, b = b, a = a}; self:UpdateFrameSettings() end, get = function(info) local c = self.db.profile.bar.swingTimer.sparkColor; return c.r, c.g, c.b, c.a end },
                 }
             }
         }

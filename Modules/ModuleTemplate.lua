@@ -5,6 +5,94 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
+
+--- ============================ LIBRARY REFERENCE ============================
+--[[
+
+    This is a reference of available modern C_ API functions in this environment. 
+    Leave this section intact for anything you build. 
+    This will be used to help you throughout all modules.
+
+    IMPORTANT FOR AI AGENTS:
+    - If any function you try below returns nil or raises an error:
+        1- Check if the namespace exists (is not nil).
+        2- Scan the namespace dynamically to list all available functions.
+        3️- Adapt to the client version.
+
+    HOW TO CHECK FOR AVAILABLE FUNCTIONS:
+    Example to scan a namespace:
+
+        local namespace = C_Item
+        if namespace then
+            for k, v in pairs(namespace) do
+                if type(v) == "function" then
+                    print("Available: C_Item." .. k)
+                end
+            end
+        else
+            print("Namespace C_Item not found.")
+        end
+
+    HOW TO SCAN ALL AVAILABLE C_ NAMESPACES:
+
+        for k, v in pairs(_G) do
+            if type(v) == "table" and k:find("^C_") then
+                print("Namespace found: " .. k)
+            end
+        end
+
+    --------------------------------------------------------------------------------
+
+    --- C_Item ---
+    - C_Item.GetItemInfo(item) -> itemGUID, itemID, itemLink, ...
+    - C_Item.GetItemInfoByID(itemID) -> name, itemLink, quality, ...
+    - C_Item.GetItemNameByID(itemID) -> name
+    - C_Item.GetItemIconByID(itemID) -> icon
+    - C_Item.GetItemSpell(item) -> spellID, spellName, spellIconID
+    - C_Item.IsItemDataCachedByID(itemID) -> boolean
+
+    --- C_Spell ---
+    - C_Spell.GetSpellInfo(spellID) -> name, rank, icon, ...
+    - C_Spell.GetSpellName(spellID) -> name
+    - C_Spell.GetSpellIcon(spellID) -> icon
+    - C_Spell.GetSpellLink(spellID) -> link
+
+    --- DataManager (Custom System) ---
+    local DataManager = NAG:GetModule("DataManager")
+    - DataManager:Get(id, entityType) -> entity
+    - DataManager:GetItem(id) -> item
+    - DataManager:GetSpell(id) -> spell
+    - DataManager:GetByName(name, flags, matchAll) -> entity
+    - DataManager:GetAllByName(name, flags, matchAll) -> {entities}
+    - DataManager:GetRelated(id, sourceType, targetType) -> {relatedEntities}
+    - DataManager:GetAllByFlag(flag, entityType) -> {entities}
+    - DataManager:HasFlag(id, entityType, flag) -> boolean
+
+    --------------------------------------------------------------------------------
+
+    TROUBLESHOOTING WORKFLOW FOR AI AGENTS:
+
+    If any function call fails:
+    - Use `type(C_Item)` or `type(C_Spell)` to verify the namespace.
+    - Use pairs(namespace) to explore available functions.
+    - Functions may differ across client versions. Dynamically adapt.
+    - Never assume function existence — always validate before call.
+    - Ask the user to run /run commands or /dump commands to test usability of a function if something doesnt go as expected.
+    --------------------------------------------------------------------------------
+
+    There are a lot of functions in the NAG codebase to speed things up. They are listed in these files:
+    - \NAG\APLhandlers.lua for APL functions
+    - \NAG\Common.lua for common functions
+    - \NAG\handlers\BuffDebuffHandlers.lua for buff/debuff functions
+    - \NAG\handlers\ItemHandlers.lua for item functions
+    - \NAG\handlers\MiscHandlers.lua for misc functions
+    - \NAG\handlers\ResourceHandlers.lua for resource functions
+
+    The above files contain a lot of functions that can be used to speed things up.
+
+]]
+
+
 --- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
