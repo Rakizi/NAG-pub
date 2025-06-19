@@ -226,10 +226,11 @@ function Snapshoter:OnCombatLogEvent(event)
     if eventType == "SPELL_AURA_APPLIED" then
         -- Track buffs applied to player or debuffs applied by player to target
         if (auraType == "BUFF" and isPlayerTarget) or (auraType == "DEBUFF" and isPlayerSource) then
+            -- Always update the snapshot when an aura is applied/reapplied
             self.state.activeBuffs[spellID] = true
-            self:Debug(format("Aura applied: %s (ID: %d) - Type: %s", spellName or "Unknown", spellID, auraType))
-            -- Capture snapshot for this aura
-            self:CaptureSnapshot(spellID, format("%s applied", auraType:lower()))
+            self:Debug(format("Aura applied/reapplied: %s (ID: %d) - Type: %s", spellName or "Unknown", spellID, auraType))
+            -- Capture/update snapshot for this aura
+            self:CaptureSnapshot(spellID, format("%s applied/reapplied", auraType:lower()))
         end
     elseif eventType == "SPELL_AURA_REMOVED" then
         -- Remove from active tracking when aura expires
@@ -457,9 +458,38 @@ ns.Snapshoter = Snapshoter
 
 -- Add global API function to NAG namespace
 do
-    --- Global API function to compare snapshot values with current live stats
-    --- Flexible argument parsing: accepts numbers (spellID) and strings (stat names) in any order.
-    --- @return number The difference between current and snapshot values (current - snapshot)
+    --- Query and compare stat snapshots with current values
+    --- This function provides a flexible way to:
+    --- 1. Compare current stats with snapshot values for spells/buffs/debuffs
+    --- 2. Get raw current stat values without comparison
+    ---
+    --- For active buffs/debuffs, returns the stat difference (current - snapshot):
+    --- - Positive values indicate stat gains since snapshot
+    --- - Negative values indicate stat losses since snapshot
+    --- - Zero indicates no change
+    ---
+    --- For expired buffs/debuffs, returns the current stat value.
+    ---
+    --- @param ... any Variable number of arguments:
+    ---   - number: spellID to check snapshot for
+    ---   - string: stat name(s) to check. Valid stats: "str", "agi", "int", "crit", "haste", "mastery", "ap"
+    --- @return number The calculated difference or current value:
+    ---   - With spellID (active buff): current_stat - snapshot_stat
+    ---   - With spellID (expired buff): current_stat
+    ---   - Without spellID: sum of current stats
+    ---
+    --- @usage
+    --- -- Compare strength for a spell/buff/debuff
+    --- local diff = NAG:Snapshot("str", 45477)  -- Returns: current_str - snapshot_str
+    --- 
+    --- -- Get current strength + agility (no comparison)
+    --- local total = NAG:Snapshot("str", "agi")  -- Returns: current_str + current_agi
+    --- 
+    --- -- Compare multiple stats for a spell
+    --- local diff = NAG:Snapshot(12345, "crit", "haste")  -- Returns: (current_crit + current_haste) - (snapshot_crit + snapshot_haste)
+    --- 
+    --- -- Arguments can be in any order
+    --- local diff = NAG:Snapshot("ap", 67890, "mastery")  -- Returns: (current_ap + current_mastery) - (snapshot_ap + snapshot_mastery)
     function NAG:Snapshot(...)
         local Snapshoter = NAG:GetModule("Snapshoter")
         if not Snapshoter then
