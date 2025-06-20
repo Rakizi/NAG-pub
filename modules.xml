@@ -45,7 +45,9 @@
     <Script file="Modules\BTK.lua"/>
     <Script file="Modules\ImportExport.lua"/>
     <Script file="Modules\RotationManager.lua"/>
-    
+
+    <Script file="Modules\Snapshotter.lua"/>
+
     <!-- SpellLearner Modules -->
     <Script file="Modules\SpellLearner\SpellLearner.lua"/>
     <Script file="Modules\SpellLearner\SpellLearner-StateManager.lua"/>
