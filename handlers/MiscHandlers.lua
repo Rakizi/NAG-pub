@@ -36,6 +36,7 @@ local swingTimerLib = LibStub("LibClassicSwingTimerAPI")
 -- WoW API (unified wrappers)
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
+local GetSpellCharges = ns.GetSpellChargesUnified
 
 -- Math operations (WoW optimized)
 local format = format or string.format
@@ -571,10 +572,10 @@ end
 
 do -- ================================= Time APLValue Functions ========================================== --
     --- Get the current combat time.
-    --- @function NAG:TimeCurrent
-    --- @usage NAG:TimeCurrent() >= 10
+    --- @function NAG:CurrentTime
+    --- @usage NAG:CurrentTime() >= 10
     --- @return number The current combat time in seconds.
-    function NAG:TimeCurrent()
+    function NAG:CurrentTime()
         -- If NAG is not fully initialized, return 0
         if not self or not self.GetModule then
             return 0
@@ -601,7 +602,6 @@ do -- ================================= Time APLValue Functions ================
         local currentTime = GetTime()
         return max(0, currentTime - StateManager.state.combat.startTime)
     end
-NAG.CurrentTime = NAG.TimeCurrent
 
     --- Get the time spent on the current target.
     --- @function NAG:TimeOnTarget
@@ -624,12 +624,12 @@ NAG.CurrentTime = NAG.TimeCurrent
     end
 
     --- Get the current time as a percentage of the total time.
-    --- @function NAG:TimeCurrentPercent
-    --- @usage NAG:TimeCurrentPercent() >= 50
+    --- @function NAG:CurrentTimePercent
+    --- @usage NAG:CurrentTimePercent() >= 50
     --- @return number The current time percentage.
-    function NAG:TimeCurrentPercent()
+    function NAG:CurrentTimePercent()
         -- Get current time remaining
-        local remainingTime = self:TimeRemaining()
+        local remainingTime = self:RemainingTime()
         if remainingTime >= 7777 then
             return 0 -- Return 0% if we don't have valid TTD
         end
@@ -646,12 +646,11 @@ NAG.CurrentTime = NAG.TimeCurrent
         -- Ensure the percentage is within valid range (0-100)
         return max(0, min(100, currentPercent))
     end
-    NAG.CurrentTimePercent = NAG.TimeCurrentPercent
     --- Get the remaining time.
-    --- @function NAG:TimeRemaining
-    --- @usage NAG:TimeRemaining()
+    --- @function NAG:RemainingTime
+    --- @usage NAG:RemainingTime()
     --- @return number The remaining time.
-    function NAG:TimeRemaining()
+    function NAG:RemainingTime()
         local global = NAG:GetGlobal()
 
         -- If encounter timer is enabled, use that value
@@ -689,19 +688,18 @@ NAG.CurrentTime = NAG.TimeCurrent
 
         return 8888 -- Default fallback
     end
-    NAG.RemainingTime = NAG.TimeRemaining
     --- Get the remaining time as a percentage.
-    --- @function NAG:TimeRemainingPercent
-    --- @usage NAG:TimeRemainingPercent()
+    --- @function NAG:RemainingTimePercent
+    --- @usage NAG:RemainingTimePercent()
     --- @return number The remaining time percentage.
-    function NAG:TimeRemainingPercent()
+    function NAG:RemainingTimePercent()
         -- Get current time remaining
-        local remainingTime = self:TimeRemaining()
+        local remainingTime = self:RemainingTime()
         if remainingTime >= 7777 then
             return 100 -- Return 100% if we don't have valid TTD
         end
 
-        local elapsedTimeSec = self:TimeCurrent()        -- Calculate how much time has passed since the fight started
+        local elapsedTimeSec = self:CurrentTime()        -- Calculate how much time has passed since the fight started
         local totalTime = elapsedTimeSec + remainingTime -- Calculate the total time duration of the fight
 
         -- Avoid division by zero
@@ -713,7 +711,6 @@ NAG.CurrentTime = NAG.TimeCurrent
         -- Ensure the percentage is within valid range (0-100)
         return max(0, min(100, remainingPercent))
     end
-    NAG.RemainingTimePercent = NAG.TimeRemainingPercent
 end
 
 do -- ================================= GCD/Swing/Auto APLValue Functions =============================== --
@@ -775,6 +772,53 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
             start, duration = GetSpellCooldown(61304) --GCD
             return max(0, min(duration, (start + duration - GetTime())))
         end
+    end
+
+    --- Returns the number of charges available for a spell.
+    --- @function NAG:SpellNumCharges
+    --- @param spellId number The ID of the spell to check.
+    --- @return number The number of charges available, or 0 if the spell doesn't use charges.
+    --- @usage NAG:SpellNumCharges(115399) >= 1
+    function NAG:SpellNumCharges(spellId)
+        if not spellId then return 0 end
+        
+        -- Get spell charge information using our unified API wrapper
+        local charges, maxCharges = GetSpellCharges(spellId)
+        
+        -- If the spell doesn't use charges or we got invalid data
+        if not charges or not maxCharges then
+            return 0
+        end
+        
+        return charges
+    end
+
+    --- Returns the time until the next charge of a spell will be ready.
+    --- @function NAG:SpellTimeToCharge
+    --- @param spellId number The ID of the spell to check.
+    --- @return number The time in seconds until the next charge, or 0 if fully charged or doesn't use charges.
+    --- @usage NAG:SpellTimeToCharge(115399) <= 10.0
+    function NAG:SpellTimeToCharge(spellId)
+        if not spellId then return 0 end
+        
+        -- Get spell charge information using our unified API wrapper
+        local charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(spellId)
+        -- If the spell doesn't use charges or we got invalid data
+        if not charges or not maxCharges then
+            return 0
+        end
+        
+        -- If we have max charges, return 0
+        if charges >= maxCharges then
+            return 0
+        end
+        
+        -- If we have charge cooldown information, calculate time until next charge
+        if chargeStart and chargeDuration then
+            return max(0, (chargeStart + chargeDuration) - GetTime())
+        end
+        
+        return 0
     end
 
     --- Checks if a spell can be safely weaved between auto attacks.

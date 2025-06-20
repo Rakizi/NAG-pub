@@ -59,8 +59,8 @@ NAG:AutocastOtherCooldowns()
     or     ((not NAG:IsActive(6673)) and NAG:Cast(6673))
     or     NAG:Cast(12294)
     -- Hide: or (((NAG:CurrentRage() < 75.0) and (NAG:AutoTimeToNext() >= 2.5) and (not (NAG:IsActive(2825) or NAG:IsActive(85730) or NAG:IsActive(1719))) and NAG:IsReady(100)) and NAG:MoveToRange(9))
-    or     (((NAG:DotIsActive(86346) or ((NAG:TimeToReady(86346) > 5) and (NAG:TimeRemaining() > 60)))) and NAG:Cast(6544))
-    or     (((not NAG:DotIsActive(86346)) and NAG:TimeRemaining() > 1) and NAG:Cast(86346))
+    or     (((NAG:DotIsActive(86346) or ((NAG:TimeToReady(86346) > 5) and (NAG:RemainingTime() > 60)))) and NAG:Cast(6544))
+    or     (((not NAG:DotIsActive(86346)) and NAG:RemainingTime() > 1) and NAG:Cast(86346))
     or     ((((NAG:CurrentRage() >= 80.0) and (not NAG:IsExecutePhase(20))) or ((NAG:CurrentRage() <= 80.0) and (not NAG:IsExecutePhase(20)) and NAG:DotIsActive(86346)) or ((NAG:CurrentRage() <= 80.0) and NAG:IsExecutePhase(20) and (NAG:NumberTargets() > 1.0))) and NAG:Cast(1464))
     or     NAG:Cast(5308)
     or     ((((NAG:CurrentRage() >= 25.0) and (not NAG:IsExecutePhase(20)) and NAG:IsActive(60503)) or (NAG:IsExecutePhase(20) and NAG:IsActive(60503)) or {}) and NAG:Cast(7384))
@@ -91,21 +91,6 @@ local prePullWarriorArms = {
 local spellLocationsWarriorArms = nil
 local burstTrackersWarriorArms = {
     { spellId = 85730, auraId = { 85730 } }, -- Deadly Calm
-    { spellId = 6673,  auraId = { 6673 } },  -- Battle Shout
-    { spellId = 1719,  auraId = { 1719 } },  -- Recklessness
-}
-
-local prePullWarriorFury = {
-    { 2457,                  2 },
-    { 6673,                  1.5 },
-    { 'defaultBattlePotion', 0.1 },
-    { 12292,                 0.1 },
-    { 100,                   0.1 },
-    { 2458,                  0.1 }
-}
-local spellLocationsWarriorFury = nil
-local burstTrackersWarriorFury = {
-    { spellId = 12292, auraId = { 12292 } }, -- Death Wish
     { spellId = 6673,  auraId = { 6673 } },  -- Battle Shout
     { spellId = 1719,  auraId = { 1719 } },  -- Recklessness
 }
@@ -146,26 +131,56 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.ARMS, "Mists Arms", {
     rotationString = rotationStringArms or rotationStringWarriorArms or debugRotationWarriorArms
 })
 
--- Fury
-ns.AddRotationToDefaults(defaults, CLASS_SPECS.FURY, "Mists Fury", {
-    default = true,
-    enabled = true,
-    gameType = Version.GAME_TYPES.CLASSIC_MISTS,
-    talents = {},
-    experimental = false,
-    prePull = prePullFury or prePullWarriorFury or nil,
-    resourceBar = resourceBarFury or resourceBarWarriorFury or nil,
-    guitarHeroBar = guitarHeroBarFury or guitarHeroBarWarriorFury or nil,
-    burstTrackers = burstTrackersFury or burstTrackersWarriorFury or nil,
-    spells = spellsFury or spellsWarriorFury or nil,
-    auras = aurasFury or aurasWarriorFury or nil,
-    items = itemsFury or itemsWarriorFury or nil,
-    consumes = consumesFury or consumesWarriorFury or nil,
-    customVariables = customVariablesFury or customVariablesWarriorFury or nil,
-    macros = macrosFury or macrosWarriorFury or nil,
-    rotationString = rotationStringFury or rotationStringWarriorFury or debugRotationWarriorFury
-})
+ns.AddRotationToDefaults(defaults,
+    SpecializationCompat:GetSpecID("Warrior", "Fury"),
+    "Warrior Fury - Default by APLParser",
+    {
+        -- Required parameters
+        default = true,
+        enabled = true,
+        experimental = true,
+        gameType = Version.GAME_TYPES.CLASSIC_MISTS,
+        prePull = {
+            { NAG:Cast(2457), -10000 }, { NAG:Cast(6673), -1000 }, { NAG:Cast(76095), -1000 }, { NAG:Cast(64382), -1000 }, { NAG:Cast(100), -1000 }
+        },
+        rotationString = [[
+    NAG:AutocastOtherCooldowns()
+        or (NAG:IsExecutePhase(20) or (NAG:RemainingTime() <= 25)) and NAG:Cast(76095)
+        or (not NAG:AuraIsActive(114206)) and NAG:Cast(114206)
+        or (not NAG:AuraIsActive(12880)) and NAG:Cast(18499)
+        or NAG:AuraIsActive(86346, "target") and NAG:Cast(6544)
+        or NAG:Cast(23881)
+        or (not NAG:AuraIsActive(86346, "target")) and NAG:Cast(86346)
+        or (NAG:CurrentTime() >= 3) and NAG:Cast(107570)
+        or NAG:Cast(5308)
+        or NAG:Cast(85288)
+        or (NAG:NumberTargets() > 1) and NAG:Cast(1680)
+        or NAG:AuraIsActive(46916) and NAG:Cast(100130)
+        or (NAG:AuraIsActive(86346, "target") and (NAG:CurrentRage() >= 80)) and NAG:Cast(78)
+        or ((not NAG:IsExecutePhase(20)) and (NAG:CurrentRage() >= 60)) and NAG:Cast(78)
+        or ((NAG:CurrentRage() < 80) and (NAG:AutoTimeToNext() >= 2.0) and NAG:SpellIsReady(100)) and NAG:Move(9)
+        or NAG:Cast(100)
+        or ((not NAG:SpellCanCast(100)) and (not NAG:UnitIsMoving()) and (NAG:CurrentTime() >= 1.5)) and NAG:Cast(46924)
+        or (NAG:CurrentRage() <= 80) and NAG:Cast(6673)
+        or false and NAG:Cast(64382)
+        ]],
+        
+        -- New action-based format
+        --prePullActions = {{action = {castSpell = {spellId = {spellId = 2457}}}, doAtValue = {const = {val = "-10s"}}}, {action = {move = {rangeFromTarget = {const = {val = "9"}}}}, doAtValue = {const = {val = "-5s"}}}, {action = {castSpell = {spellId = {spellId = 6673}}}, doAtValue = {const = {val = "-3"}}}, {action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-1.5"}}}, {action = {castSpell = {spellId = {spellId = 64382}}}, doAtValue = {const = {val = "-1.5"}}}, {action = {castSpell = {spellId = {spellId = 100}}}, doAtValue = {const = {val = "0"}}}},
+        --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {condition = {or = {vals = {{isExecutePhase = {threshold = "E20"}}, {cmp = {op = "OpLe", lhs = {remainingTime = {}}, rhs = {const = {val = "25"}}}}}}}, castSpell = {spellId = {otherId = "OtherActionPotion"}}}}, {action = {condition = {not = {val = {auraIsActive = {auraId = {spellId = 114206, tag = -1}}}}}, castSpell = {spellId = {spellId = 114206}}}}, {action = {condition = {not = {val = {auraIsActive = {auraId = {spellId = 12880}}}}}, castSpell = {spellId = {spellId = 18499}}}}, {action = {condition = {auraIsActive = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 86346}}}, castSpell = {spellId = {spellId = 6544}}}}, {action = {castSpell = {spellId = {spellId = 23881}}}}, {action = {condition = {not = {val = {auraIsActive = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 86346}}}}}, castSpell = {spellId = {spellId = 86346}}}}, {action = {condition = {cmp = {op = "OpGe", lhs = {currentTime = {}}, rhs = {const = {val = "3"}}}}, castSpell = {spellId = {spellId = 107570, tag = 1}}}}, {action = {castSpell = {spellId = {spellId = 5308}}}}, {action = {castSpell = {spellId = {spellId = 85288, tag = 1}}}}, {action = {condition = {cmp = {op = "OpGt", lhs = {numberTargets = {}}, rhs = {const = {val = "1"}}}}, castSpell = {spellId = {spellId = 1680, tag = 1}}}}, {action = {condition = {auraIsActive = {auraId = {spellId = 46916}}}, castSpell = {spellId = {spellId = 100130}}}}, {action = {condition = {and = {vals = {{auraIsActive = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 86346}}}, {cmp = {op = "OpGe", lhs = {currentRage = {}}, rhs = {const = {val = "80"}}}}}}}, castSpell = {spellId = {spellId = 78}}}}, {action = {condition = {and = {vals = {{not = {val = {isExecutePhase = {threshold = "E20"}}}}, {cmp = {op = "OpGe", lhs = {currentRage = {}}, rhs = {const = {val = "60"}}}}}}}, castSpell = {spellId = {spellId = 78}}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpLt", lhs = {currentRage = {}}, rhs = {const = {val = "80"}}}}, {cmp = {op = "OpGe", lhs = {autoTimeToNext = {}}, rhs = {const = {val = "2s"}}}}, {spellIsReady = {spellId = {spellId = 100}}}}}}, move = {rangeFromTarget = {const = {val = "9"}}}}}, {action = {castSpell = {spellId = {spellId = 100}}}}, {action = {condition = {and = {vals = {{not = {val = {spellCanCast = {spellId = {spellId = 100}}}}}, {not = {val = {unitIsMoving = {}}}}, {cmp = {op = "OpGe", lhs = {currentTime = {}}, rhs = {const = {val = "1.5"}}}}}}}, castSpell = {spellId = {spellId = 46924}}}}, {action = {condition = {cmp = {op = "OpLe", lhs = {currentRage = {}}, rhs = {const = {val = "80"}}}}, castSpell = {spellId = {spellId = 6673}}}}, {action = {condition = {const = {val = "false"}}, castSpell = {spellId = {spellId = 64382}}}}},
 
+        -- Tracked IDs for optimization
+        spells = {78, 100, 1680, 5308, 6544, 6673, 12880, 18499, 23881, 46916, 46924, 64382, 85288, 86346, 100130, 107570, 114206},
+        items = {76095},
+        auras = {},
+        runes = {},
+
+        -- Optional metadata
+        glyphs = {67482, 45792, 43399},
+        lastModified = "06/19/2025",
+        author = "APLParser"
+    }
+)
 -- Protection
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.PROTECTION, "Mists Protection", {
     default = true,

@@ -18,6 +18,8 @@ local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local Types = NAG:GetModule("Types")
 --- @type StateManager|AceModule
 local StateManager = NAG:GetModule("StateManager")
+--- @type SpecializationCompat
+local SpecializationCompat = ns.SpecializationCompat
 --- @type Version
 local Version = ns.Version
 
@@ -59,7 +61,9 @@ local GetSpellPowerCost = ns.GetSpellPowerCostUnified
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 local GetTalentTabInfo = GetTalentTabInfo
 local C_SpecializationInfo = _G.C_SpecializationInfo
-
+local GetItemInfo = ns.GetItemInfoUnified
+local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
+local UnitClass = _G.UnitClass
 --- ============================ CONTENT ============================
 
 -- Module level variables
@@ -519,7 +523,40 @@ end
 
 
 do -- ================================= Resource APLValue Functions ======================== --
-    -- TODO: Add prediction to these functions
+    -- Helper function to get the secondary resource type for the current spec
+    local function GetSecondaryResourceType()
+        local _, class = UnitClass("player")
+        local spec = SpecializationCompat:GetActiveSpecialization()
+        if not spec then return nil end
+
+        -- Map specs to their secondary resource types
+        if class == "WARLOCK" then
+            if spec == 1 then     -- Affliction
+                return Enum.PowerType.SoulShards
+            elseif spec == 2 then -- Demonology
+                return Enum.PowerType.DemonicFury
+            elseif spec == 3 then -- Destruction
+                return Enum.PowerType.BurningEmbers
+            end
+        elseif class == "PALADIN" then
+            return Enum.PowerType.HolyPower
+        elseif class == "PRIEST" and spec == 3 then -- Shadow
+            return Enum.PowerType.ShadowOrbs
+        elseif class == "MAGE" and spec == 1 then   -- Arcane
+            return Enum.PowerType.ArcaneCharges
+        end
+        return nil
+    end
+
+    --- Gets the current amount of the spec's secondary resource (Soul Shards, Demonic Fury, Holy Power, etc.)
+    --- @function NAG:CurrentGenericResource
+    --- @return number The current amount of the spec's secondary resource
+    --- @usage NAG:CurrentGenericResource() >= x
+    function NAG:CurrentGenericResource()
+        local resourceType = GetSecondaryResourceType()
+        if not resourceType then return 0 end
+        return UnitPower("player", resourceType) or 0
+    end
 
     --- Get the current health of the player
     --- @function NAG:CurrentHealth
@@ -527,6 +564,14 @@ do -- ================================= Resource APLValue Functions ============
     --- @return number The current health of the player
     function NAG:CurrentHealth()
         return UnitHealth("player")
+    end
+
+    --- Get the maximum health of the player
+    --- @function NAG:MaxHealth
+    --- @usage (NAG:MaxHealth() >= x)
+    --- @return number The maximum health of the player
+    function NAG:MaxHealth()
+        return UnitHealthMax("player")
     end
 
     --- Get the current health percentage of the player
@@ -541,6 +586,22 @@ do -- ================================= Resource APLValue Functions ============
         end
         return healthPerc
     end
+
+    --- Gets the amount of damage taken in the last global cooldown (1.5s).
+    --- @function NAG:DamageTakenLastGlobal
+    --- @usage NAG:DamageTakenLastGlobal() > 0
+    --- @return number The amount of damage taken.
+    function NAG:DamageTakenLastGlobal()
+        -- Placeholder: Damage tracking needs to be implemented.
+        -- This will likely involve listening to COMBAT_LOG_EVENT_UNFILTERED
+        -- and tracking damage taken by the player in the last 1.5 seconds.
+        return 0
+    end
+    NAG.ProtectionPaladinDamageTakenLastGlobal = NAG.DamageTakenLastGlobal
+    NAG.ProtectionWarriorDamageTakenLastGlobal = NAG.DamageTakenLastGlobal
+    NAG.GuardianDruidDamageTakenLastGlobal = NAG.DamageTakenLastGlobal
+    NAG.BrewmasterMonkDamageTakenLastGlobal = NAG.DamageTakenLastGlobal
+    NAG.BloodDeathKnightDamageTakenLastGlobal = NAG.DamageTakenLastGlobal
 
     --- Get the current mana of the player
     --- @function NAG:CurrentMana
@@ -787,14 +848,6 @@ do -- ================================= Resource APLValue Functions ============
     --- @return number The current maelstrom of the player
     function NAG:CurrentMaelstrom()
         return UnitPower("player", Enum.PowerType.Maelstrom)
-    end
-
-    --- Get the current chi of the player
-    --- @function NAG:CurrentChi
-    --- @usage (NAG:CurrentChi() >= x)
-    --- @return number The current chi of the player
-    function NAG:CurrentChi()
-        return UnitPower("player", Enum.PowerType.Chi)
     end
 
     -- =========================================================================
@@ -1060,9 +1113,9 @@ do -- ================================= Resource APLValue Functions ============
     end
 
     --- Returns the cooldown time for a specific rune slot.
-    --- @function NAG:RuneSlotCooldownNew
+    --- @function NAG:RuneSlotCooldown
     --- @param runeSlot number The rune slot to check.
-    --- @usage NAG:RuneSlotCooldownNew(runeSlot) <= x
+    --- @usage NAG:RuneSlotCooldown(runeSlot) <= x
     --- @return number The cooldown time for the specified rune slot, or 0 if the player is not a Death Knight.
     function NAG:RuneSlotCooldown(runeSlot)
         if not runeSlot then return 0 end
@@ -1072,24 +1125,6 @@ do -- ================================= Resource APLValue Functions ============
         if not start or not duration then
             return 0 -- Return 0 if the data is temporarily unavailable
         end
-        if runeReady then
-            return 0
-        elseif start and duration then
-            return max(0, (start + duration) - NAG:NextTime())
-        else
-            return 0
-        end
-    end
-
-    --- Returns the cooldown time for a specific rune slot.
-    --- @function NAG:RuneSlotCooldown
-    --- @param runeSlot number The rune slot to check.
-    --- @usage NAG:RuneSlotCooldown(runeSlot) <= x
-    --- @return number The cooldown time for the specified rune slot, or 0 if the player is not a Death Knight.
-    function NAG:RuneSlotCooldown(runeSlot)
-        if not runeSlot then return 0 end
-        if self.CLASS ~= "DEATHKNIGHT" then return 0 end
-        local start, duration, runeReady = GetRuneCooldown(runeSlot)
         if runeReady then
             return 0
         elseif start and duration then
@@ -1181,4 +1216,51 @@ do -- ================================= Resource APLValue Functions (4/4V) =====
         return UnitPower("player", Enum.PowerType.BurningEmbers) or 0
     end
 
+    --- Get the maximum combo points of the player
+    --- @function NAG:MaxComboPoints
+    --- @return number The maximum combo points of the player
+    function NAG:MaxComboPoints()
+        return UnitPowerMax("player", Enum.PowerType.ComboPoints) or 5
+    end
+
+    --- Get the maximum focus of the player
+    --- @function NAG:MaxFocus
+    --- @return number The maximum focus of the player
+    function NAG:MaxFocus()
+        return UnitPowerMax("player", Enum.PowerType.Focus) or 100
+    end
+
+    --- Gets focus regeneration per second
+    --- @function NAG:FocusRegenPerSecond
+    --- @return number Focus regen rate per second
+    function NAG:FocusRegenPerSecond()
+        -- TODO: Implement focus regen logic
+        return 4
+    end
+
+    --- Gets time until target focus level is reached
+    --- @function NAG:FocusTimeToTarget
+    --- @param targetFocus number The target focus level to reach
+    --- @return number Time in seconds until target focus is reached
+    function NAG:FocusTimeToTarget(targetFocus)
+        if not targetFocus then
+            self:Error("FocusTimeToTarget: No targetFocus provided")
+            return 0
+        end
+
+        local currentFocus = self:CurrentFocus()
+
+        if currentFocus >= targetFocus then
+            return 0
+        end
+
+        local focusNeeded = targetFocus - currentFocus
+        local regenRate = self:FocusRegenPerSecond()
+
+        if regenRate <= 0 then
+            return 999 -- Prevent division by zero
+        end
+
+        return focusNeeded / regenRate
+    end
 end
