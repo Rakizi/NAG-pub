@@ -245,8 +245,8 @@ local function evaluateCondition(condition)
                     return function(_, spellId) return NAG:CanCast(spellId) end
                 elseif k == "TimeToReady" then
                     return function(_, spellId) return NAG:TimeToReady(spellId) or 0 end
-                elseif k == "TimeRemaining" then
-                    return function() return NAG:TimeRemaining() or 0 end
+                elseif k == "RemainingTime" then
+                    return function() return NAG:RemainingTime() or 0 end
                 else
                     return NAG[k]
                 end
@@ -337,7 +337,7 @@ local function getConditionGroupType(condition)
         return "Distance"
     elseif condition:match("NumberTargets") or condition:match("Targets") then
         return "Targets"
-    elseif condition:match("TimeCurrent") or condition:match("TimeRemaining") or condition:match("Time") then
+    elseif condition:match("CurrentTime") or condition:match("RemainingTime") or condition:match("Time") then
         return "Time"
     elseif condition:match("IsExecutePhase") or condition:match("Execute") then
         return "Execute"

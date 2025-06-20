@@ -61,7 +61,7 @@ ns.AddRotationToDefaults(defaults,
     or     (((not NAG:IsActive(768)) and ((NAG:CurrentMana() + 1500.0) <= (NAG:CurrentMana() / NAG:CurrentManaPercent()))) and NAG:Cast(12662))
     or     (((not NAG:IsActive(768)) and ((NAG:CurrentMana() + 2250.0) <= (NAG:CurrentMana() / NAG:CurrentManaPercent()))) and NAG:Cast(NAG:GetBattlePotion()))
     or     (((not NAG:IsActive(768)) and (NAG:CurrentManaPercent() <= 80) and (not ((NAG:IsKnown(12662) and NAG:IsReady(12662)) or (NAG:IsKnown(NAG:GetBattlePotion()) and NAG:IsReady(NAG:GetBattlePotion()))))) and NAG:Cast(23724))
-    or     (((not NAG:IsActive(768)) and (NAG:CurrentManaPercent() <= 40) and (NAG:TimeRemaining() >= 20.0) and (not ((NAG:IsKnown(12662) and NAG:IsReady(12662)) or (NAG:IsKnown(NAG:GetBattlePotion()) and NAG:IsReady(NAG:GetBattlePotion()))))) and NAG:Cast(29166))
+    or     (((not NAG:IsActive(768)) and (NAG:CurrentManaPercent() <= 40) and (NAG:RemainingTime() >= 20.0) and (not ((NAG:IsKnown(12662) and NAG:IsReady(12662)) or (NAG:IsKnown(NAG:GetBattlePotion()) and NAG:IsReady(NAG:GetBattlePotion()))))) and NAG:Cast(29166))
     or     ((not NAG:IsActive(768)) and NAG:Cast(768))
         ]],
 

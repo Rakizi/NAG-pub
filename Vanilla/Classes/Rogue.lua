@@ -48,10 +48,10 @@ ns.AddRotationToDefaults(defaults,
             
         },
         rotationString = [[
-    ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:TimeRemaining() >= 6.0)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:TimeRemaining() > 9.0))) and NAG:Cast(6774))
+    ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:RemainingTime() >= 6.0)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:RemainingTime() > 9.0))) and NAG:Cast(6774))
     or     (((NAG:CurrentEnergy() < 59.0) and (NAG:TimeToEnergyTick() < 1.0)) and NAG:Cast(13750))
     or     (NAG:IsActive(6774) and NAG:AutocastOtherCooldowns())
-    or     (((NAG:CurrentComboPoints() >= 5.0) and (NAG:IsActive(6774) or (NAG:CurrentEnergy() >= 79.0) or (NAG:TimeRemaining() < 6.0))) and NAG:Cast(11300))
+    or     (((NAG:CurrentComboPoints() >= 5.0) and (NAG:IsActive(6774) or (NAG:CurrentEnergy() >= 79.0) or (NAG:RemainingTime() < 6.0))) and NAG:Cast(11300))
     or     NAG:Cast(11281)
         ]],
 
@@ -75,10 +75,10 @@ ns.AddRotationToDefaults(defaults,
             
         },
         rotationString = [[
-    ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:TimeRemaining() >= 6.0)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:TimeRemaining() > 9.0))) and NAG:Cast(6774))
+    ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:RemainingTime() >= 6.0)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:RemainingTime() > 9.0))) and NAG:Cast(6774))
     or     (((NAG:CurrentEnergy() < 59.0) and (NAG:TimeToEnergyTick() < 1.0)) and NAG:Cast(13750))
     or     (NAG:IsActive(6774) and NAG:AutocastOtherCooldowns())
-    or     (((NAG:CurrentComboPoints() >= 5.0) and (NAG:IsActive(6774) or (NAG:CurrentEnergy() >= 79.0) or (NAG:TimeRemaining() < 6.0))) and NAG:Cast(11300))
+    or     (((NAG:CurrentComboPoints() >= 5.0) and (NAG:IsActive(6774) or (NAG:CurrentEnergy() >= 79.0) or (NAG:RemainingTime() < 6.0))) and NAG:Cast(11300))
     or     NAG:Cast(11294)
         ]],
 
@@ -103,11 +103,11 @@ ns.AddRotationToDefaults(defaults,
         },
         rotationString = [[
     (((NAG:CurrentEnergy() <= 29.0) and (NAG:CurrentComboPoints() < 5.0) and (NAG:DotRemainingTime(11198) <= 6.0) and (NAG:TimeToEnergyTick() > 1.0) and (not NAG:IsActive(13750))) and NAG:Cast(7676))
-    or     (((NAG:DotRemainingTime(11198) < 3.0) and (NAG:CurrentComboPoints() >= 5.0) and (NAG:TimeRemaining() >= 3.0)) and NAG:Cast(11198))
-    or     ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:TimeRemaining() >= 6.0) and NAG:DotIsActive(11198)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:TimeRemaining() > 9.0) and (NAG:DotRemainingTime(11198) > 15.0))) and NAG:Cast(6774))
+    or     (((NAG:DotRemainingTime(11198) < 3.0) and (NAG:CurrentComboPoints() >= 5.0) and (NAG:RemainingTime() >= 3.0)) and NAG:Cast(11198))
+    or     ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:RemainingTime() >= 6.0) and NAG:DotIsActive(11198)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:RemainingTime() > 9.0) and (NAG:DotRemainingTime(11198) > 15.0))) and NAG:Cast(6774))
     or     (((NAG:CurrentEnergy() < 59.0) and (NAG:TimeToEnergyTick() < 1.0)) and NAG:Cast(13750))
     or     (NAG:IsActive(6774) and NAG:AutocastOtherCooldowns())
-    or     (((NAG:CurrentComboPoints() >= 5.0) and (NAG:IsActive(6774) or (NAG:CurrentEnergy() >= 79.0) or (NAG:TimeRemaining() < 6.0)) and (NAG:DotRemainingTime(11198) > 15.0)) and NAG:Cast(11300))
+    or     (((NAG:CurrentComboPoints() >= 5.0) and (NAG:IsActive(6774) or (NAG:CurrentEnergy() >= 79.0) or (NAG:RemainingTime() < 6.0)) and (NAG:DotRemainingTime(11198) > 15.0)) and NAG:Cast(11300))
     or     NAG:Cast(11294)
         ]],
 

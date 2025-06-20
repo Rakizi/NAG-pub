@@ -252,24 +252,47 @@ function ns.GetSpellCooldownUnified(spellID)
     end
 end
 
---- Unified function to get spell charges information.
--- Retrieves the number of charges available for a spell, across both Retail and Classic.
----@param spellID number The ID of the spell to check for charges.
---@return number charges, number maxCharges, number cooldownStartTime, number cooldownDuration, number chargeModRate
-function ns.GetSpellChargesUnified(spellID)
-    if not spellID then return nil end
+--- Unified function to get spell charge information.
+--- Returns information about the charges of a charge-accumulating player ability.
+---@param spell number|string The spell ID or name. When passing a name requires the spell to be in your Spellbook.
+---@param bookType? string Optional - BOOKTYPE_SPELL or BOOKTYPE_PET for spellbook queries
+---@return number? currentCharges The number of charges currently available
+---@return number? maxCharges The maximum number of charges possible
+---@return number? cooldownStartTime Time when the last charge cooldown began
+---@return number? cooldownDuration Time required to gain a charge
+---@return number? chargeModRate The rate at which the charge cooldown animation should update
+function ns.GetSpellChargesUnified(spell, bookType)
+    if not spell then return nil end
+
+    -- Try the new C_Spell API first if available
     if C_Spell and C_Spell.GetSpellCharges then
-        -- Retail: Use C_Spell.GetSpellCharges
-        local chargesInfo = C_Spell.GetSpellCharges(spellID)
-        if not chargesInfo then return nil end
-        return chargesInfo.currentCharges, chargesInfo.maxCharges, chargesInfo.cooldownStartTime,
-            chargesInfo.cooldownDuration, chargesInfo.chargeModRate
-    else
-        -- Classic-like: Use GetSpellCharges
-        ---@diagnostic disable-next-line: deprecated
-        local charges, maxCharges, startTime, duration, modRate = _G.GetSpellCharges(spellID)
-        return charges, maxCharges, startTime, duration, modRate
+        -- For retail/modern versions
+        local chargeInfo = C_Spell.GetSpellCharges(spell)
+        if chargeInfo then
+            return chargeInfo.currentCharges,
+                   chargeInfo.maxCharges,
+                   chargeInfo.cooldownStartTime,
+                   chargeInfo.cooldownDuration,
+                   chargeInfo.chargeModRate
+        end
     end
+
+    -- Fallback to classic/deprecated version
+    ---@diagnostic disable-next-line: deprecated
+    if _G.GetSpellCharges then
+        if bookType then
+            -- If bookType is provided, use spellbook version
+            ---@diagnostic disable-next-line: deprecated
+            return _G.GetSpellCharges(spell, bookType)
+        else
+            -- Otherwise use direct spell version
+            ---@diagnostic disable-next-line: deprecated
+            return _G.GetSpellCharges(spell)
+        end
+    end
+
+    -- If neither API is available, return nil
+    return nil
 end
 
 --- Unified function to get spell information.

@@ -594,7 +594,7 @@ function ShamanWeaveModule:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
         if self.defaultState.needsSync and 
            (currentTime - self.defaultState.lastSyncTime) >= self.db.profile.petSyncCooldown then
             -- Check TTD before attempting sync
-            local ttd = NAG:TimeRemaining()
+            local ttd = NAG:RemainingTime()
             if ttd >= self.db.profile.minTTDForSync then
                 if self.db.profile.debugSync then
                     self:Debug(format("[COMBAT_LOG] Target TTD (%.1f) sufficient for sync", ttd))
@@ -612,7 +612,7 @@ function ShamanWeaveModule:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
         -- If not in grace period and not needing sync, check weapon sync
         if not self.defaultState.isInGracePeriod and not self.defaultState.needsSync then
             -- Check TTD before checking sync
-            local ttd = NAG:TimeRemaining()
+            local ttd = NAG:RemainingTime()
             if ttd < self.db.profile.minTTDForSync then
                 if self.db.profile.debugSync then
                     self:Debug(format("[COMBAT_LOG] Target TTD (%.1f) too low for sync check", ttd))
@@ -659,7 +659,7 @@ function ShamanWeaveModule:TrySummonPet()
     end
     
     -- Check TTD before attempting summon
-    local ttd = NAG:TimeRemaining()
+    local ttd = NAG:RemainingTime()
     if ttd < self.db.profile.minTTDForSync then
         self:Debug(format("[TrySummonPet] Target TTD (%.1f) too low for sync", ttd))
         self.defaultState.needsSync = false

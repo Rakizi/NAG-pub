@@ -48,11 +48,11 @@ ns.AddRotationToDefaults(defaults,
                 { 18788, 5 },     { 18288, 5 }
         },
         rotationString = [[
-    (((NAG:TimeRemaining() >= 15) and (NAG:CurrentManaPercent() <= 75) and NAG:IsExecutePhase(35)) and NAG:Cast(NAG:GetBattlePotion()))
-    or     (((NAG:TimeRemaining() >= 15) and (NAG:CurrentManaPercent() <= 60) and NAG:IsExecutePhase(35)) and NAG:Cast(12662))
+    (((NAG:RemainingTime() >= 15) and (NAG:CurrentManaPercent() <= 75) and NAG:IsExecutePhase(35)) and NAG:Cast(NAG:GetBattlePotion()))
+    or     (((NAG:RemainingTime() >= 15) and (NAG:CurrentManaPercent() <= 60) and NAG:IsExecutePhase(35)) and NAG:Cast(12662))
     or     NAG:AutocastOtherCooldowns()
-    or     ((NAG:TimeRemaining() <= 1.5) and NAG:Cast(18871))
-    or     ((NAG:TimeRemaining() <= 3.5) and NAG:Cast(17923))
+    or     ((NAG:RemainingTime() <= 1.5) and NAG:Cast(18871))
+    or     ((NAG:RemainingTime() <= 3.5) and NAG:Cast(17923))
     or     ((NAG:CurrentManaPercent() < 10) and NAG:Cast(11689))
     or     ((not NAG:DotIsActive(11713)) and NAG:Cast(11713))
     or     ((not NAG:DotIsActive(25311)) and NAG:Cast(25311))

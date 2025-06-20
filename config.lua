@@ -603,13 +603,13 @@ do --== Rotation Functions ==--
             TargetUnit = { required = { "newTarget" } },
 
             -- Time and combat functions
-            TimeCurrent = { required = {} },
-            TimeCurrentPercent = { required = {} },
-            TimeRemaining = { required = {} },
-            TimeRemainingPercent = { required = {} },
             Wait = { required = { "expression" } },
             WaitUntil = { required = { "expression" } },
             Schedule = { required = { "time", "callable" } },
+            CurrentTime = { required = {} },
+            CurrentTimePercent = { required = {} },
+            RemainingTime = { required = {} },
+            RemainingTimePercent = { required = {} },
 
             -- Resource functions
             CurrentHealth = { required = {} },

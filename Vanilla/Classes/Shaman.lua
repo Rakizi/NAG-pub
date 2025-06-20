@@ -83,7 +83,7 @@ ns.AddRotationToDefaults(defaults,
     or     ((not NAG:IsActive(10627)) and NAG:Cast(10627))
     or     NAG:AutocastOtherCooldowns()
     or     NAG:Cast(17364)
-    or     (((not NAG:DotIsActive(10438)) and (NAG:TimeRemaining() >= 20)) and NAG:Cast(10438))
+    or     (((not NAG:DotIsActive(10438)) and (NAG:RemainingTime() >= 20)) and NAG:Cast(10438))
     or     ((NAG:CurrentManaPercent() >= 50) and NAG:Cast(10414))
         ]],
 
@@ -112,7 +112,7 @@ ns.AddRotationToDefaults(defaults,
     -- Hide: or ((not NAG:IsActive(10627)) and NAG:Cast(10627))
     or     NAG:AutocastOtherCooldowns()
     or     NAG:Cast(17364)
-    or     (((not NAG:DotIsActive(10438)) and (NAG:TimeRemaining() >= 20)) and NAG:Cast(10438))
+    or     (((not NAG:DotIsActive(10438)) and (NAG:RemainingTime() >= 20)) and NAG:Cast(10438))
     or     ((NAG:CurrentManaPercent() >= 50) and NAG:Cast(10414))
         ]],
 

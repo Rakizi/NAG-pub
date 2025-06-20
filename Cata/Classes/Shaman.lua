@@ -61,7 +61,7 @@ local rotationStringShamanElemental = [[
         --or ((NAG:IsPlayerMoving() and (not NAG:IsKnown(101052)) and (NAG:DotRemainingTime(8050) > 10.0)) and NAG:Cast(8042))
         or (((NAG:DotRemainingTime(8050) >= 3.0) and ((NAG:TimeToReady(51505) <= 1.0) or NAG:IsReady(51505))) and NAG:Cast(51505))
         or (((NAG:AuraNumStacks(324) >= 8.0) and (NAG:DotRemainingTime(8050) >= 5.0) and NAG:IsReady(8042)) and NAG:Cast(8042))
-        or (((((NAG:CurrentManaPercent() <= 30.0) and (NAG:TimeRemainingPercent() >= 50.0)) or ((NAG:CurrentManaPercent() <= 20.0) and (NAG:TimeRemainingPercent() >= 35.0)) or ((NAG:CurrentManaPercent() <= 10.0) and (NAG:TimeRemainingPercent() >= 20.0)) or ((NAG:CurrentManaPercent() <= 5.0) and (NAG:TimeRemainingPercent() >= 10.0)) or (NAG:CurrentManaPercent() <= 3.0)) and NAG:IsReady(51490)) and NAG:Cast(51490))
+        or (((((NAG:CurrentManaPercent() <= 30.0) and (NAG:RemainingTimePercent() >= 50.0)) or ((NAG:CurrentManaPercent() <= 20.0) and (NAG:RemainingTimePercent() >= 35.0)) or ((NAG:CurrentManaPercent() <= 10.0) and (NAG:RemainingTimePercent() >= 20.0)) or ((NAG:CurrentManaPercent() <= 5.0) and (NAG:RemainingTimePercent() >= 10.0)) or (NAG:CurrentManaPercent() <= 3.0)) and NAG:IsReady(51490)) and NAG:Cast(51490))
         or NAG:Cast(403)
 ]]
 local rotationStringShamanEnhancement = [[

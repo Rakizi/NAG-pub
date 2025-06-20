@@ -271,9 +271,9 @@ end
 function EncounterStopwatch:Update()
     if not self.frame or not self.frame:IsShown() then return end
 
-    local currentTime = NAG:TimeCurrent() or 0
-    local remainingTime = NAG:TimeRemaining() or 0
-    local remainingPercent = NAG:TimeRemainingPercent() or 100
+    local currentTime = NAG:CurrentTime() or 0
+    local remainingTime = NAG:RemainingTime() or 0
+    local remainingPercent = NAG:RemainingTimePercent() or 100
 
     -- For simulated encounters, target HP should decrease with progress
     local simulatedTargetHP = remainingPercent  -- Target HP matches remaining time percentage

@@ -46,7 +46,7 @@ local function getConditionGroupType(condition)
     if condition:find("NAG:Sequence") then return "Sequence" end
     if condition:find("NAG:DistanceToTarget") or condition:find("NAG:Range") then return "Distance" end
     if condition:find("NAG:NumberTargets") then return "Targets" end
-    if condition:find("NAG:TimeCurrent") or condition:find("NAG:TimeRemaining") then return "Time" end
+    if condition:find("NAG:CurrentTime") or condition:find("NAG:RemainingTime") then return "Time" end
     if condition:find("NAG:IsExecutePhase") then return "Execute" end
     if condition:find("NAG:Aura") or condition:find("NAG:IsActive") then return "Buffs/Auras" end
     if condition:find("NAG:Dot") then return "DoTs" end -- Specific check for "Dot" functions
@@ -60,7 +60,7 @@ function APLMonitorTests:test_ConditionGroupingLogic()
     Assert.areEqual("Sequence", getConditionGroupType("NAG:Sequence(...)"), "Should categorize Sequence correctly.")
     Assert.areEqual("Distance", getConditionGroupType("NAG:DistanceToTarget() > 10"), "Should categorize Distance correctly.")
     Assert.areEqual("Targets", getConditionGroupType("NAG:NumberTargets() >= 3"), "Should categorize Targets correctly.")
-    Assert.areEqual("Time", getConditionGroupType("NAG:TimeRemaining() < 5"), "Should categorize Time correctly.")
+    Assert.areEqual("Time", getConditionGroupType("NAG:RemainingTime() < 5"), "Should categorize Time correctly.")
     Assert.areEqual("Buffs/Auras", getConditionGroupType("NAG:AuraIsActive(123)"), "Should categorize Buffs/Auras correctly.")
     Assert.areEqual("DoTs", getConditionGroupType("NAG:DotRemainingTime(456) < 2"), "Should categorize DoTs correctly.")
     Assert.areEqual("Resources", getConditionGroupType("NAG:CurrentEnergy() > 50"), "Should categorize Resources correctly.")

@@ -669,6 +669,16 @@ do -- ================================= Casting functions ======================
         return false
     end
 
+    --- Casts a spell on a friendly target if available
+    --- @function NAG:CastFriendlySpell
+    --- @param spellId number The spell ID
+    --- @return boolean True if the spell was cast, false otherwise
+    function NAG:CastFriendlySpell(spellId)
+        -- TODO: Implement logic to find a valid friendly target and cast the spell
+        self:Print("Warning: CastFriendlySpell is not yet fully implemented.")
+        return self:CastSpell(spellId) -- Placeholder behavior
+    end
+
     --- Casts a debuff spell if available and ready, with optional tolerance.
     --- @param id number The ID of the debuff spell.
     --- @param tolerance number Optional casting tolerance in seconds.
@@ -911,6 +921,7 @@ do -- ================================= Casting functions ======================
 
     NAG.Channel = NAG.ChannelSpellBypass
     NAG.ChannelSpell = NAG.ChannelSpellBypass
+
     --- Determines if a spell or item is classified as a secondary action.
     --- @param id number The ID of the spell or item.
     --- @usage NAG:IsSecondarySpell(73643)
@@ -1212,11 +1223,11 @@ do -- ================================= Targets/Units APLValue Functions =======
     end
 
     --- Get the time until a boss spell is ready.
-    --- @function NAG:BossTimeToReadySpell
+    --- @function NAG:BossSpellTimeToReady
     --- @param spellId number The spell ID to check.
-    --- @usage NAG:BossTimeToReadySpell(12345) <= 10
+    --- @usage NAG:BossSpellTimeToReady(12345) <= 10
     --- @return number The time in seconds until the spell is ready.
-    function NAG:BossTimeToReadySpell(spellId)
+    function NAG:BossSpellTimeToReady(spellId)
         if not spellId then return 0 end
         local spellStart, spellDuration = GetSpellCooldown(spellId)
 
@@ -1225,31 +1236,6 @@ do -- ================================= Targets/Units APLValue Functions =======
             local currentTime = NAG:NextTime()
             local cooldownEnd = spellStart + spellDuration
             local timeToReady = cooldownEnd - currentTime
-
-            -- Ensure timeToReady does not go negative
-            timeToReady = max(0, timeToReady)
-
-            return timeToReady
-        end
-
-        -- If spell is not on cooldown, return 0 (ready)
-        return 0
-    end
-
-    NAG.BossSpellTimeToReady = NAG.BossTimeToReadySpell
-    --- Get the time until a boss spell is ready (new method).
-    --- @function NAG:BossTimeToReadySpellNew
-    --- @param spellId number The spell ID to check.
-    --- @usage NAG:BossTimeToReadySpellNew(12345) <= 10
-    --- @return number The time in seconds until the spell is ready.
-    function NAG:BossTimeToReadySpellNew(spellId)
-        if not spellId then return 0 end
-        local spellStart, spellDuration = GetSpellCooldown(spellId)
-
-        -- Check if the spell's cooldown is active
-        if spellStart > 0 and spellDuration > 0 then
-            local cooldownEnd = spellStart + spellDuration
-            local timeToReady = cooldownEnd - NAG:NextTime()
 
             -- Ensure timeToReady does not go negative
             timeToReady = max(0, timeToReady)
@@ -1844,27 +1830,12 @@ do -- ================================= Dot APLValue Functions =================
         return count or 0
     end
 
-    --- Checks if a DoT (Damage over Time) spell is active on the target.
-    --- @function NAG:IsActiveDot
-    --- @param spellId number The ID of the spell.
-    --- @return boolean True if the DoT is active, false otherwise.
-    --- @usage (NAG:IsActiveDot(73643))
-    function NAG:IsActiveDot(spellId)
-        if not spellId then return false end
-        if spellId == 12846 then spellId = 413841 end -- ignite
-        if spellId == 3599 then spellId = 77661 end -- searing totem applies searing flames
-        local spell = self:FindAura("target", spellId)
-        return spell ~= false
-    end
-
-    NAG.DotIsActive = NAG.IsActiveDot
-
     --- Checks if a DoT (Damage over Time) spell is active on any target globally.
-    --- @function NAG:IsActiveDotGlobal
+    --- @function NAG:DotIsActiveGlobal
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the DoT is active, false otherwise.
-    --- @usage (NAG:IsActiveDotGlobal(73643))
-    function NAG:IsActiveDotGlobal(spellId)
+    --- @usage (NAG:DotIsActiveGlobal(73643))
+    function NAG:DotIsActiveGlobal(spellId)
         if not spellId then return false end
         if spellId == 12846 then spellId = 413841 end -- ignite
         if spellId == 3599 then spellId = 77661 end -- searing totem applies searing flames
@@ -1872,23 +1843,50 @@ do -- ================================= Dot APLValue Functions =================
         return spell ~= false
     end
 
-    NAG.DotIsActiveGlobal = NAG.IsActiveDotGlobal
+    --- Checks if a DoT (Damage over Time) spell is active on the target or specified unit.
+    --- @function NAG:DotIsActive
+    --- @param spellId number The ID of the spell.
+    --- @param targetUnit? string The unit to check (defaults to "target")
+    --- @return boolean True if the DoT is active, false otherwise.
+    --- @usage (NAG:DotIsActive(73643))
+    function NAG:DotIsActive(spellId, targetUnit)
+        if not spellId then return false end
+        if spellId == 12846 then spellId = 413841 end
+        if spellId == 3599 then spellId = 77661 end -- searing totem applies searing flames
+        targetUnit = targetUnit or "target"
+        local spell = self:FindAura(targetUnit, spellId)
+        return spell ~= false
+    end
 
-    --- Returns the remaining time for a DoT (Damage over Time) spell on the target.
+    --- Returns the remaining time of a DoT spell on the target or specified unit.
     --- @function NAG:DotRemainingTime
     --- @param spellId number The ID of the spell.
-    --- @return number The remaining time or -1 if the spell is not found.
-    --- @usage (NAG:DotRemainingTime(73643) >= x)
+    --- @param targetUnit? string The unit to check (defaults to "target")
+    --- @return number The remaining time in seconds, or 0 if the DoT is not active.
     function NAG:DotRemainingTime(spellId, targetUnit)
         if not spellId then return 0 end
         if spellId == 12846 then spellId = 413841 end -- ignite
         if spellId == 3599 then spellId = 77661 end -- searing totem applies searing flames
         targetUnit = targetUnit or "target"
-        local _, _, _, _, duration, expires = self:FindAura(targetUnit, spellId)
-        if not expires then
-            return -1
+        local _, _, _, _, _, expires = self:FindAura(targetUnit, spellId)
+        if expires and expires > 0 then
+            return expires - NAG:NextTime()
+
         end
-        return expires - NAG:NextTime()
+        return 0
+    end
+
+    --- Returns the tick frequency of a DoT spell on the target or specified unit.
+    --- @function NAG:DotTickFrequency
+    --- @param spellId number The ID of the spell.
+    --- @param targetUnit? string The unit to check (defaults to "target")
+    --- @return number The tick frequency in seconds, or 0 if the spellId is nil or not found.
+    --- @usage NAG:DotTickFrequency(73643) == 0
+    function NAG:DotTickFrequency(spellId, targetUnit)
+        if not spellId then return 0 end
+        targetUnit = targetUnit or "target"
+        -- Use SpellTrackingManager API which handles registration automatically
+        return ns.SpellTracker:GetPeriodicEffectInfo(spellId) and ns.SpellTracker:GetPeriodicEffectInfo(spellId).tickTime or 0
     end
 
     --- Returns the remaining time for a DoT (Damage over Time) spell on any target globally.
@@ -1901,10 +1899,11 @@ do -- ================================= Dot APLValue Functions =================
         if spellId == 12846 then spellId = 413841 end -- ignite
         if spellId == 3599 then spellId = 77661 end -- searing totem applies searing flames
         local _, _, _, _, _, expires = self:FindAura("target", spellId, true)
-        if not expires then
-            return -1
+        if expires and expires > 0 then
+            return expires - NAG:NextTime()
+
         end
-        return expires - NAG:NextTime()
+        return 0
     end
 
     --- Returns the number of stacks for a DoT (Damage over Time) spell on the target.
@@ -2098,14 +2097,6 @@ do -- ================================= Class Specific APLValue functions ======
 
         -- Return true if we have more damage-increasing buffs now
         return newBuffCount > currentBuffCount
-    end
-
-    --- Determines the excess energy for Cat form.
-    --- @function NAG:CatExcessEnergy
-    --- @return number Excess energy.
-    --- @usage (NAG:CatExcessEnergy())
-    function NAG:CatExcessEnergy()
-        return 0
     end
 
     --- Calculates the duration of the new Savage Roar for Feral Druids.
@@ -2399,6 +2390,19 @@ do -- ================================= Dot Functions ==========================
         return canCast
     end
     NAG.MultiDot = NAG.Multidot
+    --- Applies a DoT to multiple targets, strictly adhering to refresh timers.
+    --- @function NAG:StrictMultidot
+    --- @param spellId number The spell ID of the DoT.
+    --- @param maxDots number The maximum number of dots.
+    --- @param maxOverlap number The maximum overlap allowed.
+    --- @usage NAG:StrictMultidot(73643, 3, 2)
+    --- @return boolean True if the action was successful.
+    function NAG:StrictMultidot(spellId, maxDots, maxOverlap)
+        -- TODO: Implement logic for strict multi-dotting.
+        self:Print("Warning: StrictMultidot is not yet fully implemented.")
+        return self:Multidot(spellId, maxDots, maxOverlap)
+    end
+
 end
 
 do -- ================================= Pet APLValue Functions (4/4V) ================================= --
@@ -2595,32 +2599,6 @@ function NAG:HasTalent(talentId)
     return StateManager:HasTalent(talentId)
 end
 
---- Checks if a DoT (Damage over Time) spell is active on the target or specified unit.
---- @function NAG:DotIsActive
---- @param spellId number The ID of the spell.
---- @param targetUnit? string The unit to check (defaults to "target")
---- @return boolean True if the DoT is active, false otherwise.
---- @usage (NAG:DotIsActive(73643))
-function NAG:DotIsActive(spellId, targetUnit)
-    if not spellId then return false end
-    if spellId == 12846 then spellId = 413841 end
-    targetUnit = targetUnit or "target"
-    local spell = self:FindAura(targetUnit, spellId)
-    return spell ~= false
-end
-
---- Returns the tick frequency of a DoT spell on the target or specified unit.
---- @function NAG:DotTickFrequency
---- @param spellId number The ID of the spell.
---- @param targetUnit? string The unit to check (defaults to "target")
---- @return number The tick frequency in seconds, or 0 if the spellId is nil or not found.
---- @usage NAG:DotTickFrequency(73643) == 0
-function NAG:DotTickFrequency(spellId, targetUnit)
-    if not spellId then return 0 end
-    targetUnit = targetUnit or "target"
-    -- Use SpellTrackingManager API which handles registration automatically
-    return ns.SpellTracker:GetPeriodicEffectInfo(spellId) and ns.SpellTracker:GetPeriodicEffectInfo(spellId).tickTime or 0
-end
 NAG.SpellTimeToReady = NAG.TimeToReadySpell
 NAG.AuraIsActiveWithReactionTime = NAG.IsActive
 NAG.AuraIsActive = NAG.IsActive
@@ -2637,3 +2615,187 @@ function NAG:IsPrimaryTarget(unit)
     return threat ~= nil and threat >= 2
 end
 NAG.HasAggro = NAG.IsPrimaryTarget
+
+--- Activates all stat buff proc auras.
+--- @function NAG:ActivateAllStatBuffProcAuras
+--- @return boolean True if the action was successful.
+function NAG:ActivateAllStatBuffProcAuras()
+    -- TODO: Implement logic to activate all stat buff proc auras.
+    self:Print("Warning: ActivateAllStatBuffProcAuras is not yet fully implemented.")
+    return false
+end
+
+--- Moves for a specific duration.
+--- @function NAG:MoveDuration
+--- @param duration number The duration to move for.
+--- @return boolean True if the action was successful.
+function NAG:MoveDuration(duration)
+    -- TODO: Implement logic for moving for a specific duration.
+    self:Print("Warning: MoveDuration is not yet fully implemented.")
+    return false
+end
+
+--- Performs the optimal rotation action for a Feral Druid (Cat form).
+--- @function NAG:CatOptimalRotationAction
+--- @return boolean True if an action was performed.
+function NAG:CatOptimalRotationAction()
+    -- TODO: Implement Feral Druid optimal rotation logic.
+    self:Print("Warning: CatOptimalRotationAction is not yet fully implemented.")
+    return false
+end
+
+-- ================================= APL Value Operators =================================
+
+--- Returns a constant value.
+--- @function NAG:Const
+--- @param val any The constant value to return.
+--- @return any The constant value.
+function NAG:Const(val)
+    return val
+end
+
+--- Logical AND operator for APL values.
+--- @function NAG:And
+--- @param ... any A variable number of boolean values.
+--- @return boolean True if all values are true, false otherwise.
+function NAG:And(...)
+    for i = 1, select('#', ...) do
+        if not select(i, ...) then
+            return false
+        end
+    end
+    return true
+end
+
+--- Logical OR operator for APL values.
+--- @function NAG:Or
+--- @param ... any A variable number of boolean values.
+--- @return boolean True if any value is true, false otherwise.
+function NAG:Or(...)
+    for i = 1, select('#', ...) do
+        if select(i, ...) then
+            return true
+        end
+    end
+    return false
+end
+
+--- Logical NOT operator for APL values.
+--- @function NAG:Not
+--- @param val boolean The value to negate.
+--- @return boolean The negated value.
+function NAG:Not(val)
+    return not val
+end
+
+--- Comparison operator for APL values.
+--- @function NAG:Cmp
+--- @param val1 any The first value.
+--- @param op string The comparison operator (e.g., "==", ">", "<").
+--- @param val2 any The second value.
+--- @return boolean The result of the comparison.
+function NAG:Cmp(val1, op, val2)
+    if op == "==" then return val1 == val2 end
+    if op == "~=" then return val1 ~= val2 end
+    if op == ">" then return val1 > val2 end
+    if op == ">=" then return val1 >= val2 end
+    if op == "<" then return val1 < val2 end
+    if op == "<=" then return val1 <= val2 end
+    self:Error("Cmp: Invalid operator " .. tostring(op))
+    return false
+end
+
+--- Mathematical operator for APL values.
+--- @function NAG:Math
+--- @param val1 number The first value.
+--- @param op string The math operator (e.g., "+", "-", "*", "/").
+--- @param val2 number The second value.
+--- @return number The result of the operation.
+function NAG:Math(val1, op, val2)
+    if op == "+" then return val1 + val2 end
+    if op == "-" then return val1 - val2 end
+    if op == "*" then return val1 * val2 end
+    if op == "/" then return val1 / val2 end
+    self:Error("Math: Invalid operator " .. tostring(op))
+    return 0
+end
+
+--- Returns the maximum of a set of values.
+--- @function NAG:Max
+--- @param ... number A variable number of numerical values.
+--- @return number The maximum value.
+function NAG:Max(...)
+    return math.max(...)
+end
+
+--- Returns the minimum of a set of values.
+--- @function NAG:Min
+--- @param ... number A variable number of numerical values.
+--- @return number The minimum value.
+function NAG:Min(...)
+    return math.min(...)
+end
+
+-- ================================= Misc =================================
+
+
+--- Checks if the player is in front of the target.
+--- @function NAG:FrontOfTarget
+--- @return boolean True if the player is in front of the target, false otherwise.
+function NAG:FrontOfTarget()
+    -- TODO: Implement logic to check player position relative to target.
+    self:Print("Warning: FrontOfTarget is not yet fully implemented.")
+    return true -- Assuming true for now.
+end
+
+-- ================================= Class-specific =================================
+
+
+--- Returns the excess energy for a Feral Druid.
+--- @function NAG:CatExcessEnergy
+--- @return number The amount of excess energy.
+function NAG:CatExcessEnergy()
+    self:Print("Warning: CatExcessEnergy is not yet fully implemented.")
+    return 0
+end
+
+--- Determines if the current Drain Soul should be recast for a better snapshot.
+--- @function NAG:WarlockShouldRecastDrainSoul
+--- @return boolean True if Drain Soul should be recast, false otherwise.
+--- @usage (NAG:WarlockShouldRecastDrainSoul())
+function NAG:WarlockShouldRecastDrainSoul()
+    self:Print("Warning: WarlockShouldRecastDrainSoul is not yet fully implemented.")
+    return false
+end
+
+--- Returns the current Eclipse phase for a Balance Druid.
+--- @function NAG:DruidCurrentEclipsePhase
+--- @return string The current Eclipse phase ("Solar" or "Lunar").
+function NAG:DruidCurrentEclipsePhase()
+    self:Print("Warning: DruidCurrentEclipsePhase is not yet fully implemented.")
+    return ""
+end
+
+--- Returns the estimated DoT damage for a Mage's Combustion.
+--- @function NAG:MageCurrentCombustionDotEstimate
+--- @return number The estimated damage.
+function NAG:MageCurrentCombustionDotEstimate()
+    self:Print("Warning: MageCurrentCombustionDotEstimate is not yet fully implemented.")
+    return 0
+end
+
+--- Returns the remaining duration of a Shaman's Fire Elemental.
+--- @function NAG:ShamanFireElementalDuration
+--- @return number The remaining duration in seconds.
+function NAG:ShamanFireElementalDuration()
+    self:Print("Warning: ShamanFireElementalDuration is not yet fully implemented.")
+    return 0
+end
+
+--- Returns the current stagger percentage for a Brewmaster Monk.
+--- @function NAG:BrewmasterMonkCurrentStaggerPercent
+--- @return number The stagger percentage.
+function NAG:BrewmasterMonkCurrentStaggerPercent()
+    self:Print("Warning: BrewmasterMonkCurrentStaggerPercent is not yet fully implemented.")
+    return 0
+end

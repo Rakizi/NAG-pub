@@ -109,7 +109,7 @@ local rotationStringHunterSurvival = [[
         or ((NAG:IsReady(3674) and (not NAG:IsReady(53301))) and NAG:Cast(3674))
         or (((NAG:TimeToReady(53301) < 0.25) and (NAG:CurrentFocus() > 44.0)) and NAG:Cast(53301))
         or ((NAG:CurrentFocus() >= 80.0) and NAG:Cast(3044))
-        or (((NAG:CurrentFocus() >= 40.0) and (NAG:TimeRemaining() <= 8) and (NAG:TimeToReady(53301) >= 3)) and NAG:Cast(3044))
+        or (((NAG:CurrentFocus() >= 40.0) and (NAG:RemainingTime() <= 8) and (NAG:TimeToReady(53301) >= 3)) and NAG:Cast(3044))
         or NAG:Cast(77767)
 
 ]]
