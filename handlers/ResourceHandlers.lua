@@ -1,23 +1,31 @@
---- Handles resource tracking and prediction for the NAG addon.
---- Provides functions for checking, predicting, and retrieving player resource values (mana, energy, rage, chi, runes, etc.), including class-specific logic and Cataclysm-specific formulas.
+--- ============================ ResourceHandlers ============================
+--- Handles resource management and tracking for the NAG addon.
+---
+--- This module provides functions for checking player resources such as mana,
+--- energy, rage, combo points, and other class-specific resources.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: Rakizi, Fonsas
+--- Discord: https://discord.gg/ebonhold
+--- Status: good
+---
 --- @module "ResourceHandlers"
 
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---
--- luacheck: ignore GetSpellInfo
---
--- ============================ LOCALIZE ============================
+--- ======= LOCALIZE =======
 local _, ns = ...
 
---- @type NAG|AceAddon
+--- @type NAG
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+--- @type StateManager
+local StateManager = NAG:GetModule("StateManager")
+--- @type APL
+local APL = NAG:GetModule("APL")
+
+--- ======= WoW API =======
+local UnitPower = UnitPower
+
 --- @type Types|AceModule
 local Types = NAG:GetModule("Types")
---- @type StateManager|AceModule
-local StateManager = NAG:GetModule("StateManager")
 --- @type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
 --- @type Version

@@ -1,32 +1,37 @@
---- Handles item, trinket, and tinker tracking and logic for the NAG addon.
+--- ============================ ItemHandlers ============================
+--- Handles item-related functionality for the NAG addon.
 ---
---- This module provides functions for checking and managing item-based effects, trinket procs, tinker states, and tier set bonuses.
+--- This module provides functions for checking and managing items, including item cooldowns,
+--- charges, and usability.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: Rakizi, Fonsas
+--- Discord: https://discord.gg/ebonhold
+--- Status: good
+---
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- luacheck: ignore GetSpellInfo
+---
 --- @module "ItemHandlers"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---
--- luacheck: ignore GetSpellInfo
 
--- ============================ LOCALIZE ============================
+--- ======= LOCALIZE =======
 local _, ns = ...
 
--- Addon references
----@type NAG|AceAddon
+--- @type NAG
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager
 local DataManager = NAG:GetModule("DataManager")
----@type StateManager|ModuleBase|AceModule
+--- @type StateManager
 local StateManager = NAG:GetModule("StateManager")
----@type TrinketTrackingManager|ModuleBase|AceModule
+--- @type TrinketTrackingManager|ModuleBase|AceModule
 local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
----@type Version
+--- @type Version
 local Version = ns.Version
 
--- WoW API (unified wrappers)
+--- ======= WoW API =======
 local GetItemCooldown = ns.GetItemCooldownUnified
 local GetItemInfo = ns.GetItemInfoUnified
+local GetItemCount = ns.GetItemCountUnified
 
 -- Math operations (WoW optimized)
 local format = format or string.format

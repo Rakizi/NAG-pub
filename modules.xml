@@ -77,59 +77,5 @@
     <!-- New Modules -->
     <Script file="Modules\UIBackground.lua"/>
 
-<!-- Unit Testing Framework -->
-    <Script file="Modules/Tests/Libs/TestAssert.lua"/>
-    <Script file="Modules/Tests/APLTest.lua"/>
 
-    <!-- Test Suites: Alphabetical, directories first, all found in Modules/Tests and subdirs -->
-    <Script file="Modules/Tests/Core/APICompat.Tests.lua"/>
-    <Script file="Modules/Tests/Core/Common.Tests.lua"/>
-    <Script file="Modules/Tests/Core/Config.Tests.lua"/>
-    <Script file="Modules/Tests/Core/Core.Tests.lua"/>
-    <Script file="Modules/Tests/Core/Dialogs.Tests.lua"/>
-    <Script file="Modules/Tests/Core/EntityBehaviors.Tests.lua"/>
-    <Script file="Modules/Tests/Core/Frames.Tests.lua"/>
-    <Script file="Modules/Tests/Core/NAG.Tests.lua"/>
-    <Script file="Modules/Tests/Core/SpecializationCompat.Tests.lua"/>
-    <Script file="Modules/Tests/Core/Version.Tests.lua"/>
-
-    <Script file="Modules/Tests/Debug/APLMonitor.Tests.lua"/>
-    <Script file="Modules/Tests/Debug/CLEUDebugger.Tests.lua"/>
-    <Script file="Modules/Tests/Debug/DebugManager.Tests.lua"/>
-    <Script file="Modules/Tests/Debug/EncounterStopwatch.Tests.lua"/>
-    <Script file="Modules/Tests/Debug/EntityBehaviorTester.Tests.lua"/>
-    <Script file="Modules/Tests/Debug/EventDebugger.Tests.lua"/>
-    <!--Script file="Modules/Tests/Debug/ProfilingUtility.Tests.lua"/-->
-
-    <!--Script file="Modules/Tests/Handlers/APLHandlers.Tests.lua"/-->
-    <Script file="Modules/Tests/Handlers/BuffDebuffHandlers.Tests.lua"/>
-    <Script file="Modules/Tests/Handlers/ItemHandlers.Tests.lua"/>
-    <Script file="Modules/Tests/Handlers/MiscHandlers.Tests.lua"/>
-    <Script file="Modules/Tests/Handlers/ResourceHandlers.Tests.lua"/>
-
-    <Script file="Modules/Tests/SpellLearner/PredictionAPI.Tests.lua"/>
-    <Script file="Modules/Tests/SpellLearner/PredictionEngine.Tests.lua"/>
-    <Script file="Modules/Tests/SpellLearner/SpellLearner-StateManager.Tests.lua"/>
-    <Script file="Modules/Tests/SpellLearner/SpellLearner.Tests.lua"/>
-    <Script file="Modules/Tests/APL.Tests.lua"/>
-    <Script file="Modules/Tests/APLSchema.Tests.lua"/>
-    <Script file="Modules/Tests/BTK.Tests.lua"/>
-    <Script file="Modules/Tests/DataPipeline.Tests.lua"/>
-    <Script file="Modules/Tests/GlowManager.Tests.lua"/>
-    <Script file="Modules/Tests/ImportExport.Tests.lua"/>
-    <Script file="Modules/Tests/KeybindManager.Tests.lua"/>
-    <Script file="Modules/Tests/OverlayManager.Tests.lua"/>
-    <!-- <Script file="Modules/Tests/PullTimerManager.Tests.lua"/> -->
-    <Script file="Modules/Tests/RotationManager.Tests.lua"/>
-    <Script file="Modules/Tests/ShamanWeaving.Tests.lua"/>
-    <Script file="Modules/Tests/StateManager.Tests.lua"/>
-    <Script file="Modules/Tests/ThrottleManager.Tests.lua"/>
-    <Script file="Modules/Tests/TimerManager.Tests.lua"/>
-    <Script file="Modules/Tests/TooltipParsingManager.Tests.lua"/>
-    <Script file="Modules/Tests/TrinketCommunicationManager.Tests.lua"/>
-    <Script file="Modules/Tests/TrinketRegistrationManager.Tests.lua"/>
-    <Script file="Modules/Tests/TrinketTrackingManager.Tests.lua"/>
-    <Script file="Modules/Tests/TTDManager.Tests.lua"/>
-    <Script file="Modules/Tests/Types.Tests.lua"/>
-    <Script file="Modules/Tests/UIBackground.Tests.lua"/>
 </Ui> 

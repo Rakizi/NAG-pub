@@ -36,6 +36,9 @@ EntityBehaviors.lua
 # Ace3 Modules
 modules.xml
 
+# Unit Testing
+Modules/Tests/tests.xml
+
 # APL System
 #APL\APL.xml
 
@@ -44,7 +47,6 @@ Dialogs.lua
 Common.lua
 Config.lua
 handlers\handlers.xml
-APLhandlers.lua
 #handlersnew.lua
 
 Vanilla\Vanilla.xml

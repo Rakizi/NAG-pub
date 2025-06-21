@@ -1,19 +1,35 @@
---- Miscellaneous handler functions for NAG addon
+--- ============================ MiscHandlers ============================
+--- Provides miscellaneous handler functions for the NAG addon.
 ---
---- This module provides timing, sequence, swing timer, and utility functions
---- for the Next Action Guide (NAG) addon, including scheduling, strict and
---- regular sequences, time tracking, and swing/autoattack helpers.
+--- This module includes handlers for various game events, player states,
+--- and other conditions that don't fit into more specific categories.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: Rakizi, Fonsas
+--- Discord: https://discord.gg/ebonhold
+--- Status: good
+---
+--- @diagnostic disable: undefined-field
 --- @module "MiscHandlers"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---
--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
--- luacheck: ignore GetSpellInfo
 
--- ============================ LOCALIZE ============================
+--- ======= LOCALIZE =======
 local _, ns = ...
+
+--- @type NAG
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+--- @type DataManager
+local DataManager = NAG:GetModule("DataManager")
+--- @type StateManager
+local StateManager = NAG:GetModule("StateManager")
+--- @type Version
+local Version = ns.Version
+--- @type APL
+local APL = NAG:GetModule("APL")
+--- @type APLhandlers
+local APLhandlers = NAG:GetModule("APLhandlers")
+
+--- ======= WoW API =======
+local GetTime = GetTime
 
 -- Addon references
 ---@type NAG|AceAddon
@@ -24,8 +40,6 @@ local DataManager = NAG:GetModule("DataManager")
 local StateManager = NAG:GetModule("StateManager")
 ---@type TrinketTrackingManager|ModuleBase|AceModule
 local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
----@type Version
-local Version = ns.Version
 ---@type Types|ModuleBase|AceModule
 local Types = NAG:GetModule("Types")
 ---@type TimerManager|ModuleBase|AceModule

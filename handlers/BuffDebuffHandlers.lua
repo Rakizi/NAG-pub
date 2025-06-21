@@ -1,36 +1,37 @@
---- Handles buff and debuff tracking functionality for the NAG addon.
+--- ============================ BuffDebuffHandlers ============================
+--- Handles buff and debuff tracking functionality for NAG addon
 ---
 --- This module provides functions for checking and managing buffs and debuffs,
 --- including raid buffs, aura stacks, and buff/debuff durations.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: Rakizi, Fonsas
+--- Discord: https://discord.gg/ebonhold
+--- Status: good
+---
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- luacheck: ignore GetSpellInfo
+---
 --- @module "BuffDebuffHandlers"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---
--- luacheck: ignore GetSpellInfo
--- ============================ LOCALIZE ============================
--- Addon
+
+--- ======= LOCALIZE =======
 local _, ns = ...
 
---- @type NAG|AceAddon 
+--- @type NAG
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager|ModuleBase|AceModule
+--- @type DataManager
 local DataManager = NAG:GetModule("DataManager")
---- @type Types|ModuleBase|AceModule
-local Types = NAG:GetModule("Types")
---- @type StateManager|ModuleBase|AceModule
+--- @type StateManager
 local StateManager = NAG:GetModule("StateManager")
---- @type SpellTrackingManager|ModuleBase|AceModule
-local SpellTracker = NAG:GetModule("SpellTrackingManager")
---- @type OverlayManager|ModuleBase|AceModule
-local OverlayManager = NAG:GetModule("OverlayManager")
--- Libs
+--- @type APL
+local APL = NAG:GetModule("APL")
+--- @type APLhandlers
+local APLhandlers = NAG:GetModule("APLhandlers")
 
--- WoW API
+--- ======= WoW API =======
+local UnitAura = ns.UnitAuraUnified
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
-local UnitAura = ns.UnitAuraUnified
 local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
 local GetItemInfo = ns.GetItemInfoUnified
 

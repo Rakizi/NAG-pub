@@ -1,32 +1,35 @@
 --- Handles Action Priority List (APL) logic and value functions for the NAG addon.
 ---
 --- This module provides utility, funnel, casting, target/unit, spell, dot, class, and pet APL value functions for the Next Action Guide (NAG) addon.
++
++---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: Rakizi, Fonsas
+--- Discord: https://discord.gg/ebonhold
+--- Status: good
+---
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- luacheck: ignore GetSpellInfo
+---
 --- @module "APLhandlers"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
-
--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
--- luacheck: ignore GetSpellInfo
 
 -- ============================ LOCALIZE ============================
 local _, ns = ...
 
 -- Addon references
---- @type NAG|AceAddon
+--- @type NAG
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager|ModuleBase|AceModule
+--- @type DataManager
 local DataManager = NAG:GetModule("DataManager")
---- @type StateManager|ModuleBase|AceModule
+--- @type StateManager
 local StateManager = NAG:GetModule("StateManager")
---- @type Types|ModuleBase|AceModule
+--- @type Types
 local Types = NAG:GetModule("Types")
---- @type TTDManager|ModuleBase|AceModule
+--- @type TTDManager
 local TTD = NAG:GetModule("TTDManager")
---- @type TimerManager|ModuleBase|AceModule
+--- @type TimerManager
 local Timer = NAG:GetModule("TimerManager")
---- @type OverlayManager|ModuleBase|AceModule
+--- @type OverlayManager
 local OverlayManager = NAG:GetModule("OverlayManager")
 
 -- Libraries

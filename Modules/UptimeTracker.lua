@@ -83,13 +83,13 @@
     --------------------------------------------------------------------------------
 
     There are a lot of functions in the NAG codebase to speed things up. They are listed in these files:
-    - \NAG\APLhandlers.lua for APL functions
     - \NAG\Common.lua for common functions
+    - \NAG\handlers\APLhandlers.lua for APL functions
     - \NAG\handlers\BuffDebuffHandlers.lua for buff/debuff functions
     - \NAG\handlers\ItemHandlers.lua for item functions
     - \NAG\handlers\MiscHandlers.lua for misc functions
     - \NAG\handlers\ResourceHandlers.lua for resource functions
-
+    - \NAG\handlers\StatHandlers.lua for weapon damage functions
     The above files contain a lot of functions that can be used to speed things up.
 
 ]]
