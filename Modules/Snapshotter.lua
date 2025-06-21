@@ -214,8 +214,8 @@ function Snapshoter:OnCombatLogEvent(event)
     local spellName = arg2
     local auraType = arg4
     
-    -- Only process aura events
-    if eventType ~= "SPELL_AURA_APPLIED" and eventType ~= "SPELL_AURA_REMOVED" then return end
+    -- Process aura events including refresh
+    if eventType ~= "SPELL_AURA_APPLIED" and eventType ~= "SPELL_AURA_REFRESH" and eventType ~= "SPELL_AURA_REMOVED" then return end
     
     -- Only process events where player is the source (for buffs) or target (for debuffs)
     local isPlayerSource = sourceName == UnitName("player")
@@ -223,14 +223,15 @@ function Snapshoter:OnCombatLogEvent(event)
     
     if not isPlayerSource and not isPlayerTarget then return end
     
-    if eventType == "SPELL_AURA_APPLIED" then
+    if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" then
         -- Track buffs applied to player or debuffs applied by player to target
         if (auraType == "BUFF" and isPlayerTarget) or (auraType == "DEBUFF" and isPlayerSource) then
-            -- Always update the snapshot when an aura is applied/reapplied
+            -- Always update the snapshot when an aura is applied/reapplied/refreshed
             self.state.activeBuffs[spellID] = true
-            self:Debug(format("Aura applied/reapplied: %s (ID: %d) - Type: %s", spellName or "Unknown", spellID, auraType))
+            local actionType = eventType == "SPELL_AURA_REFRESH" and "refreshed" or "applied/reapplied"
+            self:Debug(format("Aura %s: %s (ID: %d) - Type: %s", actionType, spellName or "Unknown", spellID, auraType))
             -- Capture/update snapshot for this aura
-            self:CaptureSnapshot(spellID, format("%s applied/reapplied", auraType:lower()))
+            self:CaptureSnapshot(spellID, format("%s %s", auraType:lower(), actionType))
         end
     elseif eventType == "SPELL_AURA_REMOVED" then
         -- Remove from active tracking when aura expires
@@ -539,7 +540,7 @@ do
         local spellName = GetSpellInfo(spellID) or "Unknown"
         
         if isAuraActive then
-            -- Buff/debuff is still active - return difference (snapshot - current)
+            -- Buff/debuff is still active - return difference (current - snapshot)
             local total = 0
             for _, statName in ipairs(validStats) do
                 local snapshotValue = snapshot[statName] or 0

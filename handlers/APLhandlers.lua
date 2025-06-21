@@ -1295,7 +1295,7 @@ do -- ================================= Spell APLValueFunctions ================
     --- @function NAG:IsKnownSpell
     --- @param spellId number The ID of the spell.
     --- @return boolean True if the spell is known, false otherwise.
-    --- @usage (NAG:IsKnownSpell(138228))
+    --- @usage (NAG:IsKnownSpell(130735))
     --- @see NAG:IsReadyTinker
     function NAG:IsKnownSpell(spellId)
         if not spellId then return false end
@@ -1333,8 +1333,11 @@ do -- ================================= Spell APLValueFunctions ================
                     for j = offset + 1, offset + numSpells do
                         local bookSpellName = GetSpellBookItemName(j, "spell")
                         if bookSpellName == spellName then
-                            -- Found a matching spell name in spellbook
-                            return true
+                            -- Found a matching spell name, now check if it's actually learned
+                            local spellType, spellID_correct = GetSpellBookItemInfo(j, "spell")
+                            if spellType == "SPELL" then
+                                return IsSpellKnown(spellID_correct) or IsSpellKnown(spellID_correct, true) -- It's a learned spell, not a "FUTURESPELL"
+                            end
                         end
                     end
                 end
