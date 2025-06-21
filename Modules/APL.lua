@@ -140,14 +140,14 @@ function APLModule:InitializeMetadataFromSchema()
     local actionTypes = {}
     local valueTypes = {}
     -- Get action types
-    if schema.messages.APLAction and schema.messages.APLAction.action and schema.messages.APLAction.action.fields then
-        for actionType, _ in pairs(schema.messages.APLAction.action.fields) do
+    if schema.messages.APLAction and schema.messages.APLAction.oneofs and schema.messages.APLAction.oneofs.action then
+        for _, actionType in ipairs(schema.messages.APLAction.oneofs.action) do
             table.insert(actionTypes, actionType)
         end
     end
     -- Get value types
-    if schema.messages.APLValue and schema.messages.APLValue.value and schema.messages.APLValue.value.fields then
-        for valueType, _ in pairs(schema.messages.APLValue.value.fields) do
+    if schema.messages.APLValue and schema.messages.APLValue.oneofs and schema.messages.APLValue.oneofs.value then
+        for _, valueType in ipairs(schema.messages.APLValue.oneofs.value) do
             table.insert(valueTypes, valueType)
         end
     end

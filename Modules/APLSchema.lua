@@ -220,86 +220,90 @@ end
 -- Get message fields with ordered field list
 function APLSchema:GetMessageFields(messageType, subType)
     local schema = self:GetSchema()
-    if not schema then
+    if not schema or not schema.messages then
         self:Error("Schema not loaded")
-        return nil, {}
+        return {}, {}
     end
-    
+
     -- For APLAction and APLValue, subType is required
     if (messageType == "APLAction" or messageType == "APLValue") and subType then
-        local oneofField = messageType == "APLAction" and "action" or "value"
-        local fields = schema.messages[messageType][oneofField].fields[subType]
-        
-        if not fields then
-            self:Error("Fields not found for " .. messageType .. "." .. oneofField .. "." .. subType)
-            return nil, {}
+        local aplMessage = schema.messages[messageType]
+        if not (aplMessage and aplMessage.fields and aplMessage.fields[subType]) then
+            self:Error("SubType not found: " .. subType .. " in " .. messageType)
+            return {}, {}
         end
-        
-        return fields.fields, fields.field_order or {}
+
+        local subTypeInfo = aplMessage.fields[subType]
+        local subMessageTypeName = subTypeInfo.message_type
+        if not subMessageTypeName then
+            -- This action/value has no fields of its own (e.g. APLActionReset)
+            return {}, {}
+        end
+
+        local subMessage = schema.messages[subMessageTypeName]
+        if not subMessage then
+            self:Error("Message type not found for sub-message: " .. subMessageTypeName)
+            return {}, {}
+        end
+
+        return subMessage.fields or {}, subMessage.field_order or {}
     end
-    
+
     -- For regular message types
-    local fields = schema.messages[messageType]
-    if not fields then
+    local message = schema.messages[messageType]
+    if not message then
         self:Error("Message type not found: " .. messageType)
-        return nil, {}
+        return {}, {}
     end
-    
-    return fields, fields.field_order or {}
+
+    return message.fields or {}, message.field_order or {}
 end
 
 -- Generate metadata for an action or value type
 function APLSchema:GenerateMetadata(category, typeKey)
     local schema = self:GetSchema()
-    if not schema then
+    if not schema or not schema.messages then
         self:Error("Schema not loaded")
         return nil
     end
-    
-    local messageType, oneofField
+
+    local messageType
     if category == "Actions" then
         messageType = "APLAction"
-        oneofField = "action"
     elseif category == "Values" then
         messageType = "APLValue"
-        oneofField = "value"
     else
-        self:Error("Invalid category: " .. category)
+        self:Error("Invalid category: " .. tostring(category))
         return nil
     end
-    
-    local typeInfo = schema.messages[messageType][oneofField].fields[typeKey]
+
+    local typeInfo = schema.messages[messageType] and schema.messages[messageType].fields and schema.messages[messageType].fields[typeKey]
     if not typeInfo then
         self:Error("Type not found: " .. typeKey .. " in " .. category)
         return nil
     end
-    
-    -- Get the message type for this action/value
+
+    -- Get the message type for this action/value to retrieve its fields
     local subMessageType = typeInfo.message_type
-    if not subMessageType then
-        self:Error("Message type not found for " .. typeKey)
-        return nil
-    end
-    
+    local subMessage = subMessageType and schema.messages[subMessageType]
+
     -- Generate metadata
-    local fields = {}
-    local fieldOrder = {}
-    
-    -- If this type has fields, get them
-    if typeInfo.fields then
-        fields = typeInfo.fields
-        fieldOrder = typeInfo.field_order or {}
-    end
-    
-    -- Create the metadata
+    local fields = (subMessage and subMessage.fields) or {}
+    local fieldOrder = (subMessage and subMessage.field_order) or {}
+
+    -- Create the metadata by combining info from the APLAction/Value field and the sub-message
     local metadata = {
-        label = typeInfo.label or typeKey,
+        label = typeInfo.uiLabel or typeInfo.label or typeKey, -- Prefer uiLabel from TS metadata
         shortDescription = typeInfo.shortDescription or "",
         fullDescription = typeInfo.fullDescription or "",
         fields = fields,
-        field_order = fieldOrder
+        field_order = fieldOrder,
+        -- Also copy over other relevant TS metadata
+        submenu = typeInfo.submenu,
+        includeIf = typeInfo.includeIf,
+        defaults = typeInfo.defaults,
     }
-    
+
     return metadata
 end
 
@@ -323,12 +327,12 @@ end
 function APLSchema:GetAllActionTypes()
     local schema = self:GetSchema()
     if not schema or not schema.messages or not schema.messages.APLAction or 
-       not schema.messages.APLAction.action or not schema.messages.APLAction.action.fields then
+       not schema.messages.APLAction.oneofs or not schema.messages.APLAction.oneofs.action then
         return {}
     end
     
     local actionTypes = {}
-    for actionType in pairs(schema.messages.APLAction.action.fields) do
+    for _, actionType in ipairs(schema.messages.APLAction.oneofs.action) do
         table.insert(actionTypes, actionType)
     end
     
@@ -340,12 +344,12 @@ end
 function APLSchema:GetAllValueTypes()
     local schema = self:GetSchema()
     if not schema or not schema.messages or not schema.messages.APLValue or 
-       not schema.messages.APLValue.value or not schema.messages.APLValue.value.fields then
+       not schema.messages.APLValue.oneofs or not schema.messages.APLValue.oneofs.value then
         return {}
     end
     
     local valueTypes = {}
-    for valueType in pairs(schema.messages.APLValue.value.fields) do
+    for _, valueType in ipairs(schema.messages.APLValue.oneofs.value) do
         table.insert(valueTypes, valueType)
     end
     
@@ -916,6 +920,97 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
         end
     end
     
+    -- Add Go Backend Metadata if available
+    if fieldInfo.goMetadata then
+        options.goMetadataGroup = {
+            type = "group",
+            name = "Go Backend Registrations",
+            inline = false, -- Display as a full-width section
+            order = 8, -- After includeIf, before enums/nested
+            args = {}
+        }
+        
+        for i, regData in ipairs(fieldInfo.goMetadata) do
+            local regName = regData.label or regData.functionName or ("Registration " .. i)
+            local regOrder = i * 10
+
+            options.goMetadataGroup.args["reg_header_" .. i] = {
+                type = "header",
+                name = regName,
+                order = regOrder
+            }
+
+            local regArgs = {}
+            local argOrder = 1
+            
+            local simpleTextFields = {
+                { key = 'sourceFile', label = 'Source File' },
+                { key = 'registrationType', label = 'Registration Type' },
+                { key = 'functionName', label = 'Function Name' },
+                { key = 'spellId', label = 'Spell ID' },
+                { key = 'tag', label = 'Tag' },
+                { key = 'flags', label = 'Flags' },
+                { key = 'classSpellMask', label = 'ClassSpellMask' },
+                { key = 'spellSchool', label = 'SpellSchool' },
+                { key = 'procMask', label = 'ProcMask' },
+                { key = 'damageMultiplier', label = 'DamageMultiplier' },
+                { key = 'damageMultiplierAdditive', label = 'DamageMultiplierAdditive' },
+                { key = 'critMultiplier', label = 'CritMultiplier' },
+                { key = 'threatMultiplier', label = 'ThreatMultiplier' },
+                { key = 'relatedSelfBuff', label = 'RelatedSelfBuff' },
+                { key = 'ignoreHaste', label = 'IgnoreHaste' }
+            }
+
+            for _, field in ipairs(simpleTextFields) do
+                -- The key in regData is camelCase, e.g., 'sourceFile'
+                if regData[field.key] then
+                    regArgs[field.key .. "_" .. i] = { type = "description", name = "|cFFFFD100" .. field.label .. ":|r " .. tostring(regData[field.key]), order = argOrder }
+                    argOrder = argOrder + 1
+                end
+            end
+
+            -- Durations/Cooldowns
+            if regData.cooldown then
+                regArgs["cd_" .. i] = { type = "description", name = "|cFFFFD100Cooldown:|r " .. regData.cooldown.raw .. " (" .. (regData.cooldown.seconds or "?") .. "s)", order = argOrder }
+                argOrder = argOrder + 1
+            end
+            if regData.auraDuration then
+                regArgs["auraDur_" .. i] = { type = "description", name = "|cFFFFD100Aura Duration:|r " .. regData.auraDuration.raw .. " (" .. (regData.auraDuration.seconds or "?") .. "s)", order = argOrder }
+                argOrder = argOrder + 1
+            end
+
+            -- Handlers (OnGain, OnExpire, etc.)
+            local handlerFields = {'OnGain', 'OnExpire', 'ApplyEffects', 'OnReset', 'OnSpellHitDealt', 'OnSpellHitTaken'}
+            for _, handlerName in ipairs(handlerFields) do
+                if regData[handlerName] then
+                    regArgs[handlerName .. "_group_" .. i] = {
+                        type = "group",
+                        name = "|cFFFFD100" .. handlerName .. " Handler:|r",
+                        inline = true,
+                        order = argOrder,
+                        args = {
+                            code = {
+                                type = "description",
+                                name = regData[handlerName],
+                                fontSize = "small",
+                                width = "full"
+                            }
+                        }
+                    }
+                    argOrder = argOrder + 1
+                end
+            end
+            
+            options.goMetadataGroup.args["reg_group_" .. i] = {
+                type = "group",
+                name = "",
+                inline = true,
+                order = regOrder + 1,
+                args = regArgs
+            }
+        end
+    end
+    
     return options
 end
 
@@ -1085,13 +1180,13 @@ function APLSchema:GetActionsOptions()
                     defaultValue = {
                         type = "description",
                         name = function()
-                            local meta = metadata or {}; if meta.default_value then
-                                return "|cFFFFD100Default Value:|r\n" .. (ns.DumpTable and ns.DumpTable(meta.default_value) or tostring(meta.default_value))
+                            local meta = metadata or {}; if meta.defaults then
+                                return "|cFFFFD100Default Value:|r\n" .. (ns.DumpTable and ns.DumpTable(meta.defaults) or tostring(meta.defaults))
                             end
                             return ""
                         end,
                         order = 4,
-                        hidden = function() local meta = metadata or {}; return not meta.default_value end,
+                        hidden = function() local meta = metadata or {}; return not meta.defaults end,
                     },
                     includeIf = {
                         type = "description",
@@ -1394,13 +1489,13 @@ function APLSchema:GetValuesOptions()
                     defaultValue = {
                         type = "description",
                         name = function()
-                            local meta = metadata or {}; if meta.default_value then
-                                return "|cFFFFD100Default Value:|r\n" .. (ns.DumpTable and ns.DumpTable(meta.default_value) or tostring(meta.default_value))
+                            local meta = metadata or {}; if meta.defaults then
+                                return "|cFFFFD100Default Value:|r\n" .. (ns.DumpTable and ns.DumpTable(meta.defaults) or tostring(meta.defaults))
                             end
                             return ""
                         end,
                         order = 4,
-                        hidden = function() local meta = metadata or {}; return not meta.default_value end,
+                        hidden = function() local meta = metadata or {}; return not meta.defaults end,
                     },
                     includeIf = {
                         type = "description",
@@ -1865,25 +1960,26 @@ end
 ---@return table|nil The UI metadata for the action, or nil if not found
 function APLSchema:GetActionUIMetadata(actionName)
     local schema = self:GetSchema()
-    if not schema then
+    if not schema or not schema.messages then
         self:Error("Schema not loaded")
         return nil
     end
-    
-    if schema.messages.APLAction and 
-       schema.messages.APLAction.action and 
-       schema.messages.APLAction.action.fields and 
-       schema.messages.APLAction.action.fields[actionName] then
+
+    local actionInfo = schema.messages.APLAction and
+                       schema.messages.APLAction.fields and
+                       schema.messages.APLAction.fields[actionName]
+
+    if actionInfo then
         return {
-            label = schema.messages.APLAction.action.fields[actionName].label or actionName,
-            shortDescription = schema.messages.APLAction.action.fields[actionName].shortDescription or "",
-            fullDescription = schema.messages.APLAction.action.fields[actionName].fullDescription or "",
-            tooltip = schema.messages.APLAction.action.fields[actionName].tooltip,
-            submenu = schema.messages.APLAction.action.fields[actionName].submenu or {},
-            includeIf = schema.messages.APLAction.action.fields[actionName].includeIf
+            label = actionInfo.uiLabel or actionInfo.label or actionName,
+            shortDescription = actionInfo.shortDescription or "",
+            fullDescription = actionInfo.fullDescription or "",
+            submenu = actionInfo.submenu or {},
+            includeIf = actionInfo.includeIf,
+            defaults = actionInfo.defaults,
         }
     end
-    
+
     return nil
 end
 
@@ -1892,25 +1988,26 @@ end
 ---@return table|nil The UI metadata for the value, or nil if not found
 function APLSchema:GetValueUIMetadata(valueName)
     local schema = self:GetSchema()
-    if not schema then
+    if not schema or not schema.messages then
         self:Error("Schema not loaded")
         return nil
     end
-    
-    if schema.messages.APLValue and 
-       schema.messages.APLValue.value and 
-       schema.messages.APLValue.value.fields and 
-       schema.messages.APLValue.value.fields[valueName] then
+
+    local valueInfo = schema.messages.APLValue and
+                      schema.messages.APLValue.fields and
+                      schema.messages.APLValue.fields[valueName]
+
+    if valueInfo then
         return {
-            label = schema.messages.APLValue.value.fields[valueName].label or valueName,
-            shortDescription = schema.messages.APLValue.value.fields[valueName].shortDescription or "",
-            fullDescription = schema.messages.APLValue.value.fields[valueName].fullDescription or "",
-            tooltip = schema.messages.APLValue.value.fields[valueName].tooltip,
-            submenu = schema.messages.APLValue.value.fields[valueName].submenu or {},
-            includeIf = schema.messages.APLValue.value.fields[valueName].includeIf
+            label = valueInfo.uiLabel or valueInfo.label or valueName,
+            shortDescription = valueInfo.shortDescription or "",
+            fullDescription = valueInfo.fullDescription or "",
+            submenu = valueInfo.submenu or {},
+            includeIf = valueInfo.includeIf,
+            defaults = valueInfo.defaults,
         }
     end
-    
+
     return nil
 end
 
@@ -1918,35 +2015,39 @@ end
 ---@return table A list of actions with their UI metadata
 function APLSchema:GetAllActionsWithMetadata()
     local schema = self:GetSchema()
-    if not schema then
+    if not schema or not schema.messages then
         self:Error("Schema not loaded")
         return {}
     end
-    
+
     local actions = {}
-    
-    if schema.messages.APLAction and 
-       schema.messages.APLAction.action and 
-       schema.messages.APLAction.action.fields then
-        for actionName, actionInfo in pairs(schema.messages.APLAction.action.fields) do
+    local actionTypes = self:GetAllActionTypes()
+
+    for _, actionName in ipairs(actionTypes) do
+        local actionInfo = schema.messages.APLAction.fields[actionName]
+        if actionInfo then
+            local subMessageTypeName = actionInfo.message_type
+            local subMessage = subMessageTypeName and schema.messages[subMessageTypeName] or {}
+
             table.insert(actions, {
                 name = actionName,
-                label = actionInfo.label or actionName,
+                label = actionInfo.uiLabel or actionInfo.label or actionName,
                 description = actionInfo.shortDescription or "",
                 fullDescription = actionInfo.fullDescription or "",
                 submenu = actionInfo.submenu or {},
-                tooltip = actionInfo.tooltip,
-                fields = actionInfo.fields,
-                field_order = actionInfo.field_order or {}
+                includeIf = actionInfo.includeIf,
+                defaults = actionInfo.defaults,
+                fields = subMessage.fields or {},
+                field_order = subMessage.field_order or {}
             })
         end
     end
-    
+
     -- Sort by name
-    table.sort(actions, function(a, b) 
-        return a.name < b.name 
+    table.sort(actions, function(a, b)
+        return a.name < b.name
     end)
-    
+
     return actions
 end
 
@@ -1954,35 +2055,39 @@ end
 ---@return table A list of values with their UI metadata
 function APLSchema:GetAllValuesWithMetadata()
     local schema = self:GetSchema()
-    if not schema then
+    if not schema or not schema.messages then
         self:Error("Schema not loaded")
         return {}
     end
-    
+
     local values = {}
-    
-    if schema.messages.APLValue and 
-       schema.messages.APLValue.value and 
-       schema.messages.APLValue.value.fields then
-        for valueName, valueInfo in pairs(schema.messages.APLValue.value.fields) do
+    local valueTypes = self:GetAllValueTypes()
+
+    for _, valueName in ipairs(valueTypes) do
+        local valueInfo = schema.messages.APLValue.fields[valueName]
+        if valueInfo then
+            local subMessageTypeName = valueInfo.message_type
+            local subMessage = subMessageTypeName and schema.messages[subMessageTypeName] or {}
+
             table.insert(values, {
                 name = valueName,
-                label = valueInfo.label or valueName,
+                label = valueInfo.uiLabel or valueInfo.label or valueName,
                 description = valueInfo.shortDescription or "",
                 fullDescription = valueInfo.fullDescription or "",
                 submenu = valueInfo.submenu or {},
-                tooltip = valueInfo.tooltip,
-                fields = valueInfo.fields,
-                field_order = valueInfo.field_order or {}
+                includeIf = valueInfo.includeIf,
+                defaults = valueInfo.defaults,
+                fields = subMessage.fields or {},
+                field_order = subMessage.field_order or {}
             })
         end
     end
-    
+
     -- Sort by name
-    table.sort(values, function(a, b) 
-        return a.name < b.name 
+    table.sort(values, function(a, b)
+        return a.name < b.name
     end)
-    
+
     return values
 end
 
