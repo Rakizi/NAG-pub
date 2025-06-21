@@ -25,8 +25,6 @@ local StateManager = NAG:GetModule("StateManager")
 local Version = ns.Version
 --- @type APL
 local APL = NAG:GetModule("APL")
---- @type APLhandlers
-local APLhandlers = NAG:GetModule("APLhandlers")
 
 --- ======= WoW API =======
 local GetTime = GetTime

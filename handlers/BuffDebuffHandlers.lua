@@ -25,8 +25,6 @@ local DataManager = NAG:GetModule("DataManager")
 local StateManager = NAG:GetModule("StateManager")
 --- @type APL
 local APL = NAG:GetModule("APL")
---- @type APLhandlers
-local APLhandlers = NAG:GetModule("APLhandlers")
 
 --- ======= WoW API =======
 local UnitAura = ns.UnitAuraUnified
