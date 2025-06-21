@@ -40,10 +40,20 @@ function PredictionEngineTests:test_ProcessSpellEntries_CalculatesMedianCost()
     local entries = {
         { changes = { resources = { power = { delta = -20, powerType = 0 } } } },
         { changes = { resources = { power = { delta = -21, powerType = 0 } } } },
-        -- CORRECTED a copy-paste error that had an extra 'resources' table
         { changes = { resources = { power = { delta = -20, powerType = 0 } } } },
         { changes = { resources = { power = { delta = -19, powerType = 0 } } } },
         { changes = { resources = { power = { delta = -100, powerType = 0 } } } }, -- Outlier
+        { changes = { resources = { power = { delta = -20, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -22, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -18, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -20, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -21, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -19, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -20, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -23, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -17, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -20, powerType = 0 } } } },
+        { changes = { resources = { power = { delta = -20, powerType = 0 } } } },
     }
 
     -- Act
