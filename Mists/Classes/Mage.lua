@@ -57,7 +57,7 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(7302), -15000 }, { NAG:Cast(55342), -6500 }, { NAG:Cast(12051), -5000 }, { NAG:Cast(116011), -4000 }, { NAG:Cast(30451), -1900 }
@@ -102,7 +102,7 @@ ns.AddRotationToDefaults(defaults,
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.FIRE, "Fire", {
     default = true,
     enabled = true,
-    experimental = false,
+    experimental = true,
     gameType = Version.GAME_TYPES.CLASSIC_MISTS,
     prePull = {
         { NAG:GetBattlePotion(), 1.5 }
@@ -118,7 +118,7 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(31687), -15000 }, { NAG:Cast(7302), -8000 }, { NAG:Cast(12051), -5000 }, { NAG:Cast(116011), -5000 }, { NAG:Cast(55342), -2000 }, { NAG:Cast(116), -1560 }

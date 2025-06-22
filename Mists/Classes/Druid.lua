@@ -60,7 +60,7 @@ if UnitClassBase('player') ~= "DRUID" then return end
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.BALANCE, "Balance", {
     default = true,
     enabled = true,
-    experimental = false,
+    experimental = true,
     gameType = Version.GAME_TYPES.CLASSIC_MISTS,
     prePull = {
         { NAG:GetBattlePotion(), 1.5 }
@@ -72,7 +72,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.BALANCE, "Balance", {
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.FERAL, "Feral", {
     default = true,
     enabled = true,
-    experimental = false,
+    experimental = true,
     gameType = Version.GAME_TYPES.CLASSIC_MISTS,
     prePull = {
         { NAG:GetBattlePotion(), 1.5 }
@@ -96,7 +96,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.FERAL, "Feral", {
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.GUARDIAN, "Guardian", {
     default = true,
     enabled = true,
-    experimental = false,
+    experimental = true,
     gameType = Version.GAME_TYPES.CLASSIC_MISTS,
     prePull = {
         { NAG:GetBattlePotion(), 1.5 }
@@ -108,7 +108,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.GUARDIAN, "Guardian", {
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.RESTORATION, "Restoration", {
     default = true,
     enabled = true,
-    experimental = false,
+    experimental = true,
     gameType = Version.GAME_TYPES.CLASSIC_MISTS,
     prePull = {
         { NAG:GetBattlePotion(), 1.5 }
@@ -117,18 +117,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.RESTORATION, "Restoration", {
     ]],
 })
 
-
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
-
 --- @class Druid : ClassBase
 local Druid = NAG:CreateClassModule("DRUID", defaults)
 if not Druid then return end
-
 
 NAG.Class = Druid

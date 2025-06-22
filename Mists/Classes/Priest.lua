@@ -53,7 +53,7 @@ if UnitClassBase('player') ~= "PRIEST" then return end
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.DISCIPLINE, "Discipline", {
     default = true,
     enabled = true,
-    experimental = false,
+    experimental = true,
     gameType = Version.GAME_TYPES.CLASSIC_MISTS,
     prePull = {
         { NAG:GetBattlePotion(), 1.5 }
@@ -65,7 +65,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.DISCIPLINE, "Discipline", {
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.HOLY, "Holy", {
     default = true,
     enabled = true,
-    experimental = false,
+    experimental = true,
     gameType = Version.GAME_TYPES.CLASSIC_MISTS,
     prePull = {
         { NAG:GetBattlePotion(), 1.5 }

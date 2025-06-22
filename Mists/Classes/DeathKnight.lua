@@ -387,7 +387,7 @@ NAG:Cast(49206)
     "DeathKnight Frost - Two Hand by APLParser",
     {
         -- Required parameters
-        default = true,
+        default = false,
         enabled = true,
         experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
@@ -445,7 +445,7 @@ ns.AddRotationToDefaults(defaults,
     "DeathKnight Blood - Defensive by APLParser",
     {
         -- Required parameters
-        default = true,
+        default = false,
         enabled = true,
         experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
@@ -496,7 +496,7 @@ ns.AddRotationToDefaults(defaults,
     "DeathKnight Frost - masterfrost by APLParser",
     {
         -- Required parameters
-        default = true,
+        default = false,
         enabled = true,
         experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,

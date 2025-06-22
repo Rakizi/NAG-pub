@@ -73,9 +73,9 @@ ns.AddRotationToDefaults(defaults,
     "Hunter Marksmanship - AoE by APLParser",
     {
         -- Required parameters
-        default = true,
+        default = false,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(76089), -1000 }
@@ -111,7 +111,7 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(1130), -10000 }, { NAG:Cast(13165), -11000 }, { NAG:Cast(76089), -1000 }, { NAG:Cast(13812), -5000 }, { NAG:Cast(19434), -2300 }
@@ -156,9 +156,9 @@ ns.AddRotationToDefaults(defaults,
     "Hunter Survival - Surv-AoE by APLParser",
     {
         -- Required parameters
-        default = true,
+        default = false,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(13165), -10000 }, { NAG:Cast(1130), -5000 }, { NAG:Cast(76089), -1000 }, { NAG:Cast(13812), -1000 }
@@ -197,7 +197,7 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(13165), -10000 }, { NAG:Cast(117050), -1000 }

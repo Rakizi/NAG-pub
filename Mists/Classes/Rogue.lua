@@ -59,7 +59,7 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(76089), -1000 }
@@ -104,7 +104,7 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(76089), -1000 }
@@ -150,7 +150,7 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = false,
+        experimental = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(76089), -1000 }, { NAG:Cast(14183), -1000 }, { NAG:Cast(5171), -1000 }
