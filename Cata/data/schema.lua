@@ -1,4 +1,4 @@
--- Generated schema for cata on 2025-06-21 14:51:11
+-- Generated schema for cata on 2025-06-22 03:44:27
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['cata'] = {
@@ -4551,7 +4551,7 @@ ns.protoSchema['cata'] = {
             uiLabel = "Const",
             shortDescription = "A fixed value.",
             fullDescription = [[Examples:
-
+			
 				|cffffcc00Number:|r '123]],
             fields = {
               {
@@ -6544,14 +6544,14 @@ ns.protoSchema['cata'] = {
 
 			The channel will be interrupted only if all of the following are true:
 
-
+			
 				• Immediately following a tick of the channel
 
 				• The |cffffcc00Interrupt If|r condition evaluates to |cffffcc00True|r
 
 				• Another action in the APL list is available
 
-
+			
 			Note that if you simply want to allow other actions to interrupt the channel, set |cffffcc00Interrupt If|r to |cffffcc00True|r.]],
             fields = {
               {

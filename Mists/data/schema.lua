@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-06-21 14:51:06
+-- Generated schema for mop on 2025-06-22 03:44:23
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -3953,7 +3953,7 @@ ns.protoSchema['mists'] = {
             uiLabel = "Const",
             shortDescription = "A fixed value.",
             fullDescription = [[Examples:
-
+			
 				|cffffcc00Number:|r '123]],
             fields = {
               {
@@ -6121,14 +6121,14 @@ ns.protoSchema['mists'] = {
 
 			The channel will be interrupted only if all of the following are true:
 
-
+			
 				• Immediately following a tick of the channel
 
 				• The |cffffcc00Interrupt If|r condition evaluates to |cffffcc00True|r
 
 				• Another action in the APL list is available
 
-
+			
 			Note that if you simply want to allow other actions to interrupt the channel, set |cffffcc00Interrupt If|r to |cffffcc00True|r.]],
             fields = {
               {
@@ -17182,8 +17182,8 @@ ns.protoSchema['mists'] = {
           functionName = "registerRunicCorruption",
           spellId = 51460,
           auraDuration = {
-            raw = "time.Second * 3",
-            seconds = 3
+            raw = "duration",
+            seconds = nil
           },
           label = "Runic Corruption"
         }
@@ -28074,7 +28074,7 @@ ns.protoSchema['mists'] = {
     },
     go_diagnostic = {
       files_scanned = 720,
-      functions_scanned = 3394,
+      functions_scanned = 3397,
       registrations_found = 865,
       registrations_parsed = 770,
       registrations_missed = {

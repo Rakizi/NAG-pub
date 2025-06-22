@@ -1,4 +1,4 @@
--- Generated schema for sod on 2025-06-21 14:51:09
+-- Generated schema for sod on 2025-06-22 03:44:25
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['sod'] = {
@@ -3758,7 +3758,7 @@ ns.protoSchema['sod'] = {
             uiLabel = "Const",
             shortDescription = "A fixed value.",
             fullDescription = [[Examples:
-
+			
 				|cffffcc00Number:|r '123]],
             fields = {
               {
@@ -5207,14 +5207,14 @@ ns.protoSchema['sod'] = {
 
 			The channel will be interrupted only if Instant Interrupt is true OR all of the following are true:
 
-
+			
 				• Immediately following a tick of the channel
 
 				• The |cffffcc00Interrupt If|r condition evaluates to |cffffcc00True|r
 
 				• Another action in the APL list is available
 
-
+			
 			Note that if you simply want to allow other actions to interrupt the channel, set |cffffcc00Interrupt If|r to |cffffcc00True|r.]],
             fields = {
               {
