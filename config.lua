@@ -577,9 +577,6 @@ do --== Rotation Functions ==--
             DotRemainingTime = { required = { "id" }, optional = { "targetUnit" } },
             DotTickFrequency = { required = { "id" }, optional = { "targetUnit" } },
 
-            -- Also add RemainingTime function which dispatches to the appropriate function
-            RemainingTime = { required = {} },
-
             -- Casting actions
             Cast = { required = { "id" }, optional = { "tolerance" } },
             CastFriendly = { required = { "id" }, optional = { "target" } },

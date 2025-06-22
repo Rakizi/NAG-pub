@@ -195,9 +195,9 @@ ns.COLORS = {
 
 --- Gets a color by name and returns it in the requested format
 --- @param colorName string The name of the color to get
---- @param format? string Optional format: "table" (default), "rgba", "hex", "rgbaTable"
+--- @param formatType? string Optional format: "table" (default), "rgba", "hex", "rgbaTable"
 --- @return table|number[]|string|{r:number,g:number,b:number,a:number} The color in the requested format
-function ns.GetColor(colorName, formatType) -- Changed variable name from 'format' to 'formatType'
+function ns.GetColor(colorName, formatType)
     local color = ns.COLORS[colorName] or ns.COLORS.WHITE
     formatType = formatType or "table"
 

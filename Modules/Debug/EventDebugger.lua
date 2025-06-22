@@ -7,7 +7,6 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
---- @diagnostic disable: ...
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
