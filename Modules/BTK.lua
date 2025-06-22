@@ -71,6 +71,7 @@ local BTK = NAG:CreateModule("BTK", nil, {
 
 --- ============================ ORGANIZATION ============================
 do -- Ace3 lifecycle methods
+
     --- Initialize the BTK module
     --- Registers addon message prefix and sets initial emote timer
     function BTK:ModuleInitialize()
@@ -85,6 +86,7 @@ do -- Ace3 lifecycle methods
 end
 
 do -- Event handlers
+
     --- Handles incoming addon messages for the BTK module
     --- @param event string The event name
     --- @param prefix string The addon message prefix

@@ -50,6 +50,7 @@ local SpellLearner = NAG:CreateModule("SpellLearner", defaults, {
 })
 
 do -- Ace3 lifecycle methods
+
     --- Initialize the module
     function SpellLearner:ModuleInitialize()
         self:Info("Initializing SpellLearner")

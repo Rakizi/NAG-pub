@@ -215,6 +215,7 @@ function SpellLearnerStateManager:InitializeSpellTracking()
 end
 
 do -- Ace3 lifecyle methods
+
     --- Initialize the module
     function SpellLearnerStateManager:ModuleInitialize()
         self:Info("Initializing SpellLearnerStateManager")

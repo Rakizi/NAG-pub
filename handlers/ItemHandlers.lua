@@ -68,6 +68,7 @@ local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 --- ============================ CONTENT ============================
 
 do -- ================================= Item APLValue Functions ========================== --
+
     --- Gets the remaining time on a trinket buff
     --- @param id number The trinket ID
     --- @return number Time in seconds remaining
@@ -179,6 +180,7 @@ do -- ================================= Item APLValue Functions ================
 end
 
 do -- ================================= Tiersets Functions
+
     --- Retrieves the tier set for a given item ID
     --- @param id number The item ID
     --- @return string|nil The tier set if found
@@ -216,6 +218,7 @@ do -- ================================= Tiersets Functions
 end
 
 do -- ================================= Trinket/Proc Functions (0/6V) ================================= --
+
     --- Helper function to check if a trinket matches specified stat types
     --- @param self NAG The NAG addon object
     --- @param trinketId number The ID of the trinket to check

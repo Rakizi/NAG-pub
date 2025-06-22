@@ -72,6 +72,7 @@ local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 --- ============================ CONTENT ============================
 
 do -- == ============================== Raid Buff/Debuffs Functions ==================================================
+
     --- Table of mutually exclusive buff groups.
     --- @class mutuallyExclusiveBuffs
     --- @field BLESSINGS table Buffs that are mutually exclusive in the Blessings group
@@ -285,6 +286,7 @@ do -- == ============================== Raid Buff/Debuffs Functions ============
 end
 
 do -- ================================= Aura APLValue Functions ================================= --
+
     --- Returns the number of stacks of a specific aura on the player.
     --- @param spellId number The spell ID of the aura.
     --- @param sourceUnit? string The unit to check (defaults to "player")

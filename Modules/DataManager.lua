@@ -1503,8 +1503,8 @@ do -- Helper functions
     end
 end
 
---========================================================================================================================================
 do --========================================================================== ACE3 Public Methods(ModuleInitialize, ModuleEnable)
+
     --- @param self DataManager
     function DataManager:ModuleInitialize()
         -- Initialize storage first
@@ -1564,6 +1564,7 @@ do -- Event Handlers
 end
 
 do --========================================================================== helper methods(SetSpellPosition, GetSetBonus, ProcessPetAbilities)
+
     --- Sets a spell's position
     --- @param self DataManager
     --- @param id number The spell ID
@@ -1733,6 +1734,7 @@ do --========================================================================== 
 end
 
 do --========================================================================== High Level Data Entry Functions(Add, AddSpell, AddItem)
+
     --- Adds an entity to the data store
     --- @param self DataManager
     --- @param id number The entity ID
@@ -1759,6 +1761,7 @@ do --========================================================================== 
 end
 
 do --========================================================================== byId public methods(Get, GetItem, GetSpell, GetTierSet)
+
     --- Gets an entity by its ID and type
     --- @param self DataManager
     --- @param id number The entity ID
@@ -1844,6 +1847,7 @@ do --========================================================================== 
 end
 
 do --========================================================================== byRelationship public methods(GetRelated, HasRelationship, GetAllRelationships)
+
     --- Gets all related entities of a specific relationship type
     --- @param self DataManager
     --- @param id number The source entity ID
@@ -1886,6 +1890,7 @@ do --========================================================================== 
 end
 
 do --========================================================================== byName public methods(GetByName, GetAllByName)
+
     --- Gets an entity by its name with optional flag filtering
     --- @param self DataManager
     --- @param name string The name to look up
@@ -1962,6 +1967,7 @@ do --========================================================================== 
 end
 
 do --========================================================================== byFlag public methods(HasFlag, GetFlags, GetAllByFlag, GetAllByFlags)
+
     --- Checks if an entity has a specific flag
     --- @param self DataManager
     --- @param id number The entity ID
@@ -2053,6 +2059,7 @@ do --========================================================================== 
 end
 
 do --========================================================================== byType public methods(HasType, GetTypes, GetAllByType)
+
     --- @param self DataManager
     --- @param id number The entity ID
     --- @param entityType string The entity type
@@ -2555,6 +2562,7 @@ do --========================================================================== 
 end
 
 do --========================================================================== bySpellId public methods(GetTalentBySpellId)
+
     --- Gets a talent by its spell ID
     --- @param self DataManager
     --- @param spellId number The spell ID to look up

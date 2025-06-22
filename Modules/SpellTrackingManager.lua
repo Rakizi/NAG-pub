@@ -85,6 +85,7 @@ local SpellTrackingManager = NAG:CreateModule("SpellTrackingManager", defaults, 
 })
 
 do -- Core functionality
+
     --- Initialize the SpellTrackingManager module
     --- @param self SpellTrackingManager
     function SpellTrackingManager:ModuleInitialize()
@@ -127,6 +128,7 @@ end
 
 
 do -- Registration Functions
+
     --- Register periodic damage tick time for spells
     --- @param self SpellTrackingManager
     --- @param spellIds table Array of spell IDs
@@ -251,6 +253,7 @@ do -- Registration Functions
 end
 
 do -- Event Handlers
+
     --- Handle PLAYER_REGEN_ENABLED event
     --- @param self SpellTrackingManager
     function SpellTrackingManager:PLAYER_REGEN_ENABLED()
@@ -560,6 +563,7 @@ do -- Event Handlers
 end
 
 do -- Update methods
+
     --- Update ICD tracking when a spell procs
     --- @param self SpellTrackingManager
     --- @param spellId number
@@ -598,6 +602,7 @@ do -- Update methods
 end
 
 do -- Getters
+
     --- Get cast count within the last minute
     --- @param self SpellTrackingManager
     --- @param spellId number

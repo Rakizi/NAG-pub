@@ -51,6 +51,7 @@ local concat = table.concat -- No WoW equivalent
 --- ============================ CONTENT ============================
 
 do --== PRE-PULL/ROTATION/THROTTLER FUNCTIONS ==--
+
     --- Generic Rotation Function that handles the rotation logic.
     --- @param self NAG The NAG addon object
     --- @return boolean success Returns false if rotation setup fails

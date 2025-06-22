@@ -91,6 +91,7 @@ local function translateSpellId(id)
 end
 
 do -- ================================= Utility Fn's =========================================== --
+
     --- Placeholder function for spell casting.
     ---@function NAG:CastPlaceholder
     ---@param spellId number The ID of the spell to cast.
@@ -150,6 +151,7 @@ do -- ================================= Utility Fn's ===========================
 end
 
 do -- ================================= Funnel Generic Functions =================================
+
     --- Cast a spell, trinket, tinker, or item based on the provided id.
     --- @usage (NAG:Cast(73643))
     --- @param id number The id of the spell, trinket, tinker, or item to cast.
@@ -559,6 +561,7 @@ do -- ================================= Funnel Generic Functions ===============
 end
 
 do -- ================================= Casting functions ========================================== --
+
     --- Casts a trinket if available and ready.
     --- @param itemId number The ID of the trinket.
     --- @usage NAG:CastTrinket(73643)
@@ -1071,6 +1074,7 @@ do -- ================================= Casting functions ======================
 end
 
 do -- ================================= Targets/Units APLValue Functions ======================================
+
     --- Returns the distance to the target in yards.
     --- @function NAG:DistanceToTarget
     --- @param maxRange? number Optional maximum range to check (default: 100)
@@ -1291,6 +1295,7 @@ do -- ================================= Targets/Units APLValue Functions =======
 end
 
 do -- ================================= Spell APLValueFunctions ================================ --
+
     --- Checks if a spell is known.
     --- @function NAG:IsKnownSpell
     --- @param spellId number The ID of the spell.
@@ -1714,6 +1719,7 @@ do -- ================================= Spell APLValueFunctions ================
 end
 
 do -- ================================= IsActive APLValue Functions ================================ --
+
     --- Checks if the player's pet has a specific aura.
     --- @function NAG:IsActivePetAura
     --- @param spellId number The ID of the spell to check.
@@ -1818,6 +1824,7 @@ do -- ================================= IsActive APLValue Functions ============
 end
 
 do -- ================================= Dot APLValue Functions ================================== --
+
     --- Gets the number of stacks of a specific debuff on the player.
     --- @function NAG:DebuffNumStacks
     --- @param spellId number The ID of the spell to check.
@@ -2238,6 +2245,7 @@ do -- =-=============================== SOD APLValue functions
 end
 
 do -- ================================= Class Functions ==================================================== --
+
     --- Determine the current Eclipse phase for a Balance Druid.
     --- @function NAG:CurrentEclipsePhase
     --- @usage NAG:CurrentEclipsePhase() == "SolarPhase"
@@ -2411,6 +2419,7 @@ do -- ================================= Dot Functions ==========================
 end
 
 do -- ================================= Pet APLValue Functions (4/4V) ================================= --
+
     --- Checks if a pet is currently active. (V)
     --- @function NAG:PetIsActive
     --- @return boolean True if a pet is active, false otherwise
@@ -2464,6 +2473,7 @@ do -- ================================= Pet APLValue Functions (4/4V) ==========
 end
 
 do -- ================================= Target State Functions (4/4V) ================================= --
+
     --- Gets the current health percentage of the target. (V)
     --- @function NAG:TargetHealthPercent
     --- @return number The target's health percentage (0-100)

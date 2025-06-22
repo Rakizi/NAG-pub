@@ -97,6 +97,7 @@ function PredictionEngine:GetCurrentCharacterKey()
 end
 
 do -- Ace3 lifecycle methods
+
     --- Initialize the module
     function PredictionEngine:ModuleInitialize()
         self:Info("Initializing PredictionEngine")

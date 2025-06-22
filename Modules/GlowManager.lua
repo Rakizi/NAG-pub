@@ -98,6 +98,7 @@ GlowManager.activeGlows = {}
 -- ============================ ACE3 LIFECYCLE ============================
 do
     --- Cleans up all active glow effects
+
     --- @param self GlowManager
     function GlowManager:ModuleInitialize()
         -- Initialize module state
@@ -114,6 +115,7 @@ end
 -- ============================ EVENT HANDLERS ============================
 do
     --- Event handler for PLAYER_ENTERING_WORLD
+
     --- @param self GlowManager
     function GlowManager:PLAYER_ENTERING_WORLD()
         -- Cleanup any lingering glows

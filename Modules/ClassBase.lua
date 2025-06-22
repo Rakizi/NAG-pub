@@ -1010,6 +1010,7 @@ do  -- Rotation handling
 end -- Rotation handling
 
 do  -- Import/Export
+
     --- Generates a unique name for a rotation by appending a number if needed
     --- @param self ClassBase
     --- @param specID number The specialization ID
@@ -1554,6 +1555,7 @@ function ClassBase:CreateSpellLocationOptions()
 end
 
 do -- Battle Potion handling
+
     --- Gets the default battle potion ID for the current spec
     --- @param self ClassBase
     --- @return number|nil The potion ID or nil if none is set

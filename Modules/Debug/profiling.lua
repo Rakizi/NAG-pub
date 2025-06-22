@@ -66,6 +66,7 @@ ProfilingUtility.profilingStack = {}
 --- ============================ ACE3 LIFECYCLE ============================
 do
     --- Called when the module is initialized
+
     --- @param self ProfilingUtility
     function ProfilingUtility:ModuleInitialize()
         self:Reset()

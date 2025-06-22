@@ -120,6 +120,7 @@ end
 -- ============================ EVENT HANDLERS ============================
 do
     --- Generic event handler to catch and print all events.
+
     --- @param self EventDebugger
     --- @param event string The event name.
     --- @param ... any Additional arguments passed to the event handler.
@@ -163,6 +164,7 @@ end
 -- ============================ OPTIONS UI ============================
 do
     --- Gets the options table for Event Debugger settings
+
     --- @param self EventDebugger
     --- @return table The options table for AceConfig
     function EventDebugger:GetOptions()

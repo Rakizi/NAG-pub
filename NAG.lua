@@ -238,6 +238,7 @@ NAG.defaults = {
 }
 
 do -- Core ACE3 functions --
+
     --- Initializes the addon.
     -- This function is called when the addon is initialized. It sets up the database,
     -- registers options tables, and sets up slash commands.
@@ -611,6 +612,7 @@ end
 
 
 do -- Core options
+
     --- Initializes the options structure.
     --- @param self NAG The addon object
     function NAG:InitializeOptions()
@@ -704,6 +706,7 @@ do -- Core options
 end
 
 do -- Core settings access helpers
+
     --- Gets the profile settings.
     --- @param self NAG The addon object
     --- @return table The profile settings
@@ -748,6 +751,7 @@ do -- Core settings access helpers
 end
 
 do -- Rando helper functions
+
     --- Toggles edit mode for the addon
     function NAG:ToggleEditMode()
         if not self.Frame then return end
@@ -976,6 +980,7 @@ function NAG:SlashCommand(input, editbox)
 end
 
 do --== DebugManager wrappers
+
     --- Prints an info level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
@@ -1057,6 +1062,7 @@ do --== DebugManager wrappers
 end
 
 do --== WeakAuras Integration API ==--
+
     --- Checks if WeakAuras Burst Boxes integration is enabled(used in weakauras)
     --- @param self NAG The NAG addon object
     --- @return boolean True if WeakAuras Burst Boxes integration is enabled, false otherwise
@@ -1258,6 +1264,7 @@ do --================================== Migrations --===========================
 end
 
 do -- Shared Options Utilities
+
     --- Gets the appropriate settings DB based on module type
     --- @param moduleType string The module type
     --- @param global table The global settings table

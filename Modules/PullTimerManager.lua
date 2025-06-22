@@ -137,6 +137,7 @@ end
 
 -- ============================ OPTIONS UI ============================
 do --== Options Functions ==--
+
     --- Gets the options table for the PullTimerManager module
     --- @return table The options table for AceConfig-3.0
     function PullTimerManager:GetOptions()

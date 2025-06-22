@@ -98,6 +98,7 @@ end
 
 
 do --== Reset Options ==--
+
     --- @class NAG
     --- @field CreateResetOptions fun(self: NAG): table
     --- @usage NAG:CreateResetOptions()
@@ -235,6 +236,7 @@ do --== Reset Options ==--
 end
 
 do --== Splash/Key Options ==--
+
     --- @class NAG
     --- @field CreateSplashOptions fun(self: NAG): table
     --- @usage NAG:CreateSplashOptions()
@@ -427,6 +429,7 @@ do --== Splash/Key Options ==--
 end
 
 do --== Display Options ==--
+
     --- @class NAG
     --- @field frameControls table
     --- @field general table

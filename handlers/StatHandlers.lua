@@ -29,6 +29,7 @@ local format = format or string.format
 --- ============================ CONTENT ============================
 
 do -- ================================= Stat APLValue Functions ========================== --
+
     --- Calculates the average weapon damage for a given weapon.
     --- This includes base damage, buffs, and debuffs. It does not include attack power scaling.
     --- @param weapon string The weapon to check ("mainhand" or "offhand"). Defaults to "mainhand".

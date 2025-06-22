@@ -248,6 +248,7 @@ local ModuleTemplate = NAG:CreateModule("ModuleTemplate", defaults, {
 ModuleTemplate.frame = nil
 
 do -- Ace3 lifecyle methods
+
     --- Initialize the module
     function ModuleTemplate:ModuleInitialize()
         self:Info("Initializing ModuleTemplate")

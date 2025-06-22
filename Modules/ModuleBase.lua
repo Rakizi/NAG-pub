@@ -131,6 +131,7 @@ local ModuleBase = {
 --- ============================ LIFECYCLE METHODS ============================
 do
     --- Called when the module is initialized.
+
     --- @param self ModuleBase
     function ModuleBase:OnInitialize()
         -- Skip initialization for class modules if not the right class
@@ -253,6 +254,7 @@ end
 --- ============================ DATABASE METHODS ============================
 do
     --- Default handler for database reset events
+
     --- @param self ModuleBase
     --- @param event string The event name
     --- @param resetType string The type of reset being performed ("all", "global", "char", "class")
@@ -378,6 +380,7 @@ end
 --- ============================ STATE MANAGEMENT ============================
 do
     --- Initializes the module's state
+
     --- @param self ModuleBase
     function ModuleBase:InitializeState()
         -- If module already has state, skip
@@ -453,6 +456,7 @@ end
 --- ============================ OPTIONS UI ============================
 do
     --- Registers the module options.
+
     --- @param self ModuleBase
     function ModuleBase:RegisterModuleOptions()
         local moduleOptions = self:GetOptions()
@@ -621,6 +625,7 @@ end
 --- ============================ DEBUG LOGGING ============================
 do
     --- Enables debug logging.
+
     --- @param self ModuleBase
     function ModuleBase:EnableDebug()
         self:GetGlobal().debug = true
@@ -731,6 +736,7 @@ end
 --- ============================ MIGRATION ============================
 do 
     --- Migrates the module settings.
+
     --- @param self ModuleBase
     function ModuleBase:MigrateModuleSettings()
         if not self.db or not self.migrations then return end
@@ -783,6 +789,7 @@ end
 --- ============================ EVENT MANAGEMENT ============================
 do
     --- Registers module event handlers from the eventHandlers table
+
     --- @param self ModuleBase
     function ModuleBase:RegisterEventHandlers()
         if not self.eventHandlers then return end

@@ -1200,6 +1200,7 @@ do -- ================================= Resource APLValue Functions ============
 end
 
 do -- ================================= Resource APLValue Functions (4/4V) ================================= --
+
     --- Gets the current amount of Demonic Fury. (V)
     --- @function NAG:CurrentDemonicFury
     --- @return number The current amount of Demonic Fury

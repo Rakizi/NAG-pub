@@ -85,6 +85,7 @@ local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 --- ============================ CONTENT ============================
 ---
 do -- ================================= Timing functions =========================================== --
+
     --- Schedules an action after a specified delay.
     --- @param time number Delay in seconds.
     --- @param action function The function to execute after the delay.
@@ -583,6 +584,7 @@ end
 
 
 do -- ================================= Time APLValue Functions ========================================== --
+
     --- Get the current combat time.
     --- @function NAG:CurrentTime
     --- @usage NAG:CurrentTime() >= 10
@@ -726,6 +728,7 @@ do -- ================================= Time APLValue Functions ================
 end
 
 do -- ================================= GCD/Swing/Auto APLValue Functions =============================== --
+
     --- Gets the auto swing time for the specified weapon type.
     --- @function NAG:AutoSwingTime
     --- @param weaponType? string "MainHand", "OffHand", or "Ranged". Defaults to MainHand if not provided.

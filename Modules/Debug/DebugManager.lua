@@ -296,6 +296,7 @@ end
 --- ============================ OPTIONS UI ============================
 do
     --- Gets the options table for debug settings
+
     --- @return table The options table for AceConfig
     function DebugManager:GetOptions()
         local options = {}

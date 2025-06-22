@@ -68,6 +68,7 @@ local TrinketTrackingManager = NAG:CreateModule("TrinketTrackingManager", defaul
 })
 
 do -- Core functionality
+
     --- Initialize the TrinketTrackingManager module
     --- @param self TrinketTrackingManager
     function TrinketTrackingManager:ModuleInitialize()
@@ -173,6 +174,7 @@ do -- Core functionality
 end
 
 do -- Event Handlers
+
     --- Handle aura application
     --- @param self TrinketTrackingManager
     --- @param timestamp number
@@ -205,6 +207,7 @@ do -- Event Handlers
 end
 
 do -- State Management
+
     --- Get trinket data by proc spell ID
     --- @param spellId number The proc spell ID to look up
     --- @return table|nil The trinket data if found
@@ -322,6 +325,7 @@ do -- State Management
 end
 
 do -- Trinket Analysis Functions
+
     --- Analyzes a trinket and returns its information
     --- @param self TrinketTrackingManager
     --- @param itemId number The ID of the trinket to analyze
@@ -530,6 +534,7 @@ function TrinketTrackingManager:GetInternalCooldownRemaining(spellId)
 end
 
 do -- Legacy Tooltip Scanning Functions - Kept for backward compatibility
+
     --- Helper function to convert time text to seconds
     local function parseTimeToSeconds(value, unit)
         if not value or not unit then return 0 end

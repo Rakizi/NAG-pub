@@ -222,6 +222,7 @@ function ns.RefreshAllBorders()
 end
 
 do --== Frame Creation Functions ==--
+
     --- Initializes the parent frame for the NAG addon.
     --- @param self NAG The NAG addon object
     --- @usage NAG:InitializeParentFrame()

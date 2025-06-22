@@ -85,6 +85,7 @@ local CLEUDebugger = NAG:CreateModule("CLEUDebugger", defaults, {
 -- ============================ ACE3 LIFECYCLE ============================
 do
     --- Initialize the module
+
     --- @param self CLEUDebugger
     function CLEUDebugger:ModuleInitialize()
         self:Debug("CLEUDebugger initialized")
@@ -108,6 +109,7 @@ end
 -- ============================ EVENT HANDLERS ============================
 do
     --- Handle COMBAT_LOG_EVENT_UNFILTERED events
+
     --- @param self CLEUDebugger
     function CLEUDebugger:COMBAT_LOG_EVENT_UNFILTERED()
         local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool =
@@ -172,6 +174,7 @@ end
 -- ============================ OPTIONS UI ============================
 do
     --- Gets the options table for CLEU Debugger settings
+
     --- @param self CLEUDebugger
     --- @return table The options table for AceConfig
     function CLEUDebugger:GetOptions()

@@ -153,6 +153,7 @@ local Snapshoter = NAG:CreateModule("Snapshoter", defaults, {
 })
 
 do -- Ace3 lifecyle methods
+
     --- Initialize the module
     function Snapshoter:ModuleInitialize()
         self:Info("Initializing Snapshoter")
@@ -460,6 +461,7 @@ ns.Snapshoter = Snapshoter
 -- Add global API function to NAG namespace
 do
     --- Query and compare stat snapshots with current values
+
     --- This function provides a flexible way to:
     --- 1. Compare current stats with snapshot values for spells/buffs/debuffs
     --- 2. Get raw current stat values without comparison

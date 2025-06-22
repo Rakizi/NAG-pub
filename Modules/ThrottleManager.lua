@@ -176,6 +176,7 @@ end
 --- ============================ OPTIONS UI ============================
 do
     --- Gets the options table for Throttle Manager settings
+
     --- @return table The options table
     function ThrottleManager:GetOptions()
         return {

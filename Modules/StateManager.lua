@@ -839,6 +839,7 @@ do --===========================================================================
 end
 
 do --==================================================================================== Pet State GTG
+
     --- Check if a spell belongs to the current pet
     --- @param spellId number Spell ID to check
     --- @return boolean True if spell belongs to current pet
@@ -874,6 +875,7 @@ end
 
 --- Talents Verify cata 5/21
 do --==================================================================================== Talent Management
+
     --- Updates the talent state for all specs
     --- Verify cata 5/21
     function StateManager:UpdateTalentState()
