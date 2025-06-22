@@ -1017,6 +1017,22 @@ if L then
         L["Show Icon BorderDesc"] = "Show a border around effect icons"
         L["Icon Border Color"] = "Icon Border Color"
         L["Icon Border ColorDesc"] = "Set the color of the icon border"
+        L["Add Spell ID"] = "Add Spell ID"
+        L["All Registered Types"] = "All Registered Types"
+        L["All specs"] = "All specs"
+        L["New"] = "New"
+        L["No"] = "No"
+        L["No results found for '%s'"] = "No results found for '%s'"
+        L["None"] = "None"
+        L["Not a valid import string."] = "Not a valid import string."
+        L["Right-click to close"] = "Right-click to close"
+        L["Run"] = "Run"
+        L["Scheme"] = "Scheme"
+        L["Search"] = "Search"
+        L["Search for an enum value across all types."] = "Search for an enum value across all types."
+        L["Search Results"] = "Search Results"
+        L["Select All"] = "Select All"
+        L["Select a background"] = "Select a background"
     end
 
     do -- non-sorted messages
