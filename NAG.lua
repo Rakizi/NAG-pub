@@ -1341,3 +1341,61 @@ do -- Shared Options Utilities
         }
     end
 end
+
+do --== Addon Compartment Functions ==--
+    --- Handles clicks on the addon compartment button.
+    --- @param frame Frame The button that was clicked.
+    --- @param button string The mouse button used ("LeftButton", "RightButton", etc.).
+    function NAG_OnAddonCompartmentClick(frame, button)
+        local NAG = _G.NAG -- Get addon instance
+        if not NAG then return end
+
+        if button == "LeftButton" then
+            if AceConfigDialog.OpenFrames["NAG"] then
+                AceConfigDialog:Close("NAG")
+            else
+                AceConfigDialog:Open("NAG")
+            end
+        elseif button == "RightButton" then
+            if IsShiftKeyDown() and NAG:IsDevModeEnabled() then
+                -- Show debug menu
+                local menu = {
+                    { text = "Next Action Guide Dev", isTitle = true },
+                    { text = "Encounter Stopwatch", func = function() NAG:GetModule("EncounterStopwatch"):Toggle() end },
+                    { text = "Entity Behavior Tester", func = function() NAG:GetModule("EntityBehaviorTester"):Toggle() end },
+                    { text = "APL Monitor", func = function() NAG:GetModule("APLMonitor"):Toggle() end },
+                    { text = "Event Debugger", func = function() NAG:GetModule("EventDebugger"):Toggle() end },
+                    { text = "CLEU Debugger", func = function() NAG:GetModule("CLEUDebugger"):Toggle() end },
+                    { text = "Toggle Script Errors", func = function() NAG:ToggleScriptErrors() end },
+                }
+                if not NAG.debugMenuFrame then
+                    NAG.debugMenuFrame = LibStub("LibUIDropDownMenu-4.0"):Create_UIDropDownMenu("NAGDebugMenuFrame", UIParent)
+                end
+                LibStub("LibUIDropDownMenu-4.0"):EasyMenu(menu, NAG.debugMenuFrame, "cursor", 0, 0, "MENU")
+            else
+                NAG:ToggleEditMode()
+            end
+        end
+    end
+
+    --- Shows a tooltip when hovering over the addon compartment button.
+    --- @param frame Frame The button being hovered over.
+    function NAG_OnAddonCompartmentEnter(frame)
+        if not GameTooltip:IsForbidden() then
+            GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+            GameTooltip:AddLine("Next Action Guide")
+            GameTooltip:AddLine("|cFFFFFFFFLeft Click|r to open settings")
+            GameTooltip:AddLine("|cFFFFFFFFRight Click|r to toggle edit mode")
+            if _G.NAG and _G.NAG:IsDevModeEnabled() then
+                GameTooltip:AddLine("|cFFFFFFFFShift-Right Click|r to open dev menu")
+            end
+            GameTooltip:Show()
+        end
+    end
+
+    --- Hides the tooltip when the mouse leaves the addon compartment button.
+    --- @param frame Frame The button being left.
+    function NAG_OnAddonCompartmentLeave(frame)
+        GameTooltip:Hide()
+    end
+end
