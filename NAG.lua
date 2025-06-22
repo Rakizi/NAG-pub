@@ -381,6 +381,13 @@ do -- Core ACE3 functions --
     --- @param self NAG The addon object
     function NAG:OnEnable()
         if Extras and Extras.InitializepF then Extras:InitializepF() end
+        
+        -- Apply nameplate settings 2 seconds after UI fully loads or reloads
+        C_Timer.After(2, function()
+            SetCVar("nameplateShowAll", 1)
+            SetCVar("nameplateMaxDistance", 41)
+        end)
+        
         -- Show welcome message
     end
 

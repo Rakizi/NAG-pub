@@ -183,6 +183,7 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
             return false
         end
         if entity.flags.stance and not NAG.Class.db.char.enableStances then
+            self:Error(format("Cast: entity.flags.stance and not NAG.Class.db.char.enableStances"))
             return false
         end
         -- Handle different entity types

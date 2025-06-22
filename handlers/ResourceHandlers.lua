@@ -148,7 +148,7 @@ do --== RESOURCE CHECKS ==--
 
         local predictedResource = self:PredictResourceValue(NAG:NextTime(), powerType)
         local hasEnough = not cost or cost <= predictedResource
-
+        
         local currentResource = UnitPower("player", powerType)
         --[[self:Trace(format("HasResource: spellId=%d, powerType=%d, cost=%s, current=%d, predicted=%d, hasEnough=%s",
             spellId, powerType, tostring(cost), currentResource, predictedResource, tostring(hasEnough)))
