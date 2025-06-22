@@ -130,7 +130,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 --- Determines the best glow type for a frame
 --- @param frame Frame The frame to check

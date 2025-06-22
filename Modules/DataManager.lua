@@ -1503,7 +1503,7 @@ do -- Helper functions
     end
 end
 
-do --========================================================================== ACE3 Public Methods(ModuleInitialize, ModuleEnable)
+do -- ~~~~~~~~~~~~~~~~~~~~ ACE3 Public Methods(ModuleInitialize, ModuleEnable)
 
     --- @param self DataManager
     function DataManager:ModuleInitialize()
@@ -1563,7 +1563,7 @@ do -- Event Handlers
     end
 end
 
-do --========================================================================== helper methods(SetSpellPosition, GetSetBonus, ProcessPetAbilities)
+do -- ~~~~~~~~~~~~~~~~~~~~ helper methods(SetSpellPosition, GetSetBonus, ProcessPetAbilities)
 
     --- Sets a spell's position
     --- @param self DataManager
@@ -1733,7 +1733,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== High Level Data Entry Functions(Add, AddSpell, AddItem)
+do -- ~~~~~~~~~~~~~~~~~~~~ High Level Data Entry Functions(Add, AddSpell, AddItem)
 
     --- Adds an entity to the data store
     --- @param self DataManager
@@ -1760,7 +1760,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byId public methods(Get, GetItem, GetSpell, GetTierSet)
+do -- ~~~~~~~~~~~~~~~~~~~~ byId public methods(Get, GetItem, GetSpell, GetTierSet)
 
     --- Gets an entity by its ID and type
     --- @param self DataManager
@@ -1846,7 +1846,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byRelationship public methods(GetRelated, HasRelationship, GetAllRelationships)
+do -- ~~~~~~~~~~~~~~~~~~~~ byRelationship public methods(GetRelated, HasRelationship, GetAllRelationships)
 
     --- Gets all related entities of a specific relationship type
     --- @param self DataManager
@@ -1889,7 +1889,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byName public methods(GetByName, GetAllByName)
+do -- ~~~~~~~~~~~~~~~~~~~~ byName public methods(GetByName, GetAllByName)
 
     --- Gets an entity by its name with optional flag filtering
     --- @param self DataManager
@@ -1966,7 +1966,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byFlag public methods(HasFlag, GetFlags, GetAllByFlag, GetAllByFlags)
+do -- ~~~~~~~~~~~~~~~~~~~~ byFlag public methods(HasFlag, GetFlags, GetAllByFlag, GetAllByFlags)
 
     --- Checks if an entity has a specific flag
     --- @param self DataManager
@@ -2058,7 +2058,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byType public methods(HasType, GetTypes, GetAllByType)
+do -- ~~~~~~~~~~~~~~~~~~~~ byType public methods(HasType, GetTypes, GetAllByType)
 
     --- @param self DataManager
     --- @param id number The entity ID
@@ -2145,7 +2145,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== DEBUGGING public methods
+do -- ~~~~~~~~~~~~~~~~~~~~ DEBUGGING public methods
     local function formatEntryInfo(entry)
         local info = {
             format("ID: %d", entry[entry.entryType .. "Id"]),
@@ -2561,7 +2561,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== bySpellId public methods(GetTalentBySpellId)
+do -- ~~~~~~~~~~~~~~~~~~~~ bySpellId public methods(GetTalentBySpellId)
 
     --- Gets a talent by its spell ID
     --- @param self DataManager

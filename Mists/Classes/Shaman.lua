@@ -45,7 +45,7 @@ defaults.class.specSpellLocations = {
     }
 }
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "SHAMAN" then return end

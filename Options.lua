@@ -1,4 +1,4 @@
--- ~~~~~~~~~~ Options ============================
+-- ~~~~~~~~~~ Options ~~~~~~~~~~
 --- Handles all options, configuration, and settings UI for NAG addon
 ---
 --- This module defines and manages all Ace3 options tables, configuration UI, and related logic for the Next Action Guide addon.

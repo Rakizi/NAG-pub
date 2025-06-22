@@ -45,7 +45,7 @@ defaults.class.specSpellLocations = {
     }
 }
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 -- Skip loading if not the correct class

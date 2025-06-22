@@ -45,7 +45,7 @@ defaults.class.specSpellLocations = {
     }
 }
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "PALADIN" then return end

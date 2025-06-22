@@ -119,7 +119,7 @@ local burstTrackersShamanEnhancement = {
     { spellId = 2825,  auraId = { 2825 } },  -- Bloodlust
 }
 local spellLocationsShamanRestoration = nil
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "SHAMAN" then return end
@@ -218,19 +218,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.RESTORATION, "Cataclysm Restorati
     rotationString = rotationStringRestoration or rotationStringShamanRestoration or debugRotationShamanRestoration
 })
 
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
 --- @class Shaman : ClassBase
 local Shaman = NAG:CreateClassModule("SHAMAN", defaults, {
     weakAuraName = "Shaman Next Action Guide",

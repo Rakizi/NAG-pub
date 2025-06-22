@@ -43,7 +43,7 @@ defaults.class.specSpellLocations = {
     }
 }
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "WARLOCK" then return end

@@ -44,7 +44,7 @@ defaults.class.specSpellLocations = {
     }
 }
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "PRIEST" then return end
@@ -129,19 +129,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.DISCIPLINE, "Cataclysm Discipline
     rotationString = rotationStringDiscipline or rotationStringPriestDiscipline or debugRotationPriestDiscipline
 })
 ]]
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
 --- @class Priest : ClassBase
 local Priest = NAG:CreateClassModule("PRIEST", defaults)
 if not Priest then return end

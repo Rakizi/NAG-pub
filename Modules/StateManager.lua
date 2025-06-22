@@ -813,7 +813,7 @@ do -- External Helper methods
     end
 end
 
-do --==================================================================================== Form/Stance Processing
+do -- ~~~~~~~~~~ Form/Stance Processing
     function StateManager:UpdateFormsState()
         local state = self.state.player.shapeshiftForm
         local formID = GetShapeshiftFormID()
@@ -838,7 +838,7 @@ do --===========================================================================
     end
 end
 
-do --==================================================================================== Pet State GTG
+do -- ~~~~~~~~~~ Pet State GTG
 
     --- Check if a spell belongs to the current pet
     --- @param spellId number Spell ID to check
@@ -874,7 +874,7 @@ do --===========================================================================
 end
 
 --- Talents Verify cata 5/21
-do --==================================================================================== Talent Management
+do -- ~~~~~~~~~~ Talent Management
 
     --- Updates the talent state for all specs
     --- Verify cata 5/21
@@ -966,7 +966,7 @@ do --===========================================================================
     end
 end
 
-do --==================================================================================== Event Handlers
+do -- ~~~~~~~~~~ Event Handlers
     function StateManager:PLAYER_ENTERING_WORLD(event, unit)
         if unit == "player" then
             NAG.lastEclipsePhase = "NeutralPhase"

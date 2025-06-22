@@ -1,4 +1,4 @@
--- ~~~~~~~~~~ Dialogs ============================
+-- ~~~~~~~~~~ Dialogs ~~~~~~~~~~
 --- Handles all dialog popups and reset logic for NAG addon
 ---
 --- This module defines and manages all static popup dialogs, reset functions, and dialog helpers for the Next Action Guide addon.

@@ -374,7 +374,7 @@ do --== Options Functions ==--
     end
 end
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (Local helpers and public API functions should be outside do blocks for scope)
 
 function PullTimerManager:UpdateCurrentRotation()

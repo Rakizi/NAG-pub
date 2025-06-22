@@ -89,7 +89,7 @@ local function translateSpellId(id)
     return id
 end
 
-do -- ~~~~~~~~~~ Utility Fn's ~~~~~~~~~~= --
+do -- ~~~~~~~~~~ Utility Fn's ~~~~~~~~~~
 
     --- Placeholder function for spell casting.
     --- @function NAG:CastPlaceholder
@@ -1072,7 +1072,7 @@ do -- ~~~~~~~~~~ Casting functions ~~~~~~~~~~
     NAG.MultiShield = NAG.Multishield
 end
 
-do -- ~~~~~~~~~~ Targets/Units APLValue Functions ~~~~~~~~~~=====
+do -- ~~~~~~~~~~ Targets/Units APLValue Functions ~~~~~~~~~~
 
     --- Returns the distance to the target in yards.
     --- @function NAG:DistanceToTarget
@@ -1822,7 +1822,7 @@ do -- ~~~~~~~~~~ IsActive APLValue Functions ~~~~~~~~~~
     end
 end
 
-do -- ~~~~~~~~~~ Dot APLValue Functions ~~~~~~~~~~= --
+do -- ~~~~~~~~~~ Dot APLValue Functions ~~~~~~~~~~
 
     --- Gets the number of stacks of a specific debuff on the player.
     --- @function NAG:DebuffNumStacks
@@ -2180,7 +2180,7 @@ do -- ~~~~~~~~~~ Class Specific APLValue functions ======================
     end
 end
 
-do -- =-=============================== SOD APLValue functions
+do -- ~~~~~~~~~~ SOD APLValue functions
     -- Define the spell IDs for seals
     local SEAL_IDS = {
         20375, -- Seal of Command
@@ -2288,7 +2288,7 @@ do -- ~~~~~~~~~~ Class Functions ~~~~~~~~~~
     end
 end
 
-do -- ~~~~~~~~~~ Dot Functions ~~~~~~~~~~= --
+do -- ~~~~~~~~~~ Dot Functions ~~~~~~~~~~
     -- Function to show overlay for switching targets
     local function showOverlay()
         if not NAG.overlayFrame then

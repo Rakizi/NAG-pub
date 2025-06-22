@@ -181,7 +181,7 @@ local burstTrackersWarriorProtection = {
     { spellId = 469, auraId = { 469 } }, -- Commanding Shout
 }
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 
@@ -247,19 +247,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.PROTECTION, "Cataclysm Protection
     rotationString = rotationStringProtection or rotationStringWarriorProtection or debugRotationWarriorProtection
 })
 
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
-
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 --- @class Warrior : ClassBase
 local Warrior = NAG:CreateClassModule("WARRIOR", defaults, {

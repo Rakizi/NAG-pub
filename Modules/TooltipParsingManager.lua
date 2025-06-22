@@ -14,6 +14,22 @@ local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 --- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
+
+-- Map stat types to their localized global string names
+local STAT_NAMES = {
+    [Types:GetType("Stat").STRENGTH] = STAT_STRENGTH or "Strength",
+    [Types:GetType("Stat").AGILITY] = STAT_AGILITY or "Agility",
+    [Types:GetType("Stat").STAMINA] = STAT_STAMINA or "Stamina",
+    [Types:GetType("Stat").INTELLECT] = STAT_INTELLECT or "Intellect",
+    [Types:GetType("Stat").SPIRIT] = STAT_SPIRIT or "Spirit",
+    [Types:GetType("Stat").CRIT] = CRIT_RATING_NAME or "Crit",
+    [Types:GetType("Stat").HASTE] = HASTE_RATING_NAME or "Haste",
+    [Types:GetType("Stat").MASTERY] = MASTERY_RATING_NAME or "Mastery",
+    [Types:GetType("Stat").ATTACK_POWER] = STAT_ATTACK_POWER or "Attack Power",
+    [Types:GetType("Stat").SPELL_POWER] = SPELL_POWER or "Spell Power",
+    [Types:GetType("Stat").RANGED_ATTACK_POWER] = STAT_RANGED_ATTACK_POWER or "Ranged Attack Power",
+}
+
 --- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 
@@ -233,6 +249,10 @@ end
 
 -- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 do
+    function TooltipParsingManager:GetStatKeywords()
+        return self.statKeywords
+    end
+
     -- Helper functions for time parsing
     function TooltipParsingManager:ParseTimeToSeconds(value, unit)
         if not value or not unit then return 0 end
@@ -800,6 +820,107 @@ do
         end
 
         return output
+    end
+
+    function TooltipParsingManager:ParseStatValueFromLine(line, statType)
+        if not line or not statType or not self.statKeywords then
+            return nil
+        end
+
+        local lowerLine = strlower(line)
+        local foundValue
+
+        for keyword, type in pairs(self.statKeywords) do
+            if type == statType then
+                -- The keyword from self.statKeywords can be a simple word like "haste"
+                -- or a pattern like "+# haste rating". We need to handle both.
+                local pattern = gsub(keyword, "([%(%)%.%%%+%-%*%?%[%]%^%$%'])", "%%%1")
+                pattern = gsub(pattern, "#", "([%d,%.]+)") -- Capture numbers
+
+                local valueStr = strmatch(lowerLine, pattern)
+
+                if strmatch(lowerLine, keyword) then -- simple keyword match
+                    -- This is likely a proc description, e.g., "grants 500 haste"
+                    -- We need a more generic number search on the line.
+                    valueStr = strmatch(lowerLine, "([%d,]+)%s*" .. keyword) or -- "500 haste"
+                               strmatch(lowerLine, keyword .. " by ([%d,]+)") or -- "haste by 500"
+                               strmatch(line, "([%d,]+)") -- fallback to any number on the line
+                end
+
+                if valueStr then
+                    valueStr = gsub(valueStr, ",", "")
+                    local value = tonumber(valueStr)
+                    if value then
+                        -- In cases of multiple matches on a line, let's prefer the larger value,
+                        -- as it's more likely to be the stat grant.
+                        if not foundValue or value > foundValue then
+                            foundValue = value
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Also check for the global stat name, e.g. STAT_ATTACK_POWER which is "Attack Power"
+        local statName = STAT_NAMES[statType]
+        if statName and strfind(lowerLine, strlower(statName)) then
+            local valueStr = strmatch(line, "([%d,]+)")
+            if valueStr then
+                valueStr = gsub(valueStr, ",", "")
+                local value = tonumber(valueStr)
+                if value then
+                    if not foundValue or value > foundValue then
+                        foundValue = value
+                    end
+                end
+            end
+        end
+
+        return foundValue
+    end
+
+    --- Scans a unit's auras to find a specific stat value from a tooltip.
+    --- @param unit string The unit to scan (e.g., "player").
+    --- @param auraIdentifier number|string The spell ID (number) or name (string) of the aura to find.
+    --- @param statType number The stat type constant from the Types module to parse.
+    --- @return number The value of the stat found, or 0 if not found.
+    function TooltipParsingManager:GetStatFromAura(unit, auraIdentifier, statType)
+        local scanningTooltip = self.state.scanningTooltip
+        if not scanningTooltip then return 0 end
+
+        local i = 1
+        while true do
+            local name, _, _, _, _, _, _, _, _, spellId = UnitAura(unit, i, "HELPFUL")
+            if not name then break end
+
+            local matchFound = (type(auraIdentifier) == "number" and spellId == auraIdentifier) or
+                               (type(auraIdentifier) == "string" and strlower(name) == strlower(auraIdentifier))
+
+            if matchFound then
+                scanningTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+                scanningTooltip:SetUnitAura(unit, i, "HELPFUL")
+
+                for j = 2, scanningTooltip:NumLines() do
+                    local tooltipTextWidget = _G[scanningTooltip:GetName() .. "TextLeft" .. j]
+                    if tooltipTextWidget then
+                        local text = tooltipTextWidget:GetText()
+                        if text then
+                            local value = self:ParseStatValueFromLine(text, statType)
+                            if value and value > 0 then
+                                scanningTooltip:Hide()
+                                return value
+                            end
+                        end
+                    end
+                end
+                scanningTooltip:Hide()
+                -- We found the aura but not the stat, so we can stop.
+                return 0
+            end
+            i = i + 1
+        end
+
+        return 0
     end
 end
 

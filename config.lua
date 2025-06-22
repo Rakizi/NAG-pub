@@ -54,7 +54,7 @@ local concat = table.concat
 
 -- ~~~~~~~~~~ GLOBALIZE ~~~~~~~~~~
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
---~~~~~~~~~~Helper Functions~~~~~~~~~~
+-- ~~~~~~~~~~ Helper Functions ~~~~~~~~~~
 
 
 

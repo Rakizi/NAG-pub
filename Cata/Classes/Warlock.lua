@@ -266,7 +266,7 @@ local macrosWarlockDestruction = {
     { name = "Incinerate", body = "#showtooltip\n/cast Shadow Bolt\n/petattack" },
     { name = "Soul Fire",  body = "#showtooltip\n/cast Shadow Bolt\n/petattack" }
 }
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "WARLOCK" then return end
@@ -355,19 +355,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.DESTRUCTION, "Cataclysm Destructi
     rotationString = rotationStringDestruction or rotationStringWarlockDestruction or debugRotationWarlockDestruction
 })
 
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
 --- @class Warlock : ClassBase
 local Warlock = NAG:CreateClassModule("WARLOCK", defaults)
 if not Warlock then return end

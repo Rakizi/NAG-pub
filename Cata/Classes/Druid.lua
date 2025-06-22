@@ -74,7 +74,7 @@ local macrosDruidFeralCombat = {
     { name = "Bear Form", body = "#showtooltip\n/dmh start\n/cast !Bear Form\n/dmh snake\n/dmh end" }
 }
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 if UnitClassBase('player') ~= "DRUID" then return end
 
@@ -263,19 +263,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.GUARDIAN, "Feral Guardian (AoE)",
     ]]
 })
 
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
-
--- START OF GENERATED_ROTATIONS
-
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 --- @class Druid : ClassBase
 local Druid = NAG:CreateClassModule("DRUID", defaults)

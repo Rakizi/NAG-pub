@@ -183,11 +183,11 @@ local spellLocationsPaladinHoly = {
     LEFT = {},
     AOE = {}
 }
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
 local itemsPaladinRetributionAoK = { 68972, 69113 }
 local prePullPaladinRetributionAoK = {
@@ -332,18 +332,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.RETRIBUTION,
         rotationString = rotationStringRetribution or rotationStringPaladinRetribution or debugRotationPaladinRetribution
     })
 
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
 --- @class Paladin : ClassBase
 
 local Paladin = NAG:CreateClassModule("PALADIN", defaults, {

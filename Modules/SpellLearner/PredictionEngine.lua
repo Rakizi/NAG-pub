@@ -3025,7 +3025,7 @@ function PredictionEngine:PrintContextSummary(spellID, contextKey, summary)
         end
     end
 
-    self:Debug("|cFF00FFFF==============================================|r")
+    self:Debug("|cFF00FFFF~~~~~~~~~~|r")
 end
 
 --- Inspect learned costs
@@ -3434,7 +3434,7 @@ function PredictionEngine:InspectLearnedCosts(spellID)
                                 self:Debug("  None discovered")
                             end
 
-                            self:Debug("|cFF00FFFF=============================================|r")
+                            self:Debug("|cFF00FFFF~~~~~~~~~~ |r")
                         end
 
                         -- Section for buff effects with improved visibility
@@ -3576,7 +3576,7 @@ function PredictionEngine:InspectLearnedCosts(spellID)
 
                         -- Close buff section if we had any buffs
                         if hasBuffs then
-                            self:Debug("|cFFFF80FF=============================================|r")
+                            self:Debug("|cFFFF80FF~~~~~~~~~~ |r")
                         end
                     end
                 end
@@ -4479,7 +4479,7 @@ function PredictionEngine:PrintLearningStatus()
             spec.name, spec.id, spec.spells))
     end
 
-    self:Debug("|cFF00FFFF=============================|r")
+    self:Debug("|cFF00FFFF~~~~~~~~~~ |r")
 end
 
 --- Create a context summary from entries

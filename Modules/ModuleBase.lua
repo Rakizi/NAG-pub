@@ -108,7 +108,7 @@ ns.DEBUG_LEVELS = {
     TRACE = 5
 }
 
--- ~~~~~~~~~~ TYPE DEFINITIONS ============================
+-- ~~~~~~~~~~ TYPE DEFINITIONS ~~~~~~~~~~
 
 --- @class ModuleBase : AceAddon, AceModule, AceEvent-3.0
 --- @field moduleType string The type of module (core, optional, debug, system, class)
@@ -940,7 +940,7 @@ do
     end
 end
 
---[[ ~~~~~~~~~~ EXAMPLE USAGE ============================
+--[[ ~~~~~~~~~~ EXAMPLE USAGE ~~~~~~~~~~
 -- Example of a typical core module that manages some game functionality
 do
     -- Default settings

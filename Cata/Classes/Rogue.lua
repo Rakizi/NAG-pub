@@ -130,7 +130,7 @@ local prePullRogueSubtlety = {
     { 5171,                  2 }
 }
 local spellLocationsRogueSubtlety = nil
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "ROGUE" then return end
@@ -198,19 +198,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.SUBTLETY,
         rotationString = rotationStringSubtlety or rotationStringRogueSubtlety or debugRotationRogueSubtlety
     })
 
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
 --- @class Rogue : ClassBase
 local Rogue = NAG:CreateClassModule("ROGUE", defaults, {
     weakAuraName = "Rogue Next Action Guide",

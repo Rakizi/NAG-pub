@@ -117,7 +117,7 @@ local rotationStringMageFire = [[
 local rotationStringMageFrost = [[
 ]]
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 if UnitClassBase('player') ~= "MAGE" then return end
 
@@ -181,19 +181,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.FROST, "Cataclysm Frost", {
     rotationString = rotationStringFrost or rotationStringMageFrost or debugRotationMageFrost
 })
 
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
 --- @class Mage : ClassBase
 local Mage = NAG:CreateClassModule("MAGE", defaults)
 if not Mage then return end

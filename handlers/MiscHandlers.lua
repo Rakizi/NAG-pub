@@ -892,7 +892,7 @@ do -- ~~~~~~~~~~ GCD/Swing/Auto APLValue Functions ~~~~~~~~~~
     end
 
 
-    -- ~~~~~~~~~~===============================
+    -- ~~~~~~~~~~~~~~~~~~~~
     -- Autoattack values
 
     --- Returns the time until the next auto attack.

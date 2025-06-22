@@ -224,6 +224,98 @@ ns.EntityBehaviors = {
             local timeSinceStart = NAG:NextTime() - start
             return charges + (timeSinceStart / duration)
         end,
+        CanCast = function(self, tolerance)
+            if not self:IsKnown() then return false end
+
+            local spellId = self.id
+            local class = NAG.CLASS
+
+            if class == "DEATHKNIGHT" then
+                if not NAG:HasRunicPower(spellId) then
+                    return false
+                end
+                --TODO believe this can be removed?
+                -- Rune Strike has no cooldown, it becomes usable after a dodge or parry
+                if spellId == 56815 then                        --Rune Strike
+                    local usable = ns.IsUsableSpellUnified(spellId)
+                    if not usable or ns.IsCurrentSpellUnified(56815) then --Rune Strike
+                        return false
+                    end
+                end
+            elseif class == "WARRIOR" then
+                if tolerance then
+                    if tolerance > 6 then
+                        return true
+                    end
+                end
+                if not NAG:HasRage(spellId) then
+                    return false
+                end
+                if spellId == 6572 then                        --Revenge
+                    local usable = ns.IsUsableSpellUnified(spellId)
+                    if not usable or ns.IsCurrentSpellUnified(6572) then --Revenge
+                        return false
+                    end
+                end
+                if spellId == 7384 or spellId == 772 then --OP or REND
+                    return self:IsReady(tolerance)
+                end
+                return self:IsReady(tolerance) and ns.IsUsableSpellUnified(spellId)
+            elseif class == "DRUID" then
+                local formId = GetShapeshiftForm()
+                if formId == ns.Types:GetType("StanceType").Bear then
+                    if not NAG:HasRage(spellId) then
+                        return false
+                    end
+                elseif formId == ns.Types:GetType("StanceType").Cat then
+                    if not NAG:HasEnergy(spellId) or not NAG:HasComboPoints(spellId) then
+                        return false
+                    end
+                end
+                if not NAG:HasMana(spellId) then
+                    return false
+                end
+            elseif class == "MONK" then
+                --if not NAG:HasEnergy(spellId) then
+                --    return true
+                --end
+                if spellId == 116740 then
+                    return NAG:AuraNumStacks(125195) >= 1
+                end
+                if not NAG:HasChi(spellId) then
+                    return false
+                end
+            elseif class == "ROGUE" then
+                -- Removed for 3/6 to account for pooling issues. But still showing when pooling energy.
+                if not NAG:HasEnergy(spellId) then
+                    NAG.isPooling = true
+                    NAG:Pooling()
+                    return true
+                elseif NAG.isPooling then
+                    NAG.isPooling = false
+                end
+                if not NAG:HasComboPoints(spellId) then
+                    return false
+                end
+            elseif class == "WARLOCK" then
+                if not NAG:HasMana(spellId) or not NAG:HasSoulShards(spellId) then
+                    return false
+                end
+            elseif class == "PALADIN" then
+                if not NAG:HasMana(spellId) or not NAG:HasHolyPower(spellId) then
+                    return false
+                end
+            elseif class == "HUNTER" then
+                if not NAG:HasFocus(spellId) then
+                    return false
+                end
+            else
+                if not NAG:HasMana(spellId) then
+                    return false
+                end
+            end
+            return self:IsReady(tolerance)
+        end,
         Cast = function(self, tolerance)
             tolerance = tolerance or 0
 
@@ -251,7 +343,7 @@ ns.EntityBehaviors = {
             end
 
             -- Check if the spell can be cast
-            if NAG:SpellCanCast(self.id, tolerance) then
+            if self:CanCast(tolerance) then
                 if NAG:IsSecondarySpell(self.id) then
                     NAG:AddSecondarySpell(self.id)
                     return false

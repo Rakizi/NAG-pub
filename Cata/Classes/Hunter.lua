@@ -114,7 +114,7 @@ local rotationStringHunterSurvival = [[
 
 ]]
 
--- ================================================================================================
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 -- Leave below as is
 
 if UnitClassBase('player') ~= "HUNTER" then return end
@@ -182,19 +182,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.SURVIVAL, "Cataclysm Survival - b
     rotationString = rotationStringSurvival or rotationStringHunterSurvival or debugRotationHunterSurvival
 })
 
--- ================================================================================================
--- ================================================================================================
--- ================================================================================================
--- =================================Generated Rotations============================================
--- START OF GENERATED_ROTATIONS
+-- ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 
--- CLASSIC ROTATION CONFIG START
--- CLASSIC ROTATION CONFIG END
-
--- SOD ROTATION CONFIG START
--- SOD ROTATION CONFIG END
-
--- END OF GENERATED_ROTATIONS
 --- @class Hunter : ClassBase
 local Hunter = NAG:CreateClassModule("HUNTER", defaults, {
     weakAuraName = "Hunter Next Action Guide",
