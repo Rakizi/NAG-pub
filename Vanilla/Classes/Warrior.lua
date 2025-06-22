@@ -45,7 +45,7 @@ ns.AddRotationToDefaults(defaults,
         experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_ERA,
         prePull = {
-            
+
         },
         rotationString = [[
     (((NAG:AuraNumStacks(11597) < 1.0) and (not NAG:DotIsActive(11198))) and NAG:Cast(11597))
@@ -92,7 +92,7 @@ ns.AddRotationToDefaults(defaults,
         experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_ERA,
         prePull = {
-            
+
         },
         rotationString = [[
     (((NAG:AuraNumStacks(11597) < 1.0) and (not NAG:DotIsActive(11198))) and NAG:Cast(11597))
@@ -139,7 +139,7 @@ ns.AddRotationToDefaults(defaults,
         experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_ERA,
         prePull = {
-            
+
         },
         rotationString = [[
     NAG:AutocastOtherCooldowns()

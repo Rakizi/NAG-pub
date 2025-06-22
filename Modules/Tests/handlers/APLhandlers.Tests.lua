@@ -50,10 +50,10 @@ function APLHandlersTests:test_Cast_DelegatesToCastSpellForSpells()
 
     local castSpellCalledWith = nil
     NAG.CastSpell = function(_, id) castSpellCalledWith = id end
-    
+
     -- Act
     NAG:Cast(spellId)
-    
+
     -- Assert
     Assert.areEqual(spellId, castSpellCalledWith, "NAG:Cast should have called NAG:CastSpell with the correct ID.")
 end
@@ -64,10 +64,10 @@ function APLHandlersTests:test_Cast_DelegatesToEntityCastForItems()
     local castCalled = false
     local itemEntity = { IsItem = true, Cast = function() castCalled = true end }
     DataManager.Get = function() return itemEntity end
-    
+
     -- Act
     NAG:Cast(itemId)
-    
+
     -- Assert
     Assert.isTrue(castCalled, "NAG:Cast should have called the entity's Cast() method for an item.")
 end
@@ -80,10 +80,10 @@ function APLHandlersTests:test_IsReady_DelegatesToIsReadySpell()
 
     local isReadyCalled = false
     NAG.IsReadySpell = function() isReadyCalled = true; return true end
-    
+
     -- Act
     local result = NAG:IsReady(spellId)
-    
+
     -- Assert
     Assert.isTrue(isReadyCalled, "NAG:IsReady should have called NAG:IsReadySpell.")
     Assert.isTrue(result, "The result of NAG:IsReady should match the underlying function's result.")
@@ -93,7 +93,7 @@ function APLHandlersTests:test_IsExecutePhase_CorrectlyCalculatesThreshold()
     -- Arrange
     local originalUnitHealth = _G.UnitHealth
     local originalUnitHealthMax = _G.UnitHealthMax
-    
+
     _G.UnitExists = function(unit)
         return unit == "target"
     end
@@ -104,7 +104,7 @@ function APLHandlersTests:test_IsExecutePhase_CorrectlyCalculatesThreshold()
         end
         return originalUnitHealth(unit)
     end
-    
+
     _G.UnitHealthMax = function(unit)
         if unit == "target" or unit == "player" then
             return 100

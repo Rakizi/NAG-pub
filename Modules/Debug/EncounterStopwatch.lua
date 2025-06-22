@@ -53,12 +53,12 @@ local EncounterStopwatch = NAG:CreateModule("EncounterStopwatch", {
     optionsOrder = 30,
     childGroups = "tree",
     -- Show module if debug mode is enabled OR we're in a trial area with a training dummy
-    hidden = function() 
+    hidden = function()
         return not (NAG:IsDevModeEnabled() or (ns.IsTrainingDummy() and UnitExists("target") and UnitCreatureType("target") == "Mechanical"))
     end
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function EncounterStopwatch:ModuleInitialize()
         -- Register events for target changes and combat
@@ -71,7 +71,7 @@ do
         if not self.frame then
             self:CreateFrame()
         end
-        
+
         -- Check current target when enabled
         self:CheckTarget()
     end
@@ -84,11 +84,11 @@ do
     end
 end
 
--- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function EncounterStopwatch:OnCombatChange(event)
         if not self:GetChar().autoShow then return end
-        
+
         local inCombat = (event == "PLAYER_REGEN_DISABLED")
         if inCombat and self:IsTrainingDummy() then
             -- Enable encounter timer settings when entering combat
@@ -122,7 +122,7 @@ do
 
     function EncounterStopwatch:CheckTarget()
         if not self:GetChar().autoShow then return end
-        
+
         if not self:IsTrainingDummy() then
             -- Hide frame and cancel timer if no training dummy
             if self.frame then
@@ -133,7 +133,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     function EncounterStopwatch:GetOptions()
         return {
@@ -193,10 +193,10 @@ do
     end
 end
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function EncounterStopwatch:IsTrainingDummy()
     if not UnitExists("target") then return false end
-    
+
     -- Check if we're in a capital city and target is mechanical
     return ns.IsTrainingDummy() and UnitCreatureType("target") == "Mechanical"
 end
@@ -209,7 +209,7 @@ function EncounterStopwatch:CreateFrame()
     frame:SetHeight(FRAME_HEIGHT)
     frame:SetLayout("List")  -- Changed to List layout for better control
     frame:EnableResize(false)
-    
+
     -- Set initial position
     frame.frame:ClearAllPoints()
     frame.frame:SetPoint(

@@ -131,4 +131,4 @@ local Druid = NAG:CreateClassModule("DRUID", defaults)
 if not Druid then return end
 
 
-NAG.Class = Druid 
+NAG.Class = Druid

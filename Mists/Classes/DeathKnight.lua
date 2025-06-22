@@ -22,7 +22,7 @@ local defaults = ns.InitializeClassDefaults()
 -- MoP Death Knight spec spell locations
 defaults.class.specSpellLocations = {
     [CLASS_SPECS.BLOOD] = { -- Blood
-        ABOVE = { 
+        ABOVE = {
             48265,
             48263,
             48266,
@@ -46,14 +46,14 @@ defaults.class.specSpellLocations = {
         },
         BELOW = { 77575 },  -- Outbreak
         RIGHT = {46584},
-        LEFT = { 
+        LEFT = {
             45529,  -- Blood Tap
             47568,  -- Empower Rune Weapon
             49028,  -- Dancing Rune Weapon
             49016,  -- Unholy Frenzy
             49206   -- Summon Gargoyle
         },
-        AOE = { 
+        AOE = {
             43265,  -- Death and Decay
             47541   -- Death Coil
         }
@@ -119,8 +119,8 @@ defaults.class.specSpellLocations = {
         },
         BELOW = {77575},
         RIGHT = { 46584 },  -- Raise Dead
-        LEFT = { 
-            63560, 
+        LEFT = {
+            63560,
             45529,  -- Blood Tap
             47568,  -- Empower Rune Weapon
             49028,  -- Dancing Rune Weapon
@@ -128,7 +128,7 @@ defaults.class.specSpellLocations = {
             49206,  -- Summon Gargoyle
             51271   -- Pillar of Frost
         },
-        AOE = { 
+        AOE = {
             77575,  -- Outbreak
             43265,  -- Death and Decay
             48721   -- Blood Boil
@@ -317,14 +317,14 @@ NAG:Cast(49206)
         enabled = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         rotationString = rotationDeathKnightUnholyDefault,
-        
+
         -- MoP talents structure (one per tier)
         talents = {},
-        
+
         -- MoP glyphs (only Major/Minor)
         glyphs = {}
     })
-    
+
     -- Add the two frost rotations, with weapon type condition
     ns.AddRotationToDefaults(defaults, CLASS_SPECS.FROST, "Death Knight MasterFrost", {
         authors = { "@Darkfrog" },
@@ -332,13 +332,13 @@ NAG:Cast(49206)
         enabled = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         rotationString = rotationDeathKnightFrostMasterfrost,
-        
+
         -- MoP talents structure (one per tier)
         talents = {},
-        
+
         -- MoP glyphs (only Major/Minor)
         glyphs = {},
-        
+
         -- Condition: Has an off-hand equipped (dual wield)
         condition = function()
             -- If there's an item in the off-hand slot, player is dual-wielding
@@ -346,20 +346,20 @@ NAG:Cast(49206)
             return offhandLink ~= nil
         end
     })
-    
+
     ns.AddRotationToDefaults(defaults, CLASS_SPECS.FROST, "Death Knight Frost 2H", {
         authors = { "@Darkfrog" },
         default = false, -- Not default, only selected when condition is met
         enabled = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         rotationString = rotationDeathKnightFrostTwohand,
-        
+
         -- MoP talents structure (one per tier)
         talents = {},
-        
+
         -- MoP glyphs (only Major/Minor)
         glyphs = {},
-        
+
         -- Condition: No off-hand equipped (2H weapon)
         condition = function()
             -- If there's no item in the off-hand slot, player is using a 2H weapon
@@ -367,17 +367,17 @@ NAG:Cast(49206)
             return offhandLink == nil
         end
     })
-    
+
     ns.AddRotationToDefaults(defaults, CLASS_SPECS.BLOOD, "Death Knight Blood Damage", {
         authors = { "@Darkfrog" },
         default = true,
         enabled = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         rotationString = rotationDeathKnightBloodSimple,
-        
+
         -- MoP talents structure (one per tier)
         talents = {},
-        
+
         -- MoP glyphs (only Major/Minor)
         glyphs = {}
     })
@@ -391,7 +391,7 @@ local DEATHKNIGHT = NAG:CreateClassModule("DEATHKNIGHT", defaults)
 -- Register Death Knight specific spell tracking
 function DEATHKNIGHT:RegisterSpellTracking()
     if not SpellTracker then return end
-    
+
     -- Track Death Knight specific mechanics
     SpellTracker:RegisterCastTracking({ 77575 }, { count = 0, startTime = GetTime() }) -- Outbreak
     SpellTracker:RegisterPeriodicDamage({ 55078 }, { tickTime = nil, lastTickTime = nil }) -- Blood Plague

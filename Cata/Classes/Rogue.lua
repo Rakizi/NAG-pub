@@ -91,7 +91,7 @@ local rotationStringRogueCombat = [[
 ]]
 local rotationStringRogueSubtlety = [[
     NAG:SpellCastSequence()
-    or     NAG:AutocastOtherCooldowns()   
+    or     NAG:AutocastOtherCooldowns()
     or     (((not NAG:DotIsActive(1943)) and NAG:IsReady(82174)) and NAG:Cast(82174))
     or     (((not NAG:DotIsActive(1943)) and (NAG:CurrentComboPoints() >= 5.0) and (NAG:RemainingTime() >= 10.0)) and NAG:Cast(1943))
     or     (((NAG:CurrentComboPoints() >= 5.0) and (NAG:DotRemainingTime(1943) <= 8) and NAG:DotIsActive(1943)) and NAG:Cast(2098))

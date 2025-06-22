@@ -35,10 +35,10 @@ end
 function BTKTests:test_GetEmoteTimer_ReturnsCorrectDefault()
     -- Arrange: Mock IsInGroup to return false
     IsInGroup = function() return false end
-    
+
     -- Act
     local timer = BTK:GetEmoteTimer()
-    
+
     -- Assert
     Assert.areEqual(90, timer, "Default emote timer should be 90 seconds.")
 end
@@ -46,10 +46,10 @@ end
 function BTKTests:test_GetEmoteTimer_ReturnsCorrectGroupValue()
     -- Arrange: Mock IsInGroup to return true
     IsInGroup = function() return true end
-    
+
     -- Act
     local timer = BTK:GetEmoteTimer()
-    
+
     -- Assert
     -- We can't check the exact value due to randomness, but we can check the range.
     local minExpected = 900 - 40
@@ -62,18 +62,18 @@ function BTKTests:test_PerformRandomEmote_ResetsTimer()
     local originalDoEmote = DoEmote
     local emoteCalled = false
     DoEmote = function() emoteCalled = true end
-    
+
     -- Set last emote time to be in the past to ensure it runs
     BTK.state.lastEmoteTime = 0
-    
+
     -- Act
     BTK:PerformRandomEmote()
-    
+
     -- Assert
     Assert.isTrue(BTK.state.lastEmoteTime > 0, "lastEmoteTime should be updated after performing an emote.")
     local timeSinceEmote = GetTime() - BTK.state.lastEmoteTime
     Assert.isTrue(timeSinceEmote < 1, "lastEmoteTime should be very recent.")
-    
+
     -- Cleanup
     DoEmote = originalDoEmote
 end

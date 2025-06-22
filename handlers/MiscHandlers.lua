@@ -1,4 +1,4 @@
--- ~~~~~~~~~~ MiscHandlers ~~~~~~~~~~ 
+-- ~~~~~~~~~~ MiscHandlers ~~~~~~~~~~
 --- Provides miscellaneous handler functions for the NAG addon.
 ---
 --- This module includes handlers for various game events, player states,
@@ -75,7 +75,7 @@ local next = next
 -- WoW API direct
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 do -- ~~~~~~~~~~ Timing functions ~~~~~~~~~~
 
     --- Schedules an action after a specified delay.
@@ -598,8 +598,8 @@ do -- ~~~~~~~~~~ Time APLValue Functions ~~~~~~~~~~
         end
 
         -- Ensure state exists and is properly initialized
-        if not StateManager.state or 
-           not StateManager.state.combat or 
+        if not StateManager.state or
+           not StateManager.state.combat or
            not StateManager.state.combat.startTime then
             return 0
         end
@@ -788,15 +788,15 @@ do -- ~~~~~~~~~~ GCD/Swing/Auto APLValue Functions ~~~~~~~~~~
     --- @usage NAG:SpellNumCharges(115399) >= 1
     function NAG:SpellNumCharges(spellId)
         if not spellId then return 0 end
-        
+
         -- Get spell charge information using our unified API wrapper
         local charges, maxCharges = GetSpellCharges(spellId)
-        
+
         -- If the spell doesn't use charges or we got invalid data
         if not charges or not maxCharges then
             return 0
         end
-        
+
         return charges
     end
 
@@ -807,41 +807,41 @@ do -- ~~~~~~~~~~ GCD/Swing/Auto APLValue Functions ~~~~~~~~~~
     --- @usage NAG:SpellTimeToCharge(115399) <= 10.0
     function NAG:SpellTimeToCharge(spellId)
         if not spellId then return 0 end
-        
+
         -- Get spell charge information using our unified API wrapper
         local charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(spellId)
         -- If the spell doesn't use charges or we got invalid data
         if not charges or not maxCharges then
             return 0
         end
-        
+
         -- If we have max charges, return 0
         if charges >= maxCharges then
             return 0
         end
-        
+
         -- If we have charge cooldown information, calculate time until next charge
         if chargeStart and chargeDuration then
             return max(0, (chargeStart + chargeDuration) - GetTime())
         end
-        
+
         return 0
     end
 
     --- Checks if a spell can be safely weaved between auto attacks.
     --- For instant cast spells, always returns true since they can't clip auto attacks.
-    --- For non-instant casts, it verifies that the total cast time (input delay + cast time + GCD time) 
+    --- For non-instant casts, it verifies that the total cast time (input delay + cast time + GCD time)
     --- is less than the time left until the next auto attack.
     --- @param spellId number The spell ID to check.
     --- @return boolean True if the spell can be cast, false otherwise.
     function NAG:CanWeave(spellId)
         local castTime = self:CastTime(spellId)
-        
+
         -- For instant cast spells, always return true since they can't clip auto attacks
         if castTime == 0 then
             return true
         end
-        
+
         -- For non-instant casts, check total cast time against swing time
         local gcdTimeToReady = self:GCDTimeToReady()
         local inputDelay = self:InputDelay()
@@ -859,39 +859,39 @@ do -- ~~~~~~~~~~ GCD/Swing/Auto APLValue Functions ~~~~~~~~~~
     --- @return number The estimated time in seconds until the next weave gap, or math.huge if weaving is impossible.
     function NAG:TimeToNextWeaveGap(spellId)
         local castTime = self:CastTime(spellId)
-        
+
         -- For instant cast spells, return 0 since they can always be weaved
         if castTime == 0 then
             return 0
         end
-        
+
         -- Check if we're currently casting or channeling
         local name, _, _, _, _, _, _, _, spellId = UnitCastingInfo("player")
         if name or StateManager.state.casting then
             return math.huge
         end
-        
+
         local inputDelay = self:InputDelay()
         local totalCastTime = inputDelay + castTime
         local weaponSpeed = self:AutoSwingTime(Types.SwingType.MainHand)
         local currentSwingTime = self:AutoTimeToNext()
-        
+
         -- If total cast time is greater than weapon speed, weaving is impossible
         if totalCastTime >= weaponSpeed then
             return math.huge
         end
-        
+
         -- If we can't weave now but it's theoretically possible (totalCastTime < weaponSpeed)
         if totalCastTime >= currentSwingTime then
             -- Return the actual remaining time before the next auto-attack
             return currentSwingTime + NAG:GCDTimeToReady()
         end
-        
+
         -- If we can weave now, return 0
         return 0
     end
 
-   
+
     -- ~~~~~~~~~~===============================
     -- Autoattack values
 
@@ -938,10 +938,10 @@ do -- ~~~~~~~~~~ GCD/Swing/Auto APLValue Functions ~~~~~~~~~~
         if timeToNextSwing < 0 then
             timeToNextSwingUpdated = timeToNextSwing + mhSpeed
         end
-        
+
         -- Get GCD time
         local gcd = NAG:GCDTimeToReady() or 0
-        
+
         -- Return both GCD-affected and raw times
         return max(0, timeToNextSwingUpdated), max(0, mhTimeToNext+currentTime-GetTime())
     end

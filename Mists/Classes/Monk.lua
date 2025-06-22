@@ -138,7 +138,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.BREWMASTER, "Monk Brewmaster", {
     or (NAG:AuraNumStacks(124081) < 2) and NAG:Cast(124081)
     or NAG:Cast(100787)
     ]],
-    
+
     -- MoP talents structure (one per tier)
     talents = {
         -- Tier 1 (Level 56)
@@ -154,7 +154,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.BREWMASTER, "Monk Brewmaster", {
         -- Tier 6 (Level 90)
         123986  -- Chi Wave
     },
-    
+
     -- MoP glyphs (only Major/Minor)
     glyphs = {
         major = {
@@ -180,7 +180,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.MISTWEAVER, "Monk Mistweaver - He
     rotationString = [[
 
     ]],
-    
+
     -- MoP talents structure (one per tier)
     talents = {
         -- Tier 1 (Level 56)
@@ -196,7 +196,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.MISTWEAVER, "Monk Mistweaver - He
         -- Tier 6 (Level 90)
         123986  -- Chi Wave
     },
-    
+
     -- MoP glyphs (only Major/Minor)
     glyphs = {
         major = {
@@ -249,7 +249,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.WINDWALKER, "Monk Windwalker - DP
     or ((NAG:NumberTargets() >= 3) and (not NAG:SpellIsReady(130320)) and NAG:AuraIsInactiveWithReactionTime(101546) and (NAG:CurrentChi() >= (NAG:MaxChi() - 2))) and NAG:Cast(100784)
     or ((NAG:NumberTargets() >= 3) and NAG:AuraIsInactiveWithReactionTime(101546)) and NAG:Cast(101546)
                 ]],
-    
+
     -- MoP talents structure (one per tier)
     talents = {
         -- Tier 1 (Level 56)
@@ -265,7 +265,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.WINDWALKER, "Monk Windwalker - DP
         -- Tier 6 (Level 90)
         123986  -- Chi Wave
     },
-    
+
     -- MoP glyphs (only Major/Minor)
     glyphs = {
         major = {
@@ -288,7 +288,7 @@ local MONK = NAG:CreateClassModule("MONK", defaults)
 -- Register spell tracking if needed
 function MONK:RegisterSpellTracking()
     if not SpellTracker then return end
-    
+
     -- Track Monk specific mechanics
     SpellTracker:RegisterCastTracking({ 100780 }, { count = 0, startTime = GetTime() }) -- Jab
     SpellTracker:RegisterCastTracking({ 100787 }, { count = 0, startTime = GetTime() }) -- Tiger Palm
@@ -296,4 +296,4 @@ function MONK:RegisterSpellTracking()
 end
 
 -- Make the module available globally through NAG
-NAG.Class = MONK 
+NAG.Class = MONK

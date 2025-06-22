@@ -65,17 +65,17 @@ function RotationManagerTests:test_Toggle_OpensAndClosesFrame()
         RotationManager:CreateFrame()
     end
     RotationManager.frame:Hide()
-    
+
     -- Act 1: Open the frame
     RotationManager:Toggle()
-    
+
     -- Assert 1
     Assert.isNotNil(RotationManager.frame, "Frame should exist after toggle.")
     Assert.isTrue(RotationManager.frame:IsShown(), "Frame should be visible after first toggle.")
-    
+
     -- Act 2: Close the frame
     RotationManager:Toggle()
-    
+
     -- Assert 2
     Assert.isFalse(RotationManager.frame:IsShown(), "Frame should be hidden after second toggle.")
 end
@@ -83,7 +83,7 @@ end
 function RotationManagerTests:test_CreateFrame_InitializesUI()
     -- Act
     RotationManager:CreateFrame()
-    
+
     -- Assert
     Assert.isNotNil(RotationManager.frame, "Frame should be created.")
     Assert.isNotNil(RotationManager.scroll, "Scroll frame should be created.")

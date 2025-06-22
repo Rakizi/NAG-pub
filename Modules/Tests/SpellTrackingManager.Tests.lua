@@ -39,7 +39,7 @@ function SpellTrackingManagerTests:test_UpdateCastTracking_And_GetCPM()
     local spellId = 133 -- Fireball
     SpellTrackingManager:RegisterCastTracking({ spellId }, {})
     local currentTime = GetTime()
-    
+
     -- Act: Simulate 5 casts over the last 30 seconds
     SpellTrackingManager:UpdateCastTracking(spellId, currentTime - 28)
     SpellTrackingManager:UpdateCastTracking(spellId, currentTime - 20)
@@ -47,7 +47,7 @@ function SpellTrackingManagerTests:test_UpdateCastTracking_And_GetCPM()
     SpellTrackingManager:UpdateCastTracking(spellId, currentTime - 10)
     SpellTrackingManager:UpdateCastTracking(spellId, currentTime - 2)
     -- This cast is older than 60 seconds and should be ignored
-    SpellTrackingManager:UpdateCastTracking(spellId, currentTime - 70) 
+    SpellTrackingManager:UpdateCastTracking(spellId, currentTime - 70)
 
     -- Assert
     local cpm = SpellTrackingManager:GetCPM(spellId)
@@ -59,9 +59,9 @@ function SpellTrackingManagerTests:test_UpdateICD_And_GetICDInfo()
     local spellId = 54321
     local icdDuration = 45.0
     SpellTrackingManager:RegisterICD(spellId, icdDuration)
-    
+
     local procTime = GetTime() - 15.0
-    
+
     -- Mock StateManager's time for consistency
     local originalGetNextTime = StateManager.GetNextTime
     StateManager.GetNextTime = function() return GetTime() end
@@ -69,12 +69,12 @@ function SpellTrackingManagerTests:test_UpdateICD_And_GetICDInfo()
     -- Act
     SpellTrackingManager:UpdateICD(spellId, procTime)
     local remainingICD = SpellTrackingManager:GetICDInfo(spellId)
-    
+
     -- Assert
     Assert.isNotNil(remainingICD, "Remaining ICD should not be nil.")
     local tolerance = 0.1
     Assert.isTrue(math.abs(remainingICD - 30.0) < tolerance, "Remaining ICD should be approximately 30 seconds.")
-    
+
     -- Cleanup
     StateManager.GetNextTime = originalGetNextTime
 end
@@ -84,7 +84,7 @@ function SpellTrackingManagerTests:test_GetActiveDotCount()
     local spellId = 980 -- Agony
     SpellTrackingManager:RegisterPeriodicDamage({ spellId }, {})
     local effect = SpellTrackingManager.state.periodicEffects[spellId]
-    
+
     -- Simulate active DoTs on two targets
     effect.targets["GUID-1"] = { active = true }
     effect.targets["GUID-2"] = { active = true }
@@ -92,7 +92,7 @@ function SpellTrackingManagerTests:test_GetActiveDotCount()
 
     -- Act
     local count = SpellTrackingManager:GetActiveDotCount(spellId)
-    
+
     -- Assert
     Assert.areEqual(2, count, "Should only count the 2 active DoTs.")
 end

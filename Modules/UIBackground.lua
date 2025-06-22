@@ -5,7 +5,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -50,12 +50,12 @@ local UIBackground = NAG:CreateModule("UIBackground", defaults, {
     name = L["Background"],
     desc = L["BackgroundDesc"],
     libs = { "AceTimer-3.0" },
-    
+
     -- Event handlers
     eventHandlers = {
         PLAYER_ENTERING_WORLD = "OnEnteringWorld",
     },
-    
+
     -- Message handlers
     messageHandlers = {
         NAG_CONFIG_CHANGED = "OnConfigChanged"
@@ -73,7 +73,7 @@ function UIBackground:AttachBackgroundToPrimary()
     if not primary then return end
 
     local charDB = self:GetChar()
-    
+
     -- If 'none' is selected, hide any existing background and return
     if charDB.selectedBackground == "none" then
         if primary.bgTexture then
@@ -117,7 +117,7 @@ function UIBackground:HookPrimaryIconFrame()
     local primary = GetPrimaryIconFrame()
     if not primary or self.primaryIconHooked then return end
     self.primaryIconHooked = true
-    
+
     primary:HookScript("OnShow", function()
         self:AttachBackgroundToPrimary()
     end)
@@ -130,7 +130,7 @@ function UIBackground:EnsureBackgroundOnPrimaryIcon()
     -- Only check once when the module is enabled
     if self.primaryIconChecked then return end
     self.primaryIconChecked = true
-    
+
     local primary = GetPrimaryIconFrame()
     if primary then
         self:AttachBackgroundToPrimary()
@@ -140,7 +140,7 @@ end
 
 function UIBackground:UpdateLockState()
     local charDB = self:GetChar()
-    
+
     -- Skip processing if 'none' is selected
     if charDB.selectedBackground == "none" then
         self:HideBackgroundOnPrimary()
@@ -292,4 +292,4 @@ function UIBackground:RegisterModuleOptions()
 end
 
 -- Make module available globally through NAG
-ns.UIBackground = UIBackground 
+ns.UIBackground = UIBackground

@@ -7,7 +7,7 @@
 
 --- @diagnostic disable: undefined-global, undefined-field
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -26,22 +26,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
@@ -70,7 +70,7 @@ local TTDManager = NAG:CreateModule("TTDManager", nil, {
     }
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function TTDManager:ModuleInitialize()
         -- Initialize iterable units
@@ -96,7 +96,7 @@ end
 -- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (none required for this module, handled by timer)
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function TTDManager:IsTrainingDummy(unit)
     if not UnitExists(unit) then return false end
     if not ns.IsTrainingDummy() then return false end
@@ -165,7 +165,7 @@ function TTDManager:CalculateTimeToX(guid, targetPercent, minSamples)
 
     local samples = unitData.samples
     local n = #samples
-    
+
     -- Linear regression calculation
     local Ex2, Ex, Exy, Ey = 0, 0, 0, 0
     for _, sample in ipairs(samples) do
@@ -187,7 +187,7 @@ function TTDManager:CalculateTimeToX(guid, targetPercent, minSamples)
     local seconds = (targetPercent - a) / b
     -- Adjust for elapsed time
     seconds = seconds - (GetTime() - unitData.startTime)
-    
+
     -- Handle edge cases
     if seconds < 0 then return 9999 end
     return min(7777, seconds)
@@ -315,7 +315,7 @@ function TTDManager:GetTargetCount(meleeRange, rangedRange)
     else
         -- Melee classes: first try the provided melee range or 7 yards around player
         local meleeCount = self:CountEnemiesInRange(defaultMeleeRange)
-        
+
         -- If no mobs around player, use the provided ranged range or target distance + 5 yards
         if meleeCount == 0 then
             return self:CountEnemiesInRange(defaultRangedRange)

@@ -23,24 +23,24 @@ local defaults = ns.InitializeClassDefaults()
 defaults.class.specSpellLocations = {
     [CLASS_SPECS.ARMS] = {
         LEFT   = {6673, 20572, 18499}, -- Battle Shout, Blood Fury, Berserker Rage
-        RIGHT  = {845, 46924, 12328, 1680, 6343},                   -- Cleave, 
+        RIGHT  = {845, 46924, 12328, 1680, 6343},                   -- Cleave,
         ABOVE  = {6544, 78},                      -- Heroic Leap Heroic Strike
-        BELOW  = {},                     
+        BELOW  = {},
         AOE = {},
         --DEFAULT = {86346, 5308, 12294, 7384, 1464, 12328, 6343}, -- Colossus Smash, Execute, Mortal Strike, Overpower, Slam, Sweeping Strikes, Thunder Clap
     },
     [CLASS_SPECS.FURY] = {
             LEFT   = {6673, 20572, 18499}, -- Battle Shout, Blood Fury, Berserker Rage
-            RIGHT  = {845, 46924, 12328, 1680, 6343},                   -- Cleave, 
+            RIGHT  = {845, 46924, 12328, 1680, 6343},                   -- Cleave,
             ABOVE  = {6544, 78},                      -- Heroic Leap Heroic Strike
-            BELOW  = {},                     
+            BELOW  = {},
             AOE = {}
     },
     [CLASS_SPECS.PROTECTION] = {
         ABOVE = {6544, 6673, 18499},
-        LEFT    = {6673, 20572, 18499}, 
+        LEFT    = {6673, 20572, 18499},
         BELOW   = {46924},               -- Bladestorm
-        RIGHT   = {845, 78},  
+        RIGHT   = {845, 78},
         AOE = {},
     }
 }
@@ -48,7 +48,7 @@ defaults.class.specSpellLocations = {
 local rotationStringWarriorArms = [[
 NAG:AutocastOtherCooldowns()
     or     ((not NAG:IsActive(12880)) and NAG:Cast(18499))
-    or     ((NAG:NumberTargets() > 3.0) and (not NAG:DotIsActive(115768)) and NAG:Cast(6343))    
+    or     ((NAG:NumberTargets() > 3.0) and (not NAG:DotIsActive(115768)) and NAG:Cast(6343))
     or     ((NAG:NumberTargets() > 3.0) and NAG:IsActive(12328) and NAG:Cast(1680))
     or     ((NAG:NumberTargets() > 1.0) and NAG:Cast(12328))
     or     ((NAG:NumberTargets() > 2.0) and NAG:Cast(46924))
@@ -164,7 +164,7 @@ ns.AddRotationToDefaults(defaults,
         or (NAG:CurrentRage() <= 80) and NAG:Cast(6673)
         or false and NAG:Cast(64382)
         ]],
-        
+
         -- New action-based format
         --prePullActions = {{action = {castSpell = {spellId = {spellId = 2457}}}, doAtValue = {const = {val = "-10s"}}}, {action = {move = {rangeFromTarget = {const = {val = "9"}}}}, doAtValue = {const = {val = "-5s"}}}, {action = {castSpell = {spellId = {spellId = 6673}}}, doAtValue = {const = {val = "-3"}}}, {action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-1.5"}}}, {action = {castSpell = {spellId = {spellId = 64382}}}, doAtValue = {const = {val = "-1.5"}}}, {action = {castSpell = {spellId = {spellId = 100}}}, doAtValue = {const = {val = "0"}}}},
         --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {condition = {or = {vals = {{isExecutePhase = {threshold = "E20"}}, {cmp = {op = "OpLe", lhs = {remainingTime = {}}, rhs = {const = {val = "25"}}}}}}}, castSpell = {spellId = {otherId = "OtherActionPotion"}}}}, {action = {condition = {not = {val = {auraIsActive = {auraId = {spellId = 114206, tag = -1}}}}}, castSpell = {spellId = {spellId = 114206}}}}, {action = {condition = {not = {val = {auraIsActive = {auraId = {spellId = 12880}}}}}, castSpell = {spellId = {spellId = 18499}}}}, {action = {condition = {auraIsActive = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 86346}}}, castSpell = {spellId = {spellId = 6544}}}}, {action = {castSpell = {spellId = {spellId = 23881}}}}, {action = {condition = {not = {val = {auraIsActive = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 86346}}}}}, castSpell = {spellId = {spellId = 86346}}}}, {action = {condition = {cmp = {op = "OpGe", lhs = {currentTime = {}}, rhs = {const = {val = "3"}}}}, castSpell = {spellId = {spellId = 107570, tag = 1}}}}, {action = {castSpell = {spellId = {spellId = 5308}}}}, {action = {castSpell = {spellId = {spellId = 85288, tag = 1}}}}, {action = {condition = {cmp = {op = "OpGt", lhs = {numberTargets = {}}, rhs = {const = {val = "1"}}}}, castSpell = {spellId = {spellId = 1680, tag = 1}}}}, {action = {condition = {auraIsActive = {auraId = {spellId = 46916}}}, castSpell = {spellId = {spellId = 100130}}}}, {action = {condition = {and = {vals = {{auraIsActive = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 86346}}}, {cmp = {op = "OpGe", lhs = {currentRage = {}}, rhs = {const = {val = "80"}}}}}}}, castSpell = {spellId = {spellId = 78}}}}, {action = {condition = {and = {vals = {{not = {val = {isExecutePhase = {threshold = "E20"}}}}, {cmp = {op = "OpGe", lhs = {currentRage = {}}, rhs = {const = {val = "60"}}}}}}}, castSpell = {spellId = {spellId = 78}}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpLt", lhs = {currentRage = {}}, rhs = {const = {val = "80"}}}}, {cmp = {op = "OpGe", lhs = {autoTimeToNext = {}}, rhs = {const = {val = "2s"}}}}, {spellIsReady = {spellId = {spellId = 100}}}}}}, move = {rangeFromTarget = {const = {val = "9"}}}}}, {action = {castSpell = {spellId = {spellId = 100}}}}, {action = {condition = {and = {vals = {{not = {val = {spellCanCast = {spellId = {spellId = 100}}}}}, {not = {val = {unitIsMoving = {}}}}, {cmp = {op = "OpGe", lhs = {currentTime = {}}, rhs = {const = {val = "1.5"}}}}}}}, castSpell = {spellId = {spellId = 46924}}}}, {action = {condition = {cmp = {op = "OpLe", lhs = {currentRage = {}}, rhs = {const = {val = "80"}}}}, castSpell = {spellId = {spellId = 6673}}}}, {action = {condition = {const = {val = "false"}}, castSpell = {spellId = {spellId = 64382}}}}},
@@ -220,4 +220,4 @@ local Warrior = NAG:CreateClassModule("WARRIOR", defaults, {
     weakAuraName = "Warrior Next Action Guide",
 })
 if not Warrior then return end
-NAG.Class = Warrior 
+NAG.Class = Warrior

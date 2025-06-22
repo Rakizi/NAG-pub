@@ -22,7 +22,7 @@ local GlowManagerTests = {}
 function GlowManagerTests:setup()
     -- Create a mock frame for testing
     self.mockFrame = CreateFrame("Frame")
-    
+
     -- Spy on LCG functions
     self.originalPixelGlow_Start = LCG.PixelGlow_Start
     self.originalPixelGlow_Stop = LCG.PixelGlow_Stop
@@ -40,7 +40,7 @@ function GlowManagerTests:setup()
     LCG.PixelGlow_Stop = function() self.spies.pixelStopCalled = true end
     LCG.ButtonGlow_Start = function() self.spies.buttonStartCalled = true end
     LCG.ButtonGlow_Stop = function() self.spies.buttonStopCalled = true end
-    
+
     -- Reset active glows
     GlowManager:CleanupAllGlows()
 end
@@ -64,7 +64,7 @@ end
 function GlowManagerTests:test_StartGlow_UsesPixelGlowByDefault()
     -- Act
     GlowManager:StartGlow(self.mockFrame, "pixel")
-    
+
     -- Assert
     Assert.isTrue(self.spies.pixelStartCalled, "PixelGlow_Start should have been called.")
     Assert.isFalse(self.spies.buttonStartCalled, "ButtonGlow_Start should NOT have been called.")
@@ -74,7 +74,7 @@ end
 function GlowManagerTests:test_StartGlow_UsesButtonGlowWhenSpecified()
     -- Act
     GlowManager:StartGlow(self.mockFrame, "button")
-    
+
     -- Assert
     Assert.isTrue(self.spies.buttonStartCalled, "ButtonGlow_Start should have been called.")
     Assert.isFalse(self.spies.pixelStartCalled, "PixelGlow_Start should NOT have been called.")
@@ -84,10 +84,10 @@ function GlowManagerTests:test_StopGlow_StopsCorrectGlowType()
     -- Arrange: Start a pixel glow
     GlowManager:StartGlow(self.mockFrame, "pixel")
     Assert.isTrue(self.spies.pixelStartCalled, "Precondition failed: Pixel glow did not start.")
-    
+
     -- Act: Stop the glow
     GlowManager:StopGlow(self.mockFrame)
-    
+
     -- Assert
     Assert.isTrue(self.spies.pixelStopCalled, "PixelGlow_Stop should have been called.")
     Assert.isNil(GlowManager.activeGlows[self.mockFrame], "Glow should be marked as inactive.")
@@ -99,10 +99,10 @@ function GlowManagerTests:test_CleanupAllGlows_StopsAllActiveGlows()
     local frame2 = CreateFrame("Frame")
     GlowManager:StartGlow(frame1, "pixel")
     GlowManager:StartGlow(frame2, "button")
-    
+
     -- Act
     GlowManager:CleanupAllGlows()
-    
+
     -- Assert
     Assert.isTrue(self.spies.pixelStopCalled, "PixelGlow_Stop should have been called for frame1.")
     Assert.isTrue(self.spies.buttonStopCalled, "ButtonGlow_Stop should have been called for frame2.")

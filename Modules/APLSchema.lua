@@ -28,22 +28,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
@@ -73,23 +73,23 @@ APLSchema.ViewSettings = {
     currentPrepullContext = false,  -- Current context - true if we're in prepull editor
 }
 
--- Core initialization 
+-- Core initialization
 function APLSchema:ModuleInitialize()
     local startTime = debugprofilestop()
     self:Debug("APLSchema initialization started")
-    
+
     APL = NAG:GetModule("APL")
     if not APL then
         error("APL module not found")
     end
-    
+
     -- Set initial selections for UI to nil
     -- They will be initialized on first access
     self.selectedMessageType = nil
     self.selectedActionType = nil
     self.selectedValueType = nil
     self.selectedEnumType = nil
-    
+
     local endTime = debugprofilestop()
     self:Debug(format("APLSchema initialized in %.2f ms", endTime - startTime))
 end
@@ -97,30 +97,30 @@ end
 -- Convert snake_case to camelCase
 function APLSchema:SnakeToCamel(snake_str)
     if not snake_str then return nil end
-    
+
     local components = {}
     for component in snake_str:gmatch("[^_]+") do
         table.insert(components, component)
     end
-    
+
     local result = components[1]
     for i = 2, #components do
         result = result .. components[i]:gsub("^%l", string.upper)
     end
-    
+
     return result
 end
 
 -- Convert camelCase to snake_case
 function APLSchema:CamelToSnake(camel_str)
     if not camel_str then return nil end
-    
+
     -- Insert underscore before each capital letter and convert to lowercase
     local snake_str = camel_str:gsub("(%u)", function(c) return "_" .. c:lower() end)
-    
+
     -- Remove leading underscore if it exists
     snake_str = snake_str:gsub("^_", "")
-    
+
     return snake_str
 end
 
@@ -131,19 +131,19 @@ function APLSchema:GetFieldInfo(messageType, fieldPath)
         self:Error("Schema not loaded")
         return nil
     end
-    
+
     local fields = schema.messages[messageType]
     if not fields then
         self:Error("Message type not found: " .. messageType)
         return nil
     end
-    
+
     -- Split the field path and traverse the schema
     local parts = {}
     for part in fieldPath:gmatch("[^%.]+") do
         table.insert(parts, part)
     end
-    
+
     local current = fields
     for i, part in ipairs(parts) do
         if i < #parts then
@@ -159,7 +159,7 @@ function APLSchema:GetFieldInfo(messageType, fieldPath)
             return current[part]
         end
     end
-    
+
     return nil
 end
 
@@ -170,7 +170,7 @@ function APLSchema:GetFieldOrder(messageType, fieldPath)
         self:Error("Schema not loaded")
         return {}
     end
-    
+
     -- If field_path is nil, get top-level field order
     if not fieldPath then
         local fields = schema.messages[messageType]
@@ -178,16 +178,16 @@ function APLSchema:GetFieldOrder(messageType, fieldPath)
             self:Error("Message type not found: " .. messageType)
             return {}
         end
-        
+
         return fields.field_order or {}
     end
-    
+
     -- Get field info for the specified field path
     local fieldInfo = self:GetFieldInfo(messageType, fieldPath)
     if not fieldInfo then
         return {}
     end
-    
+
     return fieldInfo.field_order or {}
 end
 
@@ -313,12 +313,12 @@ function APLSchema:GetAllMessageTypes()
     if not schema or not schema.messages then
         return {}
     end
-    
+
     local messageTypes = {}
     for messageType in pairs(schema.messages) do
         table.insert(messageTypes, messageType)
     end
-    
+
     table.sort(messageTypes)
     return messageTypes
 end
@@ -326,16 +326,16 @@ end
 -- Get all action types
 function APLSchema:GetAllActionTypes()
     local schema = self:GetSchema()
-    if not schema or not schema.messages or not schema.messages.APLAction or 
+    if not schema or not schema.messages or not schema.messages.APLAction or
        not schema.messages.APLAction.oneofs or not schema.messages.APLAction.oneofs.action then
         return {}
     end
-    
+
     local actionTypes = {}
     for _, actionType in ipairs(schema.messages.APLAction.oneofs.action) do
         table.insert(actionTypes, actionType)
     end
-    
+
     table.sort(actionTypes)
     return actionTypes
 end
@@ -343,16 +343,16 @@ end
 -- Get all value types
 function APLSchema:GetAllValueTypes()
     local schema = self:GetSchema()
-    if not schema or not schema.messages or not schema.messages.APLValue or 
+    if not schema or not schema.messages or not schema.messages.APLValue or
        not schema.messages.APLValue.oneofs or not schema.messages.APLValue.oneofs.value then
         return {}
     end
-    
+
     local valueTypes = {}
     for _, valueType in ipairs(schema.messages.APLValue.oneofs.value) do
         table.insert(valueTypes, valueType)
     end
-    
+
     table.sort(valueTypes)
     return valueTypes
 end
@@ -360,19 +360,19 @@ end
 -- Format field type for display
 function APLSchema:FormatFieldType(field)
     if not field then return "unknown" end
-    
+
     local typeStr = field.type or "unknown"
-    
+
     if field.type == "message" and field.message_type then
         typeStr = field.message_type
     elseif field.type == "enum" and field.enum_type then
         typeStr = field.enum_type
     end
-    
+
     if field.label == "repeated" then
         typeStr = "array<" .. typeStr .. ">"
     end
-    
+
     return typeStr
 end
 
@@ -382,12 +382,12 @@ function APLSchema:FormatEnumValues(enumType)
     if not schema or not schema.enums or not schema.enums[enumType] then
         return "Enum not found"
     end
-    
+
     local result = {}
     for value, name in pairs(schema.enums[enumType]) do
         table.insert(result, name .. " = " .. value)
     end
-    
+
     table.sort(result)
     return table.concat(result, ", ")
 end
@@ -404,7 +404,7 @@ function APLSchema:GetOptions()
             }
         }
     end
-    
+
     -- Ensure we have initial selections
     if not self.selectedMessageType then
         local messageTypes = self:GetAllMessageTypes()
@@ -413,7 +413,7 @@ function APLSchema:GetOptions()
             self:Debug("Initial message type selected: " .. self.selectedMessageType)
         end
     end
-    
+
     if not self.selectedActionType then
         local actionTypes = self:GetAllActionTypes()
         if #actionTypes > 0 then
@@ -421,7 +421,7 @@ function APLSchema:GetOptions()
             self:Debug("Initial action type selected: " .. self.selectedActionType)
         end
     end
-    
+
     if not self.selectedValueType then
         local valueTypes = self:GetAllValueTypes()
         if #valueTypes > 0 then
@@ -429,7 +429,7 @@ function APLSchema:GetOptions()
             self:Debug("Initial value type selected: " .. self.selectedValueType)
         end
     end
-    
+
     if not self.selectedEnumType then
         local enumNames = {}
         for enumName in pairs(schema.enums or {}) do
@@ -441,7 +441,7 @@ function APLSchema:GetOptions()
             self:Debug("Initial enum type selected: " .. self.selectedEnumType)
         end
     end
-    
+
     local options = {
         header = {
             type = "header",
@@ -486,14 +486,14 @@ function APLSchema:GetOptions()
             }
         }
     }
-    
+
     return options
 end
 
 -- Generate options for message types
 function APLSchema:GetMessageTypesOptions()
     local messageTypes = self:GetAllMessageTypes()
-    
+
     local options = {
         header = {
             type = "header",
@@ -518,7 +518,7 @@ function APLSchema:GetMessageTypesOptions()
                     desc = "When enabled, only shows elements applicable to your current spec",
                     width = "full",
                     get = function() return self.ViewSettings.filterBySpec end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.filterBySpec = value
                         NAG:RefreshConfig()
                     end,
@@ -530,7 +530,7 @@ function APLSchema:GetMessageTypesOptions()
                     desc = "When enabled, only shows elements applicable to current context (prepull or combat)",
                     width = "full",
                     get = function() return self.ViewSettings.filterByPrepull end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.filterByPrepull = value
                         NAG:RefreshConfig()
                     end,
@@ -545,7 +545,7 @@ function APLSchema:GetMessageTypesOptions()
                         [true] = L["contextPrepull"] or "Prepull"
                     },
                     get = function() return self.ViewSettings.currentPrepullContext end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.currentPrepullContext = value
                         NAG:RefreshConfig()
                     end,
@@ -565,13 +565,13 @@ function APLSchema:GetMessageTypesOptions()
                 end
                 return values
             end,
-            get = function(info) 
+            get = function(info)
                 -- Initialize default selection if needed
                 if not self.selectedMessageType and #messageTypes > 0 then
                     self.selectedMessageType = messageTypes[1]
                     self:Debug("Default message type selected: " .. self.selectedMessageType)
                 end
-                return self.selectedMessageType 
+                return self.selectedMessageType
             end,
             set = function(info, value)
                 self:Debug("Message type selected: " .. value)
@@ -582,11 +582,11 @@ function APLSchema:GetMessageTypesOptions()
             order = 10
         }
     }
-    
+
     -- Show fields for selected message type
     if self.selectedMessageType then
         self:Debug("Showing fields for message type: " .. self.selectedMessageType)
-        
+
         options.fieldsGroup = {
             type = "group",
             name = "Fields",
@@ -594,9 +594,9 @@ function APLSchema:GetMessageTypesOptions()
             order = 20,
             args = {}
         }
-        
+
         local fields, fieldOrder = self:GetMessageFields(self.selectedMessageType)
-        
+
         if not fields then
             self:Debug("No fields found for message type: " .. self.selectedMessageType)
             options.fieldsGroup.args.noFields = {
@@ -613,31 +613,31 @@ function APLSchema:GetMessageTypesOptions()
             }
         else
             self:Debug("Found " .. self:TableCount(fields) .. " fields for " .. self.selectedMessageType)
-            
+
             -- Add the field order information
             options.fieldsGroup.args.fieldOrderHeader = {
                 type = "header",
                 name = "Field Order",
                 order = 1
             }
-            
+
             options.fieldsGroup.args.fieldOrder = {
                 type = "description",
                 name = fieldOrder and #fieldOrder > 0 and table.concat(fieldOrder, ", ") or "No field order specified",
                 order = 2
             }
-            
+
             -- Add each field
             options.fieldsGroup.args.fieldsHeader = {
                 type = "header",
                 name = "Field Definitions",
                 order = 10
             }
-            
+
             -- Process field list with priority for order fields
             local processedFields = {}
             local currentOrder = 11
-            
+
             -- First process fields in order
             if fieldOrder and #fieldOrder > 0 then
                 for _, fieldName in ipairs(fieldOrder) do
@@ -648,7 +648,7 @@ function APLSchema:GetMessageTypesOptions()
                     end
                 end
             end
-            
+
             -- Then process any remaining fields
             for fieldName, fieldInfo in pairs(fields) do
                 if not processedFields[fieldName] and fieldName ~= "field_order" then
@@ -656,7 +656,7 @@ function APLSchema:GetMessageTypesOptions()
                     currentOrder = currentOrder + 1
                 end
             end
-            
+
             -- Field details section for selected field
             if self.selectedField and fields[self.selectedField] then
                 options.fieldDetails = {
@@ -668,7 +668,7 @@ function APLSchema:GetMessageTypesOptions()
                 }
             end
         end
-        
+
         -- Add a field list as a separate section for better visibility
         options.fieldListGroup = {
             type = "group",
@@ -682,7 +682,7 @@ function APLSchema:GetMessageTypesOptions()
                         if not fields or not next(fields) then
                             return "No fields available"
                         end
-                        
+
                         local result = ""
                         for fieldName, fieldInfo in pairs(fields) do
                             if fieldName ~= "field_order" then
@@ -697,7 +697,7 @@ function APLSchema:GetMessageTypesOptions()
             }
         }
     end
-    
+
     return options
 end
 
@@ -716,7 +716,7 @@ end
 -- Create an option for a field
 function APLSchema:CreateFieldOption(fieldName, fieldInfo, order)
     if fieldName == "field_order" then return nil end
-    
+
     local option = {
         type = "toggle",
         name = fieldName .. " (" .. self:FormatFieldType(fieldInfo) .. ")",
@@ -732,7 +732,7 @@ function APLSchema:CreateFieldOption(fieldName, fieldInfo, order)
         end,
         order = order or 1
     }
-    
+
     return option
 end
 
@@ -768,7 +768,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             }
         }
     }
-    
+
     -- Add UI mapping information
     options.uiMapping = {
         type = "group",
@@ -788,7 +788,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             }
         }
     }
-    
+
     -- Add metadata if available
     if fieldInfo.label or fieldInfo.shortDescription or fieldInfo.tooltip then
         options.metadata = {
@@ -798,9 +798,9 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             order = 3,
             args = {}
         }
-        
+
         local metadataOrder = 1
-        
+
         if fieldInfo.label then
             options.metadata.args.label = {
                 type = "description",
@@ -809,7 +809,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             }
             metadataOrder = metadataOrder + 1
         end
-        
+
         if fieldInfo.shortDescription then
             options.metadata.args.shortDescription = {
                 type = "description",
@@ -818,7 +818,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             }
             metadataOrder = metadataOrder + 1
         end
-        
+
         if fieldInfo.tooltip then
             options.metadata.args.tooltip = {
                 type = "description",
@@ -828,7 +828,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             metadataOrder = metadataOrder + 1
         end
     end
-    
+
     -- Add default_value if present
     if fieldInfo.default_value then
         options.defaultValue = {
@@ -880,7 +880,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             }
         }
     end
-    
+
     -- Show enum values if this is an enum field
     if fieldInfo.type == "enum" and fieldInfo.enum_type then
         options.enumValues = {
@@ -897,7 +897,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             }
         }
     end
-    
+
     -- Show nested fields if this is a message type
     if fieldInfo.type == "message" and fieldInfo.fields and next(fieldInfo.fields) then
         options.nestedFields = {
@@ -907,9 +907,9 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             order = 5,
             args = {}
         }
-        
+
         local nestedOrder = 1
-        
+
         for nestedFieldName, nestedFieldInfo in pairs(fieldInfo.fields) do
             options.nestedFields.args["nested_" .. nestedFieldName] = {
                 type = "description",
@@ -919,7 +919,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             nestedOrder = nestedOrder + 1
         end
     end
-    
+
     -- Add Go Backend Metadata if available
     if fieldInfo.goMetadata then
         options.goMetadataGroup = {
@@ -929,7 +929,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             order = 8, -- After includeIf, before enums/nested
             args = {}
         }
-        
+
         for i, regData in ipairs(fieldInfo.goMetadata) do
             local regName = regData.label or regData.functionName or ("Registration " .. i)
             local regOrder = i * 10
@@ -942,7 +942,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
 
             local regArgs = {}
             local argOrder = 1
-            
+
             local simpleTextFields = {
                 { key = 'sourceFile', label = 'Source File' },
                 { key = 'registrationType', label = 'Registration Type' },
@@ -1000,7 +1000,7 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
                     argOrder = argOrder + 1
                 end
             end
-            
+
             options.goMetadataGroup.args["reg_group_" .. i] = {
                 type = "group",
                 name = "",
@@ -1010,14 +1010,14 @@ function APLSchema:CreateFieldDetailsOptions(fieldName, fieldInfo)
             }
         end
     end
-    
+
     return options
 end
 
 -- Generate options for actions
 function APLSchema:GetActionsOptions()
     local actionTypes = self:GetAllActionTypes()
-    
+
     local options = {
         header = {
             type = "header",
@@ -1042,7 +1042,7 @@ function APLSchema:GetActionsOptions()
                     desc = "When enabled, only shows actions applicable to your current spec",
                     width = "full",
                     get = function() return self.ViewSettings.filterBySpec end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.filterBySpec = value
                         NAG:RefreshConfig()
                     end,
@@ -1054,7 +1054,7 @@ function APLSchema:GetActionsOptions()
                     desc = "When enabled, only shows actions applicable to current context (prepull or combat)",
                     width = "full",
                     get = function() return self.ViewSettings.filterByPrepull end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.filterByPrepull = value
                         NAG:RefreshConfig()
                     end,
@@ -1069,7 +1069,7 @@ function APLSchema:GetActionsOptions()
                         [true] = L["contextPrepull"] or "Prepull"
                     },
                     get = function() return self.ViewSettings.currentPrepullContext end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.currentPrepullContext = value
                         NAG:RefreshConfig()
                     end,
@@ -1100,7 +1100,7 @@ function APLSchema:GetActionsOptions()
             values = function()
                 local values = {}
                 local filteredTypes = {}
-                
+
                 -- Apply filtering if enabled
                 if self.ViewSettings.filterBySpec or self.ViewSettings.filterByPrepull then
                     for _, actionType in ipairs(actionTypes) do
@@ -1111,19 +1111,19 @@ function APLSchema:GetActionsOptions()
                 else
                     filteredTypes = actionTypes
                 end
-                
+
                 for _, actionType in ipairs(filteredTypes) do
                     values[actionType] = actionType
                 end
                 return values
             end,
-            get = function(info) 
+            get = function(info)
                 -- Initialize default selection if needed
                 if not self.selectedActionType and #actionTypes > 0 then
                     self.selectedActionType = actionTypes[1]
                     self:Debug("Default action type selected: " .. self.selectedActionType)
                 end
-                
+
                 -- If the currently selected action is filtered out, select the first visible one
                 if self.ViewSettings.filterBySpec or self.ViewSettings.filterByPrepull then
                     if not self:ShouldShowInSchemaViewer("Actions", self.selectedActionType) then
@@ -1135,8 +1135,8 @@ function APLSchema:GetActionsOptions()
                         end
                     end
                 end
-                
-                return self.selectedActionType 
+
+                return self.selectedActionType
             end,
             set = function(info, value)
                 self:Debug("Action type selected: " .. value)
@@ -1147,13 +1147,13 @@ function APLSchema:GetActionsOptions()
             order = 10
         }
     }
-    
+
     -- Show fields for selected action type
     if self.selectedActionType then
         self:Debug("Showing fields for action type: " .. self.selectedActionType)
-        
+
         local metadata = self:GenerateMetadata("Actions", self.selectedActionType)
-        
+
         if metadata then
             options.metadataGroup = {
                 type = "group",
@@ -1208,10 +1208,10 @@ function APLSchema:GetActionsOptions()
                 }
             }
         end
-        
+
         -- Add a field list as a separate section for better visibility
         local fields, fieldOrder = self:GetMessageFields("APLAction", self.selectedActionType)
-        
+
         options.fieldListGroup = {
             type = "group",
             name = "Field List",
@@ -1224,7 +1224,7 @@ function APLSchema:GetActionsOptions()
                         if not fields or not next(fields) then
                             return "No fields available"
                         end
-                        
+
                         local result = ""
                         for fieldName, fieldInfo in pairs(fields) do
                             if fieldName ~= "field_order" then
@@ -1238,7 +1238,7 @@ function APLSchema:GetActionsOptions()
                 }
             }
         }
-        
+
         options.fieldsGroup = {
             type = "group",
             name = "Fields",
@@ -1246,7 +1246,7 @@ function APLSchema:GetActionsOptions()
             order = 20,
             args = {}
         }
-        
+
         if not fields then
             self:Debug("No fields found for action type: " .. self.selectedActionType)
             options.fieldsGroup.args.noFields = {
@@ -1263,31 +1263,31 @@ function APLSchema:GetActionsOptions()
             }
         else
             self:Debug("Found " .. self:TableCount(fields) .. " fields for " .. self.selectedActionType)
-            
+
             -- Add the field order information
             options.fieldsGroup.args.fieldOrderHeader = {
                 type = "header",
                 name = "Field Order",
                 order = 1
             }
-            
+
             options.fieldsGroup.args.fieldOrder = {
                 type = "description",
                 name = fieldOrder and #fieldOrder > 0 and table.concat(fieldOrder, ", ") or "No field order specified",
                 order = 2
             }
-            
+
             -- Add each field
             options.fieldsGroup.args.fieldsHeader = {
                 type = "header",
                 name = "Field Definitions",
                 order = 10
             }
-            
+
             -- Process field list with priority for order fields
             local processedFields = {}
             local currentOrder = 11
-            
+
             -- First process fields in order
             if fieldOrder and #fieldOrder > 0 then
                 for _, fieldName in ipairs(fieldOrder) do
@@ -1298,7 +1298,7 @@ function APLSchema:GetActionsOptions()
                     end
                 end
             end
-            
+
             -- Then process any remaining fields
             for fieldName, fieldInfo in pairs(fields) do
                 if not processedFields[fieldName] and fieldName ~= "field_order" then
@@ -1306,7 +1306,7 @@ function APLSchema:GetActionsOptions()
                     currentOrder = currentOrder + 1
                 end
             end
-            
+
             -- Field details section for selected field
             if self.selectedActionField and fields[self.selectedActionField] then
                 options.fieldDetails = {
@@ -1319,14 +1319,14 @@ function APLSchema:GetActionsOptions()
             end
         end
     end
-    
+
     return options
 end
 
 -- Generate options for values
 function APLSchema:GetValuesOptions()
     local valueTypes = self:GetAllValueTypes()
-    
+
     local options = {
         header = {
             type = "header",
@@ -1351,7 +1351,7 @@ function APLSchema:GetValuesOptions()
                     desc = "When enabled, only shows values applicable to your current spec",
                     width = "full",
                     get = function() return self.ViewSettings.filterBySpec end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.filterBySpec = value
                         NAG:RefreshConfig()
                     end,
@@ -1363,7 +1363,7 @@ function APLSchema:GetValuesOptions()
                     desc = "When enabled, only shows values applicable to current context (prepull or combat)",
                     width = "full",
                     get = function() return self.ViewSettings.filterByPrepull end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.filterByPrepull = value
                         NAG:RefreshConfig()
                     end,
@@ -1378,7 +1378,7 @@ function APLSchema:GetValuesOptions()
                         [true] = L["contextPrepull"] or "Prepull"
                     },
                     get = function() return self.ViewSettings.currentPrepullContext end,
-                    set = function(_, value) 
+                    set = function(_, value)
                         self.ViewSettings.currentPrepullContext = value
                         NAG:RefreshConfig()
                     end,
@@ -1409,7 +1409,7 @@ function APLSchema:GetValuesOptions()
             values = function()
                 local values = {}
                 local filteredTypes = {}
-                
+
                 -- Apply filtering if enabled
                 if self.ViewSettings.filterBySpec or self.ViewSettings.filterByPrepull then
                     for _, valueType in ipairs(valueTypes) do
@@ -1420,19 +1420,19 @@ function APLSchema:GetValuesOptions()
                 else
                     filteredTypes = valueTypes
                 end
-                
+
                 for _, valueType in ipairs(filteredTypes) do
                     values[valueType] = valueType
                 end
                 return values
             end,
-            get = function(info) 
+            get = function(info)
                 -- Initialize default selection if needed
                 if not self.selectedValueType and #valueTypes > 0 then
                     self.selectedValueType = valueTypes[1]
                     self:Debug("Default value type selected: " .. self.selectedValueType)
                 end
-                
+
                 -- If the currently selected value is filtered out, select the first visible one
                 if self.ViewSettings.filterBySpec or self.ViewSettings.filterByPrepull then
                     if not self:ShouldShowInSchemaViewer("Values", self.selectedValueType) then
@@ -1444,8 +1444,8 @@ function APLSchema:GetValuesOptions()
                         end
                     end
                 end
-                
-                return self.selectedValueType 
+
+                return self.selectedValueType
             end,
             set = function(info, value)
                 self:Debug("Value type selected: " .. value)
@@ -1456,13 +1456,13 @@ function APLSchema:GetValuesOptions()
             order = 10
         }
     }
-    
+
     -- Show fields for selected value type
     if self.selectedValueType then
         self:Debug("Showing fields for value type: " .. self.selectedValueType)
-        
+
         local metadata = self:GenerateMetadata("Values", self.selectedValueType)
-        
+
         if metadata then
             options.metadataGroup = {
                 type = "group",
@@ -1517,10 +1517,10 @@ function APLSchema:GetValuesOptions()
                 }
             }
         end
-        
+
         -- Add a field list as a separate section for better visibility
         local fields, fieldOrder = self:GetMessageFields("APLValue", self.selectedValueType)
-        
+
         options.fieldListGroup = {
             type = "group",
             name = "Field List",
@@ -1533,7 +1533,7 @@ function APLSchema:GetValuesOptions()
                         if not fields or not next(fields) then
                             return "No fields available"
                         end
-                        
+
                         local result = ""
                         for fieldName, fieldInfo in pairs(fields) do
                             if fieldName ~= "field_order" then
@@ -1547,7 +1547,7 @@ function APLSchema:GetValuesOptions()
                 }
             }
         }
-        
+
         options.fieldsGroup = {
             type = "group",
             name = "Fields",
@@ -1555,7 +1555,7 @@ function APLSchema:GetValuesOptions()
             order = 20,
             args = {}
         }
-        
+
         if not fields then
             self:Debug("No fields found for value type: " .. self.selectedValueType)
             options.fieldsGroup.args.noFields = {
@@ -1572,31 +1572,31 @@ function APLSchema:GetValuesOptions()
             }
         else
             self:Debug("Found " .. self:TableCount(fields) .. " fields for " .. self.selectedValueType)
-            
+
             -- Add the field order information
             options.fieldsGroup.args.fieldOrderHeader = {
                 type = "header",
                 name = "Field Order",
                 order = 1
             }
-            
+
             options.fieldsGroup.args.fieldOrder = {
                 type = "description",
                 name = fieldOrder and #fieldOrder > 0 and table.concat(fieldOrder, ", ") or "No field order specified",
                 order = 2
             }
-            
+
             -- Add each field
             options.fieldsGroup.args.fieldsHeader = {
                 type = "header",
                 name = "Field Definitions",
                 order = 10
             }
-            
+
             -- Process field list with priority for order fields
             local processedFields = {}
             local currentOrder = 11
-            
+
             -- First process fields in order
             if fieldOrder and #fieldOrder > 0 then
                 for _, fieldName in ipairs(fieldOrder) do
@@ -1607,7 +1607,7 @@ function APLSchema:GetValuesOptions()
                     end
                 end
             end
-            
+
             -- Then process any remaining fields
             for fieldName, fieldInfo in pairs(fields) do
                 if not processedFields[fieldName] and fieldName ~= "field_order" then
@@ -1615,7 +1615,7 @@ function APLSchema:GetValuesOptions()
                     currentOrder = currentOrder + 1
                 end
             end
-            
+
             -- Field details section for selected field
             if self.selectedValueField and fields[self.selectedValueField] then
                 options.fieldDetails = {
@@ -1628,7 +1628,7 @@ function APLSchema:GetValuesOptions()
             end
         end
     end
-    
+
     return options
 end
 
@@ -1644,13 +1644,13 @@ function APLSchema:GetEnumsOptions()
             }
         }
     end
-    
+
     local enumNames = {}
     for enumName in pairs(schema.enums) do
         table.insert(enumNames, enumName)
     end
     table.sort(enumNames)
-    
+
     local options = {
         header = {
             type = "header",
@@ -1686,15 +1686,15 @@ function APLSchema:GetEnumsOptions()
                         if not self.enumSearchTerm or self.enumSearchTerm == "" then
                             return "Enter a search term above to find enum values"
                         end
-                        
+
                         local Types = NAG:GetModule("Types")
                         if not Types then return "Types module not available" end
-                        
+
                         local results = Types:SearchEnumValues(self.enumSearchTerm)
                         if not next(results) then
                             return "No matches found for: " .. self.enumSearchTerm
                         end
-                        
+
                         local output = "Search Results for: " .. self.enumSearchTerm .. "\n\n"
                         for typeName, values in pairs(results) do
                             output = output .. "|cFFFFD100" .. typeName .. ":|r\n"
@@ -1722,12 +1722,12 @@ function APLSchema:GetEnumsOptions()
                 end
                 return values
             end,
-            get = function(info) 
+            get = function(info)
                 if not self.selectedEnumType and #enumNames > 0 then
                     self.selectedEnumType = enumNames[1]
                     self:Debug("Default enum type selected: " .. self.selectedEnumType)
                 end
-                return self.selectedEnumType 
+                return self.selectedEnumType
             end,
             set = function(info, value)
                 self:Debug("Enum type selected: " .. value)
@@ -1737,7 +1737,7 @@ function APLSchema:GetEnumsOptions()
             order = 10
         }
     }
-    
+
     if self.selectedEnumType and schema.enums[self.selectedEnumType] then
         -- Schema values
         options.schemaValuesGroup = {
@@ -1753,7 +1753,7 @@ function APLSchema:GetEnumsOptions()
                 }
             }
         }
-        
+
         local Types = NAG:GetModule("Types")
         local APL = NAG:GetModule("APL")
         local aliasInfo = ""
@@ -1950,7 +1950,7 @@ function APLSchema:GetEnumsOptions()
             }
         }
     end
-    
+
     return options
 end
 
@@ -2096,20 +2096,20 @@ end
 function APLSchema:GetActionsGroupedBySubmenu()
     local actions = self:GetAllActionsWithMetadata()
     local grouped = {}
-    
+
     for _, action in ipairs(actions) do
         local submenu = action.submenu and action.submenu[1] or "Other"
         grouped[submenu] = grouped[submenu] or {}
         table.insert(grouped[submenu], action)
     end
-    
+
     -- Sort actions within each submenu
     for submenu, submenuActions in pairs(grouped) do
-        table.sort(submenuActions, function(a, b) 
-            return a.label < b.label 
+        table.sort(submenuActions, function(a, b)
+            return a.label < b.label
         end)
     end
-    
+
     return grouped
 end
 
@@ -2118,20 +2118,20 @@ end
 function APLSchema:GetValuesGroupedBySubmenu()
     local values = self:GetAllValuesWithMetadata()
     local grouped = {}
-    
+
     for _, value in ipairs(values) do
         local submenu = value.submenu and value.submenu[1] or "Other"
         grouped[submenu] = grouped[submenu] or {}
         table.insert(grouped[submenu], value)
     end
-    
+
     -- Sort values within each submenu
     for submenu, submenuValues in pairs(grouped) do
-        table.sort(submenuValues, function(a, b) 
-            return a.label < b.label 
+        table.sort(submenuValues, function(a, b)
+            return a.label < b.label
         end)
     end
-    
+
     return grouped
 end
 
@@ -2148,13 +2148,13 @@ function APLSchema:GetEnumLabel(enumName, value)
             return typeObj:GetNameByValue(value) or "Unknown"
         end
     end
-    
+
     -- Fallback to schema if not found in types
     local schema = self:GetSchema()
     if not schema or not schema.enums or not schema.enums[enumName] then
         return "Unknown"
     end
-    
+
     return schema.enums[enumName][value] or "Unknown"
 end
 
@@ -2170,19 +2170,19 @@ function APLSchema:ValidateEnumValue(enumName, value)
             return typeObj:IsValid(value)
         end
     end
-    
+
     -- Fallback to schema validation
     local schema = self:GetSchema()
     if not schema or not schema.enums or not schema.enums[enumName] then
         return false
     end
-    
+
     for _, enumValue in pairs(schema.enums[enumName]) do
         if enumValue == value then
             return true
         end
     end
-    
+
     return false
 end
 
@@ -2197,13 +2197,13 @@ function APLSchema:GetEnumValues(enumName)
             return typeObj:GetValues()
         end
     end
-    
+
     -- Fallback to schema
     local schema = self:GetSchema()
     if not schema or not schema.enums or not schema.enums[enumName] then
         return {}
     end
-    
+
     return schema.enums[enumName]
 end
 
@@ -2223,7 +2223,7 @@ function APLSchema:GetEnumMetadata(enumName)
             }
         end
     end
-    
+
     return nil
 end
 
@@ -2237,27 +2237,27 @@ function APLSchema:ShouldIncludeAction(actionName, isPrepull, playerSpec)
     if not metadata then
         return true -- Default to including if metadata isn't available
     end
-    
+
     -- No includeIf means always include
     if not metadata.includeIf then
         return true
     end
-    
+
     -- Check prepull/combat context
     if isPrepull and metadata.includeIf.combatOnly then
         return false -- Combat-only action, exclude from prepull
     end
-    
+
     if not isPrepull and metadata.includeIf.prepullOnly then
         return false -- Prepull-only action, exclude from combat
     end
-    
+
     -- Check spec-specific context if needed
     if metadata.includeIf.specSpecific and playerSpec then
         -- This would need more detailed parsing of the original condition
         -- For now, just log that we have a spec-specific condition
         self:Debug("Spec-specific includeIf for action: " .. actionName .. " with condition: " .. (metadata.includeIf.condition or ""))
-        
+
         -- Simplified check for specs mentioned directly in the condition
         local condition = metadata.includeIf.condition or ""
         if condition:find("SpecFeralDruid") and playerSpec ~= 103 then
@@ -2265,7 +2265,7 @@ function APLSchema:ShouldIncludeAction(actionName, isPrepull, playerSpec)
         end
         -- Add more spec checks as needed
     end
-    
+
     return true
 end
 
@@ -2279,33 +2279,33 @@ function APLSchema:ShouldIncludeValue(valueName, isPrepull, playerSpec)
     if not metadata then
         return true -- Default to including if metadata isn't available
     end
-    
+
     -- No includeIf means always include
     if not metadata.includeIf then
         return true
     end
-    
+
     -- Check prepull/combat context
     if isPrepull and metadata.includeIf.combatOnly then
         return false -- Combat-only value, exclude from prepull
     end
-    
+
     if not isPrepull and metadata.includeIf.prepullOnly then
         return false -- Prepull-only value, exclude from combat
     end
-    
+
     -- Check spec-specific context if needed
     if metadata.includeIf.specSpecific and playerSpec then
         -- Same approach as in ShouldIncludeAction
         self:Debug("Spec-specific includeIf for value: " .. valueName .. " with condition: " .. (metadata.includeIf.condition or ""))
         -- TODO Add spec-specific checks as needed
     end
-    
+
     return true
 end
 
 -- Register this module
-NAG.APLSchema = APLSchema 
+NAG.APLSchema = APLSchema
 
 -- New helper method to determine if an item should be shown in schema viewer based on filter settings
 function APLSchema:ShouldShowInSchemaViewer(category, typeName)
@@ -2313,26 +2313,26 @@ function APLSchema:ShouldShowInSchemaViewer(category, typeName)
     if not self.ViewSettings.filterBySpec and not self.ViewSettings.filterByPrepull then
         return true
     end
-    
+
     -- Get current spec and prepull context
     local specID = self.ViewSettings.filterBySpec and (SpecializationCompat:GetActiveSpecialization() or 0) or nil
     local isPrepull = self.ViewSettings.filterByPrepull and self.ViewSettings.currentPrepullContext or nil
-    
+
     -- If spec filtering is enabled but we don't have a valid spec, show everything
     if self.ViewSettings.filterBySpec and (not specID or specID == 0) then
         self:Debug("Spec filtering enabled but no valid spec, showing all items")
         return true
     end
-    
+
     -- Check if the item should be included based on current filters
     if category == "Actions" then
-        return not (self.ViewSettings.filterByPrepull or self.ViewSettings.filterBySpec) or 
+        return not (self.ViewSettings.filterByPrepull or self.ViewSettings.filterBySpec) or
                self:ShouldIncludeItem("Actions", typeName, isPrepull, specID)
     elseif category == "Values" then
-        return not (self.ViewSettings.filterByPrepull or self.ViewSettings.filterBySpec) or 
+        return not (self.ViewSettings.filterByPrepull or self.ViewSettings.filterBySpec) or
                self:ShouldIncludeItem("Values", typeName, isPrepull, specID)
     end
-    
+
     -- Default to showing if we're not sure
     return true
 end
@@ -2346,33 +2346,33 @@ function APLSchema:ShouldIncludeItem(category, itemName, isPrepull, playerSpec)
     elseif category == "Values" then
         metadata = self:GetValueUIMetadata(itemName)
     end
-    
+
     if not metadata then
         return true -- Default to including if metadata isn't available
     end
-    
+
     -- No includeIf means always include
     if not metadata.includeIf then
         return true
     end
-    
+
     -- Check prepull/combat context if filter is enabled
     if isPrepull ~= nil then
         -- If we're in prepull mode and this is combat-only, exclude it
         if isPrepull and metadata.includeIf.combatOnly then
             return false
         end
-        
+
         -- If we're in combat mode and this is prepull-only, exclude it
         if not isPrepull and metadata.includeIf.prepullOnly then
             return false
         end
     end
-    
+
     -- Check spec-specific context if filter is enabled
     if playerSpec and metadata.includeIf.specSpecific then
         local condition = (metadata.includeIf.condition or ""):lower() -- Convert to lowercase for easier matching
-        
+
         -- Handle specific class checks
         if condition:find("classdeathknight") and playerSpec ~= 250 and playerSpec ~= 251 and playerSpec ~= 252 then
             return false -- Not a Death Knight spec
@@ -2397,7 +2397,7 @@ function APLSchema:ShouldIncludeItem(category, itemName, isPrepull, playerSpec)
         elseif condition:find("classmonk") and playerSpec ~= 268 and playerSpec ~= 270 and playerSpec ~= 269 then
             return false -- Not a Monk spec
         end
-        
+
         -- Handle specific spec checks
         if condition:find("specbalancedruid") and playerSpec ~= 102 then
             return false -- Not Balance Druid
@@ -2410,11 +2410,11 @@ function APLSchema:ShouldIncludeItem(category, itemName, isPrepull, playerSpec)
         elseif condition:find("ishealing") and playerSpec ~= 105 and playerSpec ~= 257 and playerSpec ~= 264 and playerSpec ~= 65 then
             return false -- Not a healing spec
         end
-        
+
         -- Additional checks based on the condition can be added here
         -- This is a simplified implementation - a more complete one would parse the full condition
     end
-    
+
     return true
 end
 
@@ -2423,7 +2423,7 @@ function APLSchema:ShouldIncludeAction(actionName, isPrepull, playerSpec)
     return self:ShouldIncludeItem("Actions", actionName, isPrepull, playerSpec)
 end
 
--- Updated wrapper around ShouldIncludeItem for backwards compatibility  
+-- Updated wrapper around ShouldIncludeItem for backwards compatibility
 function APLSchema:ShouldIncludeValue(valueName, isPrepull, playerSpec)
     return self:ShouldIncludeItem("Values", valueName, isPrepull, playerSpec)
 end
@@ -2432,13 +2432,13 @@ end
 function APLSchema:GetActionsGroupedBySubmenu(applyFilter)
     local actions = self:GetAllActionsWithMetadata()
     local grouped = {}
-    
+
     -- Store current filter state
     local originalFilterState = {
         filterBySpec = self.ViewSettings.filterBySpec,
         filterByPrepull = self.ViewSettings.filterByPrepull
     }
-    
+
     -- Apply filter if requested
     if applyFilter then
         -- Keep current settings
@@ -2447,7 +2447,7 @@ function APLSchema:GetActionsGroupedBySubmenu(applyFilter)
         self.ViewSettings.filterBySpec = false
         self.ViewSettings.filterByPrepull = false
     end
-    
+
     for _, action in ipairs(actions) do
         -- Check if this action should be shown based on current filter settings
         if self:ShouldShowInSchemaViewer("Actions", action.name) then
@@ -2456,18 +2456,18 @@ function APLSchema:GetActionsGroupedBySubmenu(applyFilter)
             table.insert(grouped[submenu], action)
         end
     end
-    
+
     -- Restore original filter state
     self.ViewSettings.filterBySpec = originalFilterState.filterBySpec
     self.ViewSettings.filterByPrepull = originalFilterState.filterByPrepull
-    
+
     -- Sort actions within each submenu
     for submenu, submenuActions in pairs(grouped) do
-        table.sort(submenuActions, function(a, b) 
-            return a.label < b.label 
+        table.sort(submenuActions, function(a, b)
+            return a.label < b.label
         end)
     end
-    
+
     return grouped
 end
 
@@ -2475,13 +2475,13 @@ end
 function APLSchema:GetValuesGroupedBySubmenu(applyFilter)
     local values = self:GetAllValuesWithMetadata()
     local grouped = {}
-    
+
     -- Store current filter state
     local originalFilterState = {
         filterBySpec = self.ViewSettings.filterBySpec,
         filterByPrepull = self.ViewSettings.filterByPrepull
     }
-    
+
     -- Apply filter if requested
     if applyFilter then
         -- Keep current settings
@@ -2490,7 +2490,7 @@ function APLSchema:GetValuesGroupedBySubmenu(applyFilter)
         self.ViewSettings.filterBySpec = false
         self.ViewSettings.filterByPrepull = false
     end
-    
+
     for _, value in ipairs(values) do
         -- Check if this value should be shown based on current filter settings
         if self:ShouldShowInSchemaViewer("Values", value.name) then
@@ -2499,18 +2499,18 @@ function APLSchema:GetValuesGroupedBySubmenu(applyFilter)
             table.insert(grouped[submenu], value)
         end
     end
-    
+
     -- Restore original filter state
     self.ViewSettings.filterBySpec = originalFilterState.filterBySpec
     self.ViewSettings.filterByPrepull = originalFilterState.filterByPrepull
-    
+
     -- Sort values within each submenu
     for submenu, submenuValues in pairs(grouped) do
-        table.sort(submenuValues, function(a, b) 
-            return a.label < b.label 
+        table.sort(submenuValues, function(a, b)
+            return a.label < b.label
         end)
     end
-    
+
     return grouped
 end
 

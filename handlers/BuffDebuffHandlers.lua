@@ -1,4 +1,4 @@
--- ~~~~~~~~~~ BuffDebuffHandlers ~~~~~~~~~~ 
+-- ~~~~~~~~~~ BuffDebuffHandlers ~~~~~~~~~~
 --- Handles buff and debuff tracking functionality for NAG addon
 ---
 --- This module provides functions for checking and managing buffs and debuffs,
@@ -69,7 +69,7 @@ local next = next
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 -- local GetItemSpell = C_Item.GetItemSpell
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 do -- ~~~~~~~~~~ Raid Buff/Debuffs Functions ~~~~~~~~~~
 
     -- Table of mutually exclusive buff groups.
@@ -523,7 +523,7 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
                 --self:Debug(format("FindAura: ID %d is an item, not a spell. Skipping auto-registration.", spellId))
                 return false
             end
-            
+
             -- Try to get spell info from WoW API
             local name, _, icon = GetSpellInfo(spellId)
             if name then
@@ -533,7 +533,7 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
                     --self:Debug(format("FindAura: ID %d belongs to item %s. Skipping auto-registration.", spellId, itemName))
                     return false
                 end
-                
+
                 -- Create spell path and data
                 local spellPath = { "Spells", "Aura", "detected" }
                 local spellData = {
@@ -542,7 +542,7 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
                         detected = true
                     }
                 }
-                
+
                 -- Add the spell to DataManager
                 spell = ns.DataManager:AddSpell(spellId, spellPath, spellData)
                 if spell then
@@ -553,7 +553,7 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
             else
                 self:Debug(format("FindAura: ID %d is not a valid spell or item", spellId))
             end
-            
+
             if not spell then
                 return false
             end
@@ -574,7 +574,7 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
                     (UnitIsFriend("player", unit) and "HELPFUL|PLAYER" or "HARMFUL|PLAYER")
             end
         end
-        
+
         -- Use direct API call for player auras if available
         if UnitIsUnit(unit, "player") and GetPlayerAuraBySpellID then
             local name, icon, count, dispelType, duration, expirationTime = GetPlayerAuraBySpellID(spellId)
@@ -607,8 +607,8 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
                 return unpack(result)
             end
         else
-            
-        if spellId == 1943 then   
+
+        if spellId == 1943 then
         end
             -- Classic API - direct lookup by name
             local spellName = spell.name
@@ -620,7 +620,7 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
                     local name, icon, count, debuffType, duration, expirationTime,
                     unitCaster, isStealable, shouldConsolidate, auraSpellId = UnitAura(unit, i, filter)
 
-                    if spellId == 1943 then   
+                    if spellId == 1943 then
                     end
                     if not name then
                         break
@@ -660,7 +660,7 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
             end
         end
     end)
-    
+
     --- Lists all auras on a unit with their spell IDs and other information.
     --- @param unit string The unit to check.
     --- @param filter? string Optional filter ("HELPFUL", "HARMFUL", "HELPFUL|PLAYER", "HARMFUL|PLAYER", etc.)
@@ -671,10 +671,10 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
             self:Debug("ListAuras: Invalid input - unit is nil")
             return {}
         end
-        
+
         filter = filter or "HELPFUL"
         local auras = {}
-        
+
         -- Use modern API if available
         if C_UnitAuras and C_UnitAuras.GetAuraDataByUnit then
             local auraData = C_UnitAuras.GetAuraDataByUnit(unit, filter)
@@ -697,13 +697,13 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
             -- Classic API
             local i = 1
             while true do
-                local name, icon, count, debuffType, duration, expirationTime, 
+                local name, icon, count, debuffType, duration, expirationTime,
                       unitCaster, isStealable, shouldConsolidate, spellId = UnitAura(unit, i, filter)
-                
+
                 if not name then
                     break
                 end
-                
+
                 tinsert(auras, {
                     id = spellId,
                     name = name,
@@ -715,30 +715,30 @@ do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
                     dispelType = debuffType or 0,
                     isStealable = isStealable and true or false
                 })
-                
+
                 i = i + 1
             end
         end
-        
+
         -- Print the auras directly
         if #auras == 0 then
             self:Print(format("No %s auras found on %s", filter or "HELPFUL", unit))
         else
             self:Print(format("Found %d %s auras on %s:", #auras, filter or "HELPFUL", unit))
-            
+
             -- Sort by ID
             sort(auras, function(a, b) return a.id < b.id end)
-            
+
             for _, aura in ipairs(auras) do
                 local remains = aura.expires > 0 and format("%.1fs", aura.expires - GetTime()) or "N/A"
                 local stacks = aura.count > 1 and format(" (%d stacks)", aura.count) or ""
                 self:Print(format("ID: %d - %s%s - Remains: %s", aura.id, aura.name, stacks, remains))
             end
         end
-        
+
         return auras
     end
-    
+
     --- Prints all auras on a unit to the chat.
     --- @param unit string The unit to check.
     --- @param filter? string Optional filter ("HELPFUL", "HARMFUL", "HELPFUL|PLAYER", "HARMFUL|PLAYER", etc.)

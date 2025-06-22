@@ -73,10 +73,10 @@ function StateManagerTests:test_CompareStates_DetectsBuffGainsAndLosses()
         resources = { power = { type = 0, current = 100, max = 100 } },
         buffs = { player = { [456] = { name = "New Buff", expirationTime = 1020 } } }
     }
-    
+
     -- Act
     local changes = StateManager:CompareCastStates(preState, postState)
-    
+
     -- Assert
     Assert.isNotNil(changes.buffs.player.gained[456], "New buff should be detected as gained.")
     Assert.isNotNil(changes.buffs.player.lost[123], "Old buff should be detected as lost.")

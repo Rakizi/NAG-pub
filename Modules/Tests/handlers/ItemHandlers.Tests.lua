@@ -36,10 +36,10 @@ function ItemHandlersTests:test_TierSetEquipped_CallsStateManager()
         hasTierCountCalledWith = { tier = tier, count = count }
         return true -- Simulate having the set
     end
-    
+
     -- Act
     local result = NAG:TierSetEquipped("T10", 4)
-    
+
     -- Assert
     Assert.isTrue(result, "The result should reflect the StateManager's return value.")
     Assert.areEqual("T10", hasTierCountCalledWith.tier, "TierSetEquipped did not call StateManager with the correct tier.")

@@ -56,10 +56,10 @@ end
 function DialogsTests:test_ResetGlobal_WipesDBAndRegistersDefaults()
     -- Arrange
     NAG.db.global.someSetting = true -- Add a value to ensure it gets wiped
-    
+
     -- Act
     ns.ResetGlobal()
-    
+
     -- Assert
     Assert.isNil(NAG.db.global.someSetting, "Global setting should have been wiped.")
     Assert.isTrue(self.spy.registerDefaultsCalled, "RegisterDefaults should have been called after wiping.")

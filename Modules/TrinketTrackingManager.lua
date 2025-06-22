@@ -27,25 +27,25 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
     global = {
         debug = false,
@@ -107,11 +107,11 @@ do -- Core functionality
             -- Spell Power trinkets
             [91838] = Types:GetType("Stat").SPELL_POWER -- Spell Power
         }
-        
+
         -- Register for events
         self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
-        
+
         -- Initialize trinket info for currently equipped trinkets
         self:InitializeEquippedTrinkets()
     end
@@ -363,7 +363,7 @@ do -- Trinket Analysis Functions
                 trinketInfo.procType = tooltipInfo.procType
                 trinketInfo.buffId = tooltipInfo.buffId
                 trinketInfo.stacks = tooltipInfo.stacks or 0
-                
+
                 -- Cache and return early
                 self.state.trinketInfo[itemId] = trinketInfo
                 return trinketInfo
@@ -516,7 +516,7 @@ end
 function TrinketTrackingManager:GetInternalCooldownRemaining(spellId)
     -- Initialize or get proc state
     local procState = self:InitializeProcState(spellId)
-    
+
     -- If we have a last proc time and an ICD, calculate remaining time
     if procState.lastProcTime and procState.icd then
         local currentTime = GetTime()
@@ -635,7 +635,7 @@ do -- Legacy Tooltip Scanning Functions - Kept for backward compatibility
     --- @return table Information about procs and stats found
     function TrinketTrackingManager:ScanTooltipData(itemId)
         if not itemId then return nil end
-        
+
         -- Get TooltipParsingManager if available
         --- @type TooltipParsingManager|AceModule
         local TooltipParser = NAG:GetModule("TooltipParsingManager", true)

@@ -7,7 +7,7 @@
 
 --- @diagnostic disable: duplicate-set-field, undefined-global, unused-local
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -23,22 +23,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 local pairs = pairs
 local setmetatable = setmetatable
@@ -434,7 +434,7 @@ Types.SwapSet = TypeRegistry:Register("SwapSet", {
 })
 
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function Types:ModuleInitialize()
         self.Registry = TypeRegistry
@@ -528,8 +528,8 @@ function Types:ImportTypesFromSchema(schema)
             }
             TypeRegistry:Register(enumName, values, metadata)
             count = count + 1
-            self:Debug(format("Registered schema type %s with %d values (%s prefix cleaning)", 
-                enumName, 
+            self:Debug(format("Registered schema type %s with %d values (%s prefix cleaning)",
+                enumName,
                 ns.tCount(values),
                 PRESERVE_PREFIX_TYPES[enumName] and "without" or "with"))
         end
@@ -538,7 +538,7 @@ function Types:ImportTypesFromSchema(schema)
     return count
 end
 
--- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function Types:LoadSchemaTypes()
         -- Clear caches when reloading schema types
@@ -563,7 +563,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function Types:GetType(name)
     -- Quick return for nil input
     if not name then return nil end

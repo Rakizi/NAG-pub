@@ -35,12 +35,12 @@ function ProfilingUtilityTests:test_Reset_ClearsData()
     -- Arrange
     ProfilingUtility:StartProfiling("test_label")
     ProfilingUtility:StopProfiling()
-    
+
     Assert.isNotNil(ProfilingUtility.timings["test_label"], "Data should exist before reset.")
-    
+
     -- Act
     ProfilingUtility:Reset()
-    
+
     -- Assert
     Assert.isNil(ProfilingUtility.timings["test_label"], "Data should be nil after reset.")
     Assert.isTrue(#ProfilingUtility.profilingStack == 0, "Profiling stack should be empty after reset.")
@@ -52,7 +52,7 @@ function ProfilingUtilityTests:test_StartAndStopProfiling_RecordsData()
     C_Timer.After(0.01, function() -- Simulate work
         ProfilingUtility:StopProfiling()
     end)
-    
+
     -- Assert (This test is asynchronous, so we can only check for existence after a delay)
     C_Timer.After(0.02, function()
         local timingData = ProfilingUtility.timings["my_test"]
@@ -71,14 +71,14 @@ function ProfilingUtilityTests:test_GetReport_CalculatesAveragesCorrectly()
         min = 0.005,
         times = { 0.01, 0.015, 0.005 }
     }
-    
+
     -- Act
     local report = ProfilingUtility:GetReport()
-    
+
     -- Assert
     Assert.isNotNil(report[1], "Report should contain an entry.")
     local entry = report[1]
-    
+
     Assert.areEqual("report_test", entry.label)
     -- Use a tolerance for floating point comparisons
     local tolerance = 0.0001
@@ -90,7 +90,7 @@ end
 
 function ProfilingUtilityTests:test_StopProfiling_WithoutStart_ThrowsError()
     local success, err = pcall(function() ProfilingUtility:StopProfiling() end)
-    
+
     Assert.isFalse(success, "StopProfiling without StartProfiling should cause an error.")
     Assert.isNotNil(err, "An error message should be returned.")
     Assert.isTrue(tostring(err):find("without matching StartProfiling"), "Error message should mention mismatched call.")

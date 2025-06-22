@@ -22,7 +22,7 @@ function MiscHandlersTests:test_StrictSequence_InitializesState()
 
     -- Act
     NAG:StrictSequence("MySequence", 1, 2, 3)
-    
+
     -- Assert
     Assert.isNotNil(NAG.strictSequenceSpells["MySequence"], "Sequence spell list should be created.")
     Assert.areEqual(1, NAG.strictSequencePosition["MySequence"], "Sequence position should be initialized to 1.")
@@ -39,14 +39,14 @@ function MiscHandlersTests:test_TargetMobType_CallsUnitCreatureType()
         return "Demon" -- Mock return value
     end
     local Types = NAG:GetModule("Types")
-    
+
     -- Act
     local result = NAG:IsTargetMobType(Types:GetType("MobType").Demon)
-    
+
     -- Assert
     Assert.isTrue(unitCreatureTypeCalled, "UnitCreatureType should have been called.")
     Assert.isTrue(result, "Should return true when creature types match.")
-    
+
     -- Cleanup
     _G.UnitCreatureType = originalUnitCreatureType
 end

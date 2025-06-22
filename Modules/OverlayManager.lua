@@ -5,7 +5,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -116,7 +116,7 @@ local OverlayManager = NAG:CreateModule("OverlayManager", defaults, {
     }
 })
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function OverlayManager:CreateOverlay(frame, overlayType, customConfig)
     if not frame or not overlayType then
         self:Debug("CreateOverlay: Missing frame or overlayType")
@@ -260,7 +260,7 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     -- Generate consistent key for this overlay
     local spellId = customConfig and customConfig.spellId
     local overlayKey = self:GetOverlayKey(frame, overlayType, spellId)
-    self:Debug(format("ShowOverlay: Processing overlay - Type: %s, SpellId: %s, Key: %s", 
+    self:Debug(format("ShowOverlay: Processing overlay - Type: %s, SpellId: %s, Key: %s",
         overlayType, spellId or "none", overlayKey))
 
     -- Initialize frame tracking if needed
@@ -299,7 +299,7 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     overlay:SetSize(size, size)
     overlay:SetFrameLevel(frame:GetFrameLevel() + 2)
     overlay:SetFrameStrata("MEDIUM")
-    self:Debug(format("ShowOverlay: Created frame - Size: %d, Level: %d, Strata: %s", 
+    self:Debug(format("ShowOverlay: Created frame - Size: %d, Level: %d, Strata: %s",
         size, overlay:GetFrameLevel(), overlay:GetFrameStrata()))
 
     -- Create and setup the spell icon texture if needed
@@ -325,7 +325,7 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
         overlay.texture:SetTexture(config.texture)
         overlay.texture:SetBlendMode(config.blendMode)
         overlay.texture:SetAlpha(config.alpha)
-        self:Debug(format("ShowOverlay: Set texture properties - Blend: %s, Alpha: %.2f", 
+        self:Debug(format("ShowOverlay: Set texture properties - Blend: %s, Alpha: %.2f",
             config.blendMode, config.alpha))
     end
 
@@ -364,9 +364,9 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     -- Start monitoring check function if provided
     if checkFunc then
         local function monitor()
-            if not overlay:GetParent() then 
+            if not overlay:GetParent() then
                 self:Debug(format("Monitor: Overlay %s lost parent, cleaning up", overlayKey))
-                return 
+                return
             end
 
             local success, shouldShow = pcall(checkFunc)
@@ -747,7 +747,7 @@ function OverlayManager:RefreshAllOverlays()
                         overlayData.overlay:Hide()
                     end
                 else
-                    self:Error(format("RefreshAllOverlays: Error in check function for %s: %s", 
+                    self:Error(format("RefreshAllOverlays: Error in check function for %s: %s",
                         overlayKey, tostring(shouldShow)))
                 end
             end
@@ -767,14 +767,14 @@ function OverlayManager:DumpActiveOverlays()
         self:Debug("No active overlays table")
         return
     end
-    
+
     local count = 0
     for key, data in pairs(self.state.activeOverlays) do
         count = count + 1
         if data.overlay then
-            self:Debug(format("[%d] Key: %s, Frame: %s, Visible: %s, Parent: %s", 
+            self:Debug(format("[%d] Key: %s, Frame: %s, Visible: %s, Parent: %s",
                 count,
-                key, 
+                key,
                 data.overlay:GetName() or "unnamed",
                 data.overlay:IsVisible() and "yes" or "no",
                 data.overlay:GetParent() and data.overlay:GetParent():GetName() or "no parent"
@@ -887,12 +887,12 @@ function OverlayManager:ShowTextOverlay(frame, text, duration, checkFunc, custom
 
     -- Get the actual font path from LSM
     local fontPath = LSM:Fetch("font", finalConfig.font) or LSM:GetDefault("font")
-    
+
     -- Update text properties
     overlay.textFrame.text:SetFont(fontPath, finalConfig.fontSize, finalConfig.fontFlags)
     overlay.textFrame.text:SetTextColor(unpack(finalConfig.fontColor))
     overlay.textFrame.text:SetText(text)
-    
+
     -- Position the text within the frame according to config
     overlay.textFrame.text:ClearAllPoints()
     overlay.textFrame.text:SetPoint(finalConfig.point or "CENTER", overlay.textFrame, finalConfig.relativePoint or finalConfig.point or "CENTER", finalConfig.xOffset or 0, finalConfig.yOffset or 0)
@@ -957,7 +957,7 @@ function OverlayManager:ShowInfo(frame, text, duration)
     })
 end
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function OverlayManager:ModuleEnable()
         -- Register callback for LSM updates
@@ -969,5 +969,5 @@ do
     end
 end
 
--- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 ns.OverlayManager = OverlayManager

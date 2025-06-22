@@ -8,7 +8,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -24,22 +24,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 local setmetatable = setmetatable
@@ -71,25 +71,25 @@ APLEditor.dragSource = nil
 APLEditor.clipboard = nil
 APLEditor.nodeCounter = 0
 
--- Core initialization 
+-- Core initialization
 function APLEditor:ModuleInitialize()
     APL = NAG:GetModule("APL")
     APLSchema = NAG:GetModule("APLSchema")
-    
+
     if not APL or not APLSchema then
         error("APL or APLSchema module not found")
     end
-    
+
     -- Initialize empty rotation if none exists
     if not self.currentEditingRotation then
         self:CreateNewRotation()
     end
-    
+
     -- Initialize node path tracking
     self.nodePaths = self.nodePaths or {
         ["root"] = {"root"}
     }
-    
+
     self:Debug("APLEditor initialized")
 end
 
@@ -119,44 +119,44 @@ function APLEditor:CreateEditor()
     frame:SetLayout("Flow")
     frame:SetWidth(900)
     frame:SetHeight(600)
-    frame:SetCallback("OnClose", function(widget) 
-        AceGUI:Release(widget) 
+    frame:SetCallback("OnClose", function(widget)
+        AceGUI:Release(widget)
         self.editorFrames = {}  -- Clear frames reference
     end)
-    
+
     -- Create a horizontal layout for the main content
     local mainContent = AceGUI:Create("SimpleGroup")
     mainContent:SetFullWidth(true)
     mainContent:SetFullHeight(true)
     mainContent:SetLayout("Flow")
     frame:AddChild(mainContent)
-    
+
     -- Create the left panel (action/value list)
     local leftPanel = AceGUI:Create("SimpleGroup")
     leftPanel:SetLayout("Flow")
     leftPanel:SetRelativeWidth(0.33)
     leftPanel:SetFullHeight(true)
     mainContent:AddChild(leftPanel)
-    
+
     -- Create the right panel (rotation editor)
     local rightPanel = AceGUI:Create("SimpleGroup")
     rightPanel:SetLayout("Flow")
     rightPanel:SetRelativeWidth(0.67)
     rightPanel:SetFullHeight(true)
     mainContent:AddChild(rightPanel)
-    
+
     -- Populate the left panel with actions and values
     self:PopulateActionValueList(leftPanel)
-    
+
     -- Initialize the rotation editor in the right panel
     self:InitializeRotationEditor(rightPanel)
-    
+
     -- Store the frame
     self.editorFrames.main = frame
-    
+
     -- Update the rotation tree to reflect current data
     self:UpdateRotationTree()
-    
+
     return frame
 end
 
@@ -179,7 +179,7 @@ function APLEditor:PopulateActionValueList(panel)
             self:PopulateValuesTab(container)
         end
     end)
-    
+
     panel:AddChild(tabs)
     tabs:SelectTab("actions")
 end
@@ -191,7 +191,7 @@ function APLEditor:PopulateActionsTab(container)
     filterGroup:SetLayout("Flow")
     filterGroup:SetFullWidth(true)
     container:AddChild(filterGroup)
-    
+
     -- Add spec filter toggle
     local specFilterToggle = AceGUI:Create("CheckBox")
     specFilterToggle:SetLabel(L["filterBySpec"] or "Filter by Spec")
@@ -203,7 +203,7 @@ function APLEditor:PopulateActionsTab(container)
         self:PopulateActionsTab(container) -- Refresh the content
     end)
     filterGroup:AddChild(specFilterToggle)
-    
+
     -- Add context filter toggle
     local contextFilterToggle = AceGUI:Create("CheckBox")
     contextFilterToggle:SetLabel(L["filterByContext"] or "Filter by Context")
@@ -215,7 +215,7 @@ function APLEditor:PopulateActionsTab(container)
         self:PopulateActionsTab(container) -- Refresh the content
     end)
     filterGroup:AddChild(contextFilterToggle)
-    
+
     -- Add context selector dropdown
     local contextDropdown = AceGUI:Create("Dropdown")
     contextDropdown:SetLabel(L["currentContext"] or "Context")
@@ -232,10 +232,10 @@ function APLEditor:PopulateActionsTab(container)
     end)
     contextDropdown:SetDisabled(not APLSchema.ViewSettings.filterByPrepull)
     filterGroup:AddChild(contextDropdown)
-    
+
     -- Get actions grouped by submenu, respecting current filter settings
     local actionGroups = APLSchema:GetActionsGroupedBySubmenu(true)
-    
+
     -- Create SearchBox
     local searchBox = AceGUI:Create("EditBox")
     searchBox:SetLabel(L["Search"] or "Search")
@@ -244,14 +244,14 @@ function APLEditor:PopulateActionsTab(container)
         self:FilterActions(scroll, actionGroups, text:lower())
     end)
     container:AddChild(searchBox)
-    
+
     -- Create ScrollFrame to hold the content
     local scroll = AceGUI:Create("ScrollFrame")
     scroll:SetLayout("List")
     scroll:SetFullWidth(true)
     scroll:SetFullHeight(true)
     container:AddChild(scroll)
-    
+
     -- Initially populate with filtered actions
     self:FilterActions(scroll, actionGroups, "")
 end
@@ -259,29 +259,29 @@ end
 -- Filter and display actions based on search text
 function APLEditor:FilterActions(scroll, actionGroups, searchText)
     scroll:ReleaseChildren()
-    
+
     for submenu, actions in pairs(actionGroups) do
         local showHeader = false
         local children = {}
-        
+
         -- Check which actions match the search
         for _, action in ipairs(actions) do
             local name = (action.label or action.name):lower()
             local desc = (action.description or ""):lower()
-            
+
             if searchText == "" or name:find(searchText) or desc:find(searchText) then
                 table.insert(children, action)
                 showHeader = true
             end
         end
-        
+
         -- If any actions in this group match, show the header and actions
         if showHeader then
             local header = AceGUI:Create("Heading")
             header:SetText(submenu)
             header:SetFullWidth(true)
             scroll:AddChild(header)
-            
+
             for _, action in ipairs(children) do
                 local button = AceGUI:Create("InteractiveLabel")
                 button:SetText(action.label or action.name)
@@ -314,7 +314,7 @@ function APLEditor:PopulateValuesTab(container)
     filterGroup:SetLayout("Flow")
     filterGroup:SetFullWidth(true)
     container:AddChild(filterGroup)
-    
+
     -- Add spec filter toggle
     local specFilterToggle = AceGUI:Create("CheckBox")
     specFilterToggle:SetLabel(L["filterBySpec"] or "Filter by Spec")
@@ -326,7 +326,7 @@ function APLEditor:PopulateValuesTab(container)
         self:PopulateValuesTab(container) -- Refresh the content
     end)
     filterGroup:AddChild(specFilterToggle)
-    
+
     -- Add context filter toggle
     local contextFilterToggle = AceGUI:Create("CheckBox")
     contextFilterToggle:SetLabel(L["filterByContext"] or "Filter by Context")
@@ -338,7 +338,7 @@ function APLEditor:PopulateValuesTab(container)
         self:PopulateValuesTab(container) -- Refresh the content
     end)
     filterGroup:AddChild(contextFilterToggle)
-    
+
     -- Add context selector dropdown
     local contextDropdown = AceGUI:Create("Dropdown")
     contextDropdown:SetLabel(L["currentContext"] or "Context")
@@ -355,10 +355,10 @@ function APLEditor:PopulateValuesTab(container)
     end)
     contextDropdown:SetDisabled(not APLSchema.ViewSettings.filterByPrepull)
     filterGroup:AddChild(contextDropdown)
-    
+
     -- Get values grouped by submenu, respecting current filter settings
     local valueGroups = APLSchema:GetValuesGroupedBySubmenu(true)
-    
+
     -- Create SearchBox
     local searchBox = AceGUI:Create("EditBox")
     searchBox:SetLabel(L["Search"] or "Search")
@@ -367,14 +367,14 @@ function APLEditor:PopulateValuesTab(container)
         self:FilterValues(scroll, valueGroups, text:lower())
     end)
     container:AddChild(searchBox)
-    
+
     -- Create ScrollFrame to hold the content
     local scroll = AceGUI:Create("ScrollFrame")
     scroll:SetLayout("List")
     scroll:SetFullWidth(true)
     scroll:SetFullHeight(true)
     container:AddChild(scroll)
-    
+
     -- Initially populate with filtered values
     self:FilterValues(scroll, valueGroups, "")
 end
@@ -382,29 +382,29 @@ end
 -- Filter and display values based on search text
 function APLEditor:FilterValues(scroll, valueGroups, searchText)
     scroll:ReleaseChildren()
-    
+
     for submenu, values in pairs(valueGroups) do
         local showHeader = false
         local children = {}
-        
+
         -- Check which values match the search
         for _, value in ipairs(values) do
             local name = (value.label or value.name):lower()
             local desc = (value.description or ""):lower()
-            
+
             if searchText == "" or name:find(searchText) or desc:find(searchText) then
                 table.insert(children, value)
                 showHeader = true
             end
         end
-        
+
         -- If any values in this group match, show the header and values
         if showHeader then
             local header = AceGUI:Create("Heading")
             header:SetText(submenu)
             header:SetFullWidth(true)
             scroll:AddChild(header)
-            
+
             for _, value in ipairs(children) do
                 local button = AceGUI:Create("InteractiveLabel")
                 button:SetText(value.label or value.name)
@@ -436,21 +436,21 @@ end
 -- Initialize the rotation editor
 function APLEditor:InitializeRotationEditor(panel)
     self:Debug("Initializing rotation editor")
-    
+
     -- Add a header and buttons
     local headerGroup = AceGUI:Create("SimpleGroup")
     headerGroup:SetLayout("Flow")
     headerGroup:SetFullWidth(true)
-    
+
     local header = AceGUI:Create("Heading")
     header:SetText(L["Rotation"] or "Rotation")
     header:SetRelativeWidth(0.5)
     headerGroup:AddChild(header)
-    
+
     local buttonGroup = AceGUI:Create("SimpleGroup")
     buttonGroup:SetLayout("Flow")
     buttonGroup:SetRelativeWidth(0.5)
-    
+
     local addButton = AceGUI:Create("Button")
     addButton:SetText(L["Add Action"] or "Add Action")
     addButton:SetWidth(120)
@@ -458,7 +458,7 @@ function APLEditor:InitializeRotationEditor(panel)
         self:ShowActionSelectionDialog()
     end)
     buttonGroup:AddChild(addButton)
-    
+
     local clearButton = AceGUI:Create("Button")
     clearButton:SetText(L["Clear All"] or "Clear All")
     clearButton:SetWidth(120)
@@ -466,67 +466,67 @@ function APLEditor:InitializeRotationEditor(panel)
         self:ClearRotation()
     end)
     buttonGroup:AddChild(clearButton)
-    
+
     headerGroup:AddChild(buttonGroup)
     panel:AddChild(headerGroup)
-    
+
     -- Add the rotation tree
     local rotationContainer = AceGUI:Create("SimpleGroup")
     rotationContainer:SetLayout("Fill")
     rotationContainer:SetFullWidth(true)
     rotationContainer:SetFullHeight(true)
-    
+
     local rotationTree = AceGUI:Create("TreeGroup")
     rotationTree:SetLayout("Fill")  -- Changed from Flow to Fill
     rotationTree:SetTreeWidth(200)
     rotationTree:SetFullWidth(true)
     rotationTree:SetFullHeight(true)
-    
+
     -- Initialize with empty tree
     rotationTree:SetTree({
         { value = "root", text = L["Rotation"] or "Rotation", children = {} }
     })
-    
+
     rotationTree:SetCallback("OnGroupSelected", function(container, event, group)
         self:Debug("Group selected: " .. (group or "nil"))
         container:ReleaseChildren()
-        
+
         -- Extract the actual node ID from the uniquevalue
         local nodeID = group
         if group and group:find("\001") then
             -- Extract the actual node ID after the last \001 character
             nodeID = group:match("[^\001]+$")
         end
-        
+
         self:Debug("Extracted node ID: " .. (nodeID or "nil"))
         self:ShowNodeEditor(container, nodeID)
-        
+
         -- Force layout update
         container:DoLayout()
     end)
-    
+
     rotationContainer:AddChild(rotationTree)
     panel:AddChild(rotationContainer)
-    
+
     -- Store the tree for later updates
     self.editorFrames.rotationTree = rotationTree
-    
+
     -- Create an initial empty rotation if none exists
     if not self.currentEditingRotation then
         self:CreateNewRotation()
     end
-    
+
     -- Update the tree to show the current rotation
     self:UpdateRotationTree()
-    
+
     -- Select the root node by default
     rotationTree:SelectByValue("root")
-    
+
     -- Force panel layout update
     panel:DoLayout()
-    
+
     self:Debug("Rotation editor initialized")
-    
+
     return rotationTree
 end
 
@@ -534,16 +534,16 @@ end
 function APLEditor:ShowNodeEditor(container, nodeID)
     -- Store the current container for updates
     self.editorFrames.currentEditor = container
-    
+
     if not nodeID then
         nodeID = "root"
     end
-    
+
     self:Debug("Showing editor for node: " .. nodeID)
-    
+
     -- Ensure container is empty
     container:ReleaseChildren()
-    
+
     if nodeID == "root" then
         -- Show the root rotation properties
         self:ShowRotationProperties(container)
@@ -552,7 +552,7 @@ function APLEditor:ShowNodeEditor(container, nodeID)
         local node = self:FindNodeByID(nodeID)
         if node then
             self.currentEditingNode = node
-            
+
             if node.type == "action" then
                 self:ShowActionEditor(container, node)
             elseif node.type == "condition" then
@@ -565,21 +565,21 @@ function APLEditor:ShowNodeEditor(container, nodeID)
             local group = AceGUI:Create("SimpleGroup")
             group:SetLayout("Flow")
             group:SetFullWidth(true)
-            
+
             local heading = AceGUI:Create("Heading")
             heading:SetText(L["Error"] or "Error")
             heading:SetFullWidth(true)
             group:AddChild(heading)
-            
+
             local errorText = AceGUI:Create("Label")
             errorText:SetText(L["Node not found"] or "Node not found: " .. nodeID)
             errorText:SetFullWidth(true)
             group:AddChild(errorText)
-            
+
             container:AddChild(group)
         end
     end
-    
+
     -- Force layout update
     if container.DoLayout then
         container:DoLayout()
@@ -588,28 +588,28 @@ end
 
 -- Find a node in the rotation by its ID
 function APLEditor:FindNodeByID(nodeID)
-    if not self.currentEditingRotation or not nodeID then 
-        return nil 
+    if not self.currentEditingRotation or not nodeID then
+        return nil
     end
-    
+
     -- Clean up the nodeID by removing any control characters
     -- This ensures we're working with just the node ID itself
     local cleanNodeID = nodeID:gsub("%c", "")
-    
+
     -- Search in actions
     if self.currentEditingRotation.actions then
         for _, action in ipairs(self.currentEditingRotation.actions) do
             if action.id == cleanNodeID then
                 return action
             end
-            
+
             -- Check if this is a condition under the action
             if action.condition and action.condition.id == cleanNodeID then
                 return action.condition
             end
         end
     end
-    
+
     self:Debug("Node not found with ID: " .. cleanNodeID)
     return nil
 end
@@ -617,20 +617,20 @@ end
 -- Show the rotation properties editor
 function APLEditor:ShowRotationProperties(container)
     self:Debug("ShowRotationProperties called with container: " .. tostring(container))
-    
+
     -- Force release any existing children to avoid issues
     container:ReleaseChildren()
-    
+
     local group = AceGUI:Create("SimpleGroup")
     group:SetLayout("Flow")
     group:SetFullWidth(true)
     group:SetFullHeight(true)
-    
+
     local heading = AceGUI:Create("Heading")
     heading:SetText(L["Rotation Properties"] or "Rotation Properties")
     heading:SetFullWidth(true)
     group:AddChild(heading)
-    
+
     local nameEdit = AceGUI:Create("EditBox")
     nameEdit:SetLabel(L["Rotation Name"] or "Rotation Name")
     nameEdit:SetFullWidth(true)
@@ -642,12 +642,12 @@ function APLEditor:ShowRotationProperties(container)
         end
     end)
     group:AddChild(nameEdit)
-    
+
     local rotationTypeGroup = AceGUI:Create("InlineGroup")
     rotationTypeGroup:SetTitle(L["Rotation Type"] or "Rotation Type")
     rotationTypeGroup:SetLayout("Flow")
     rotationTypeGroup:SetFullWidth(true)
-    
+
     local typeDropdown = AceGUI:Create("Dropdown")
     typeDropdown:SetLabel(L["Type"] or "Type")
     typeDropdown:SetFullWidth(true)
@@ -664,7 +664,7 @@ function APLEditor:ShowRotationProperties(container)
     end)
     rotationTypeGroup:AddChild(typeDropdown)
     group:AddChild(rotationTypeGroup)
-    
+
     local description = AceGUI:Create("MultiLineEditBox")
     description:SetLabel(L["Description"] or "Description")
     description:SetFullWidth(true)
@@ -676,12 +676,12 @@ function APLEditor:ShowRotationProperties(container)
         end
     end)
     group:AddChild(description)
-    
+
     -- Add save/export buttons
     local buttonGroup = AceGUI:Create("SimpleGroup")
     buttonGroup:SetLayout("Flow")
     buttonGroup:SetFullWidth(true)
-    
+
     local saveButton = AceGUI:Create("Button")
     saveButton:SetText(L["Save Rotation"] or "Save Rotation")
     saveButton:SetWidth(150)
@@ -689,7 +689,7 @@ function APLEditor:ShowRotationProperties(container)
         self:SaveRotation()
     end)
     buttonGroup:AddChild(saveButton)
-    
+
     local exportButton = AceGUI:Create("Button")
     exportButton:SetText(L["Export Rotation"] or "Export Rotation")
     exportButton:SetWidth(150)
@@ -697,16 +697,16 @@ function APLEditor:ShowRotationProperties(container)
         self:ExportRotation()
     end)
     buttonGroup:AddChild(exportButton)
-    
+
     group:AddChild(buttonGroup)
-    
+
     container:AddChild(group)
-    
+
     -- Force container layout update
     if container.DoLayout then
         container:DoLayout()
     end
-    
+
     self:Debug("Rotation properties UI completed")
 end
 
@@ -715,12 +715,12 @@ function APLEditor:ShowActionEditor(container, node)
     local group = AceGUI:Create("SimpleGroup")
     group:SetLayout("Flow")
     group:SetFullWidth(true)
-    
+
     local heading = AceGUI:Create("Heading")
     heading:SetText(L["Edit Action"] or "Edit Action: " .. (node.name or ""))
     heading:SetFullWidth(true)
     group:AddChild(heading)
-    
+
     -- Get the action type metadata from schema
     local actionType = node.action and node.action.action_type
     if not actionType then
@@ -731,7 +731,7 @@ function APLEditor:ShowActionEditor(container, node)
         container:AddChild(group)
         return
     end
-    
+
     -- Get action metadata
     local metadata = APLSchema:GetActionUIMetadata(actionType)
     if not metadata then
@@ -742,34 +742,34 @@ function APLEditor:ShowActionEditor(container, node)
         container:AddChild(group)
         return
     end
-    
+
     -- Show action info
     local infoGroup = AceGUI:Create("InlineGroup")
     infoGroup:SetTitle(L["Action Information"] or "Action Information")
     infoGroup:SetLayout("Flow")
     infoGroup:SetFullWidth(true)
-    
+
     local nameLabel = AceGUI:Create("Label")
     nameLabel:SetText(metadata.label or actionType)
     nameLabel:SetFontObject(GameFontHighlight)
     nameLabel:SetFullWidth(true)
     infoGroup:AddChild(nameLabel)
-    
+
     if metadata.shortDescription then
         local descLabel = AceGUI:Create("Label")
         descLabel:SetText(metadata.shortDescription)
         descLabel:SetFullWidth(true)
         infoGroup:AddChild(descLabel)
     end
-    
+
     group:AddChild(infoGroup)
-    
+
     -- Add parameters section
     local paramsGroup = AceGUI:Create("InlineGroup")
     paramsGroup:SetTitle(L["Parameters"] or "Parameters")
     paramsGroup:SetLayout("Flow")
     paramsGroup:SetFullWidth(true)
-    
+
     -- Dynamically create form fields based on schema
     if metadata.fields and next(metadata.fields) then
         for _, fieldName in ipairs(metadata.field_order or {}) do
@@ -785,22 +785,22 @@ function APLEditor:ShowActionEditor(container, node)
         noParamsLabel:SetFullWidth(true)
         paramsGroup:AddChild(noParamsLabel)
     end
-    
+
     group:AddChild(paramsGroup)
-    
+
     -- Add condition section
     local conditionGroup = AceGUI:Create("InlineGroup")
     conditionGroup:SetTitle(L["Condition"] or "Condition")
     conditionGroup:SetLayout("Flow")
     conditionGroup:SetFullWidth(true)
-    
+
     if node.condition then
         -- Show existing condition summary
         local conditionSummary = AceGUI:Create("Label")
         conditionSummary:SetText(self:FormatConditionSummary(node.condition))
         conditionSummary:SetFullWidth(true)
         conditionGroup:AddChild(conditionSummary)
-        
+
         local editConditionButton = AceGUI:Create("Button")
         editConditionButton:SetText(L["Edit Condition"] or "Edit Condition")
         editConditionButton:SetWidth(120)
@@ -808,7 +808,7 @@ function APLEditor:ShowActionEditor(container, node)
             self:SelectNode(node.condition.id)
         end)
         conditionGroup:AddChild(editConditionButton)
-        
+
         local removeConditionButton = AceGUI:Create("Button")
         removeConditionButton:SetText(L["Remove Condition"] or "Remove Condition")
         removeConditionButton:SetWidth(150)
@@ -828,14 +828,14 @@ function APLEditor:ShowActionEditor(container, node)
         end)
         conditionGroup:AddChild(addConditionButton)
     end
-    
+
     group:AddChild(conditionGroup)
-    
+
     -- Add action buttons
     local buttonGroup = AceGUI:Create("SimpleGroup")
     buttonGroup:SetLayout("Flow")
     buttonGroup:SetFullWidth(true)
-    
+
     local deleteButton = AceGUI:Create("Button")
     deleteButton:SetText(L["Delete Action"] or "Delete Action")
     deleteButton:SetWidth(120)
@@ -843,9 +843,9 @@ function APLEditor:ShowActionEditor(container, node)
         self:RemoveActionFromRotation(node)
     end)
     buttonGroup:AddChild(deleteButton)
-    
+
     group:AddChild(buttonGroup)
-    
+
     container:AddChild(group)
 end
 
@@ -854,17 +854,17 @@ function APLEditor:CreateFieldWidget(container, node, nodeType, fieldName, field
     local field = fieldInfo or {}
     local fieldType = field.type or "string"
     local currentValue = self:GetFieldValue(node, nodeType, fieldName)
-    
+
     -- Create label
     local label = field.label or fieldName
-    
+
     -- Create the appropriate widget based on field type
     if fieldType == "enum" then
         -- Create dropdown for enum
         local dropdown = AceGUI:Create("Dropdown")
         dropdown:SetLabel(label)
         dropdown:SetFullWidth(true)
-        
+
         -- Get enum values from schema
         local enumValues = {}
         if field.enum_type and APLSchema.GetSchema and APLSchema:GetSchema().enums then
@@ -875,13 +875,13 @@ function APLEditor:CreateFieldWidget(container, node, nodeType, fieldName, field
                 end
             end
         end
-        
+
         dropdown:SetList(enumValues)
         dropdown:SetValue(currentValue)
         dropdown:SetCallback("OnValueChanged", function(widget, event, value)
             self:SetFieldValue(node, nodeType, fieldName, value)
         end)
-        
+
         container:AddChild(dropdown)
     elseif fieldType == "bool" or fieldType == "boolean" then
         -- Create checkbox for boolean
@@ -892,7 +892,7 @@ function APLEditor:CreateFieldWidget(container, node, nodeType, fieldName, field
         checkbox:SetCallback("OnValueChanged", function(widget, event, value)
             self:SetFieldValue(node, nodeType, fieldName, value)
         end)
-        
+
         container:AddChild(checkbox)
     elseif fieldType == "message" then
         -- Complex field with nested fields
@@ -900,7 +900,7 @@ function APLEditor:CreateFieldWidget(container, node, nodeType, fieldName, field
         messageGroup:SetTitle(label)
         messageGroup:SetLayout("Flow")
         messageGroup:SetFullWidth(true)
-        
+
         -- Add a label or button to expand/edit
         local editButton = AceGUI:Create("Button")
         editButton:SetText(L["Edit"] or "Edit")
@@ -909,7 +909,7 @@ function APLEditor:CreateFieldWidget(container, node, nodeType, fieldName, field
             self:ShowNestedFieldEditor(node, nodeType, fieldName, field)
         end)
         messageGroup:AddChild(editButton)
-        
+
         container:AddChild(messageGroup)
     else
         -- Default to text input for other types
@@ -919,15 +919,15 @@ function APLEditor:CreateFieldWidget(container, node, nodeType, fieldName, field
         editBox:SetText(currentValue or "")
         editBox:SetCallback("OnEnterPressed", function(widget, event, text)
             -- Convert to number if the field type is numeric
-            if fieldType == "int32" or fieldType == "int64" or 
+            if fieldType == "int32" or fieldType == "int64" or
                fieldType == "uint32" or fieldType == "uint64" or
                fieldType == "float" or fieldType == "double" then
                 text = tonumber(text) or 0
             end
-            
+
             self:SetFieldValue(node, nodeType, fieldName, text)
         end)
-        
+
         container:AddChild(editBox)
     end
 end
@@ -935,7 +935,7 @@ end
 -- Get a field value from a node
 function APLEditor:GetFieldValue(node, nodeType, fieldName)
     if not node or not fieldName then return nil end
-    
+
     if nodeType == "action" and node.action and node.action.params then
         return node.action.params[fieldName]
     elseif nodeType == "condition" and node.condition then
@@ -943,14 +943,14 @@ function APLEditor:GetFieldValue(node, nodeType, fieldName)
     elseif nodeType == "value" and node.value and node.value.params then
         return node.value.params[fieldName]
     end
-    
+
     return nil
 end
 
 -- Set a field value in a node
 function APLEditor:SetFieldValue(node, nodeType, fieldName, value)
     if not node or not fieldName then return end
-    
+
     if nodeType == "action" and node.action then
         if not node.action.params then
             node.action.params = {}
@@ -971,26 +971,26 @@ function APLEditor:ShowConditionEditor(container, node)
     local group = AceGUI:Create("SimpleGroup")
     group:SetLayout("Flow")
     group:SetFullWidth(true)
-    
+
     local heading = AceGUI:Create("Heading")
     heading:SetText(L["Edit Condition"] or "Edit Condition")
     heading:SetFullWidth(true)
     group:AddChild(heading)
-    
+
     -- Add condition type dropdown
     local conditionTypeGroup = AceGUI:Create("InlineGroup")
     conditionTypeGroup:SetTitle(L["Condition Type"] or "Condition Type")
     conditionTypeGroup:SetLayout("Flow")
     conditionTypeGroup:SetFullWidth(true)
-    
+
     -- Get all value types from schema (conditions are values)
     local valueTypes = APLSchema:GetAllValuesWithMetadata()
     local valueOptions = {}
-    
+
     for _, value in ipairs(valueTypes) do
         valueOptions[value.name] = value.label or value.name
     end
-    
+
     local typeDropdown = AceGUI:Create("Dropdown")
     typeDropdown:SetLabel(L["Type"] or "Type")
     typeDropdown:SetFullWidth(true)
@@ -999,20 +999,20 @@ function APLEditor:ShowConditionEditor(container, node)
     typeDropdown:SetCallback("OnValueChanged", function(widget, event, value)
         node.condition_type = value
         node.params = {} -- Reset params when changing type
-        
+
         -- Refresh the editor
         self:ShowConditionEditor(container, node)
     end)
     conditionTypeGroup:AddChild(typeDropdown)
-    
+
     group:AddChild(conditionTypeGroup)
-    
+
     -- Add parameters section based on the condition type
     local paramsGroup = AceGUI:Create("InlineGroup")
     paramsGroup:SetTitle(L["Parameters"] or "Parameters")
     paramsGroup:SetLayout("Flow")
     paramsGroup:SetFullWidth(true)
-    
+
     -- Get condition metadata
     local metadata = APLSchema:GetValueUIMetadata(node.condition_type)
     if metadata and metadata.fields then
@@ -1029,9 +1029,9 @@ function APLEditor:ShowConditionEditor(container, node)
         noParamsLabel:SetFullWidth(true)
         paramsGroup:AddChild(noParamsLabel)
     end
-    
+
     group:AddChild(paramsGroup)
-    
+
     container:AddChild(group)
 end
 
@@ -1040,26 +1040,26 @@ function APLEditor:ShowValueEditor(container, node)
     local group = AceGUI:Create("SimpleGroup")
     group:SetLayout("Flow")
     group:SetFullWidth(true)
-    
+
     local heading = AceGUI:Create("Heading")
     heading:SetText(L["Edit Value"] or "Edit Value")
     heading:SetFullWidth(true)
     group:AddChild(heading)
-    
+
     -- Add value type dropdown
     local valueTypeGroup = AceGUI:Create("InlineGroup")
     valueTypeGroup:SetTitle(L["Value Type"] or "Value Type")
     valueTypeGroup:SetLayout("Flow")
     valueTypeGroup:SetFullWidth(true)
-    
+
     -- Get all value types from schema
     local valueTypes = APLSchema:GetAllValuesWithMetadata()
     local valueOptions = {}
-    
+
     for _, value in ipairs(valueTypes) do
         valueOptions[value.name] = value.label or value.name
     end
-    
+
     local typeDropdown = AceGUI:Create("Dropdown")
     typeDropdown:SetLabel(L["Type"] or "Type")
     typeDropdown:SetFullWidth(true)
@@ -1068,20 +1068,20 @@ function APLEditor:ShowValueEditor(container, node)
     typeDropdown:SetCallback("OnValueChanged", function(widget, event, value)
         node.value_type = value
         node.params = {} -- Reset params when changing type
-        
+
         -- Refresh the editor
         self:ShowValueEditor(container, node)
     end)
     valueTypeGroup:AddChild(typeDropdown)
-    
+
     group:AddChild(valueTypeGroup)
-    
+
     -- Add parameters section based on the value type
     local paramsGroup = AceGUI:Create("InlineGroup")
     paramsGroup:SetTitle(L["Parameters"] or "Parameters")
     paramsGroup:SetLayout("Flow")
     paramsGroup:SetFullWidth(true)
-    
+
     -- Get value metadata
     local metadata = APLSchema:GetValueUIMetadata(node.value_type)
     if metadata and metadata.fields then
@@ -1098,30 +1098,30 @@ function APLEditor:ShowValueEditor(container, node)
         noParamsLabel:SetFullWidth(true)
         paramsGroup:AddChild(noParamsLabel)
     end
-    
+
     group:AddChild(paramsGroup)
-    
+
     container:AddChild(group)
 end
 
 -- Format a condition for display
 function APLEditor:FormatConditionSummary(condition)
     if not condition then return "No condition" end
-    
+
     local conditionType = condition.condition_type
     if not conditionType then return "Invalid condition" end
-    
+
     -- Get condition metadata
     local metadata = APLSchema:GetValueUIMetadata(conditionType)
     if not metadata then return "Unknown condition type: " .. conditionType end
-    
+
     return metadata.label or conditionType
 end
 
 -- Add a condition to an action
 function APLEditor:AddConditionToAction(actionNode)
     if not actionNode then return end
-    
+
     -- Create condition
     actionNode.condition = {
         id = self:GenerateNodeID("condition"),
@@ -1129,10 +1129,10 @@ function APLEditor:AddConditionToAction(actionNode)
         condition_type = "comparison", -- Default type
         params = {}
     }
-    
+
     -- Update tree
     self:UpdateRotationTree()
-    
+
     -- Select the new condition using our improved method
     self:SelectNode(actionNode.condition.id)
 end
@@ -1147,7 +1147,7 @@ function APLEditor:ShowActionSelectionDialog()
         frame:SetWidth(600)
         frame:SetHeight(500)
         frame:EnableResize(false)
-        
+
         -- Add search box
         local searchBox = AceGUI:Create("EditBox")
         searchBox:SetLabel(L["Search"] or "Search")
@@ -1156,21 +1156,21 @@ function APLEditor:ShowActionSelectionDialog()
             self:FilterActionsInDialog(scroll, text:lower())
         end)
         frame:AddChild(searchBox)
-        
+
         -- Add scroll frame for actions
         local scroll = AceGUI:Create("ScrollFrame")
         scroll:SetLayout("List")
         scroll:SetFullWidth(true)
         scroll:SetFullHeight(true)
         frame:AddChild(scroll)
-        
+
         self.actionSelectionFrame = frame
         self.actionSelectionScroll = scroll
     end
-    
+
     -- Populate with actions
     self:PopulateActionSelectionDialog()
-    
+
     -- Show the frame
     self.actionSelectionFrame:Show()
 end
@@ -1179,18 +1179,18 @@ end
 function APLEditor:PopulateActionSelectionDialog()
     local scroll = self.actionSelectionScroll
     if not scroll then return end
-    
+
     scroll:ReleaseChildren()
-    
+
     -- Get actions grouped by submenu
     local actionGroups = APLSchema:GetActionsGroupedBySubmenu()
-    
+
     for submenu, actions in pairs(actionGroups) do
         local header = AceGUI:Create("Heading")
         header:SetText(submenu)
         header:SetFullWidth(true)
         scroll:AddChild(header)
-        
+
         for _, action in ipairs(actions) do
             local button = AceGUI:Create("InteractiveLabel")
             button:SetText(action.label or action.name)
@@ -1219,34 +1219,34 @@ end
 -- Filter actions in the selection dialog
 function APLEditor:FilterActionsInDialog(scroll, searchText)
     if not scroll then return end
-    
+
     scroll:ReleaseChildren()
-    
+
     -- Get actions grouped by submenu
     local actionGroups = APLSchema:GetActionsGroupedBySubmenu()
-    
+
     for submenu, actions in pairs(actionGroups) do
         local showHeader = false
         local children = {}
-        
+
         -- Check which actions match the search
         for _, action in ipairs(actions) do
             local name = (action.label or action.name):lower()
             local desc = (action.description or ""):lower()
-            
+
             if searchText == "" or name:find(searchText) or desc:find(searchText) then
                 table.insert(children, action)
                 showHeader = true
             end
         end
-        
+
         -- If any actions in this group match, show the header and actions
         if showHeader then
             local header = AceGUI:Create("Heading")
             header:SetText(submenu)
             header:SetFullWidth(true)
             scroll:AddChild(header)
-            
+
             for _, action in ipairs(children) do
                 local button = AceGUI:Create("InteractiveLabel")
                 button:SetText(action.label or action.name)
@@ -1276,13 +1276,13 @@ end
 -- Remove an action from the rotation
 function APLEditor:RemoveActionFromRotation(node)
     if not self.currentEditingRotation or not node then return end
-    
+
     -- Find and remove the action
     for i, action in ipairs(self.currentEditingRotation.actions) do
         if action.id == node.id then
             table.remove(self.currentEditingRotation.actions, i)
             self:UpdateRotationTree()
-            
+
             -- Select root node with our improved method
             self:SelectNode("root")
             return
@@ -1296,22 +1296,22 @@ function APLEditor:SaveRotation()
         self:Debug("No rotation to save")
         return
     end
-    
+
     -- Validation logic could go here
-    
+
     -- Convert to APL format
     local aplRotation = self:ConvertToAPLRotation(self.currentEditingRotation)
-    
+
     -- Get the class module to save the rotation
     local classModule = NAG:GetModule(NAG.CLASS)
     if not classModule then
         self:Debug("Class module not found, cannot save rotation")
         return
     end
-    
+
     -- Save the rotation
     local success = classModule:SaveUserRotation(NAG.SPECID, self.currentEditingRotation.name, aplRotation)
-    
+
     if success then
         self:Debug("Rotation saved successfully")
     else
@@ -1337,10 +1337,10 @@ function APLEditor:ExportRotation()
         self:Debug("No rotation to export")
         return
     end
-    
+
     -- Convert to APL format
     local aplRotation = self:ConvertToAPLRotation(self.currentEditingRotation)
-    
+
     -- TODO: Implement proper export functionality
     self:Debug("Export not yet implemented")
 end
@@ -1359,7 +1359,7 @@ function APLEditor:SetRotation(rotation)
     else
         self:CreateNewRotation()
     end
-    
+
     self:UpdateRotationTree()
     self:Debug("Set rotation: " .. (self.currentEditingRotation.name or "Unnamed"))
 end
@@ -1371,12 +1371,12 @@ end
 
 -- Clear the rotation
 function APLEditor:ClearRotation()
-    -- Reset the rotation 
+    -- Reset the rotation
     self:CreateNewRotation()
-    
+
     -- Update the tree
     self:UpdateRotationTree()
-    
+
     -- Log the action
     self:Debug("Rotation cleared")
 end
@@ -1385,7 +1385,7 @@ end
 function APLEditor:Show()
     local frame = self.editorFrames.main or self:CreateEditor()
     frame:Show()
-    
+
     -- Initialize with a default rotation if none is set
     if not self.currentEditingRotation then
         self:CreateNewRotation()
@@ -1409,21 +1409,21 @@ function APLEditor:UpdateRotationTree()
         self:Debug("No rotation tree to update")
         return
     end
-    
+
     if not self.currentEditingRotation then
         self:Debug("No rotation to display")
         self:CreateNewRotation()
     end
-    
+
     local tree = {
         { value = "root", text = self.currentEditingRotation.name or (L["Rotation"] or "Rotation"), children = {} }
     }
-    
+
     -- Track paths for easier node selection
     self.nodePaths = {
         ["root"] = {"root"}
     }
-    
+
     if self.currentEditingRotation and self.currentEditingRotation.actions then
         for i, action in ipairs(self.currentEditingRotation.actions) do
             local actionNode = {
@@ -1431,28 +1431,28 @@ function APLEditor:UpdateRotationTree()
                 text = self:GetActionLabel(action),
                 children = {}
             }
-            
+
             -- Store the path for this node
             self.nodePaths[action.id] = {"root", action.id}
-            
+
             -- Add condition as child if present
             if action.condition then
                 table.insert(actionNode.children, {
                     value = action.condition.id,
                     text = L["Condition"] .. ": " .. self:FormatConditionSummary(action.condition)
                 })
-                
+
                 -- Store the path for the condition node
                 self.nodePaths[action.condition.id] = {"root", action.id, action.condition.id}
             end
-            
+
             table.insert(tree[1].children, actionNode)
         end
     end
-    
+
     self:Debug("Setting tree with " .. (#tree[1].children) .. " actions")
     self.editorFrames.rotationTree:SetTree(tree)
-    
+
     -- Force refresh the tree
     if self.editorFrames.rotationTree.RefreshTree then
         self.editorFrames.rotationTree:RefreshTree()
@@ -1464,10 +1464,10 @@ function APLEditor:GetActionLabel(action)
     if not action or not action.action or not action.action.action_type then
         return L["Unknown Action"] or "Unknown Action"
     end
-    
+
     local actionType = action.action.action_type
     local metadata = APLSchema:GetActionUIMetadata(actionType)
-    
+
     if metadata then
         return metadata.label or actionType
     else
@@ -1480,7 +1480,7 @@ function APLEditor:OnActionSelected(action)
     if not self.currentEditingRotation then
         self:CreateNewRotation()
     end
-    
+
     -- Create a new action node
     local newAction = {
         id = self:GenerateNodeID("action"),
@@ -1490,26 +1490,26 @@ function APLEditor:OnActionSelected(action)
             params = {}
         }
     }
-    
+
     -- Add to the rotation
     if not self.currentEditingRotation.actions then
         self.currentEditingRotation.actions = {}
     end
     table.insert(self.currentEditingRotation.actions, newAction)
-    
+
     -- Update the tree
     self:UpdateRotationTree()
-    
+
     -- Select the new action for editing with our improved method
     self:SelectNode(newAction.id)
-    
+
     self:Debug("Added action: " .. action.name)
 end
 
 -- Handle value selection from the left panel
 function APLEditor:OnValueSelected(value)
     self:Debug("Selected value: " .. value.name)
-    
+
     -- The behavior depends on the context - for now just log it
     -- This would be implemented based on how values should be handled in the editor
 end
@@ -1519,13 +1519,13 @@ function APLEditor:SelectNode(nodeID)
     if not self.editorFrames.rotationTree or not nodeID then
         return false
     end
-    
+
     -- If we have a stored path, use SelectByPath
     if self.nodePaths and self.nodePaths[nodeID] then
         self.editorFrames.rotationTree:SelectByPath(unpack(self.nodePaths[nodeID]))
         return true
     end
-    
+
     -- Fallback to direct selection if no path is available
     self.editorFrames.rotationTree:SelectByValue(nodeID)
     return true

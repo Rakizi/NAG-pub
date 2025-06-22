@@ -9,7 +9,7 @@
 -- Status: good
 --- @diagnostic disable: undefined-global, undefined-field
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -30,13 +30,13 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
@@ -82,7 +82,7 @@ local CLEUDebugger = NAG:CreateModule("CLEUDebugger", defaults, {
     hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     --- Initialize the module
 
@@ -106,7 +106,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     --- Handle COMBAT_LOG_EVENT_UNFILTERED events
 
@@ -171,7 +171,7 @@ end
 -- ~~~~~~~~~~ MESSAGE HANDLERS ~~~~~~~~~~
 -- (none)
 
--- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for CLEU Debugger settings
 

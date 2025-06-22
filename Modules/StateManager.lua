@@ -43,22 +43,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 local SpecializationCompat = ns.SpecializationCompat
@@ -227,7 +227,7 @@ function StateManager:ModuleInitialize()
     -- Initialize state
     self.state = self.state or CreateDefaultState()
     NAG.state = self.state -- Keep a local reference
-    
+
     -- Initialize combat state
     self.state.combat = self.state.combat or {
         time = 0,
@@ -235,14 +235,14 @@ function StateManager:ModuleInitialize()
         encounterTimer = nil,
         encounterEndTime = nil
     }
-    
+
     -- Initialize player state
     self.state.player = self.state.player or {
         inCombat = UnitAffectingCombat("player"),
         lastCast = 0,
         lastCastId = nil
     }
-    
+
     -- Initialize next state
     self.state.next = self.state.next or {
         nextTime = GetTime()
@@ -274,7 +274,7 @@ function StateManager:UpdatePlayerState()
     local state = self.state.player
     -- Update class info
     local _, classFileName, classId = UnitClass("player")
-    --state.classInfo.id = classId             
+    --state.classInfo.id = classId
     state.classInfo.name = classFileName     -- NAG.CLASS
     state.classInfo.fileName = classFileName -- NAG.CLASSFILE
 
@@ -330,7 +330,7 @@ do -- Spec change handling
         -- ADDED: Handle nil specialization gracefully
         if not currentSpec then
             self:Debug("ProcessSpecChange: No specialization available yet, will retry later")
-            
+
             -- Initialize with default values to avoid nil errors
             if not state.id then
                 state.id = 0
@@ -342,12 +342,12 @@ do -- Spec change handling
                 -- Update NAG global reference with safe default
                 NAG.SPECID = 0
             end
-            
+
             -- Schedule a retry after a short delay
             C_Timer.After(2, function()
                 self:ProcessSpecChange()
             end)
-            
+
             return
         end
 
@@ -372,14 +372,14 @@ do -- Spec change handling
             self:SendMessage("NAG_SPEC_UPDATED")
         else
             self:Debug("ProcessSpecChange: Failed to get valid spec info")
-            
+
             -- Initialize with default values to avoid nil errors
             state.id = 0
             state.name = "Unknown"
             state.index = currentSpec
             state.role = nil
             state.description = "Specialization info not available"
-            
+
             -- Update NAG global reference with safe default
             NAG.SPECID = 0
         end
@@ -494,7 +494,7 @@ function StateManager:UpdateTrinketState()
             -- Register new trinket
             if itemId then
                 state.trinkets[slot] = itemId
-                
+
                 -- First try to analyze trinket using TooltipParser
                 local trinketInfo = nil
                 if TooltipParser then
@@ -981,7 +981,7 @@ do --===========================================================================
     function StateManager:PLAYER_TARGET_CHANGED()
         local state = self.state.target
         local newGuid = UnitGUID("target")
-        
+
         -- If target changed (different GUID), reset the start time
         if newGuid ~= state.guid then
             state.guid = newGuid
@@ -1014,7 +1014,7 @@ do --===========================================================================
         if equipmentSlot >= 1 and equipmentSlot <= 19 then
             self:UpdateEquipmentState()
         end
-        
+
         --TODO: Maybe we dont want to force select rotation here?
         -- Handle Death Knight Frost spec weapon configuration detection
         if equipmentSlot == 17 and UnitClassBase('player') == "DEATHKNIGHT" then
@@ -1025,7 +1025,7 @@ do --===========================================================================
                 if specID == 251 then
                     local offhandItem = GetInventoryItemLink("player", 17)
                     local classModule = NAG.Class
-                    
+
                     if offhandItem then
                         -- Dual-wielding - use MasterFrost
                         classModule:SelectRotation(specID, "Death Knight MasterFrost")

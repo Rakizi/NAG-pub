@@ -862,7 +862,7 @@ do --== Icon Frame Update Functions ==--
         if not main and aoeSpellId then
             NAG.Frame.iconFrames["primary"].spellId = aoeSpellId
             self:UpdateIcon("primary", aoeSpellId)
-            
+
             -- Hide the AOE icon frame since we moved its spell to primary
             if NAG.Frame.iconFrames["aoe"] then
                 NAG.Frame.iconFrames["aoe"]:Hide()

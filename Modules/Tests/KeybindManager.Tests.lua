@@ -20,10 +20,10 @@ local KeybindManagerTests = {}
 function KeybindManagerTests:setup()
     -- Store and clear overrides
     self.originalOverrides = CopyTable(KeybindManager:GetChar().keybindOverrides)
-    
+
     -- *** THE FIX: Call ModuleInitialize to set up internal tables like ActionSlotsBy ***
     KeybindManager:ModuleInitialize()
-    
+
     wipe(KeybindManager:GetChar().keybindOverrides.Spell)
     wipe(KeybindManager:GetChar().keybindOverrides.Item)
     wipe(KeybindManager:GetChar().keybindOverrides.Macro)
@@ -50,10 +50,10 @@ function KeybindManagerTests:test_OverrideSpellKeybind_And_GetSpellKeybind()
     -- Arrange
     local spellId = 49998 -- Death Strike
     local keybind = "CTRL-1"
-    
+
     -- Act
     KeybindManager:OverrideSpellKeybind(spellId, keybind)
-    
+
     -- Assert
     local retrievedKeybind = KeybindManager:GetSpellKeybind(spellId)
     Assert.areEqual(keybind, retrievedKeybind, "Keybind override was not set or retrieved correctly.")
@@ -63,23 +63,23 @@ function KeybindManagerTests:test_GetKeybind_PrioritizesOverrides()
     -- Arrange
     local spellId = 49998
     local overrideKeybind = "OVERRIDE"
-    
+
     -- Mock the action tables to simulate a real keybind
     local originalActions = CopyTable(KeybindManager.Actions)
     local originalSlots = CopyTable(KeybindManager.ActionSlotsBy.Spell)
-    
+
     KeybindManager.Actions[1] = { Type = "Spell", ID = spellId, Keybind = "REALBIND" }
     KeybindManager.ActionSlotsBy.Spell[spellId] = { 1 }
 
     -- Set the override
     KeybindManager:OverrideSpellKeybind(spellId, overrideKeybind)
-    
+
     -- Act
     local result = KeybindManager:GetKeybind("Spell", spellId)
-    
+
     -- Assert
     Assert.areEqual(overrideKeybind, result, "GetKeybind should prioritize the override.")
-    
+
     -- Cleanup
     KeybindManager:OverrideSpellKeybind(spellId, nil) -- remove override
     KeybindManager.Actions = originalActions

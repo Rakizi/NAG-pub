@@ -756,7 +756,7 @@ if L then
         L["resetClassDesc"] = "Redefine as configurações da classe para seus valores padrão"
         L["resetToDefault"] = "Redefinir para Padrão"
         L["resetConfirmation"] = "Tem certeza que deseja redefinir '%s' para as configurações padrão?\nIsso não pode ser desfeito."
-        
+
         -- Types.lua Stats
         L["strength"] = "Força"
         L["agility"] = "Agilidade"
@@ -785,14 +785,14 @@ if L then
         L["health"] = "Vida"
         L["mana"] = "Mana"
         L["mp5"] = "Mana a cada 5 segundos"
-        
+
         -- Types.lua Categories
         L["character"] = "Personagem"
         L["buffs"] = "Bônus"
         L["debuffs"] = "Penalidades"
         L["combat"] = "Combate"
         L["class"] = "Classe"
-        
+
         -- Types.lua Buff Types
         L["stats"] = "Atributos"
         L["spell_resistance"] = "Resistência a Feitiços"
@@ -809,7 +809,7 @@ if L then
         L["major_mana"] = "Mana Maior"
         L["armor"] = "Armadura"
         L["heroism"] = "Heroísmo"
-        
+
         -- Types.lua Debuff Types
         L["spell_damage"] = "Dano de Feitiço"
         L["spell_crit"] = "Golpe Crítico de Feitiço"
@@ -819,7 +819,7 @@ if L then
         L["physical_damage_reduction"] = "Redução de Dano Físico"
         L["attack_speed"] = "Velocidade de Ataque"
         L["healing_reduction"] = "Redução de Cura"
-        
+
         -- Types.lua Combat Types
         L["unknown"] = "Desconhecido"
         L["any"] = "Qualquer"
@@ -827,7 +827,7 @@ if L then
         L["main_hand"] = "Mão Principal"
         L["off_hand"] = "Mão Secundária"
         L["ranged"] = "À Distância"
-        
+
         -- Types.lua Class Types
         L["humanoid"] = "Humanoide"
         L["ghost_wolf"] = "Lobo Fantasma"
@@ -844,14 +844,14 @@ if L then
         L["blood"] = "Sangue"
         L["frost"] = "Gelo"
         L["unholy"] = "Profano"
-        
+
         -- Types.lua Rune Types
         L["rune_unknown"] = "Runa Desconhecida"
         L["rune_blood"] = "Runa de Sangue"
         L["rune_frost"] = "Runa de Gelo"
         L["rune_unholy"] = "Runa Profana"
         L["rune_death"] = "Runa da Morte"
-        
+
         -- Types.lua Rune Slots
         L["slot_unknown"] = "Slot Desconhecido"
         L["slot_left_blood"] = "Runa de Sangue Esquerda"
@@ -860,18 +860,18 @@ if L then
         L["slot_right_frost"] = "Runa de Gelo Direita"
         L["slot_left_unholy"] = "Runa Profana Esquerda"
         L["slot_right_unholy"] = "Runa Profana Direita"
-        
+
         -- Types.lua Eclipse Phases
         L["unknown_phase"] = "Fase Desconhecida"
         L["neutral_phase"] = "Fase Neutra"
         L["solar_phase"] = "Fase Solar"
         L["lunar_phase"] = "Fase Lunar"
-        
+
         -- Types.lua Swap Sets
         L["swap_set_unknown"] = "Conjunto de Troca Desconhecido"
         L["swap_set_main"] = "Conjunto de Troca Principal"
         L["swap_set_swap1"] = "Conjunto de Troca 1"
-        
+
         -- Types.lua Mob Types
         L["none"] = "Nenhum"
         L["aberration"] = "Aberração"

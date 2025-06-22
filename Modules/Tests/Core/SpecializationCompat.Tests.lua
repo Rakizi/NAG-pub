@@ -23,13 +23,13 @@ function SpecializationCompatTests:test_GetSpecID_ReturnsCorrectIDForCurrentVers
     -- Arrange
     local playerClass = select(2, UnitClass("player"))
     local specIndex = 1
-    
+
     -- This test is highly dependent on the running game version.
     -- We can only assert that it returns a number.
-    
+
     -- Act
     local specId = SpecializationCompat:GetSpecID(playerClass, specIndex)
-    
+
     -- Assert
     Assert.isNotNil(specId, "GetSpecID should return a value for a valid class and spec index.")
     Assert.isType(specId, "number", "SpecID should be a number.")
@@ -37,14 +37,14 @@ end
 
 function SpecializationCompatTests:test_GetClassAndSpecIndexForSpecID()
     -- Arrange: Use a known spec ID. Retribution Paladin is 70 on retail/mop.
-    local retPaladinSpecID = 70 
+    local retPaladinSpecID = 70
     if Version:IsCata() then
         retPaladinSpecID = 855 -- Retribution Paladin for Cata
     end
-    
+
     -- Act
     local class, index = SpecializationCompat:GetClassAndSpecIndexForSpecID(retPaladinSpecID)
-    
+
     -- Assert
     Assert.areEqual("PALADIN", class, "Should correctly identify PALADIN class for the spec ID.")
     Assert.areEqual(3, index, "Should correctly identify the 3rd spec index.")
@@ -54,10 +54,10 @@ function SpecializationCompatTests:test_GetNumSpecializations_ReturnsCorrectCoun
     -- This test is also environment-dependent.
     local warriorClassID = 1
     local druidClassID = 11
-    
+
     local warriorSpecs = SpecializationCompat:GetNumSpecializations(warriorClassID)
     local druidSpecs = SpecializationCompat:GetNumSpecializations(druidClassID)
-    
+
     if Version:IsCata() then
         Assert.areEqual(3, warriorSpecs, "Warrior should have 3 specs in Cataclysm.")
         Assert.areEqual(4, druidSpecs, "Druid should have 4 specs in Cataclysm.")

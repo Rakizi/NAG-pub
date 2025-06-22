@@ -40,22 +40,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 local pairs = pairs
 local ipairs = ipairs
@@ -84,7 +84,7 @@ local function formatDate(dateValue)
     return L["rotationUnknown"] or "Unknown"
 end
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
     global = {
         debug = false,
@@ -116,7 +116,7 @@ local RotationManager = NAG:CreateModule("RotationManager", defaults, {
     }
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function RotationManager:ModuleInitialize()
         self.frame = nil
@@ -133,7 +133,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 function RotationManager:OnRotationChanged()
     self:Debug("OnRotationChanged: Starting")
     if self.frame and self.frame:IsShown() then
@@ -141,7 +141,7 @@ function RotationManager:OnRotationChanged()
     end
 end
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function RotationManager:Toggle()
     self:Debug("Toggle: Starting")
     if not self.frame then
@@ -401,7 +401,7 @@ function RotationManager:RefreshRotationList()
     -- Get current spec
     local currentSpec = SpecializationCompat:GetActiveSpecialization()
     local specID = 0  -- Default to 0 (spec-independent) if no valid spec
-    
+
     -- Only try to get spec info if we have a valid spec
     if currentSpec and currentSpec > 0 then
         specID = select(1, SpecializationCompat:GetSpecializationInfo(currentSpec)) or 0
@@ -686,7 +686,7 @@ end
 -- Register slash command
 NAG:RegisterChatCommand("nagrot", function() RotationManager:Toggle() end)
 
--- ~~~~~~~~~~ VALIDATION ~~~~~~~~~~ 
+-- ~~~~~~~~~~ VALIDATION ~~~~~~~~~~
 function RotationManager:ValidateAllRotations()
     local results = {}
     local classModule = NAG:GetModule(NAG.CLASS)

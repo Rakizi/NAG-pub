@@ -1,8 +1,8 @@
 --[[
     Uptime Tracker Module
-    
+
     A flexible, class-agnostic tracker for buffs, debuffs, and cooldowns.
-    
+
     Author: Rakizi & Gemini
     Date: 2024
 ]]
@@ -94,7 +94,7 @@
 ]]
 
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG")
 local AceGUI = LibStub("AceGUI-3.0")
@@ -196,16 +196,16 @@ end
 
 function UptimeTracker:ModuleEnable()
     self:Debug("Enabling UptimeTracker")
-    
+
     if not frame then
         self:CreateFrames()
     end
-    
+
     self:UpdateVisibility()
-    
+
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnCombatStateChanged")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnCombatStateChanged")
-    
+
     frame:SetScript("OnUpdate", function(self, elapsed)
         lastUpdate = lastUpdate + elapsed
         if lastUpdate >= UPDATE_INTERVAL then
@@ -218,12 +218,12 @@ end
 
 function UptimeTracker:ModuleDisable()
     self:Debug("Disabling UptimeTracker")
-    
+
     if frame then
         frame:SetScript("OnUpdate", nil)
         frame:Hide()
     end
-    
+
     self:UnregisterEvent("PLAYER_REGEN_DISABLED")
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 
@@ -238,24 +238,24 @@ function UptimeTracker:CreateFrames()
     frame:SetMovable(true)
     frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
-    
+
     -- Background texture
     local bgTexture = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
     bgTexture:SetAllPoints()
     frame.bgTexture = bgTexture
-    
+
     frame:SetScript("OnDragStart", function()
         if not self.db.profile.bar.locked and not UnitAffectingCombat("player") then
             frame:StartMoving()
             isDragging = true
         end
     end)
-    
+
     frame:SetScript("OnDragStop", function()
         if isDragging then
             frame:StopMovingOrSizing()
             isDragging = false
-            
+
             local point, _, _, x, y = frame:GetPoint()
             self.db.profile.bar.point = point
             self.db.profile.bar.x = x
@@ -271,7 +271,7 @@ end
 
 function UptimeTracker:UpdateFrameSettings()
     if not frame then return end
-    
+
     -- Hide everything if there are no tracked effects
     if not self.db.profile.trackedAuras or #self.db.profile.trackedAuras == 0 then
         frame:Hide()
@@ -315,7 +315,7 @@ function UptimeTracker:UpdateFrameSettings()
     end
 
     local ringSettings = self.db.profile.rings
-    
+
     -- Configure BG Ring
     frame.inactiveContainer.bgRingFrame:SetFrameStrata("BACKGROUND")
     local iconSize = self.db.profile.sparks.size or 25
@@ -340,13 +340,13 @@ function UptimeTracker:UpdateFrameSettings()
     for _, spark in pairs(frame.auraSparks) do
         spark:Hide()
     end
-    
+
     local barHeight = self.db.profile.bar.height
 
     -- Create/Update bars for tracked auras
     for i, auraInfo in ipairs(self.db.profile.trackedAuras) do
         local auraId = auraInfo.id or tostring(i)
-        
+
         -- Create Bar
         local bar = frame.auraBars[auraId]
         if not bar then
@@ -354,7 +354,7 @@ function UptimeTracker:UpdateFrameSettings()
             frame.auraBars[auraId] = bar
         end
         bar:SetPoint("LEFT", frame, "LEFT", 0, 0) -- All bars have same Y
-        
+
         -- Data migration: ensure color is valid and a unique copy
         local c = auraInfo.color
         local fallbackColor = defaults.profile.auraBars.color
@@ -366,7 +366,7 @@ function UptimeTracker:UpdateFrameSettings()
             c = auraInfo.color
         end
         bar:SetColorTexture(c.r, c.g, c.b, c.a)
-        
+
         -- Create Spark
         local sparkFrame = frame.auraSparks[auraId]
         if not sparkFrame then
@@ -399,7 +399,7 @@ function UptimeTracker:UpdateFrameSettings()
             sparkFrame.maskTexture = mask -- Store mask texture
             frame.auraSparks[auraId] = sparkFrame
         end
-        
+
         -- Apply zoom to the icon texture
         if sparkFrame and sparkFrame.sparkTexture then
             local zoom = self.db.profile.sparks.zoom or 1.0
@@ -411,17 +411,17 @@ function UptimeTracker:UpdateFrameSettings()
                 sparkTexture:SetTexCoord(0, 1, 0, 1) -- Reset to default
             end
         end
-        
+
         if sparkFrame.maskTexture then
             sparkFrame.maskTexture:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
         end
 
         sparkFrame:SetSize(self.db.profile.sparks.size, self.db.profile.sparks.size)
-        
+
         -- Set height, ensuring a minimum visible height
         local auraBarHeight = math.max(2, barHeight * (auraInfo.heightPct or 1.0))
         bar:SetHeight(auraBarHeight)
-        
+
         bar:Show()
     end
 
@@ -479,7 +479,7 @@ function UptimeTracker:UpdateDisplay()
 
         if bar and spark then
             local remaining, _ = self:GetAuraStatus(auraInfo)
-            
+
             local width = 0
             if remaining and remaining > 0 and maxTrackTime > 0 then
                 -- The display time is the remaining time, but capped at the max track time.
@@ -552,7 +552,7 @@ function UptimeTracker:GetAuraStatus(auraInfo)
         end
 
         local gcd = NAG:GCDTimeToReady() or 0
-        
+
         -- Only show a cooldown bar if the spell's actual cooldown is longer than the GCD.
         if rawRemaining > gcd then
             if duration and duration > 0 then
@@ -569,19 +569,19 @@ end
 function UptimeTracker:UpdateVisibility()
     if not frame then return end
     self:Debug("UptimeTracker:UpdateVisibility called.")
-    
+
     if isPositioning then
         self:Debug(" -> Forcing frame to show for positioning.")
         frame:Show()
         return
     end
-    
+
     if not self.db.profile.showTracker then
         self:Debug(" -> Hiding frame: 'Show Tracker' is disabled.")
         frame:Hide()
         return
     end
-    
+
     if self.db.profile.hideOutOfCombat and not UnitAffectingCombat("player") then
         self:Debug(" -> Hiding frame: 'Hide Out of Combat' is enabled and player is OOC.")
         frame:Hide()
@@ -619,9 +619,9 @@ function UptimeTracker:RegisterModuleOptions()
             args = {}
         }
     end
-    
+
     NAG.options.display.args[self:GetName()] = self:GetOptions()
-    
+
     -- Let AceConfig know that we've changed the options table.
     LibStub("AceConfigRegistry-3.0"):NotifyChange("NAG")
 end
@@ -910,7 +910,7 @@ function UptimeTracker:GetOptions()
     return options
 end
 
--- ~~~~~~~~~~ AURA MANAGEMENT WINDOW ~~~~~~~~~~ 
+-- ~~~~~~~~~~ AURA MANAGEMENT WINDOW ~~~~~~~~~~
 function UptimeTracker:CreateAuraManagementWindow()
     -- If frame exists, do nothing
     if self.auraManagementFrame then
@@ -953,7 +953,7 @@ function UptimeTracker:BuildAuraManagementWindow()
     if not self.auraManagementFrame then
         self:CreateAuraManagementWindow()
     end
-    
+
     local frame = self.auraManagementFrame
     if not frame or not frame.scroll then return end
 
@@ -1034,9 +1034,9 @@ function UptimeTracker:BuildAuraManagementWindow()
                         itemInfo = C_Item_GetItemInfo(input)
                     end
                     self:Debug("C_Item.GetItemInfo result:", itemInfo and "Got info table" or "NIL")
-                    
+
                     -- itemInfo is an indexed table. [1] is name, [2] is link.
-                    if itemInfo and itemInfo[2] then 
+                    if itemInfo and itemInfo[2] then
                         local itemName = itemInfo[1]
                         local itemLink = itemInfo[2]
                         self:Debug("Item found - Name:", itemName, "| Link:", itemLink)
@@ -1060,7 +1060,7 @@ function UptimeTracker:BuildAuraManagementWindow()
                                     break -- Use the first one we find
                                 end
                                 self:Debug("Found related spellId:", tostring(relatedSpellId))
-                                
+
                                 finalName = GetSpellInfo(relatedSpellId) or itemName
                                 foundId = relatedSpellId
                             else
@@ -1095,7 +1095,7 @@ function UptimeTracker:BuildAuraManagementWindow()
                     nameWidget:SetText(text)
                     self:Print(string.format("Could not resolve '%s'. Please enter a valid Spell/Item Name or ID.", text))
                 end
-                
+
                 self:UpdateFrameSettings()
             end)
             group:AddChild(nameWidget)
@@ -1197,4 +1197,4 @@ function UptimeTracker:ApplySettings()
     self:UpdateFrameSettings()
 end
 
-ns.UptimeTracker = UptimeTracker 
+ns.UptimeTracker = UptimeTracker

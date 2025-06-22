@@ -81,7 +81,7 @@ ns.AddRotationToDefaults(defaults,
         or NAG:Cast(51533)
         or (NAG:DotRemainingTime(3599) < 15.0) and NAG:Cast(3599)
         ]],
-        
+
         -- New action-based format
         --prePullActions = {{action = {castSpell = {spellId = {spellId = 51533}}}, doAtValue = {const = {val = "-1.6s"}}}},
         --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {condition = {and = {vals = {{not = {val = {dotIsActive = {spellId = {spellId = 3599}}}}}, {not = {val = {auraIsActive = {auraId = {spellId = 2894}}}}}}}}, castSpell = {spellId = {spellId = 3599}}}}, {action = {castSpell = {spellId = {spellId = 117014}}}}, {action = {castSpell = {spellId = {spellId = 115356}}}}, {action = {castSpell = {spellId = {spellId = 17364}}}}, {action = {castSpell = {spellId = {spellId = 60103}}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpLt", lhs = {math = {op = "OpAdd", lhs = {inputDelay = {}}, rhs = {spellCastTime = {spellId = {spellId = 403}}}}}, rhs = {autoTimeToNext = {}}}}, {cmp = {op = "OpGe", lhs = {auraNumStacks = {auraId = {spellId = 51530}}}, rhs = {const = {val = "3"}}}}}}}, castSpell = {spellId = {spellId = 403}}}}, {action = {condition = {cmp = {op = "OpLe", lhs = {currentTime = {}}, rhs = {const = {val = "7"}}}}, castSpell = {spellId = {spellId = 2062}}}}, {action = {condition = {and = {vals = {{not = {val = {dotIsActive = {spellId = {spellId = 8050, tag = 1}}}}}, {auraIsActive = {auraId = {spellId = 73683}}}}}}, castSpell = {spellId = {spellId = 8050}}}}, {action = {castSpell = {spellId = {spellId = 73680}}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpLt", lhs = {math = {op = "OpAdd", lhs = {inputDelay = {}}, rhs = {spellCastTime = {spellId = {spellId = 421}}}}}, rhs = {autoTimeToNext = {}}}}, {cmp = {op = "OpGe", lhs = {auraNumStacks = {auraId = {spellId = 51530}}}, rhs = {const = {val = "1"}}}}}}}, castSpell = {spellId = {spellId = 421}}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpLe", lhs = {dotRemainingTime = {spellId = {spellId = 8050}}}, rhs = {const = {val = "9s"}}}}, {auraIsActive = {auraId = {spellId = 73683}}}}}}, castSpell = {spellId = {spellId = 8050}}}}, {action = {castSpell = {spellId = {spellId = 8042}}}}, {action = {castSpell = {spellId = {spellId = 51533}}}}, {action = {condition = {cmp = {op = "OpLt", lhs = {dotRemainingTime = {spellId = {spellId = 3599}}}, rhs = {const = {val = "15s"}}}}, castSpell = {spellId = {spellId = 3599}}}}},
@@ -116,7 +116,7 @@ ns.AddRotationToDefaults(defaults,
         or NAG:Cast(114074)
         or NAG:Cast(421)
         ]],
-        
+
         -- New action-based format
         --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 2894}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 421}}}, doAtValue = {const = {val = "-1s"}}}},
         --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {castSpell = {spellId = {spellId = 114074}}}}, {action = {castSpell = {spellId = {spellId = 421}}}}},
@@ -155,7 +155,7 @@ ns.AddRotationToDefaults(defaults,
         or (NAG:AuraNumStacks(324) == 7) and NAG:Cast(8042)
         or NAG:Cast(403)
         ]],
-        
+
         -- New action-based format
         --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 2894}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 403}}}, doAtValue = {const = {val = "-1s"}}}},
         --aplActions = {{action = {castSpell = {spellId = {spellId = 73680}}}}, {action = {autocastOtherCooldowns = {}}}, {action = {condition = {cmp = {op = "OpGt", lhs = {dotRemainingTime = {spellId = {spellId = 8050}}}, rhs = {spellCastTime = {spellId = {spellId = 51505}}}}}, castSpell = {spellId = {spellId = 51505}}}}, {action = {multidot = {spellId = {spellId = 8050}, maxDots = 1, maxOverlap = {const = {val = "2s"}}}}}, {action = {condition = {and = {vals = {{not = {val = {auraIsActive = {auraId = {spellId = 2894}}}}}, {not = {val = {dotIsActive = {spellId = {spellId = 3599}}}}}}}}, castSpell = {spellId = {spellId = 3599}}}}, {action = {condition = {cmp = {op = "OpEq", lhs = {auraNumStacks = {auraId = {spellId = 324}}}, rhs = {const = {val = "7"}}}}, castSpell = {spellId = {spellId = 8042}}}}, {action = {castSpell = {spellId = {spellId = 403}}}}},
@@ -194,7 +194,7 @@ ns.AddRotationToDefaults(defaults,
         or NAG:Cast(114074)
         or NAG:Cast(421)
         ]],
-        
+
         -- New action-based format
         --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 2894}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 421}}}, doAtValue = {const = {val = "-1s"}}}},
         --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {condition = {cmp = {op = "OpGt", lhs = {dotRemainingTime = {spellId = {spellId = 8050}}}, rhs = {spellCastTime = {spellId = {spellId = 51505}}}}}, castSpell = {spellId = {spellId = 51505}}}}, {action = {multidot = {spellId = {spellId = 8050}, maxDots = 2, maxOverlap = {const = {val = "2s"}}}}}, {action = {condition = {cmp = {op = "OpEq", lhs = {auraNumStacks = {auraId = {spellId = 324}}}, rhs = {const = {val = "7"}}}}, castSpell = {spellId = {spellId = 8042}}}}, {action = {condition = {and = {vals = {{not = {val = {auraIsActive = {auraId = {spellId = 2894}}}}}, {not = {val = {dotIsActive = {spellId = {spellId = 3599}}}}}}}}, castSpell = {spellId = {spellId = 3599}}}}, {action = {castSpell = {spellId = {spellId = 114074}}}}, {action = {castSpell = {spellId = {spellId = 421}}}}},
@@ -228,4 +228,4 @@ function Shaman:RegisterSpellTracking()
     if not SpellTracker then return end
 end
 
-NAG.Class = Shaman 
+NAG.Class = Shaman

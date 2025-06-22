@@ -34,22 +34,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
@@ -1533,11 +1533,11 @@ do -- Event Handlers
     function DataManager:NAG_VERSION_DATA_SELECTED()
         if ns.data then
             local startTime = debugprofilestop()
-            
+
             -- Use the new DataWalker module instead of TableWalker
             local DataWalker = NAG:GetModule("DataWalker")
             DataWalker:Walk(ns.data, ProcessorsV2)
-            
+
             local endTime = debugprofilestop()
             self:Debug(format("OnInitialize: DataWalker took %dms", endTime - startTime))
             self:SendMessage("NAG_DATA_LOADED")

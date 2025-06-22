@@ -5,7 +5,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -21,22 +21,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 local setmetatable = setmetatable
@@ -72,7 +72,7 @@ APLModule.Implementations = {
     Actions = {}
 }
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function APLModule:ModuleInitialize()
         local startTime = debugprofilestop()
@@ -126,7 +126,7 @@ end
 -- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 -- (No options UI defined in this module)
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function APLModule:InitializeMetadataFromSchema()
     local startTime = debugprofilestop()
     self:Debug("Initializing metadata from schema")
@@ -165,8 +165,8 @@ function APLModule:InitializeMetadataFromSchema()
             self.Metadata.Values[valueType] = metadata
         end
     end
-    self:Debug(format("Generated metadata for %d actions and %d values", 
-        ns.tCount(self.Metadata.Actions), 
+    self:Debug(format("Generated metadata for %d actions and %d values",
+        ns.tCount(self.Metadata.Actions),
         ns.tCount(self.Metadata.Values)))
     local endTime = debugprofilestop()
     self:Debug(format("Metadata initialization completed in %.2f ms", endTime - startTime))

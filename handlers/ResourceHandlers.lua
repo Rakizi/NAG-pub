@@ -1,4 +1,4 @@
--- ~~~~~~~~~~ ResourceHandlers ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ResourceHandlers ~~~~~~~~~~
 --- Handles resource management and tracking for the NAG addon.
 ---
 --- This module provides functions for checking player resources such as mana,
@@ -29,7 +29,7 @@ local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 --- ======= WoW API =======
 local UnitPower = UnitPower
 
--- ~~~~~~~~~~ FUNCTION LOCALIZATION ~~~~~~~~~~ 
+-- ~~~~~~~~~~ FUNCTION LOCALIZATION ~~~~~~~~~~
 -- Math operations (WoW optimized)
 local format = format or string.format
 local floor = floor or math.floor
@@ -70,7 +70,7 @@ local C_SpecializationInfo = _G.C_SpecializationInfo
 local GetItemInfo = ns.GetItemInfoUnified
 local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
 local UnitClass = _G.UnitClass
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Module level variables
 local spellNames = {}
 
@@ -178,7 +178,7 @@ do --== RESOURCE CHECKS ==--
         return self:HasResource(spellId, Enum.PowerType.ComboPoints)
     end
 
-    
+
     --- Checks if the player has enough Chi for a spell.
     --- @param spellId number The ID of the spell to check
     --- @return boolean True if the player has enough Chi, false otherwise
@@ -717,29 +717,29 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
             self:Error("EnergyTimeToTarget: No targetEnergy provided")
             return 0
         end
-        
+
         -- If targetEnergy is an APLValue table, extract the actual value
         if type(targetEnergy) == "table" and targetEnergy.GetFloat then
             targetEnergy = targetEnergy:GetFloat()
         elseif type(targetEnergy) ~= "number" then
             targetEnergy = 0
         end
-        
+
         local currentEnergy = self:CurrentEnergy()
-        
+
         -- If we already have enough energy, return 0
         if currentEnergy >= targetEnergy then
             return 0
         end
-        
+
         -- Calculate time needed
         local energyNeeded = targetEnergy - currentEnergy
         local regenRate = self:EnergyRegenPerSecond()
-        
+
         if regenRate <= 0 then
             return 999 -- Prevent division by zero
         end
-        
+
         return energyNeeded / regenRate
     end
 
@@ -752,19 +752,19 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
         end
 
         local spellId = 115399 -- Chi Brew spell ID
-        
+
         -- Check if spell is known
         if not self:IsKnown(spellId) then
             return 0
         end
-        
+
         local charges, maxCharges, chargeStart, chargeDuration = GetSpellCharges(spellId)
-        
+
         -- If no charge system or all charges available
         if not charges or charges >= maxCharges then
             return 0
         end
-        
+
         -- If no charges but spell is on cooldown
         if charges == 0 then
             local start, duration = GetSpellCooldown(spellId)
@@ -772,13 +772,13 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
                 return max(0, (start + duration) - GetTime())
             end
         end
-        
+
         -- Calculate time until next charge
         if chargeStart and chargeDuration then
             local timeToNextCharge = (chargeStart + chargeDuration) - GetTime()
             return max(0, timeToNextCharge)
         end
-        
+
         return 0
     end
 
@@ -793,9 +793,9 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
     function NAG:EnergyRegenPerSecond()
         -- Base regen rate is 10 energy per second
         local baseRegen = 10
-        
+
         -- Check if we're in Cat Form
-        -- TODO: Implement this        
+        -- TODO: Implement this
         return baseRegen
     end
 
@@ -867,11 +867,11 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
         if not runeType then return 0 end
         if self.CLASS ~= "DEATHKNIGHT" then return 0 end
         local total = 0
-        
+
         -- Get Types for more readable code
         local RuneType = self.Types.RuneType
         local RuneSlot = self.Types.RuneSlot
-        
+
         -- Handle Death runes separately (original behavior)
         if runeType == RuneType.RuneDeath then
             for i = 1, 6 do
@@ -882,7 +882,7 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
             end
             return total
         end
-        
+
         -- Handle Blood runes - check only blood slots
         if runeType == RuneType.RuneBlood then
             if self:CurrentRuneActive(RuneSlot.SlotLeftBlood) then
@@ -893,7 +893,7 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
             end
             return total
         end
-        
+
         -- Handle Frost runes - check only frost slots
         if runeType == RuneType.RuneFrost then
             if self:CurrentRuneActive(RuneSlot.SlotLeftFrost) then
@@ -904,7 +904,7 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
             end
             return total
         end
-        
+
         -- Handle Unholy runes - check only unholy slots
         if runeType == RuneType.RuneUnholy then
             if self:CurrentRuneActive(RuneSlot.SlotLeftUnholy) then
@@ -915,7 +915,7 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
             end
             return total
         end
-        
+
         -- Default case for unknown rune types
         for i = 1, 6 do
             local rt = GetRuneType(i)
@@ -1053,7 +1053,7 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
                 highestCooldown = max(highestCooldown, currentCooldown)
             end
         end
-        
+
         return highestCooldown
     end
 
@@ -1108,12 +1108,12 @@ do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
                 lowestCooldown = min(lowestCooldown, currentCooldown)
             end
         end
-        
+
         -- If lowestCooldown wasn't changed, no matching runes were found
         if lowestCooldown == 999999 then
             return 0
         end
-        
+
         return lowestCooldown
     end
 

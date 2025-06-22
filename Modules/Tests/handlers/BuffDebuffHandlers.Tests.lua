@@ -23,7 +23,7 @@ function BuffDebuffHandlersTests:setup()
     self.originalFindAura = NAG.FindAura
     self.originalGetTime = _G.GetTime
     self.originalNextTime = NAG.NextTime
-    
+
     -- Add a mock spell to DataManager for the tests
     DataManager:AddSpell(12345, {"Spells"}, {})
 end
@@ -47,7 +47,7 @@ function BuffDebuffHandlersTests:test_AuraNumStacks_ReturnsCorrectValue()
         end
         return false
     end
-    
+
     -- Act & Assert
     Assert.areEqual(5, NAG:AuraNumStacks(12345), "AuraNumStacks should return the stack count from FindAura.")
     Assert.areEqual(0, NAG:AuraNumStacks(99999), "AuraNumStacks should return 0 for an inactive aura.")
@@ -64,10 +64,10 @@ function BuffDebuffHandlersTests:test_AuraRemainingTime_CalculatesCorrectly()
         return false
     end
     NAG.NextTime = function() return 1005.0 end -- Simulate current time
-    
+
     -- Act
     local remaining = NAG:AuraRemainingTime(12345)
-    
+
     -- Assert
     local tolerance = 0.01
     Assert.isTrue(math.abs(remaining - 10.0) < tolerance, "AuraRemainingTime should calculate the correct remaining duration.")
@@ -76,7 +76,7 @@ end
 function BuffDebuffHandlersTests:test_AuraShouldRefresh_Logic()
     -- Arrange: Mock AuraRemainingTime directly for simplicity
     local originalAuraRemainingTime = NAG.AuraRemainingTime
-    
+
     -- Case 1: Refresh needed
     NAG.AuraRemainingTime = function() return 2.0 end
     Assert.isTrue(NAG:AuraShouldRefresh(12345, 5.0), "Should refresh when remaining time is less than overlap.")
@@ -84,7 +84,7 @@ function BuffDebuffHandlersTests:test_AuraShouldRefresh_Logic()
     -- Case 2: Refresh not needed
     NAG.AuraRemainingTime = function() return 8.0 end
     Assert.isFalse(NAG:AuraShouldRefresh(12345, 5.0), "Should not refresh when remaining time is greater than overlap.")
-    
+
     -- Cleanup
     NAG.AuraRemainingTime = originalAuraRemainingTime
 end

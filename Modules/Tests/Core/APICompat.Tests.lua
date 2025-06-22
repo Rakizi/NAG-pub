@@ -59,7 +59,7 @@ end
 
 function APICompatTests:test_GetItemInfoUnified_ReturnsMultipleValues()
     local name, link, quality, level, reqLevel, type, subType = ns.GetItemInfoUnified(6948)
-    
+
     Assert.isNotNil(name, "GetItemInfoUnified should return multiple values, not a table.")
     Assert.isType(name, "string")
     Assert.isType(link, "string")

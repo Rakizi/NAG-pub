@@ -705,7 +705,7 @@ if L then
         L["xOffsetDesc"] = "Establecer el desplazamiento horizontal del resplandor"
         L["yOffsetDesc"] = "Establecer el desplazamiento vertical del resplandor"
         L["yes"] = "Sí"
-        
+
         -- OverlayManager
         L["overlayManager"] = "Administrador de Superposición"
         L["overlayTypes"] = "Tipos de Superposición"
@@ -759,7 +759,7 @@ if L then
         L["resetClassDesc"] = "Restablecer configuraciones de clase a sus valores predeterminados"
         L["resetToDefault"] = "Restablecer a Predeterminado"
         L["resetConfirmation"] = "¿Estás seguro de que quieres restablecer '%s' a la configuración predeterminada?\nEsto no se puede deshacer."
-        
+
         -- Types.lua Stats
         L["strength"] = "Fuerza"
         L["agility"] = "Agilidad"
@@ -788,14 +788,14 @@ if L then
         L["health"] = "Salud"
         L["mana"] = "Maná"
         L["mp5"] = "Maná por 5 segundos"
-        
+
         -- Types.lua Categories
         L["character"] = "Personaje"
         L["buffs"] = "Beneficios"
         L["debuffs"] = "Perjuicios"
         L["combat"] = "Combate"
         L["class"] = "Clase"
-        
+
         -- Types.lua Buff Types
         L["stats"] = "Estadísticas"
         L["spell_resistance"] = "Resistencia a Hechizos"
@@ -812,7 +812,7 @@ if L then
         L["major_mana"] = "Maná Mayor"
         L["armor"] = "Armadura"
         L["heroism"] = "Heroísmo"
-        
+
         -- Types.lua Debuff Types
         L["spell_damage"] = "Daño de Hechizos"
         L["spell_crit"] = "Golpe Crítico de Hechizos"
@@ -822,7 +822,7 @@ if L then
         L["physical_damage_reduction"] = "Reducción de Daño Físico"
         L["attack_speed"] = "Velocidad de Ataque"
         L["healing_reduction"] = "Reducción de Sanación"
-        
+
         -- Types.lua Combat Types
         L["unknown"] = "Desconocido"
         L["any"] = "Cualquiera"
@@ -830,7 +830,7 @@ if L then
         L["main_hand"] = "Mano Principal"
         L["off_hand"] = "Mano Secundaria"
         L["ranged"] = "A Distancia"
-        
+
         -- Types.lua Class Types
         L["humanoid"] = "Humanoide"
         L["ghost_wolf"] = "Lobo Fantasma"
@@ -847,14 +847,14 @@ if L then
         L["blood"] = "Sangre"
         L["frost"] = "Escarcha"
         L["unholy"] = "Profano"
-        
+
         -- Types.lua Rune Types
         L["rune_unknown"] = "Runa Desconocida"
         L["rune_blood"] = "Runa de Sangre"
         L["rune_frost"] = "Runa de Escarcha"
         L["rune_unholy"] = "Runa Profana"
         L["rune_death"] = "Runa de Muerte"
-        
+
         -- Types.lua Rune Slots
         L["slot_unknown"] = "Ranura Desconocida"
         L["slot_left_blood"] = "Ranura de Runa de Sangre Izquierda"
@@ -863,18 +863,18 @@ if L then
         L["slot_right_frost"] = "Ranura de Runa de Escarcha Derecha"
         L["slot_left_unholy"] = "Ranura de Runa Profana Izquierda"
         L["slot_right_unholy"] = "Ranura de Runa Profana Derecha"
-        
+
         -- Types.lua Eclipse Phases
         L["unknown_phase"] = "Fase Desconocida"
         L["neutral_phase"] = "Fase Neutral"
         L["solar_phase"] = "Fase Solar"
         L["lunar_phase"] = "Fase Lunar"
-        
+
         -- Types.lua Swap Sets
         L["swap_set_unknown"] = "Conjunto de Intercambio Desconocido"
         L["swap_set_main"] = "Conjunto Principal de Intercambio"
         L["swap_set_swap1"] = "Conjunto de Intercambio 1"
-        
+
         -- Types.lua Mob Types
         L["none"] = "Ninguno"
         L["aberration"] = "Aberración"

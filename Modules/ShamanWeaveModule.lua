@@ -6,7 +6,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG")
 local SpecializationCompat = ns.SpecializationCompat
@@ -100,7 +100,7 @@ function ShamanWeaveModule:OnInitialize()
 
     self:Debug("Initializing ShamanWeaveModule")
     self.db = NAG.db:RegisterNamespace("ShamanWeaveModule", defaults)
-    
+
     -- Initialize last known states for change detection
     self.lastKnownStates = {
         difference = 0,
@@ -109,7 +109,7 @@ function ShamanWeaveModule:OnInitialize()
         lastPetSync = 0,
         isReady = false
     }
-    
+
     -- Register for spec change events
     self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     self:RegisterMessage("NAG_SPEC_UPDATED")
@@ -129,7 +129,7 @@ function ShamanWeaveModule:CheckSpecialization()
     local currentSpec = SpecializationCompat:GetActiveSpecialization()
     if currentSpec then
         local specId = select(1, SpecializationCompat:GetSpecializationInfo(currentSpec))
-        
+
         if specId == ENHANCEMENT_SPEC_ID then
             -- Enable module for Enhancement spec
             if not self:IsEnabled() then
@@ -153,20 +153,20 @@ function ShamanWeaveModule:ResetPetSyncState()
     self.defaultState.currentTarget = nil
     self.defaultState.lastStateChangeTime = 0
     self.defaultState.syncCheckActive = false
-    
+
     -- Reset last known states
     self.lastKnownStates.difference = 0
     self.lastKnownStates.pendingPetSync = false
     self.lastKnownStates.lastMainHandSwing = self.defaultState.lastMainHandSwing
     self.lastKnownStates.lastPetSync = self.defaultState.lastPetSync
     self.lastKnownStates.isReady = false
-    
+
     -- Cancel existing timer if any
     if self.defaultState.syncCheckTimer then
         Timer:Cancel(self.defaultState.syncCheckTimer)
         self.defaultState.syncCheckTimer = nil
     end
-    
+
     self:Debug("[ResetPetSyncState] Pet sync state reset")
 end
 
@@ -176,12 +176,12 @@ function ShamanWeaveModule:StartSyncCheckTimer()
         Timer:Cancel(self.defaultState.syncCheckTimer)
         self.defaultState.syncCheckTimer = nil
     end
-    
+
     -- Set the current time as the reference point
     local now = GetTime()
     self.defaultState.lastStateChangeTime = now
     self.defaultState.syncCheckActive = false
-    
+
     -- Start a new timer for periodic sync checks
     self.defaultState.syncCheckTimer = Timer:Create(
         Timer.Categories.COMBAT,
@@ -192,108 +192,108 @@ function ShamanWeaveModule:StartSyncCheckTimer()
         PET_SYNC_CHECK_INTERVAL, -- Check exactly every 4 seconds
         true -- Repeating
     )
-    
+
     self:Debug(format("[StartSyncCheckTimer] Started sync timer - first check at %.1f", now + PET_SYNC_CHECK_INTERVAL))
 end
 
 function ShamanWeaveModule:IsSyncOperationAllowed()
     local now = GetTime()
     local timeSinceLastAttempt = now - self.defaultState.lastSyncAttempt
-    
+
     if timeSinceLastAttempt < PET_SYNC_ATTEMPT_COOLDOWN then
         self:Debug(format("[IsSyncOperationAllowed] Too soon since last attempt (%.2f seconds ago)", timeSinceLastAttempt))
         return false
     end
-    
+
     if self.defaultState.isSummoning then
         self:Debug("[IsSyncOperationAllowed] Summon already in progress")
         return false
     end
-    
+
     return true
 end
 
 function ShamanWeaveModule:CheckWeaponSpeeds()
     local mhSpeed  = swingTimerLib:UnitSwingTimerInfo("player", "mainhand")
     local ohSpeed  = swingTimerLib:UnitSwingTimerInfo("player", "offhand")
-    
+
     if not mhSpeed or not ohSpeed then
         return false
     end
-    
+
     -- If offhand is a shield (speed = 0), don't sync but allow weaving
     if ohSpeed == 0 then
         return false
     end
-    
+
     local speedDifference = math.abs(mhSpeed - ohSpeed)
     return speedDifference <= WEAPON_SPEED_THRESHOLD
 end
 
 function ShamanWeaveModule:CheckWeaponSync()
-    if not self.db.profile.enablePetSync then 
-        return 
+    if not self.db.profile.enablePetSync then
+        return
     end
-    
+
     if not UnitAffectingCombat("player") then
         return
     end
-    
+
     -- Check if weapons have different speeds
     if not self:CheckWeaponSpeeds() then
         self:Debug("[CheckWeaponSync] Weapons have different speeds, disabling auto-sync")
         return
     end
-    
+
     local now = GetTime()
     local timeSinceStateChange = now - self.defaultState.lastStateChangeTime
     local timeSinceLastDismissal = now - self.defaultState.lastDismissalTime
-    
+
     -- Only check for sync if it's been at least 4 seconds since combat entry or target change
     if timeSinceStateChange < PET_SYNC_CHECK_INTERVAL then
-        self:Debug(format("[CheckWeaponSync] Waiting for initial delay (%.1f seconds remaining)", 
+        self:Debug(format("[CheckWeaponSync] Waiting for initial delay (%.1f seconds remaining)",
             PET_SYNC_CHECK_INTERVAL - timeSinceStateChange))
         return
     end
-    
+
     -- Don't check if we recently dismissed the pet
     if timeSinceLastDismissal < PET_SYNC_CHECK_INTERVAL then
-        self:Debug(format("[CheckWeaponSync] Recently dismissed pet (%.1f seconds ago), skipping check", 
+        self:Debug(format("[CheckWeaponSync] Recently dismissed pet (%.1f seconds ago), skipping check",
             timeSinceLastDismissal))
         return
     end
-    
+
     -- Check if we're allowed to perform sync operations
     if not self:IsSyncOperationAllowed() then
         return
     end
-    
+
     -- If this is the first check after the delay, note that checks are now active
     if not self.defaultState.syncCheckActive then
         self:Debug("[CheckWeaponSync] Initial delay complete, beginning sync checks")
         self.defaultState.syncCheckActive = true
     end
-    
+
     local difference = NAG:SwingTimeDifference()
     local absDifference = math.abs(difference)
-    
-    self:Debug(format("[CheckWeaponSync] Checking weapon sync: difference = %.3f, abs difference = %.3f, threshold = %.3f, pendingPetSync = %s", 
+
+    self:Debug(format("[CheckWeaponSync] Checking weapon sync: difference = %.3f, abs difference = %.3f, threshold = %.3f, pendingPetSync = %s",
         difference,
         absDifference,
         self.db.profile.petSyncThreshold,
         tostring(self.defaultState.pendingPetSync)
     ))
-    
+
     -- Set the flag first before any operations
     if absDifference > self.db.profile.petSyncThreshold and not self.defaultState.pendingPetSync then
         -- Set the flag before dismissing to prevent race conditions
         self.defaultState.pendingPetSync = true
         self:Debug(format("[CheckWeaponSync] Weapons out of sync (abs diff: %.3f) - Set pendingPetSync flag", absDifference))
-        
+
         -- Update tracking times
         self.defaultState.lastDismissalTime = now
         self.defaultState.lastSyncAttempt = now
-        
+
         -- Dismiss current companion if any
         DismissCompanion("CRITTER")
         self:Debug("[CheckWeaponSync] Dismissed current companion")
@@ -311,7 +311,7 @@ function ShamanWeaveModule:ModuleEnable()
     end
 
     self:Debug("Enabling ShamanWeaveModule")
-    
+
     -- Check spec before enabling
     local currentSpec = SpecializationCompat:GetActiveSpecialization()
     if currentSpec then
@@ -321,24 +321,24 @@ function ShamanWeaveModule:ModuleEnable()
             return
         end
     end
-    
+
     -- Register events
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnCombatStateChanged")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnCombatStateChanged")
     self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     self:RegisterEvent("PLAYER_TARGET_CHANGED")
-    
+
     -- Reset pet sync state on enable
     self:ResetPetSyncState()
 end
 
 function ShamanWeaveModule:ModuleDisable()
     self:Debug("Disabling ShamanWeaveModule")
-    
+
     -- Unregister events
     self:UnregisterEvent("PLAYER_REGEN_DISABLED")
     self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-    
+
     -- Reset pet sync state on disable
     self:ResetPetSyncState()
 end
@@ -479,21 +479,21 @@ function ShamanWeaveModule:ShouldUseChainLightning()
     if not UnitAffectingCombat("player") or not UnitExists("target") then
         return false
     end
-    
+
     -- Count enemies in range (using 10 yards as default range for Chain Lightning)
     local enemies = NAG:CountEnemiesInRange(10)
-    
+
     -- Get weapon speed and cast times
     local weaponSpeed = NAG:AutoSwingTime(NAG.Types:GetType("SwingType").MainHand)
     local lbCastTime = NAG:CastTime(LIGHTNING_BOLT_ID)
     local clCastTime = NAG:CastTime(CHAIN_LIGHTNING_ID)
-    
+
     -- Check if we should use CL based on enemy count
     local shouldUseCLForEnemies = enemies >= MIN_ENEMIES_FOR_CL
-    
+
     -- Check if we should use CL based on cast times
     local shouldUseCLForCastTime = lbCastTime+0.1 > weaponSpeed and clCastTime < weaponSpeed
-    
+
     -- Return true if either condition is met
     return shouldUseCLForEnemies or shouldUseCLForCastTime
 end
@@ -501,10 +501,10 @@ end
 function ShamanWeaveModule:IsOffhandSpeedValid()
     local ohSpeed = swingTimerLib:UnitSwingTimerInfo("player", "offhand")
     if not ohSpeed then return false end
-    
+
     -- If offhand is a shield (speed = 0), it's valid for weaving but not for sync
     if ohSpeed == 0 then return true end
-    
+
     return ohSpeed >= MIN_OFFHAND_SPEED and ohSpeed <= MAX_OFFHAND_SPEED
 end
 
@@ -518,7 +518,7 @@ function ShamanWeaveModule:OnCombatStateChanged()
         self.defaultState.graceSwingCount = 0
         self.defaultState.lastSwingTime = GetTime()
         self.defaultState.isInGracePeriod = false
-        
+
         self:Debug("[OnCombatStateChanged] Combat started, reset sync state")
     else
         -- Left combat
@@ -534,25 +534,25 @@ end
 
 function ShamanWeaveModule:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
     local timestamp, eventType, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags = CombatLogGetCurrentEventInfo()
-    
+
     -- Only process events from the player
     if sourceGUID ~= UnitGUID("player") then return end
-    
+
     local currentTime = GetTime()
-    
+
     -- Handle swing events
     if eventType == "SWING_DAMAGE" or eventType == "SWING_MISSED" then
         -- Debug print weapon speeds on swing
         local mhSpeed  = swingTimerLib:UnitSwingTimerInfo("player", "mainhand")
         local ohSpeed  = swingTimerLib:UnitSwingTimerInfo("player", "offhand")
         if self.db.profile.debugSync then
-            self:Debug(format("[Swing] Main Hand: %.2f, Off Hand: %.2f, Difference: %.2f", 
+            self:Debug(format("[Swing] Main Hand: %.2f, Off Hand: %.2f, Difference: %.2f",
                 mhSpeed or 0,
                 ohSpeed or 0,
                 mhSpeed and ohSpeed and math.abs(mhSpeed - ohSpeed) or 0
             ))
         end
-        
+
         -- First check if weapons have different speeds
         if not self:CheckWeaponSpeeds() then
             if self.db.profile.debugSync then
@@ -564,21 +564,21 @@ function ShamanWeaveModule:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
             self.defaultState.graceSwingCount = 0
             return
         end
-        
+
         if self.db.profile.debugSync then
-            self:Debug(format("[COMBAT_LOG] Swing detected! needsSync = %s, graceSwingCount = %d", 
+            self:Debug(format("[COMBAT_LOG] Swing detected! needsSync = %s, graceSwingCount = %d",
                 tostring(self.defaultState.needsSync),
                 self.defaultState.graceSwingCount
             ))
         end
-        
+
         -- Update swing time
         self.defaultState.lastSwingTime = currentTime
-        
+
         -- If we're in grace period, increment counter
         if self.defaultState.isInGracePeriod then
             self.defaultState.graceSwingCount = self.defaultState.graceSwingCount + 1
-            
+
             -- Check if grace period is over
             if self.defaultState.graceSwingCount >= self.db.profile.graceSwingCount then
                 if self.db.profile.debugSync then
@@ -589,9 +589,9 @@ function ShamanWeaveModule:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
             end
             return
         end
-        
+
         -- If we need to sync and enough time has passed since last sync
-        if self.defaultState.needsSync and 
+        if self.defaultState.needsSync and
            (currentTime - self.defaultState.lastSyncTime) >= self.db.profile.petSyncCooldown then
             -- Check TTD before attempting sync
             local ttd = NAG:RemainingTime()
@@ -608,7 +608,7 @@ function ShamanWeaveModule:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
             end
             return
         end
-        
+
         -- If not in grace period and not needing sync, check weapon sync
         if not self.defaultState.isInGracePeriod and not self.defaultState.needsSync then
             -- Check TTD before checking sync
@@ -619,17 +619,17 @@ function ShamanWeaveModule:COMBAT_LOG_EVENT_UNFILTERED(event, ...)
                 end
                 return
             end
-            
+
             local difference = NAG:SwingTimeDifference()
             self.defaultState.currentSwingDifference = difference
-            
+
             if self.db.profile.debugSync then
-                self:Debug(format("[COMBAT_LOG] Current swing difference: %.3f, threshold: %.3f", 
+                self:Debug(format("[COMBAT_LOG] Current swing difference: %.3f, threshold: %.3f",
                     difference,
                     self.db.profile.petSyncThreshold
                 ))
             end
-            
+
             if math.abs(difference) > self.db.profile.petSyncThreshold then
                 if self.db.profile.debugSync then
                     self:Debug("[COMBAT_LOG] Weapons out of sync, dismissing pet")
@@ -646,18 +646,18 @@ function ShamanWeaveModule:TrySummonPet()
         self:Debug("[TrySummonPet] Pet sync disabled")
         return
     end
-    
+
     if not self.defaultState.needsSync then
         self:Debug("[TrySummonPet] No sync needed")
         return
     end
-    
+
     -- Only try to summon if we're in combat and have a target
     if not UnitAffectingCombat("player") or not UnitExists("target") then
         self:Debug("[TrySummonPet] Not in combat or no target")
         return
     end
-    
+
     -- Check TTD before attempting summon
     local ttd = NAG:RemainingTime()
     if ttd < self.db.profile.minTTDForSync then
@@ -665,15 +665,15 @@ function ShamanWeaveModule:TrySummonPet()
         self.defaultState.needsSync = false
         return
     end
-    
+
     self:Debug("[TrySummonPet] Attempting to summon pet")
-    
+
     local snakeName = GetSpellInfo(SNAKE_SPELL_ID)
     if not snakeName then
         self:Debug("[TrySummonPet] Failed to find snake spell name")
         return
     end
-    
+
     -- Find the snake in companion list
     local foundSnake = false
     for i=1,GetNumCompanions("CRITTER") do
@@ -682,7 +682,7 @@ function ShamanWeaveModule:TrySummonPet()
             foundSnake = true
             self:Debug("[TrySummonPet] Summoning snake")
             CallCompanion("CRITTER", i)
-            
+
             -- Update state
             self.defaultState.needsSync = false
             self.defaultState.currentSwingDifference = 0
@@ -690,16 +690,16 @@ function ShamanWeaveModule:TrySummonPet()
             self.defaultState.isInGracePeriod = true
             self.defaultState.graceSwingCount = 0
             self.defaultState.snakeSummonAttempts = self.defaultState.snakeSummonAttempts + 1
-            
+
             self:Debug("[TrySummonPet] Pet summoned, entering grace period")
             break
         end
     end
-    
+
     if not foundSnake then
         self:Debug("[TrySummonPet] Snake companion not found in list")
         self.defaultState.needsSync = false
-        
+
         -- Show warning about missing Albino Snake
         local now = GetTime()
         if now - self.defaultState.lastMissingSnakeWarning > WARNING_COOLDOWN then
@@ -719,27 +719,27 @@ end
 
 function ShamanWeaveModule:PLAYER_TARGET_CHANGED()
     if not UnitAffectingCombat("player") then return end
-    
+
     local newTarget = UnitGUID("target")
     if newTarget ~= self.defaultState.currentTarget then
-        self:Debug(format("[PLAYER_TARGET_CHANGED] Target changed from %s to %s", 
-            tostring(self.defaultState.currentTarget), 
+        self:Debug(format("[PLAYER_TARGET_CHANGED] Target changed from %s to %s",
+            tostring(self.defaultState.currentTarget),
             tostring(newTarget)))
-        
+
         -- Store the new target
         self.defaultState.currentTarget = newTarget
         self.defaultState.lastTargetChangeTime = GetTime()
-        
+
         -- Reset sync state and enter grace period
         self.defaultState.currentSwingDifference = 0
         self.defaultState.needsSync = false
         self.defaultState.isInGracePeriod = true
         self.defaultState.graceSwingCount = 0
         self.defaultState.snakeSummonAttempts = 0 -- Reset summon attempts on target change
-        
+
         self:Debug("[PLAYER_TARGET_CHANGED] Entering grace period after target change")
     end
 end
 
 -- Add module to namespace
-ns.ShamanWeaveModule = ShamanWeaveModule 
+ns.ShamanWeaveModule = ShamanWeaveModule

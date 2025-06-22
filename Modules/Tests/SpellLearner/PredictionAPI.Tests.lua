@@ -42,7 +42,7 @@ function PredictionAPITests:test_ApplySpellEffects_ReducesResources()
             ["default"] = { cost = { [0] = 50 } } -- Mana cost of 50
         }
     }
-    
+
     local initialState = {
         resources = {
             [0] = 100 -- 100 Mana
@@ -65,13 +65,13 @@ function PredictionAPITests:test_ApplySpellEffects_AddsBuff()
     -- Create mock compiled data
     PredictionEngine:GetChar().compiled[specId] = {
         [spellId] = {
-            ["default"] = { 
+            ["default"] = {
                 applies = { [buffId] = 0.9 }, -- 90% chance to apply buff
                 confidence = { applies = { [buffId] = 0.9 } }
             }
         }
     }
-    
+
     local initialState = {
         buffs = { player = {} }
     }
@@ -87,18 +87,18 @@ end
 function PredictionAPITests:test_StateObjectPooling()
     -- This tests the memory management helpers in the API
     local initialPoolSize = #PredictionAPI.statePool
-    
+
     -- Act: Get a few objects
     local state1 = PredictionAPI:CreateStateObject()
     local state2 = PredictionAPI:CreateStateObject()
-    
+
     -- Assert
     Assert.areEqual(initialPoolSize, #PredictionAPI.statePool, "Pool size should decrease after getting objects.")
-    
+
     -- Act: Recycle them
     PredictionAPI:RecycleStateObject(state1)
     PredictionAPI:RecycleStateObject(state2)
-    
+
     -- Assert
     Assert.areEqual(initialPoolSize + 2, #PredictionAPI.statePool, "Pool size should increase after recycling objects.")
 end

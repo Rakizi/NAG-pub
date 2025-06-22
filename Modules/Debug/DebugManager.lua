@@ -9,7 +9,7 @@
 -- Status: good
 --- @diagnostic disable: undefined-global, undefined-field
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -24,22 +24,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
@@ -94,7 +94,7 @@ local dlapiBuffer = {}
 local isInitialized = false
 local isDLAPIReady = false
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function DebugManager:ModuleInitialize()
         isInitialized = true
@@ -206,7 +206,7 @@ function DebugManager:DebugLog(category, message)
     if DLAPI and DLAPI.DebugLog then
         -- Log to the specific category
         DLAPI.DebugLog(category, message)
-        
+
         -- Also log to the consolidated category if the message should be logged based on severity
         local severity = category -- In our case, category is the severity
         if self:ShouldLog(severity) then
@@ -293,7 +293,7 @@ end
 -- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (No explicit event handlers outside Ace3 lifecycle in this module)
 
--- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for debug settings
 
@@ -391,7 +391,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~
 SLASH_NAGDEBUGLEVEL1 = "/nagdebuglevel"
 SlashCmdList["NAGDEBUGLEVEL"] = function(msg)
     local level = tonumber(msg)

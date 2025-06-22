@@ -759,7 +759,7 @@ if L then
         L["resetClassDesc"] = "Reset class settings to their default values"
         L["resetToDefault"] = "Reset to Default"
         L["resetConfirmation"] = "Are you sure you want to reset '%s' to default settings?\nThis cannot be undone."
-        
+
         -- Types.lua Stats
         L["strength"] = "Strength"
         L["agility"] = "Agility"
@@ -788,14 +788,14 @@ if L then
         L["health"] = "Health"
         L["mana"] = "Mana"
         L["mp5"] = "Mana per 5 seconds"
-        
+
         -- Types.lua Categories
         L["character"] = "Character"
         L["buffs"] = "Buffs"
         L["debuffs"] = "Debuffs"
         L["combat"] = "Combat"
         L["class"] = "Class"
-        
+
         -- Types.lua Buff Types
         L["stats"] = "Stats"
         L["spell_resistance"] = "Spell Resistance"
@@ -812,7 +812,7 @@ if L then
         L["major_mana"] = "Major Mana"
         L["armor"] = "Armor"
         L["heroism"] = "Heroism"
-        
+
         -- Types.lua Debuff Types
         L["spell_damage"] = "Spell Damage"
         L["spell_crit"] = "Spell Critical Strike"
@@ -822,7 +822,7 @@ if L then
         L["physical_damage_reduction"] = "Physical Damage Reduction"
         L["attack_speed"] = "Attack Speed"
         L["healing_reduction"] = "Healing Reduction"
-        
+
         -- Types.lua Combat Types
         L["unknown"] = "Unknown"
         L["any"] = "Any"
@@ -830,7 +830,7 @@ if L then
         L["main_hand"] = "Main Hand"
         L["off_hand"] = "Off Hand"
         L["ranged"] = "Ranged"
-        
+
         -- Types.lua Class Types
         L["humanoid"] = "Humanoid"
         L["ghost_wolf"] = "Ghost Wolf"
@@ -847,14 +847,14 @@ if L then
         L["blood"] = "Blood"
         L["frost"] = "Frost"
         L["unholy"] = "Unholy"
-        
+
         -- Types.lua Rune Types
         L["rune_unknown"] = "Unknown Rune"
         L["rune_blood"] = "Blood Rune"
         L["rune_frost"] = "Frost Rune"
         L["rune_unholy"] = "Unholy Rune"
         L["rune_death"] = "Death Rune"
-        
+
         -- Types.lua Rune Slots
         L["slot_unknown"] = "Unknown Slot"
         L["slot_left_blood"] = "Left Blood Rune"
@@ -863,18 +863,18 @@ if L then
         L["slot_right_frost"] = "Right Frost Rune"
         L["slot_left_unholy"] = "Left Unholy Rune"
         L["slot_right_unholy"] = "Right Unholy Rune"
-        
+
         -- Types.lua Eclipse Phases
         L["unknown_phase"] = "Unknown Phase"
         L["neutral_phase"] = "Neutral Phase"
         L["solar_phase"] = "Solar Phase"
         L["lunar_phase"] = "Lunar Phase"
-        
+
         -- Types.lua Swap Sets
         L["swap_set_unknown"] = "Unknown Swap Set"
         L["swap_set_main"] = "Main Swap Set"
         L["swap_set_swap1"] = "Swap Set 1"
-        
+
         -- Types.lua Mob Types
         L["none"] = "None"
         L["aberration"] = "Aberration"

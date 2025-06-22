@@ -128,4 +128,4 @@ function Hunter:RegisterSpellTracking()
     if not SpellTracker then return end
 end
 
-NAG.Class = Hunter 
+NAG.Class = Hunter

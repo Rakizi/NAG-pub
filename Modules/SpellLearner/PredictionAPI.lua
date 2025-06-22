@@ -38,10 +38,10 @@ local PredictionAPI = NAG.PredictionAPI
 -- @return number The spell ID that would be cast next, or nil if unavailable
 function PredictionAPI:EvaluateState(state)
     if not state then return nil end
-    
+
     -- Create state container that preserves original game state
     local simulationActive = true
-    
+
     -- Store function references
     local originalGetResource = NAG.GetResource
     local originalGetBuffRemaining = NAG.GetBuffRemaining
@@ -49,7 +49,7 @@ function PredictionAPI:EvaluateState(state)
     local originalIsOnCooldown = NAG.IsOnCooldown
     local originalGetRuneCount = NAG.GetRuneCount
     local originalGetRuneCooldown = NAG.GetRuneCooldown
-    
+
     -- Override resource function
     NAG.GetResource = function(self, resourceType)
         if simulationActive then
@@ -58,7 +58,7 @@ function PredictionAPI:EvaluateState(state)
             return originalGetResource(self, resourceType)
         end
     end
-    
+
     -- Override buff remaining function
     NAG.GetBuffRemaining = function(self, buffID)
         if simulationActive then
@@ -68,7 +68,7 @@ function PredictionAPI:EvaluateState(state)
             return originalGetBuffRemaining(self, buffID)
         end
     end
-    
+
     -- Override is buff active function
     NAG.IsBuffActive = function(self, buffID)
         if simulationActive then
@@ -77,7 +77,7 @@ function PredictionAPI:EvaluateState(state)
             return originalIsBuffActive(self, buffID)
         end
     end
-    
+
     -- Override cooldown function
     NAG.IsOnCooldown = function(self, spellID)
         if simulationActive then
@@ -86,7 +86,7 @@ function PredictionAPI:EvaluateState(state)
             return originalIsOnCooldown(self, spellID)
         end
     end
-    
+
     -- Override rune functions for Death Knights
     NAG.GetRuneCount = function(self, runeType)
         if simulationActive then
@@ -105,7 +105,7 @@ function PredictionAPI:EvaluateState(state)
             return originalGetRuneCount and originalGetRuneCount(self, runeType) or 0
         end
     end
-    
+
     NAG.GetRuneCooldown = function(self, runeIndex)
         if simulationActive then
             if state.runes and state.runes[runeIndex] then
@@ -116,39 +116,39 @@ function PredictionAPI:EvaluateState(state)
             return originalGetRuneCooldown and originalGetRuneCooldown(self, runeIndex) or 0
         end
     end
-    
+
     -- Call main rotation function in safe context
     local success, result = pcall(function()
         -- Call actual rotation logic to get next spell
         -- This could be different depending on how NAG determines the next spell
-        
+
         -- Option 1: NAG's nextSpell is set during normal rotation
         -- Simply return it
         return NAG.nextSpell
-        
+
         -- Option 2: If NAG has a specific function to calculate next action
         -- We could call that instead:
         -- local actionTable = {}
         -- NAG:RunRotation(actionTable)
         -- return actionTable.nextSpell or NAG.nextSpell
     end)
-    
+
     -- Restore original functions
     NAG.GetResource = originalGetResource
     NAG.GetBuffRemaining = originalGetBuffRemaining
     NAG.IsBuffActive = originalIsBuffActive
     NAG.IsOnCooldown = originalIsOnCooldown
-    
+
     if originalGetRuneCount then
         NAG.GetRuneCount = originalGetRuneCount
     end
-    
+
     if originalGetRuneCooldown then
         NAG.GetRuneCooldown = originalGetRuneCooldown
     end
-    
+
     simulationActive = false
-    
+
     -- Return result or nil on error
     return success and result or nil
 end
@@ -160,10 +160,10 @@ end
 -- @return table The modified state after applying spell effects
 function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
     if not spellID or not state then return state end
-    
+
     -- Create a copy of the state using pooling instead of deep copy
     local newState = self:CreateStateObject()
-    
+
     -- Copy essential state data
     -- Resources
     if state.resources then
@@ -180,12 +180,12 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Buffs
     if state.buffs then
         newState.buffs.player = newState.buffs.player or {}
         newState.buffs.target = newState.buffs.target or {}
-        
+
         if state.buffs.player then
             for buffId, buffData in pairs(state.buffs.player) do
                 if type(buffData) == "table" then
@@ -198,7 +198,7 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
                 end
             end
         end
-        
+
         if state.buffs.target then
             for buffId, buffData in pairs(state.buffs.target) do
                 if type(buffData) == "table" then
@@ -212,14 +212,14 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Cooldowns
     if state.cooldowns then
         for spellId, cooldown in pairs(state.cooldowns) do
             newState.cooldowns[spellId] = cooldown
         end
     end
-    
+
     -- Runes for Death Knights
     if state.runes then
         for i = 1, 6 do
@@ -232,24 +232,24 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Get the prediction engine module
     local PredictionEngine = NAG:GetModule("PredictionEngine")
     if not PredictionEngine then return newState end
-    
+
     -- Get spell data from PredictionEngine if not provided
     spellData = spellData or (PredictionEngine:GetChar().compiled and PredictionEngine:GetChar().compiled[spellID])
     if not spellData then return newState end
-    
+
     -- Default to best context match
     local contextKey = "default"
     if newState.buffs and newState.buffs.player then
         contextKey = PredictionEngine:GenerateContextKey(newState.buffs.player)
     end
-    
+
     local contextData = spellData[contextKey] or spellData["default"]
     if not contextData then return newState end
-    
+
     -- Apply resource costs
     if contextData.cost then
         for resourceType, amount in pairs(contextData.cost) do
@@ -258,7 +258,7 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Apply resource generation
     if contextData.generates then
         for resourceType, amount in pairs(contextData.generates) do
@@ -269,12 +269,12 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Apply rune costs for Death Knights
     if contextData.runeUsage and contextData.runeUsage.typePatterns and newState.runes then
         local mostCommonPattern = nil
         local highestCount = 0
-        
+
         -- Find the most common rune pattern
         for pattern, count in pairs(contextData.runeUsage.typePatterns) do
             if count > highestCount then
@@ -282,14 +282,14 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
                 mostCommonPattern = pattern
             end
         end
-        
+
         -- Apply the pattern if found
         if mostCommonPattern then
             local runeTypes = {}
             for runeType in mostCommonPattern:gmatch("%d+") do
                 table.insert(runeTypes, tonumber(runeType))
             end
-            
+
             -- For each rune type in the pattern, use an available rune
             for _, runeType in ipairs(runeTypes) do
                 for i = 1, 6 do
@@ -303,12 +303,12 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Apply buff changes
     if contextData.applies then
         newState.buffs = newState.buffs or {}
         newState.buffs.player = newState.buffs.player or {}
-        
+
         for buffId, chance in pairs(contextData.applies) do
             if chance > 0.7 then -- Only apply buffs with high confidence
                 newState.buffs.player[buffId] = {
@@ -318,7 +318,7 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Apply buff removals
     if contextData.removes then
         if newState.buffs and newState.buffs.player then
@@ -329,12 +329,12 @@ function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
             end
         end
     end
-    
+
     -- Apply cooldown to the cast spell
     if newState.cooldowns then
         newState.cooldowns[spellID] = contextData.cooldown or 0
     end
-    
+
     return newState
 end
 
@@ -343,11 +343,11 @@ end
 -- @return table A deep copy of the original table
 function PredictionAPI:DeepCopy(orig)
     if type(orig) ~= "table" then return orig end
-    
+
     -- Use pooled object if copying a state
     local isState = orig.resources ~= nil and orig.buffs ~= nil and orig.cooldowns ~= nil
     local copy = isState and self:GetStateObject() or {}
-    
+
     for orig_key, orig_value in pairs(orig) do
         if type(orig_value) == "table" then
             copy[orig_key] = self:DeepCopy(orig_value)
@@ -355,12 +355,12 @@ function PredictionAPI:DeepCopy(orig)
             copy[orig_key] = orig_value
         end
     end
-    
+
     return copy
 end
 
 -- Initialize API into NAG system
-NAG.PredictionAPI = PredictionAPI 
+NAG.PredictionAPI = PredictionAPI
 
 --- State object pooling for better memory management
 -- @return table A recycled or new state object
@@ -373,12 +373,12 @@ end
 -- @param state table The state object to recycle
 function PredictionAPI:RecycleStateObject(state)
     if not state then return end
-    
+
     self.statePool = self.statePool or {}
-    
+
     -- Clear all state data
     wipe(state)
-    
+
     -- Add to pool
     tinsert(self.statePool, state)
 end
@@ -387,16 +387,16 @@ end
 -- @return table A properly initialized state object
 function PredictionAPI:CreateStateObject()
     local state = self:GetStateObject()
-    
+
     -- Initialize key state tables
     state.resources = state.resources or {}
     state.buffs = state.buffs or {player = {}, target = {}}
     state.debuffs = state.debuffs or {player = {}, target = {}}
     state.cooldowns = state.cooldowns or {}
     state.runes = state.runes or {}
-    
+
     return state
 end
 
 -- Initialize state pool
-PredictionAPI.statePool = {} 
+PredictionAPI.statePool = {}

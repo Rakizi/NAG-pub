@@ -11,7 +11,7 @@
 -- luacheck: ignore GetSpellInfo
 --- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -111,7 +111,7 @@ local APLMonitor = NAG:CreateModule("APLMonitor", defaults, {
     },
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function APLMonitor:ModuleEnable()
         local profileConfig = self:GetCurrentRotation()

@@ -32,22 +32,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 --File
@@ -191,7 +191,7 @@ do --== Rotation Functions ==--
                 -- Get the arguments string
                 local argsString = arg:match("^NAG:[%w_]+(%b())$")
                 argsString = argsString:sub(2, -2) -- Remove parentheses
-                
+
                 -- Validate the function and its arguments
                 if type(NAG[funcName]) == "function" then
                     local valid, err = NAG:ValidateFunctionArguments(funcName, argsString)
@@ -300,7 +300,7 @@ do --== Rotation Functions ==--
                 end
             },
             id = {
-                name = "id", 
+                name = "id",
                 pattern = false,
                 validate = function(arg)
                     -- Support database path
@@ -316,7 +316,7 @@ do --== Rotation Functions ==--
                     if not numId then
                         return false, "Invalid ID format"
                     end
-                    return (DataManager:GetSpell(numId) or DataManager:GetItem(numId)), 
+                    return (DataManager:GetSpell(numId) or DataManager:GetItem(numId)),
                         "ID not registered: " .. tostring(numId)
                 end
             },
@@ -576,7 +576,7 @@ do --== Rotation Functions ==--
             DotIsActive = { required = { "id" }, optional = { "targetUnit" } },
             DotRemainingTime = { required = { "id" }, optional = { "targetUnit" } },
             DotTickFrequency = { required = { "id" }, optional = { "targetUnit" } },
-            
+
             -- Also add RemainingTime function which dispatches to the appropriate function
             RemainingTime = { required = {} },
 

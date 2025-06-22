@@ -1,4 +1,4 @@
--- ~~~~~~~~~~ ItemHandlers ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ItemHandlers ~~~~~~~~~~
 --- Handles item-related functionality for the NAG addon.
 ---
 --- This module provides functions for checking and managing items, including item cooldowns,
@@ -65,7 +65,7 @@ local next = next
 -- WoW API direct
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 do -- ~~~~~~~~~~ Item APLValue Functions ~~~~~~~~~~
 
     --- Gets the remaining time on a trinket buff
@@ -240,19 +240,19 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
             local customTrinkets = TrinketRegistrationManager:GetGlobal().customTrinkets
             if customTrinkets and customTrinkets[trinketId] then
                 local trinketData = customTrinkets[trinketId]
-                
+
                 -- If no stats are specified or statType1 is -1, match any
                 if not statType1 or statType1 == -1 then
                     return true
                 end
-                
+
                 -- Check if any of the trinket's stats match the requested ones
                 for _, statType in ipairs(trinketData.stats or {}) do
                     if statType == statType1 or statType == statType2 or statType == statType3 then
                         return true
                     end
                 end
-                
+
                 return false
             end
         end
@@ -297,7 +297,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
         local hasLowIcdMatch = false
         local TrinketRegistrationManager = self:GetModule("TrinketRegistrationManager")
         local TrinketTracker = self:GetModule("TrinketTrackingManager")
-        
+
         -- Get all equipped trinkets
         local trinketSlots = {13, 14} -- Trinket slots
         for _, slot in ipairs(trinketSlots) do
@@ -305,12 +305,12 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
             if itemId then
                 -- Get trinket info first to check ICD
                 local trinketInfo = TrinketTracker:GetTrinketInfo(itemId)
-                
+
                 -- Skip ON USE trinkets
                 if not (trinketInfo and trinketInfo.procType == "use") then
                     -- Check if trinket matches stat types (without ICD filter)
                     local matches = matchesStatTypes(self, itemId, statType1, statType2, statType3, nil, statType1 == -1 and "any" or "all")
-                    
+
                     if matches then
                         -- If trinket has low ICD, mark it but continue checking others
                         if trinketInfo and minIcdSeconds and trinketInfo.icd < minIcdSeconds then
@@ -318,17 +318,17 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
                             -- Don't return immediately, continue checking other trinkets
                         else
                             -- Handle user-registered trinkets
-                            local customData = TrinketRegistrationManager and 
-                                TrinketRegistrationManager:GetGlobal().customTrinkets and 
+                            local customData = TrinketRegistrationManager and
+                                TrinketRegistrationManager:GetGlobal().customTrinkets and
                                 TrinketRegistrationManager:GetGlobal().customTrinkets[itemId]
-                            
+
                             if customData then
                                 local remaining = TrinketTrackingManager:GetInternalCooldownRemaining(customData.buffId)
                                 if remaining and remaining > 0 then
                                     maxRemaining = math.max(maxRemaining, remaining)
                                 end
                             end
-                            
+
                             -- Handle hardcoded trinkets
                             if trinketInfo and trinketInfo.buffId then
                                 local remaining = TrinketTrackingManager:GetInternalCooldownRemaining(trinketInfo.buffId)
@@ -362,11 +362,11 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
 
         local minTime = math.huge
         local hasLowIcdMatch = false
-        
+
         -- Get TrinketRegistrationManager module
         local TrinketRegistrationManager = self:GetModule("TrinketRegistrationManager")
         local TrinketTracker = self:GetModule("TrinketTrackingManager")
-        
+
         -- Get all equipped trinkets
         local trinketSlots = {13, 14} -- Trinket slots
         for _, slot in ipairs(trinketSlots) do
@@ -374,16 +374,16 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
             if itemId then
                 -- Get trinket info first to check ICD
                 local trinketInfo = TrinketTracker:GetTrinketInfo(itemId)
-                
+
                 -- Skip ON USE trinkets
                 if not (trinketInfo and trinketInfo.procType == "use") then
                     -- Check if trinket matches stat types (without ICD filter)
                     local matches = matchesStatTypes(self, itemId, statType1, statType2, statType3, nil, statType1 == -1 and "any" or "all")
-                    
+
                     if matches then
                         -- Handle user-registered trinkets
                         local customData = TrinketRegistrationManager and TrinketRegistrationManager:GetGlobal().customTrinkets and TrinketRegistrationManager:GetGlobal().customTrinkets[itemId]
-                        
+
                         if customData then
                             local name, _, _, _, _, expirationTime = self:FindAura("player", customData.buffId)
                             if name and expirationTime then
@@ -393,7 +393,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
                                 end
                             end
                         end
-                        
+
                         -- Handle hardcoded trinkets
                         if trinketInfo and trinketInfo.buffId then
                             local name, _, _, _, _, expirationTime = self:FindAura("player", trinketInfo.buffId)
@@ -404,7 +404,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
                                 end
                             end
                         end
-                        
+
                         -- Mark if this is a low ICD trinket
                         if trinketInfo and minIcdSeconds and trinketInfo.icd < minIcdSeconds then
                             hasLowIcdMatch = true
@@ -439,23 +439,23 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
         -- Get TrinketRegistrationManager module
         local TrinketRegistrationManager = self:GetModule("TrinketRegistrationManager")
         local TrinketTracker = self:GetModule("TrinketTrackingManager")
-        
+
         -- Get equipped trinkets
         local trinketSlots = {13, 14} -- Trinket slots
         for _, slot in ipairs(trinketSlots) do
             local itemId = GetInventoryItemID("player", slot)
             if itemId then
                 -- Get trinket info from both sources
-                local customData = TrinketRegistrationManager and 
-                    TrinketRegistrationManager:GetGlobal().customTrinkets and 
+                local customData = TrinketRegistrationManager and
+                    TrinketRegistrationManager:GetGlobal().customTrinkets and
                     TrinketRegistrationManager:GetGlobal().customTrinkets[itemId]
                 local trinketInfo = TrinketTracker:GetTrinketInfo(itemId)
-                
+
                 -- Skip ON USE trinkets
                 if not (trinketInfo and trinketInfo.procType == "use") then
                     -- Check if trinket matches stat types (matchesStatTypes handles both custom and hardcoded)
                     local matches = matchesStatTypes(self, itemId, statType1, statType2, statType3, minIcdSeconds, statType1 == -1 and "any" or "all")
-                    
+
                     if matches then
                         count = count + 1
                     end
@@ -482,7 +482,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
         -- Get TrinketRegistrationManager module
         local TrinketRegistrationManager = self:GetModule("TrinketRegistrationManager")
         local TrinketTracker = self:GetModule("TrinketTrackingManager")
-        
+
         -- Get equipped trinkets
         local trinketSlots = {13, 14} -- Trinket slots
         local matchingCount = 0
@@ -494,30 +494,30 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
             if itemId then
                 -- Get trinket info first to check ICD
                 local trinketInfo = TrinketTracker:GetTrinketInfo(itemId)
-                
+
                 -- Track if we have any registered trinkets
                 if trinketInfo then
                     hasRegisteredTrinkets = true
                 end
-                
+
                 -- Check if trinket matches stat types (without ICD filter)
                 local matches = matchesStatTypes(self, itemId, statType1, statType2, statType3, nil, statType1 == -1 and "any" or "all")
-                
+
                 if matches then
                     -- Skip ON USE trinkets by not incrementing matchingCount
                     if not (trinketInfo and trinketInfo.procType == "use") then
                         matchingCount = matchingCount + 1
                         local isActive = false
-                        
+
                         -- If trinket has low ICD, consider it always active
                         if trinketInfo and minIcdSeconds and trinketInfo.icd < minIcdSeconds then
                             isActive = true
                         else
                             -- Check custom registration first
-                            local customData = TrinketRegistrationManager and 
-                                TrinketRegistrationManager:GetGlobal().customTrinkets and 
+                            local customData = TrinketRegistrationManager and
+                                TrinketRegistrationManager:GetGlobal().customTrinkets and
                                 TrinketRegistrationManager:GetGlobal().customTrinkets[itemId]
-                            
+
                             if customData then
                                 local name, _, count, _, _, expirationTime = self:FindAura("player", customData.buffId)
                                 if name and expirationTime and (expirationTime - GetTime()) > 0 then
@@ -527,7 +527,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
                                     end
                                 end
                             end
-                            
+
                             -- If not active from custom data, check hardcoded data
                             if not isActive and trinketInfo and trinketInfo.buffId then
                                 local name, _, count, _, _, expirationTime = self:FindAura("player", trinketInfo.buffId)
@@ -539,7 +539,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
                                 end
                             end
                         end
-                        
+
                         if isActive then
                             activeCount = activeCount + 1
                         end
@@ -576,7 +576,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
         for _, trinketId in ipairs({ trinket1, trinket2 }) do
             -- Get trinket info first to check ICD
             local trinketInfo = TrinketTrackingManager:GetTrinketInfo(trinketId)
-            
+
             -- Skip ON USE trinkets
             if not (trinketInfo and trinketInfo.procType == "use") then
                 if trinketInfo and minIcdSeconds and trinketInfo.icd < minIcdSeconds then
@@ -612,7 +612,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
         for _, trinketId in ipairs({ trinket1, trinket2 }) do
             -- Get trinket info to check type
             local trinketInfo = TrinketTrackingManager:GetTrinketInfo(trinketId)
-            
+
             -- Only count ON USE trinkets
             if trinketInfo and trinketInfo.procType == "use" and matchesStatTypes(self, trinketId, statType1, statType2, statType3) then
                 count = count + 1
@@ -651,12 +651,12 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
             self:Error("TriggerICD: No auraId provided")
             return false
         end
-        
+
         -- Create a reference in TrinketTrackingManager or SpellTracker if appropriate
         if TrinketTrackingManager and TrinketTrackingManager.TriggerICD then
             TrinketTrackingManager:TriggerICD(auraId)
         end
-        
+
         -- Always return true for APL compatibility
         return true
     end
@@ -671,7 +671,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
             self:Error("ChangeTarget: No target unit provided")
             return false
         end
-        
+
         -- Show targeting overlay
         local OverlayManager = self:GetModule("OverlayManager")
         if OverlayManager and NAG.Frame then
@@ -680,7 +680,7 @@ do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
                 OverlayManager:ShowOverlay(frame, "target", newTarget)
             end
         end
-        
+
         -- Always return true for APL compatibility
         return true
     end

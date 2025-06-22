@@ -79,7 +79,7 @@ local type = type
 local tostring = tostring
 local tonumber = tonumber
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Helper function to translate spell IDs
 --TODO: make this be native to the parser
 local function translateSpellId(id)
@@ -281,7 +281,7 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
             local currentTime = GetTime()
             if currentTime - self.runeforgeCache.lastCheck > 0.5 then
                 self.runeforgeCache.lastCheck = currentTime
-                
+
                 -- Function to extract the enchant ID from an item link
                 local function GetEnchantID(itemLink)
                     if not itemLink then return nil end
@@ -479,7 +479,7 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
     --- @return number|boolean The remaining time in seconds.
     function NAG:ItemRemainingTime(id)
         if not id then return false end
-        
+
         -- Validate ID
         if not tonumber(id) then
             self:Error(format("ItemRemainingTime: ID %s is not a number", tostring(id)))
@@ -503,7 +503,7 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
     --- @return number|boolean The remaining time in seconds.
     function NAG:TinkerRemainingTime(id)
         if not id then return false end
-        
+
         -- Validate ID
         if not tonumber(id) then
             self:Error(format("TinkerRemainingTime: ID %s is not a number", tostring(id)))
@@ -611,23 +611,23 @@ do -- ~~~~~~~~~~ Casting functions ~~~~~~~~~~
         --[[if spellId == 100780 then
             local spellName = GetSpellInfo(spellId) or tostring(spellId)
             print("=== CastSpell Debug for:", spellName, "(ID:", spellId, ") ===")
-        
+
             -- Check if the spell is known
             local isKnown = self:IsKnownSpell(spellId)
             print("IsKnownSpell:", tostring(isKnown))
             if not isKnown then print("-> Spell is not known!") end
-        
+
             -- Check if the spell can be cast
             local canCast = self:SpellCanCast(spellId, tolerance)
             print("SpellCanCast:", tostring(canCast))
             if not canCast then print("-> Spell cannot be cast (see SpellCanCast debug)") end
-        
+
             -- Check if it's a secondary spell
             local isSecondary = self:IsSecondarySpell(spellId)
             print("IsSecondarySpell:", tostring(isSecondary))
-        
+
             -- Any other relevant checks for your logic...
-        
+
             print("Returning false from CastSpell for", spellName, "(ID:", spellId, ")")
             print("===============================================")
         end]]
@@ -1116,7 +1116,7 @@ do -- ~~~~~~~~~~ Targets/Units APLValue Functions ~~~~~~~~~~=====
     --- @param range number|nil Optional range to use for counting targets (substitutes for hardcoded distances)
     --- @usage NAG:NumberTargets() -- Uses default ranges
     --- @usage NAG:NumberTargets(10) -- Uses 10 yards for both melee and ranged fallback
-    --- @return number The number of targets. 
+    --- @return number The number of targets.
     function NAG:NumberTargets(range)
         if range then
             -- If a single range is provided, use it for both melee and ranged scenarios
@@ -1304,7 +1304,7 @@ do -- ~~~~~~~~~~ Spell APLValueFunctions ~~~~~~~~~~
     function NAG:IsKnownSpell(spellId)
         if not spellId then return false end
         if not (tostring(type(tonumber(spellId))) == "number") then return false end
-        
+
         -- Special case for Sunfire
         if tonumber(spellId) == 93402 then
             local currRank = select(5, GetTalentInfo(1, 20))
@@ -1318,7 +1318,7 @@ do -- ~~~~~~~~~~ Spell APLValueFunctions ~~~~~~~~~~
 
         -- Special hardcoded cases for MoP
         if ns.Version:IsMoP() then
-            if ((spellId == 49143 or spellId == 55050) and self.CLASS == "DEATHKNIGHT") 
+            if ((spellId == 49143 or spellId == 55050) and self.CLASS == "DEATHKNIGHT")
             or ((spellId == 77767) and self.CLASS == "HUNTER")
             or ((spellId == 138228) and self.CLASS == "MONK")
             or ((spellId == 20243) and self.CLASS == "WARRIOR") then
@@ -1368,7 +1368,7 @@ do -- ~~~~~~~~~~ Spell APLValueFunctions ~~~~~~~~~~
     function NAG:SpellCanCast(spellId, tolerance)
         if not spellId then return false end
         if not NAG:IsKnownSpell(spellId) then return false end
-                
+
         if self.CLASS == "DEATHKNIGHT" then
             if not self:HasRunicPower(spellId) then
                 return false
@@ -1418,7 +1418,7 @@ do -- ~~~~~~~~~~ Spell APLValueFunctions ~~~~~~~~~~
             --if not self:HasEnergy(spellId) then
             --    return true
             --end
-            if spellId == 116740 then 
+            if spellId == 116740 then
                 return NAG:AuraNumStacks(125195) >= 1
             end
             if not self:HasChi(spellId) then
@@ -1502,22 +1502,22 @@ do -- ~~~~~~~~~~ Spell APLValueFunctions ~~~~~~~~~~
     --- @return number The cast time in seconds, or 0 if the spellId is nil.
     --- @usage (NAG:SpellCastTime(73643) >= 0)
     function NAG:SpellCastTime(spellId)
-        if not spellId then 
+        if not spellId then
             self:Debug("SpellCastTime: No spellId provided")
-            return 0 
+            return 0
         end
-        
+
         -- Get base cast time
         local name, _, _, castTime = GetSpellInfo(spellId)
-        if not castTime then 
+        if not castTime then
             --self:Debug(format("SpellCastTime: No cast time found for spell %d (%s)", spellId, name or "unknown"))
-            return 0 
+            return 0
         end
-        
+
         -- Convert to seconds
         local baseCastTime = castTime / 1000
         --self:Debug(format("SpellCastTime: Base cast time for %s (%d): %.2f seconds", name, spellId, baseCastTime))
-                
+
         return baseCastTime
     end
 

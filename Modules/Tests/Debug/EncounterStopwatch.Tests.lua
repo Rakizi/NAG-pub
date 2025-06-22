@@ -53,7 +53,7 @@ function EncounterStopwatchTests:test_IsTrainingDummy_Logic()
     -- This test is environment-dependent, so we can only test the negative case reliably.
     -- To test the positive case, a developer would need to be targeting a dummy.
     local isDummy = EncounterStopwatch:IsTrainingDummy()
-    
+
     -- We can't assert a specific outcome, but we can assert the return type.
     Assert.isType(isDummy, "boolean", "IsTrainingDummy should always return a boolean.")
 end

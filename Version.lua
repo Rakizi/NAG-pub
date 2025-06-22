@@ -151,7 +151,7 @@ end
 --- @return string expansion The current expansion identifier
 function Version:GetExpansion()
     local expansionVersion = self:GetExpansionVersion()
-    
+
     -- First check the WoW project ID for more specific information
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
@@ -174,7 +174,7 @@ function Version:GetExpansion()
     elseif WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC then
         return self.EXPANSIONS.MISTS
     end
-    
+
     -- Fallback to expansion version number detection
     if expansionVersion >= self.EXPANSION_VERSIONS.RETAIL_MIN then
         return self.EXPANSIONS.MAINLINE
@@ -206,7 +206,7 @@ function Version:GetVersionInfo()
     -- Determine game type
     local gameType
     local expansion = self:GetExpansion()
-    
+
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
         --- @diagnostic disable-next-line: undefined-global
@@ -257,12 +257,12 @@ end
 --- @return string tocSuffix The appropriate TOC suffix for the expansion
 function Version:GetTocSuffix(expansion)
     expansion = expansion or self:GetExpansion()
-    
+
     -- Handle Season of Discovery with same TOC as Vanilla
     if expansion == self.EXPANSIONS.SOD then
         return self.TOC_SUFFIXES.VANILLA
     end
-    
+
     -- Map expansion to TOC suffix
     if expansion == self.EXPANSIONS.VANILLA then
         return self.TOC_SUFFIXES.VANILLA
@@ -418,7 +418,7 @@ end
 --- @return string dataSource The data source identifier
 function Version:GetDataSource(expansion)
     expansion = expansion or self:GetExpansion()
-    
+
     -- Return mapped data source or default to expansion name
     return self.DATA_MAPPING[expansion] or expansion
 end

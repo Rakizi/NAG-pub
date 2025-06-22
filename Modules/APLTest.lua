@@ -9,7 +9,7 @@
 
 --- @diagnostic disable: undefined-global, undefined-field
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -63,13 +63,13 @@ end
 local function FormatTestResult(result)
     local status = result.success and "|cFF00FF00PASS|r" or "|cFFFF0000FAIL|r"
     local time = result.endTime - result.startTime
-    
+
     local msg = format("%s: %s in %.3f ms", status, result.name, time * 1000)
-    
+
     if not result.success then
         msg = msg .. format(" - Error: %s", result.errorMessage or "Unknown error")
     end
-    
+
     return msg
 end
 
@@ -97,7 +97,7 @@ local APLTest = NAG:CreateModule("APLTest", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     optionsOrder = 10,
     libs = { "AceTimer-3.0" },
-    
+
     -- Define default state structure
     defaultState = {
         testQueue = {}, -- List of tests to run
@@ -116,44 +116,44 @@ local APLTest = NAG:CreateModule("APLTest", defaults, {
             values = {}
         },
     },
-    
+
     -- Message handlers
     messageHandlers = {
         ["NAG_CONFIG_CHANGED"] = "OnConfigChanged"
     }
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function APLTest:ModuleInitialize()
         self:Debug("Initializing APLTest module")
-        
+
         -- Get required modules
         APL = NAG:GetModule("APL")
         if not APL then
             self:Error("APL module not found")
             return
         end
-        
+
         APLSchema = NAG:GetModule("APLSchema")
         if not APLSchema then
             self:Error("APLSchema module not found")
             return
         end
-        
+
         -- Get test data helper
         TestData = NAG.TestData
         if not TestData then
             self:Error("TestData helper not found")
             return
         end
-        
+
         -- Register for test completion notification
         self:RegisterMessage("APL_TEST_COMPLETE", "OnTestComplete")
-        
+
         -- Create slash command
         self:RegisterChatCommand("nagtest", "OnTestCommand")
-        
+
         self:Debug("APLTest module initialized")
     end
 
@@ -169,17 +169,17 @@ do
     end
 end
 
--- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function APLTest:OnTestCommand(input)
         local args = {strsplit(" ", input)}
         local cmd = args[1] and strlower(args[1]) or "help"
-        
+
         -- Check if the UI wants to handle this command
         if NAG.APLTestUI and NAG.APLTestUI.SlashCommandHook and NAG.APLTestUI.SlashCommandHook(cmd) then
             return
         end
-        
+
         if cmd == "run" or cmd == "r" then
             self:RunTests(args[2])
         elseif cmd == "report" or cmd == "results" then
@@ -206,12 +206,12 @@ do
     end
 end
 
--- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~
 do
     -- Ace3 lifecycle helpers
     function APLTest:ModuleResetState()
         self:Debug("Resetting APLTest state")
-        
+
         -- Reset current run state
         self.state.currentRun = {
             inProgress = false,
@@ -223,22 +223,22 @@ do
             skipped = 0,
             failures = {},
         }
-        
+
         -- Reset test queue
         wipe(self.state.testQueue)
-        
+
         -- Populate test types if empty
         if not next(self.state.testTypes.actions) then
             self.state.testTypes.actions = APLSchema:GetAllActionTypes() or {}
         end
-        
+
         if not next(self.state.testTypes.values) then
             self.state.testTypes.values = APLSchema:GetAllValueTypes() or {}
         end
     end
 end
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function APLTest:ShowHelp()
     self:Print("APL Test Suite Commands:")
     self:Print("/nagtest run [type] - Run tests (all, actions, values, or specific type)")
@@ -250,7 +250,7 @@ end
 
 function APLTest:BuildTestQueue(testType)
     wipe(self.state.testQueue)
-    
+
     if testType == "actions" or testType == "all" or not testType then
         for _, actionType in ipairs(self.state.testTypes.actions) do
             self:QueueActionTests(actionType)
@@ -262,7 +262,7 @@ function APLTest:BuildTestQueue(testType)
     else
         -- Try to find the specific type
         local found = false
-        
+
         -- Check if it's an action
         for _, actionType in ipairs(self.state.testTypes.actions) do
             if actionType == testType then
@@ -271,7 +271,7 @@ function APLTest:BuildTestQueue(testType)
                 break
             end
         end
-        
+
         -- Check if it's a value
         if not found then
             for _, valueType in ipairs(self.state.testTypes.values) do
@@ -282,38 +282,38 @@ function APLTest:BuildTestQueue(testType)
                 end
             end
         end
-        
+
         if not found then
             self:Print("Test type not found: " .. testType)
             return false
         end
     end
-    
+
     return #self.state.testQueue > 0
 end
 
 function APLTest:QueueActionTests(actionType)
     self:Debug("Queuing tests for action: " .. actionType)
-    
+
     local metadata = APLSchema:GenerateMetadata("Actions", actionType)
     if not metadata then
         self:Error("Failed to generate metadata for action: " .. actionType)
         return
     end
-    
+
     -- Convert snake_case to CamelCase for function name
     local funcName = actionType:gsub("^%l", string.upper):gsub("_(%l)", function(c) return c:upper() end)
-    
+
     -- Make sure the function exists
     if not APL.Actions or not APL.Actions[funcName] then
         self:Warn("Action function not found: " .. funcName)
         return
     end
-    
+
     -- Ensure we have valid fields and field order
     local fields = metadata.fields or {}
     local fieldOrder = metadata.field_order or {}
-    
+
     -- If no field order is defined but we have fields, create a reasonable order
     if #fieldOrder == 0 and next(fields) then
         self:Debug("No field_order found for " .. actionType .. ", generating one")
@@ -323,7 +323,7 @@ function APLTest:QueueActionTests(actionType)
         -- Sort fields alphabetically to ensure consistent testing
         table.sort(fieldOrder)
     end
-    
+
     -- Create a basic test case
     local test = {
         type = "action",
@@ -334,33 +334,33 @@ function APLTest:QueueActionTests(actionType)
         fields = fields,
         fieldOrder = fieldOrder,
     }
-    
+
     -- Add to queue
     table.insert(self.state.testQueue, test)
 end
 
 function APLTest:QueueValueTests(valueType)
     self:Debug("Queuing tests for value: " .. valueType)
-    
+
     local metadata = APLSchema:GenerateMetadata("Values", valueType)
     if not metadata then
         self:Error("Failed to generate metadata for value: " .. valueType)
         return
     end
-    
+
     -- Convert snake_case to CamelCase for function name
     local funcName = valueType:gsub("^%l", string.upper):gsub("_(%l)", function(c) return c:upper() end)
-    
+
     -- Make sure the function exists
     if not APL.Values or not APL.Values[funcName] then
         self:Warn("Value function not found: " .. funcName)
         return
     end
-    
+
     -- Ensure we have valid fields and field order
     local fields = metadata.fields or {}
     local fieldOrder = metadata.field_order or {}
-    
+
     -- If no field order is defined but we have fields, create a reasonable order
     if #fieldOrder == 0 and next(fields) then
         self:Debug("No field_order found for " .. valueType .. ", generating one")
@@ -370,7 +370,7 @@ function APLTest:QueueValueTests(valueType)
         -- Sort fields alphabetically to ensure consistent testing
         table.sort(fieldOrder)
     end
-    
+
     -- Create a basic test case
     local test = {
         type = "value",
@@ -381,7 +381,7 @@ function APLTest:QueueValueTests(valueType)
         fields = fields,
         fieldOrder = fieldOrder,
     }
-    
+
     -- Add to queue
     table.insert(self.state.testQueue, test)
 end
@@ -391,13 +391,13 @@ function APLTest:RunTests(testType)
         self:Print("Test run already in progress")
         return
     end
-    
+
     -- Build the test queue
     if not self:BuildTestQueue(testType) then
         self:Print("No tests to run")
         return
     end
-    
+
     -- Initialize run state
     self.state.currentRun = {
         inProgress = true,
@@ -409,40 +409,40 @@ function APLTest:RunTests(testType)
         skipped = 0,
         failures = {},
     }
-    
+
     self:Print(format("Starting test run with %d tests", #self.state.testQueue))
-    
+
     -- Start the test timer
     self:ScheduleTimer("ProcessTestQueue", 0.1)
 end
 
 function APLTest:ProcessTestQueue()
     if not self.state.currentRun.inProgress then return end
-    
+
     if #self.state.testQueue == 0 or self.state.currentRun.testsRun >= self.state.currentRun.totalTests then
         -- Test run complete
         self:FinishTestRun()
         return
     end
-    
+
     -- Run a batch of tests
     local testCasesPerRun = self:GetGlobal().testCasesPerRun or 5
     local toRun = math.min(testCasesPerRun, #self.state.testQueue)
-    
+
     for i = 1, toRun do
         if #self.state.testQueue == 0 then break end
-        
+
         local test = table.remove(self.state.testQueue, 1)
         self:RunSingleTest(test)
     end
-    
+
     -- Schedule next batch
     self:ScheduleTimer("ProcessTestQueue", 0.1)
 end
 
 function APLTest:RunSingleTest(test)
     self:Debug("Running test: " .. test.name)
-    
+
     -- Initialize test result
     local result = {
         name = test.name,
@@ -455,32 +455,32 @@ function APLTest:RunSingleTest(test)
         input = {},
         output = nil,
     }
-    
+
     -- Generate test input based on field definitions
     local randomize = self:GetGlobal().randomizedTesting
     local input = TestData:GenerateTestInput(test.fields, test.fieldOrder, randomize)
     result.input = input
-    
+
     -- Get ordered values for function call
     local args = {}
     if test.fieldOrder and #test.fieldOrder > 0 then
         args = TestData:GetOrderedInputValues(input, test.fieldOrder)
     end
-    
+
     -- Try to call the function and catch errors
     local success, output = pcall(function()
         return test.func(unpack(args))
     end)
-    
+
     -- Record result
     result.success = success
     result.endTime = GetTime()
     result.output = output
-    
+
     if not success then
         result.errorMessage = output
         self.state.currentRun.failed = self.state.currentRun.failed + 1
-        
+
         -- Store failure details if we're under the limit
         if #self.state.currentRun.failures < self:GetGlobal().failureLimit then
             table.insert(self.state.currentRun.failures, result)
@@ -488,25 +488,25 @@ function APLTest:RunSingleTest(test)
     else
         self.state.currentRun.passed = self.state.currentRun.passed + 1
     end
-    
+
     self.state.currentRun.testsRun = self.state.currentRun.testsRun + 1
-    
+
     -- Save result if recording is enabled
     if self:GetGlobal().recordResults then
         -- Store in test results
         self:GetChar().testResults[test.protoName] = result
-        
+
         -- Add to history
         if not self:GetChar().testHistory[test.protoName] then
             self:GetChar().testHistory[test.protoName] = {}
         end
-        
+
         table.insert(self:GetChar().testHistory[test.protoName], {
             timestamp = GetTime(),
             success = result.success,
             errorMessage = result.errorMessage,
         })
-        
+
         -- Cap history at 10 entries
         if #self:GetChar().testHistory[test.protoName] > 10 then
             table.remove(self:GetChar().testHistory[test.protoName], 1)
@@ -518,29 +518,29 @@ function APLTest:FinishTestRun()
     self.state.currentRun.inProgress = false
     self.state.currentRun.endTime = GetTime()
     local duration = self.state.currentRun.endTime - self.state.currentRun.startTime
-    
+
     -- Update last run date
     self:GetChar().lastRunDate = date("%Y-%m-%d %H:%M:%S")
-    
+
     -- Print summary
-    self:Print(format("Test run complete: %d tests in %.2f seconds", 
+    self:Print(format("Test run complete: %d tests in %.2f seconds",
         self.state.currentRun.totalTests, duration))
-    self:Print(format("Results: %d passed, %d failed, %d skipped", 
+    self:Print(format("Results: %d passed, %d failed, %d skipped",
         self.state.currentRun.passed, self.state.currentRun.failed, self.state.currentRun.skipped))
-    
+
     -- Show failures if any
     if self.state.currentRun.failed > 0 then
         self:Print("Failures:")
         for i, failure in ipairs(self.state.currentRun.failures) do
             self:Print(format("%d. %s - %s", i, failure.name, failure.errorMessage or "Unknown error"))
         end
-        
+
         if self.state.currentRun.failed > #self.state.currentRun.failures then
-            self:Print(format("... and %d more failures", 
+            self:Print(format("... and %d more failures",
                 self.state.currentRun.failed - #self.state.currentRun.failures))
         end
     end
-    
+
     -- Send completion message
     self:SendMessage("APL_TEST_COMPLETE", self.state.currentRun)
 end
@@ -550,15 +550,15 @@ function APLTest:ShowTestReport()
         self:Print("No test results available. Run tests first.")
         return
     end
-    
+
     self:Print("APL Test Report:")
     self:Print("Last run: " .. self:GetChar().lastRunDate)
-    
+
     local results = self:GetChar().testResults
     local totalTests = 0
     local passed = 0
     local failed = 0
-    
+
     for _, result in pairs(results) do
         totalTests = totalTests + 1
         if result.success then
@@ -567,10 +567,10 @@ function APLTest:ShowTestReport()
             failed = failed + 1
         end
     end
-    
-    self:Print(format("Summary: %d total tests, %d passed, %d failed", 
+
+    self:Print(format("Summary: %d total tests, %d passed, %d failed",
         totalTests, passed, failed))
-    
+
     -- Show recent failures
     if failed > 0 then
         self:Print("Recent failures:")
@@ -581,7 +581,7 @@ function APLTest:ShowTestReport()
                 shown = shown + 1
             end
         end
-        
+
         if failed > shown then
             self:Print(format("... and %d more failures", failed - shown))
         end
@@ -590,18 +590,18 @@ end
 
 function APLTest:ListTests()
     self:Print("Available test types:")
-    
+
     self:Print("Actions:")
     for _, actionType in ipairs(self.state.testTypes.actions) do
         self:Print("- " .. actionType)
     end
-    
+
     self:Print("Values:")
     for _, valueType in ipairs(self.state.testTypes.values) do
         self:Print("- " .. valueType)
     end
-    
-    self:Print(format("Run with: /nagtest run [type] (e.g., /nagtest run %s)", 
+
+    self:Print(format("Run with: /nagtest run [type] (e.g., /nagtest run %s)",
         self.state.testTypes.values[1] or "values"))
 end
 

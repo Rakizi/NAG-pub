@@ -103,4 +103,4 @@ function Mage:RegisterSpellTracking()
     if not SpellTracker then return end
 end
 
-NAG.Class = Mage 
+NAG.Class = Mage

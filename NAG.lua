@@ -77,7 +77,7 @@ ns.MODULE_CATEGORIES = {
 local NAG = LibStub("AceAddon-3.0"):NewAddon("NAG", "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0")
 NAG.trinketFunctionsUsed = false -- Global flag to track if trinket functions have been used
 _G.NAG = NAG
-NAG.x = ns 
+NAG.x = ns
 
 ns.assertType(NAG, "table", "NAG")
 LibStub("AceEvent-3.0"):Embed(NAG) -- This adds RegisterCallback functionality to NAG
@@ -251,10 +251,10 @@ do -- Core ACE3 functions --
         if self:GetGlobal().combatMetricsBaseline == nil then
             self:GetGlobal().combatMetricsBaseline = false
         end
-        
+
         -- Make ns.combatMetricsBaseline reference the global DB value for easy access
         ns.combatMetricsBaseline = self:GetGlobal().combatMetricsBaseline
-        
+
         -- Add a function to calibrate the combat metrics baseline
         function ns.CalibrateMetricsBaseline(value)
             local global = NAG:GetGlobal()
@@ -543,7 +543,7 @@ do -- Core ACE3 functions --
         return char and char.defaultBattlePotion or nil
     end
     NAG.GetBattlePotion = NAG.GetDefaultBattlePotion
-    
+
     --- Updates the default battle potion setting based on class/spec
     --- @param self NAG The addon object
     function NAG:UpdateDefaultBattlePotion()
@@ -1094,7 +1094,7 @@ do --== WeakAuras Integration API ==--
         return 0
     end
 
-    --[[ replaced with APLHandler version 
+    --[[ replaced with APLHandler version
     function NAG:GetBattlePotion()
         return NAG.db and NAG.db.char and NAG.db.char.defaultBattlePotion
     end
@@ -1157,7 +1157,7 @@ do -- ~~~~~~~~~~ Migrations ~~~~~~~~~~~~
         end,
         [40100] = function(self) -- v4.1.0 Key storage restructure
             local global = self:GetGlobal()
-            
+
             -- Create new storage structure
             global.keys = global.keys or {}
             global.keys.legacy = global.keys.legacy or {

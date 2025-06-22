@@ -20,7 +20,7 @@ local VersionTests = {}
 
 function VersionTests:test_GetVersionInfo_ReturnsValidTable()
     local info = Version:GetVersionInfo()
-    
+
     Assert.isNotNil(info, "GetVersionInfo should return a table.")
     Assert.isType(info.version, "string")
     Assert.isType(info.build, "string")

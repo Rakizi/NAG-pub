@@ -7,7 +7,7 @@
 
 --- @diagnostic disable: undefined-global, undefined-field
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -47,7 +47,7 @@ local sort = table.sort
 local concat = table.concat
 local unpack = unpack
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
     global = {
         debug = false,
@@ -117,7 +117,7 @@ local IGNORED_PATH_COMPONENTS = {
     ["EVOKER"] = true,
 }
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function DataWalker:ModuleInitialize()
         self:Debug("DataWalker module initialized")
@@ -186,7 +186,7 @@ function DataWalker:WalkNode(node)
     if self:ShouldSkipPath(currentPath) then
         self:Trace("WalkNode: Skipping path: " .. currentPath)
         return true
-    else 
+    else
         self:Debug(format("WalkNode: Processing path: %s", currentPath))
     end
     -- Handle different node types
@@ -372,4 +372,4 @@ function DataWalker:ClearSkipPaths()
 end
 
 -- Expose in private namespace
-ns.DataWalker = DataWalker 
+ns.DataWalker = DataWalker

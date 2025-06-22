@@ -756,7 +756,7 @@ if L then
         L["resetClassDesc"] = "Сбросить настройки класса к значениям по умолчанию"
         L["resetToDefault"] = "Сбросить к настройкам по умолчанию"
         L["resetConfirmation"] = "Вы уверены, что хотите сбросить '%s' к настройкам по умолчанию?\nЭто действие нельзя отменить."
-        
+
         -- Types.lua Stats
         L["strength"] = "Сила"
         L["agility"] = "Ловкость"
@@ -785,14 +785,14 @@ if L then
         L["health"] = "Здоровье"
         L["mana"] = "Мана"
         L["mp5"] = "Мана за 5 секунд"
-        
+
         -- Types.lua Categories
         L["character"] = "Персонаж"
         L["buffs"] = "Баффы"
         L["debuffs"] = "Дебаффы"
         L["combat"] = "Бой"
         L["class"] = "Класс"
-        
+
         -- Types.lua Buff Types
         L["stats"] = "Характеристики"
         L["spell_resistance"] = "Сопротивление заклинаниям"
@@ -809,7 +809,7 @@ if L then
         L["major_mana"] = "Большая мана"
         L["armor"] = "Броня"
         L["heroism"] = "Героизм"
-        
+
         -- Types.lua Debuff Types
         L["spell_damage"] = "Урон от заклинаний"
         L["spell_crit"] = "Критический удар заклинаний"
@@ -819,7 +819,7 @@ if L then
         L["physical_damage_reduction"] = "Снижение физического урона"
         L["attack_speed"] = "Скорость атаки"
         L["healing_reduction"] = "Снижение исцеления"
-        
+
         -- Types.lua Combat Types
         L["unknown"] = "Неизвестно"
         L["any"] = "Любой"
@@ -827,7 +827,7 @@ if L then
         L["main_hand"] = "Правая рука"
         L["off_hand"] = "Левая рука"
         L["ranged"] = "Дальний бой"
-        
+
         -- Types.lua Class Types
         L["humanoid"] = "Гуманоид"
         L["ghost_wolf"] = "Призрачный волк"
@@ -844,14 +844,14 @@ if L then
         L["blood"] = "Кровь"
         L["frost"] = "Лед"
         L["unholy"] = "Нечестивость"
-        
+
         -- Types.lua Rune Types
         L["rune_unknown"] = "Неизвестная руна"
         L["rune_blood"] = "Руна крови"
         L["rune_frost"] = "Руна льда"
         L["rune_unholy"] = "Руна нечестивости"
         L["rune_death"] = "Руна смерти"
-        
+
         -- Types.lua Rune Slots
         L["slot_unknown"] = "Неизвестный слот"
         L["slot_left_blood"] = "Левая руна крови"
@@ -860,18 +860,18 @@ if L then
         L["slot_right_frost"] = "Правая руна льда"
         L["slot_left_unholy"] = "Левая руна нечестивости"
         L["slot_right_unholy"] = "Правая руна нечестивости"
-        
+
         -- Types.lua Eclipse Phases
         L["unknown_phase"] = "Неизвестная фаза"
         L["neutral_phase"] = "Нейтральная фаза"
         L["solar_phase"] = "Солнечная фаза"
         L["lunar_phase"] = "Лунная фаза"
-        
+
         -- Types.lua Swap Sets
         L["swap_set_unknown"] = "Неизвестный набор замены"
         L["swap_set_main"] = "Основной набор замены"
         L["swap_set_swap1"] = "Набор замены 1"
-        
+
         -- Types.lua Mob Types
         L["none"] = "Нет"
         L["aberration"] = "Аберрация"

@@ -9,7 +9,7 @@
 --
 --- @diagnostic disable: undefined-global, undefined-field
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -30,25 +30,25 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local TIMER_CATEGORY = Timer.Categories.CORE
 
 local UPDATE_INTERVALS = {
@@ -102,7 +102,7 @@ local ThrottleManager = NAG:CreateModule("ThrottleManager", {
     }
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function ThrottleManager:ModuleInitialize()
     end
@@ -115,7 +115,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function ThrottleManager:NAG_CLASS_MODULE_READY(event, hasEnabledModule)
         if hasEnabledModule then
@@ -173,7 +173,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for Throttle Manager settings
 
@@ -315,7 +315,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function ThrottleManager:UpdateDisplayVisibility()
     -- Update burst trackers visibility
     --- @type BurstTrackerManager
@@ -412,7 +412,7 @@ end
 function ThrottleManager:ForceRotationUpdate()
     -- Update display visibility
     self:UpdateDisplayVisibility()
-    
+
     -- Force immediate rotation calculation
     if NAG.cachedRotationFunc then
         NAG:Update(NAG.cachedRotationFunc)

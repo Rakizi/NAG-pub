@@ -53,21 +53,21 @@ do -- Ace3 lifecycle methods
     --- Initialize the module
     function SpellLearner:ModuleInitialize()
         self:Info("Initializing SpellLearner")
-        
+
         -- Initialize StateManager
         self.stateManager = NAG:GetModule("SpellLearnerStateManager")
         if not self.stateManager then
             self:Error("Failed to initialize StateManager!")
             return
         end
-        
+
         -- Initialize PredictionEngine
         self.predictionEngine = NAG:GetModule("PredictionEngine")
         if not self.predictionEngine then
             self:Error("Failed to initialize PredictionEngine!")
             return
         end
-        
+
         -- Register slash command for clearing data
         self:RegisterChatCommand("nagclear", function(input)
             if input == "confirm" or input == "p" then
@@ -78,7 +78,7 @@ do -- Ace3 lifecycle methods
                 self:Debug("WARNING: Using 'confirm' will erase all learned spell data!")
             end
         end)
-        
+
         -- Register slash command for processing
         self:RegisterChatCommand("nagprocess", function(input)
             if not self.predictionEngine then
@@ -90,7 +90,7 @@ do -- Ace3 lifecycle methods
                 -- Try to convert input to spell ID
                 local spellID = tonumber(input)
                 if spellID then
-                    self:Debug(format("Processing data only for spell %d (%s)", 
+                    self:Debug(format("Processing data only for spell %d (%s)",
                         spellID, GetSpellInfo(spellID) or "Unknown"))
                     self.predictionEngine:ForceProcessData(spellID)
                 else
@@ -101,14 +101,14 @@ do -- Ace3 lifecycle methods
                 self.predictionEngine:ForceProcessData()
             end
         end)
-        
+
         self:Debug("StateManager and PredictionEngine initialized successfully")
     end
 
     --- Enable the module
     function SpellLearner:ModuleEnable()
         self:Debug("Enabling SpellLearner")
-        
+
         -- Enable StateManager if it exists
         if self.stateManager then
             self.stateManager:Enable()
@@ -119,7 +119,7 @@ do -- Ace3 lifecycle methods
     --- Disable the module
     function SpellLearner:ModuleDisable()
         self:Debug("Disabling SpellLearner")
-        
+
         -- Disable StateManager if it exists
         if self.stateManager then
             self.stateManager:Disable()
@@ -174,7 +174,7 @@ function SpellLearner:GetOptions()
 end
 
 -- Make module available globally through NAG
-ns.SpellLearner = SpellLearner 
+ns.SpellLearner = SpellLearner
 
 --- Clear all learned data
 -- @param clearType string Optional - 'p' for processed data only, 'confirm' for full clear
@@ -184,12 +184,12 @@ function SpellLearner:ClearLearnedData(clearType)
         if self:GetChar().compiled then
             wipe(self:GetChar().compiled)
         end
-        
+
         -- Clear processed history
         if self:GetChar().processedHistory then
             wipe(self:GetChar().processedHistory)
         end
-        
+
         -- Clear spell effects (learned relationships)
         if self.stateManager and self.stateManager.state then
             self.stateManager.state.spellEffects = {}
@@ -200,46 +200,46 @@ function SpellLearner:ClearLearnedData(clearType)
                 wipe(self.stateManager.state.stateHistory)
             end
         end
-        
+
         -- Clear PredictionEngine processed data
         if self.predictionEngine then
             -- Clear compiled knowledge
             if self.predictionEngine:GetChar().compiled then
                 wipe(self.predictionEngine:GetChar().compiled)
             end
-            
+
             -- Clear processed history
             if self.predictionEngine:GetChar().processedHistory then
                 wipe(self.predictionEngine:GetChar().processedHistory)
             end
-            
+
             -- Clear outlier statistics
             if self.predictionEngine:GetChar().outlierStats then
                 wipe(self.predictionEngine:GetChar().outlierStats)
             end
-            
+
             -- Reset last processed time
             self.predictionEngine:GetChar().lastProcessedTime = 0
-            
+
             -- Clear any predictions
             if self.predictionEngine.state and self.predictionEngine.state.predictions then
                 wipe(self.predictionEngine.state.predictions)
             end
         end
-        
+
         self:Debug("Processed data has been cleared")
         self:Debug("Raw spell cast records have been preserved")
         self:Debug("Use /nagprocess to reprocess the existing cast records")
-        
+
     elseif clearType == "confirm" then
         -- First clear all processed data
         self:ClearLearnedData("p")
-        
+
         -- Then clear raw data
         if self.stateManager and self.stateManager.db.global.spellChanges then
             wipe(self.stateManager.db.global.spellChanges)
         end
-        
+
         self:Debug("All data has been cleared")
         self:Debug("Use /nagprocess to start learning from new cast records")
     else
@@ -247,4 +247,4 @@ function SpellLearner:ClearLearnedData(clearType)
         self:Debug("To clear all learned data, use: /nagclear confirm")
         self:Debug("WARNING: Using 'confirm' will erase all learned spell data!")
     end
-end 
+end

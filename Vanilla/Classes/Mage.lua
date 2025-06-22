@@ -45,7 +45,7 @@ ns.AddRotationToDefaults(defaults,
         experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_ERA,
         prePull = {
-            
+
         },
         rotationString = [[
     NAG:AutocastOtherCooldowns()

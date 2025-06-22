@@ -33,10 +33,10 @@ end
 function EntityBehaviorsTests:test_SpellEntity_HasCorrectBehaviors()
     -- Arrange
     local spellId = 133
-    
+
     -- Act
     local spellEntity = DataManager:AddSpell(spellId, { "Spells" })
-    
+
     -- Assert
     Assert.isNotNil(spellEntity, "Spell entity should be created.")
     Assert.isType(spellEntity.IsKnown, "function", "Spell entity should have IsKnown behavior.")
@@ -47,10 +47,10 @@ end
 function EntityBehaviorsTests:test_ItemEntity_HasCorrectBehaviors()
     -- Arrange
     local itemId = 6948
-    
+
     -- Act
     local itemEntity = DataManager:AddItem(itemId, { "Items" })
-    
+
     -- Assert
     Assert.isNotNil(itemEntity, "Item entity should be created.")
     Assert.isType(itemEntity.IsKnown, "function", "Item entity should have IsKnown behavior.")
@@ -60,10 +60,10 @@ end
 function EntityBehaviorsTests:test_TrinketEntity_InheritsItemAndTrinketBehaviors()
     -- Arrange
     local trinketId = 50353 -- Example: Deathbringer's Will
-    
+
     -- Act
     local trinketEntity = DataManager:AddItem(trinketId, { "Items", "Trinket" }, { flags = { trinket = true } })
-    
+
     -- Assert
     Assert.isNotNil(trinketEntity, "Trinket entity should be created.")
     -- Test a base Item behavior
@@ -76,10 +76,10 @@ function EntityBehaviorsTests:test_TalentEntity_HasTalentBehaviors()
     -- Arrange
     local talentId = 10001
     local spellId = 20001
-    
+
     -- Act
     local talentEntity = DataManager:Add(talentId, "talent", { "Talents" }, { talentId = talentId, rank1 = spellId })
-    
+
     -- Assert
     Assert.isNotNil(talentEntity, "Talent entity should be created.")
     Assert.isType(talentEntity.GetRank, "function", "Talent should have GetRank behavior.")

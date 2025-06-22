@@ -8,7 +8,7 @@
 -- Status: good
 --- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -32,22 +32,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
@@ -257,7 +257,7 @@ do -- Ace3 lifecycle
             C_Timer.After(6, function()
                 local hasOldWA = ns.IsWeakAuraLoaded("DK Next Action Guide - by Fonsas")
                 local hasNewWA = ns.IsWeakAuraLoaded("DK Next Action Guide (comp) - by Fonsas")
-                
+
                 if hasOldWA or not hasNewWA then
                     C_Timer.After(2, function()
                         local message = "\124cffF772E6 [Fonsas] whispers: "
@@ -644,7 +644,7 @@ do  -- Rotation handling
         if not selectedName then
             self:Debug("GetCurrentRotation: No selected rotation, looking for default")
             local classDB = self:GetClass()
-            
+
             -- First check spec-independent rotations (specID 0)
             local specIndependentRotations = classDB.rotations and classDB.rotations[0]
             if specIndependentRotations then
@@ -656,7 +656,7 @@ do  -- Rotation handling
                     end
                 end
             end
-            
+
             -- If no spec-independent default found, check spec-specific rotations
             if not selectedName and specID > 0 then
                 local classRotations = classDB.rotations and classDB.rotations[specID]
@@ -681,17 +681,17 @@ do  -- Rotation handling
 
         -- First check for user-modified rotation in class DB
         local classDB = self:GetClass()
-        
+
         -- Check spec-independent custom rotations first
         local customRotations = classDB.customRotations and classDB.customRotations[0]
         local rotation = customRotations and customRotations[selectedName]
-        
+
         -- If not found in spec-independent, check spec-specific custom rotations
         if not rotation and specID > 0 then
             customRotations = classDB.customRotations and classDB.customRotations[specID]
             rotation = customRotations and customRotations[selectedName]
         end
-        
+
         self:Debug("GetCurrentRotation: Found in custom rotations: " .. tostring(rotation ~= nil))
 
         -- If not found in custom rotations, check base rotations
@@ -699,13 +699,13 @@ do  -- Rotation handling
             -- Check spec-independent base rotations first
             local classRotations = classDB.rotations and classDB.rotations[0]
             rotation = classRotations and classRotations[selectedName]
-            
+
             -- If not found in spec-independent, check spec-specific base rotations
             if not rotation and specID > 0 then
                 classRotations = classDB.rotations and classDB.rotations[specID]
                 rotation = classRotations and classRotations[selectedName]
             end
-            
+
             self:Debug("GetCurrentRotation: Found in base rotations: " .. tostring(rotation ~= nil))
         end
 
@@ -726,7 +726,7 @@ do  -- Rotation handling
                 end
             end
         end
-        
+
         -- If no spec-independent default found, check spec-specific
         if not defaultConfig and specID > 0 then
             classRotations = classDB.rotations and classDB.rotations[specID]
@@ -792,11 +792,11 @@ do  -- Rotation handling
 
         -- Get class DB
         local classDB = self:GetClass()
-        
+
         -- First check if this is a spec-independent rotation (specID 0)
         local foundInSpecIndependent = (classDB.rotations and classDB.rotations[0] and classDB.rotations[0][rotationName]) or
             (classDB.customRotations and classDB.customRotations[0] and classDB.customRotations[0][rotationName])
-        
+
         -- If not found in spec-independent, verify the spec exists and check spec-specific rotations
         if not foundInSpecIndependent then
             if specID > 0 then
@@ -991,7 +991,7 @@ do  -- Rotation handling
         else
             -- For standard rotations, add to defaults
             ns.AddRotationToDefaults(self.defaults, result.specID, result.name, result)
-            
+
             -- Re-register defaults to ensure they take effect
             self.db:RegisterDefaults(self.defaults)
         end
@@ -1430,15 +1430,15 @@ function ClassBase:CreateSpellLocationOptions()
             if lastAction then
                 -- Extract spell ID from various action patterns
                 local spellId
-                
+
                 -- Direct Cast call
                 spellId = lastAction:match("Cast%((%d+)%)")
-                
+
                 -- PaladinCastWithMacro
                 if not spellId then
                     spellId = lastAction:match("PaladinCastWithMacro%((%d+)[%s,]")
                 end
-                
+
                 -- StrictSequence - get the first spell ID after the name
                 if not spellId and lastAction:match("StrictSequence") then
                     local afterName = lastAction:match("StrictSequence%([^,]+,([^%)]+)%)")
@@ -1446,7 +1446,7 @@ function ClassBase:CreateSpellLocationOptions()
                         spellId = afterName:match("(%d+)")
                     end
                 end
-                
+
                 -- Sequence - get the first spell ID after the name
                 if not spellId and lastAction:match("Sequence") then
                     local afterName = lastAction:match("Sequence%([^,]+,([^%)]+)%)")

@@ -26,8 +26,8 @@ local GetSpellBonusDamage = GetSpellBonusDamage
 -- Math operations (WoW optimized)
 local format = format or string.format
 
--- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
-do -- ~~~~~~~~~~ Stat APLValue Functions ~~~~~~~~~~ 
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+do -- ~~~~~~~~~~ Stat APLValue Functions ~~~~~~~~~~
 
     --- Calculates the average weapon damage for a given weapon.
     --- This includes base damage, buffs, and debuffs. It does not include attack power scaling.
@@ -62,4 +62,4 @@ do -- ~~~~~~~~~~ Stat APLValue Functions ~~~~~~~~~~
         return (minDamage + maxDamage) / 2
     end
 
-end 
+end

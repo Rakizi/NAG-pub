@@ -34,7 +34,7 @@ end
 function PullTimerManagerTests:test_StartPullTimer_SetsCorrectState()
     -- Act
     PullTimerManager:StartPullTimer(10)
-    
+
     -- Assert
     Assert.areEqual(10, PullTimerManager:GetPullTimer(), "Pull timer duration is incorrect.")
     Assert.isNotNil(PullTimerManager:GetPullStartTime(), "Pull start time should be set.")
@@ -50,7 +50,7 @@ function PullTimerManagerTests:test_CancelPullTimer_ResetsState()
 
     -- Act
     PullTimerManager:CancelPullTimer()
-    
+
     -- Assert
     Assert.areEqual(0, PullTimerManager:GetPullTimer(), "Pull timer duration should be reset to 0.")
     Assert.isNil(PullTimerManager:GetPullStartTime(), "Pull start time should be reset to nil.")
@@ -66,18 +66,18 @@ function PullTimerManagerTests:test_GetCurrentPrePullSettings_MergesRotationSett
     PullTimerManager.UpdateCurrentRotation = function(self)
         self.state.currentRotation = { prePull = { { 12345, -5 } } }
     end
-    
+
     PullTimerManager:UpdateCurrentRotation()
     PullTimerManager:GetChar().useRotationPrePull = true
-    
+
     -- Act
     local settings = PullTimerManager:GetCurrentPrePullSettings()
-    
+
     -- Assert
     Assert.isNotNil(settings, "Should return settings.")
     Assert.areEqual(1, #settings, "Should have one action from the rotation.")
     Assert.areEqual(12345, settings[1][1], "Spell ID should match the rotation's setting.")
-    
+
     -- Cleanup
     PullTimerManager.UpdateCurrentRotation = originalUpdateRotation
     PullTimerManager:UpdateCurrentRotation() -- Restore original state

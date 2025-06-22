@@ -6,7 +6,7 @@
 -- Status: good
 --- @diagnostic disable: undefined-global, undefined-field
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -20,22 +20,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
@@ -69,7 +69,7 @@ local BTK = NAG:CreateModule("BTK", nil, {
     },
 })
 
--- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~
 do -- Ace3 lifecycle methods
 
     --- Initialize the BTK module
@@ -137,5 +137,5 @@ function BTK:PerformRandomEmote()
     end
 end
 
--- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 ns.BTK = BTK

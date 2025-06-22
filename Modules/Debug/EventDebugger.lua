@@ -9,7 +9,7 @@
 -- Status: good
 --- @diagnostic disable: ...
 
--- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -28,22 +28,22 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch 
-local strfind = strfind   
-local strsub = strsub     
-local strlower = strlower 
-local strupper = strupper 
-local strsplit = strsplit 
-local strjoin = strjoin   
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     
-local tremove = tremove     
-local wipe = wipe           
-local tContains = tContains 
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort    
+local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
@@ -80,7 +80,7 @@ local EventDebugger = NAG:CreateModule("EventDebugger", defaults, {
     hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
--- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     --- @param self EventDebugger
     function EventDebugger:ModuleInitialize()
@@ -117,7 +117,7 @@ do
     end
 end
 
--- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     --- Generic event handler to catch and print all events.
 
@@ -155,13 +155,13 @@ do
     end
 end
 
--- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~ 
+-- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~
 SLASH_NAGEVENTDEBUG1 = "/nageventdebug"
 SlashCmdList["NAGEVENTDEBUG"] = function()
     EventDebugger:Toggle()
 end
 
--- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for Event Debugger settings
 

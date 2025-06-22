@@ -38,32 +38,32 @@ end
 function APLTest:RunTests(filter)
     local startTime = GetTime()
     local results = { passed = 0, failed = 0, errors = 0, total = 0, failures = {} }
-    
+
     self:Print("|cFF00FF00Starting NAG Test Run...|r")
 
     for suiteName, suite in pairs(self.testSuites) do
         if not filter or suiteName:lower():find(filter:lower()) then
             self:Print(string.format("|cFFFFFF00Running suite: %s|r", suiteName))
-            
+
             for testName, testFunc in pairs(suite) do
                 if type(testFunc) == "function" and testName:find("^test_") then
                     results.total = results.total + 1
-                    
+
                     -- Run setup if it exists
-                    if suite.setup then 
+                    if suite.setup then
                         -- Pass 'suite' as the 'self' argument
                         pcall(suite.setup, suite) -- <--- FIX #1
                     end
-                    
+
                     -- Run the test in a protected call, passing 'suite' as 'self'
                     local success, err = pcall(testFunc, suite) -- <--- FIX #2
-                    
+
                     -- Run teardown if it exists
-                    if suite.teardown then 
+                    if suite.teardown then
                         -- Pass 'suite' as the 'self' argument
                         pcall(suite.teardown, suite) -- <--- FIX #3
                     end
-                    
+
                     -- Record result
                     if success then
                         results.passed = results.passed + 1
@@ -80,7 +80,7 @@ function APLTest:RunTests(filter)
             end
         end
     end
-    
+
     local endTime = GetTime()
     self:PrintReport(results, endTime - startTime)
 end
@@ -94,7 +94,7 @@ function APLTest:PrintReport(results, duration)
     self:Print(string.format("|cFF00FF00Passed: %d|r", results.passed))
     self:Print(string.format("|cFFFF0000Failed: %d|r", results.failed))
     self:Print(string.format("Duration: %.3f seconds", duration))
-    
+
     if #results.failures > 0 then
         self:Print("\n|cFFFF0000Failure Details:|r")
         for i, failure in ipairs(results.failures) do

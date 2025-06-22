@@ -41,7 +41,7 @@ function CommonTests:test_GlyphFunctions_OnGlyphClient()
     local majorGlyphId = 55555
     local minorGlyphId = 66666
     local primeGlyphId = 77777
-    
+
     _G.GetNumGlyphSockets = function() return 3 end
     _G.GetGlyphSocketInfo = function(socketIndex)
         if socketIndex == 1 then
@@ -53,7 +53,7 @@ function CommonTests:test_GlyphFunctions_OnGlyphClient()
         end
         return false, 0, nil, nil
     end
-    
+
     -- Act & Assert
     Assert.isTrue(NAG:HasGlyph(majorGlyphId), "HasGlyph should detect an equipped glyph.")
     Assert.isTrue(NAG:HasMajorGlyph(majorGlyphId), "Should detect a major glyph.")
@@ -68,10 +68,10 @@ function CommonTests:test_GlyphFunctions_OnNonGlyphClient()
         APLTest:Print("|cFFFFFF00Skipping Non-Glyph test: API is present on this client.|r")
         return
     end
-    
+
     -- Arrange
     local glyphId = 12345
-    
+
     -- Act & Assert
     Assert.isFalse(NAG:HasGlyph(glyphId), "HasGlyph should return false when API doesn't exist.")
     Assert.isFalse(NAG:HasMajorGlyph(glyphId), "HasMajorGlyph should return false when API doesn't exist.")

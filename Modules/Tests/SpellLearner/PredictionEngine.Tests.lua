@@ -57,7 +57,7 @@ function PredictionEngineTests:test_ProcessSpellEntries_CalculatesMedianCost()
 
     -- Act
     PredictionEngine:ProcessSpellEntries(spellId, entries)
-    
+
     -- Assert
     local specID = 0 -- Assuming spec-independent for this test
     local compiledData = PredictionEngine:GetChar().compiled[specID][spellId]["default"]
@@ -80,7 +80,7 @@ function PredictionEngineTests:test_ProcessSpellEntries_CalculatesBuffApplicatio
 
     -- Act
     PredictionEngine:ProcessSpellEntries(spellId, entries)
-    
+
     -- Assert
     local specID = 0 -- Assuming spec-independent for this test
     local compiledData = PredictionEngine:GetChar().compiled[specID][spellId]["default"]

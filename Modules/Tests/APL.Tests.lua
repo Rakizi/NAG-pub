@@ -68,7 +68,7 @@ function APLTests:test_RegisterImplementation_AddsToCorrectTable()
     -- Act
     APL:RegisterActionImplementation("test_action", testActionImpl)
     APL:RegisterValueImplementation("test_value", testValueImpl)
-    
+
     -- Assert
     Assert.isNotNil(APL.Implementations.Actions["test_action"], "Test action implementation should be registered.")
     Assert.isNotNil(APL.Implementations.Values["test_value"], "Test value implementation should be registered.")

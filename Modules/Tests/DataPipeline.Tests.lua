@@ -37,11 +37,11 @@ function DataPipelineTests:test_DataManager_AddAndGetSpell()
     -- Arrange
     local spellId = 133
     local path = { "Spells", "Mage", "Fire" }
-    
+
     -- Act
     local entry = DataManager:AddSpell(spellId, path)
     local retrieved = DataManager:GetSpell(spellId)
-    
+
     -- Assert
     Assert.isNotNil(entry, "AddSpell should return the created entry.")
     Assert.isNotNil(retrieved, "GetSpell should retrieve the added entry.")
@@ -56,11 +56,11 @@ function DataPipelineTests:test_DataManager_AddAndGetItem()
     -- Arrange
     local itemId = 6948
     local path = { "Items", "Misc" }
-    
+
     -- Act
     local entry = DataManager:AddItem(itemId, path)
     local retrieved = DataManager:GetItem(itemId)
-    
+
     -- Assert
     Assert.isNotNil(retrieved, "GetItem should retrieve the added item.")
     Assert.areEqual("Hearthstone", retrieved.name, "Item name should be correct.")
@@ -77,7 +77,7 @@ function DataPipelineTests:test_DataWalker_ProcessesMockData()
             }
         }
     }
-    
+
     local mockProcessors = {
         spell = {
             process = function(id, path, rawData)
@@ -93,16 +93,16 @@ function DataPipelineTests:test_DataWalker_ProcessesMockData()
     DataManager.Add = function(self, id, type, path, data)
         processedEntry = { id=id, type=type, path=path }
     end
-    
+
     -- Act
     DataWalker:Walk(mockData, mockProcessors)
-    
+
     -- Assert
     Assert.isNotNil(processedEntry, "DataWalker should have processed an entry.")
     Assert.areEqual(12345, processedEntry.id, "Processed entry should have the correct ID.")
     Assert.areEqual("spell", processedEntry.type, "Processed entry should have the correct type.")
     Assert.isTrue(tContains(processedEntry.path, "TestCategory"), "Path should be passed correctly.")
-    
+
     -- Cleanup
     DataManager.Add = originalAdd
 end

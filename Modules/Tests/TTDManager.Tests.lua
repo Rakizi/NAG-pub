@@ -44,19 +44,19 @@ function TTDManagerTests:test_CalculateTimeToX_WithLinearData()
             { time = 1, health = 90 },
         }
     }
-    
+
     -- Mock GetTime to control the time elapsed
     local originalGetTime = GetTime
     GetTime = function() return 1005 end
-    
+
     -- Act
     local ttd = TTDManager:CalculateTimeToX(guid, 0, 5) -- Time to 0% health
-    
+
     -- Assert
     -- Health is at 50% after 5 seconds of combat. At a rate of -10%/sec, it should take 5 more seconds to die.
     local tolerance = 0.1
     Assert.isTrue(math.abs(ttd - 5) < tolerance, "TTD calculation for linear data is incorrect.")
-    
+
     -- Cleanup
     GetTime = originalGetTime
 end
@@ -65,13 +65,13 @@ function TTDManagerTests:test_GetTargetCount_ReturnsCorrectValues()
     -- Arrange
     local _, playerClass = UnitClass("player")
     local isRanged = (playerClass == "MAGE" or playerClass == "HUNTER" or playerClass == "WARLOCK")
-    
+
     TTDManager.state.mobCount = 10
     TTDManager.state.meleeMobCount = 3
-    
+
     -- Act
     local targetCount = TTDManager:GetTargetCount()
-    
+
     -- Assert
     if isRanged then
         Assert.areEqual(10, targetCount, "Ranged class should count all mobs.")

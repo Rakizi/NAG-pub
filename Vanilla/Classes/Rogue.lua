@@ -45,7 +45,7 @@ ns.AddRotationToDefaults(defaults,
         experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_ERA,
         prePull = {
-            
+
         },
         rotationString = [[
     ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:RemainingTime() >= 6.0)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:RemainingTime() > 9.0))) and NAG:Cast(6774))
@@ -72,7 +72,7 @@ ns.AddRotationToDefaults(defaults,
         experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_ERA,
         prePull = {
-            
+
         },
         rotationString = [[
     ((((NAG:CurrentComboPoints() >= 1.0) and (not NAG:IsActive(6774)) and (NAG:RemainingTime() >= 6.0)) or ((NAG:CurrentComboPoints() >= 5.0) and (NAG:AuraRemainingTime(6774) < 3.0) and (NAG:RemainingTime() > 9.0))) and NAG:Cast(6774))
