@@ -342,12 +342,34 @@ function ns.GetSpellTabInfoUnified(tabIndex)
 end
 
 --- Unified GetAuraDataByIndex function.
---- TODO: This failed unittesting, disabled for now
--- Retrieves aura data by index, working across both Retail and Classic.
+--- Retrieves aura data by index, working across both Retail and Classic.
 --- @param unitToken string The unit to check for the aura.
 --- @param index number The index of the aura on the unit.
 --- @param filter string Optional filter for the aura (e.g., "HELPFUL", "HARMFUL").
--- @return string name, number icon, number count, string? dispelType, number duration, number expirationTime, string? source, boolean isStealable, boolean nameplateShowPersonal, number spellId, boolean canApplyAura, boolean isBossDebuff, boolean castByPlayer, boolean nameplateShowAll, number timeMod, boolean? shouldConsolidate, number? auraInstanceID, number? charges, boolean? isHarmful, boolean? isHelpful, boolean? isNameplateOnly, boolean? isRaid, number? maxCharges, table? points
+--- @return string|nil name The name of the aura.
+--- @return number|nil icon The icon texture of the aura.
+--- @return number|nil count The number of applications of the aura.
+--- @return string|nil dispelType The dispel type of the aura.
+--- @return number|nil duration The total duration of the aura.
+--- @return number|nil expirationTime The time at which the aura will expire.
+--- @return string|nil source The unit that applied the aura.
+--- @return boolean|nil isStealable Whether the aura is stealable.
+--- @return boolean|nil nameplateShowPersonal Whether the aura is from the player and should be shown on their nameplate.
+--- @return number|nil spellId The spell ID of the aura.
+--- @return boolean|nil canApplyAura Whether the player can apply the aura.
+--- @return boolean|nil isBossDebuff Whether the aura is a boss debuff. In Retail, this is `isBossAura`.
+--- @return boolean|nil castByPlayer Whether the aura was cast by the player or their pet. In Retail, this is `isFromPlayerOrPlayerPet`.
+--- @return boolean|nil nameplateShowAll Whether the aura should be shown on all nameplates.
+--- @return number|nil timeMod The time modification rate of the aura.
+--- @return any|nil shouldConsolidate (Retail-only) Placeholder, not reliably returned.
+--- @return number|nil auraInstanceID (Retail-only) Aura instance ID.
+--- @return number|nil charges (Retail-only) The number of charges.
+--- @return boolean|nil isHarmful (Retail-only) Whether the aura is harmful.
+--- @return boolean|nil isHelpful (Retail-only) Whether the aura is helpful.
+--- @return boolean|nil isNameplateOnly (Retail-only) Whether the aura is only for nameplates.
+--- @return boolean|nil isRaid (Retail-only) Whether the aura is from a raid member.
+--- @return number|nil maxCharges (Retail-only) The maximum number of charges.
+--- @return table|nil points (Retail-only) A table of points for area auras.
 function ns.UnitAuraUnified(unitToken, index, filter)
     if not unitToken then error("unitToken is nil") end
     if not index then return nil end
@@ -586,32 +608,235 @@ function ns.GetActiveSpecGroupUnified()
     end
 end
 
---- Unified function to get talent info.
---- @param talentTier number The talent tier (row).
---- @param talentColumn number The talent column.
---- @param specGroupIndex number? The spec group index.
+--- Unified function to get talent info, providing a compatibility layer for older versions.
+--- Mimics the behavior of the pre-5.5.x GetTalentInfo function.
+--- @param tabIndex number The talent tab index (unsupported in modern API).
+--- @param talentIndex number The talent index (1-18 for players).
 --- @param isInspect boolean? Whether to get for inspect target.
---- @param target string? The unit to inspect.
---- @return number|nil talentID, string? name, number? icon, boolean? selected, boolean? available, number? spellID, boolean? isPVPTalentUnlocked, number? tier, number? column, boolean? known, boolean? isGrantedByAura
-function ns.GetTalentInfoUnified(talentTier, talentColumn, specGroupIndex, isInspect, target)
+--- @param isPet boolean? Whether it's a pet talent (unsupported in modern API).
+--- @param groupIndex number? The spec group index.
+--- @return string? name, number? icon, number? tier, number? column, number? rank, number? maxRank, boolean? meetsPrereq, number? previewRank, boolean? meetsPreviewPrereq, boolean? isExceptional, boolean? hasGoldBorder, number? talentID
+function ns.GetTalentInfoUnified(tabIndex, talentIndex, isInspect, isPet, groupIndex)
     if C_SpecializationInfo and C_SpecializationInfo.GetTalentInfo then
-        local talentInfoQuery = {
-            tier = talentTier,
-            column = talentColumn,
-            groupIndex = specGroupIndex,
-            isInspect = isInspect,
-            target = target,
-        }
+        -- Modern API (post-5.5.x), adapted from WeakAuras
+        -- Note: tabIndex and isPet are not supported parameters here.
+        local numColumns = 3
+        local talentInfoQuery = {}
+        talentInfoQuery.tier = ceil(talentIndex / numColumns)
+        talentInfoQuery.column = (talentIndex - 1) % numColumns + 1 -- Ensure column is 1, 2, or 3
+        talentInfoQuery.groupIndex = groupIndex
+        talentInfoQuery.isInspect = isInspect
+        talentInfoQuery.target = nil
         local talentInfo = C_SpecializationInfo.GetTalentInfo(talentInfoQuery)
         if not talentInfo then
             return nil
         end
-        return talentInfo.talentID, talentInfo.name, talentInfo.icon, talentInfo.selected,
-            talentInfo.available, talentInfo.spellID, talentInfo.isPVPTalentUnlocked, talentInfo.tier,
-            talentInfo.column, talentInfo.known, talentInfo.isGrantedByAura
+
+        -- Emulate old return values for compatibility
+        return talentInfo.name, talentInfo.icon, talentInfo.tier, talentInfo.column,
+            talentInfo.selected and talentInfo.rank or 0, talentInfo.maxRank, talentInfo.meetsPrereq,
+            talentInfo.previewRank, talentInfo.meetsPreviewPrereq, talentInfo.isExceptional,
+            talentInfo.hasGoldBorder, talentInfo.talentID
     elseif _G.GetTalentInfo then
-        return _G.GetTalentInfo(talentTier, talentColumn, specGroupIndex, isInspect, target)
+        -- Classic/Older API
+        return _G.GetTalentInfo(tabIndex, talentIndex, isInspect, isPet, groupIndex)
     else
         return nil
     end
+end
+
+--- Unified function to get the number of factions.
+--- @return number numFactions
+function ns.GetNumFactionsUnified()
+    if C_Reputation and C_Reputation.GetNumFactions then
+        return C_Reputation.GetNumFactions()
+    else
+        --- @diagnostic disable-next-line: deprecated
+        return _G.GetNumFactions()
+    end
+end
+
+--- Unified function to get faction data by index.
+--- @param index number The faction index.
+--- @return table|nil factionData A table with faction information, or nil.
+function ns.GetFactionDataByIndexUnified(index)
+    if C_Reputation and C_Reputation.GetFactionDataByIndex then
+        return C_Reputation.GetFactionDataByIndex(index)
+    else
+        --- @diagnostic disable-next-line: deprecated
+        local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canSetInactive = GetFactionInfo(index)
+        if not name then return nil end
+        return {
+            factionID = factionID,
+            name = name,
+            description = description,
+            reaction = standingID,
+            currentReactionThreshold = barMin,
+            nextReactionThreshold = barMax,
+            currentStanding = barValue,
+            atWarWith = atWarWith,
+            canToggleAtWar = canToggleAtWar,
+            isChild = isChild,
+            isHeader = isHeader,
+            isHeaderWithRep = hasRep,
+            isCollapsed = isCollapsed,
+            isWatched = isWatched,
+            hasBonusRepGain = hasBonusRepGain,
+            canSetInactive = canSetInactive,
+            isAccountWide = nil
+        }
+    end
+end
+
+--- Unified function to get faction data by ID.
+--- @param factionID number The faction ID.
+--- @return table|nil factionData A table with faction information, or nil.
+function ns.GetFactionDataByIDUnified(factionID)
+    if C_Reputation and C_Reputation.GetFactionDataByID then
+        return C_Reputation.GetFactionDataByID(factionID)
+    else
+        --- @diagnostic disable-next-line: deprecated
+        local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, id, hasBonusRepGain, canSetInactive = GetFactionInfoByID(factionID)
+        if not name then return nil end
+        return {
+            factionID = id,
+            name = name,
+            description = description,
+            reaction = standingID,
+            currentReactionThreshold = barMin,
+            nextReactionThreshold = barMax,
+            currentStanding = barValue,
+            atWarWith = atWarWith,
+            canToggleAtWar = canToggleAtWar,
+            isChild = isChild,
+            isHeader = isHeader,
+            isHeaderWithRep = hasRep,
+            isCollapsed = isCollapsed,
+            isWatched = isWatched,
+            hasBonusRepGain = hasBonusRepGain,
+            canSetInactive = canSetInactive,
+            isAccountWide = nil -- Not available in classic API
+        }
+    end
+end
+
+--- Unified function to get the ID of the watched faction.
+--- @return number|nil factionID The ID of the watched faction, or nil.
+function ns.GetWatchedFactionIdUnified()
+    if C_Reputation and C_Reputation.GetWatchedFactionData then
+        local data = C_Reputation.GetWatchedFactionData()
+        return data and data.factionID or nil
+    else
+        --- @diagnostic disable-next-line: deprecated
+        return select(6, GetWatchedFactionInfo())
+    end
+end
+
+--- Unified function to expand a faction header in the reputation UI.
+--- @param factionID number The ID of the faction header.
+function ns.ExpandFactionHeaderUnified(factionID)
+    if C_Reputation and C_Reputation.ExpandFactionHeader then
+        return C_Reputation.ExpandFactionHeader(factionID)
+    else
+        --- @diagnostic disable-next-line: deprecated
+        return _G.ExpandFactionHeader(factionID)
+    end
+end
+
+--- Unified function to collapse a faction header in the reputation UI.
+--- @param factionID number The ID of the faction header.
+function ns.CollapseFactionHeaderUnified(factionID)
+    if C_Reputation and C_Reputation.CollapseFactionHeader then
+        return C_Reputation.CollapseFactionHeader(factionID)
+    else
+        --- @diagnostic disable-next-line: deprecated
+        return _G.CollapseFactionHeader(factionID)
+    end
+end
+
+--- Unified function to check if legacy reputations are shown.
+--- @return boolean shown
+function ns.AreLegacyReputationsShownUnified()
+    if C_Reputation and C_Reputation.AreLegacyReputationsShown then
+        return C_Reputation.AreLegacyReputationsShown()
+    else
+        -- Default to true for older clients where this concept didn't exist
+        return true
+    end
+end
+
+--- Unified function to get the reputation sort type.
+--- @return number sortType
+function ns.GetReputationSortTypeUnified()
+    if C_Reputation and C_Reputation.GetReputationSortType then
+        return C_Reputation.GetReputationSortType()
+    else
+        -- Default to 0 for older clients
+        return 0
+    end
+end
+
+--- Unified function to get the player's current specialization index.
+--- @return number|nil specIndex The index of the current specialization, or nil if not available.
+function ns.GetSpecializationUnified()
+    if C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
+        return C_SpecializationInfo.GetSpecialization()
+    elseif _G.GetSpecialization then
+        return _G.GetSpecialization()
+    end
+    return nil
+end
+
+--- Unified function to get the number of specializations for a given class ID.
+--- @param classID number The class ID.
+--- @return number|nil numSpecs The number of specializations, or nil if the API is not available.
+function ns.GetNumSpecializationsForClassIDUnified(classID)
+    if not classID then return nil end
+    if C_SpecializationInfo and C_SpecializationInfo.GetNumSpecializationsForClassID then
+        return C_SpecializationInfo.GetNumSpecializationsForClassID(classID)
+    elseif _G.GetNumSpecializationsForClassID then
+        return _G.GetNumSpecializationsForClassID(classID)
+    end
+    return nil
+end
+
+--- Unified function to get specialization info for a given class ID and spec index.
+--- Includes a fallback for Mists of Pandaria.
+--- @param classID number The class ID.
+--- @param specIndex number The specialization index (1-based).
+--- @return any ... Returns from GetSpecializationInfoByID or nil.
+function ns.GetSpecializationInfoForClassIDUnified(classID, specIndex)
+    if not classID or not specIndex then return nil end
+
+    if Version and Version:IsMists() then
+        -- Mists of Pandaria specific implementation from WeakAuras
+        local specsByClassID = {
+            [0] = { 74, 81, 79 }, -- Warrior placeholder?
+            [1] = { 71, 72, 73, 1446 }, -- Warrior
+            [2] = { 65, 66, 70, 1451 }, -- Paladin
+            [3] = { 253, 254, 255, 1448 }, -- Hunter
+            [4] = { 259, 260, 261, 1453 }, -- Rogue
+            [5] = { 256, 257, 258, 1452 }, -- Priest
+            [6] = { 250, 251, 252, 1455 }, -- Death Knight
+            [7] = { 262, 263, 264, 1444 }, -- Shaman
+            [8] = { 62, 63, 64, 1449 }, -- Mage
+            [9] = { 265, 266, 267, 1454 }, -- Warlock
+            [10] = { 268, 270, 269, 1450 }, -- Monk
+            [11] = { 102, 103, 104, 105, 1447 }, -- Druid
+        }
+        local specID = specsByClassID[classID] and specsByClassID[classID][specIndex]
+        if not specID then
+            return nil
+        end
+        --- @diagnostic disable-next-line: deprecated
+        return _G.GetSpecializationInfoByID(specID)
+    end
+
+    if _G.GetSpecializationInfoForClassID then
+        -- Standard API call
+        --- @diagnostic disable-next-line: deprecated
+        return _G.GetSpecializationInfoForClassID(classID, specIndex)
+    end
+
+    return nil
 end

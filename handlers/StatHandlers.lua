@@ -21,17 +21,7 @@ local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 --- ======= WoW API =======
 local UnitDamage = UnitDamage
 local UnitRangedDamage = UnitRangedDamage
-local GetSpellBonusDamage = GetSpellBonusDamage
-local UnitAura = ns.UnitAuraUnified
 local GetTime = GetTime
-local CreateFrame = CreateFrame
-local tonumber = tonumber
-local gsub = string.gsub
-local find = string.find
-local match = string.match
-
--- Math operations (WoW optimized)
-local format = format or string.format
 
 -- Module References
 --- @type TooltipParsingManager|ModuleBase|AceModule

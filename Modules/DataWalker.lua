@@ -15,10 +15,6 @@ local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local DebugManager = NAG:GetModule("DebugManager")
 
 --WoW API
-local GetSpellCooldown = ns.GetSpellCooldownUnified
-local GetSpellCharges = ns.GetSpellChargesUnified
-local GetSpellInfo = ns.GetSpellInfoUnified
-local UnitAura = ns.UnitAuraUnified
 local UnitClass = UnitClass
 
 -- Lua APIs (using WoW's optimized versions where available)
