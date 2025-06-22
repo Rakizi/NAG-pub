@@ -30,13 +30,13 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch 
+local strfind = strfind   
+local strsub = strsub     
+local strlower = strlower 
+local strupper = strupper 
+local strsplit = strsplit 
+local strjoin = strjoin   
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
