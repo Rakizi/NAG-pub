@@ -1,13 +1,14 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
----@class SpellTrackingManager : ModuleBase
+--- @type SpellTrackingManager|AceModule|ModuleBase
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
+--- @type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
+--- @type NAG|AceAddon
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Dynamically build spec table for WARRIOR
 local specNames = { "SPEC1", "SPEC2", "SPEC3" }
@@ -85,12 +86,12 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.SPEC1, "Template Spec1", {
 
 -- END OF GENERATED_ROTATIONS
 
----@class Template : ClassBase
+--- @class Template : ClassBase
 local Template = NAG:CreateClassModule("TEMPLATE", defaults)
 
 -- Optional: Register spell tracking if needed
 function Template:RegisterSpellTracking()
-    ---@class SpellTrackingManager : ModuleBase
+    --- @type SpellTrackingManager|AceModule|ModuleBase
     local SpellTracker = NAG:GetModule("SpellTrackingManager")
     if not SpellTracker then return end
 

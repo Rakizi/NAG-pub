@@ -5,16 +5,16 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field, redundant-parameter, missing-parameter, param-type-mismatch
+--- @diagnostic disable: undefined-global, undefined-field, redundant-parameter, missing-parameter, param-type-mismatch
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@type Types|ModuleBase|AceModule
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 
 --WoW API
@@ -50,14 +50,14 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 local defaults = {
     global = {
         debug = false,
     },
 }
 
----@class TooltipParsingManager: ModuleBase
+--- @class TooltipParsingManager: ModuleBase
 local TooltipParsingManager = NAG:CreateModule("TooltipParsingManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 301,
@@ -108,8 +108,8 @@ local DAMAGE_STATS = {
     [Types:GetType("Stat").RANGED_ATTACK_POWER] = true,
 }
 
---- ============================ ORGANIZATION ============================
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function TooltipParsingManager:ModuleInitialize()
         -- Create scanning tooltip frame if it doesn't exist
@@ -228,10 +228,10 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (No explicit event handler blocks, handled via chat command registration and parsing)
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 do
     -- Helper functions for time parsing
     function TooltipParsingManager:ParseTimeToSeconds(value, unit)
@@ -803,10 +803,10 @@ do
     end
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 -- (No explicit options UI in this module)
 
---- ============================ COMMAND HANDLERS ============================
+-- ~~~~~~~~~~ COMMAND HANDLERS ~~~~~~~~~~ 
 function TooltipParsingManager:ProcessTrinketCommand(input)
     -- Parse the input
     local itemId = tonumber(input)
@@ -860,6 +860,6 @@ function TooltipParsingManager:ProcessTrinketCommand(input)
     end
 end
 
---- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 -- Expose in private namespace 
 ns.TooltipParser = TooltipParsingManager 

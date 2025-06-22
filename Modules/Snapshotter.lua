@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
@@ -21,13 +20,13 @@
     Date: 06/01/2024
 
     STATUS: Development
-    NOTES: Snapshoter module for automatic real-time snapshot recording of player stats
+    NOTES: Snapshotter module for automatic real-time snapshot recording of player stats
     
     PURPOSE: Provides fully automatic real-time snapshot recording of player stats during 
     spell casts and debuff applications. Snapshots are temporary and exist only during combat.
 
     USAGE:
-    The Snapshoter module automatically records snapshots for:
+    The Snapshotter module automatically records snapshots for:
     - Every successful spell cast by the player
     - Every buff applied to the player
     - Every debuff applied by the player to the target
@@ -55,7 +54,7 @@
 --- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -105,7 +104,7 @@ local abs = abs or math.abs
 local wipe = wipe
 local tinsert = tinsert
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local CONSTANTS = {
     VALID_STATS = {
@@ -132,8 +131,8 @@ local defaults = {
     }
 }
 
----@class Snapshoter: ModuleBase
-local Snapshoter = NAG:CreateModule("Snapshoter", defaults, {
+--- @class Snapshotter: ModuleBase
+local Snapshotter = NAG:CreateModule("Snapshotter", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG, -- Category in options UI
     optionsOrder = 30,                           -- Order within category
     childGroups = "tree",                        -- Options group structure
@@ -155,8 +154,8 @@ local Snapshoter = NAG:CreateModule("Snapshoter", defaults, {
 do -- Ace3 lifecyle methods
 
     --- Initialize the module
-    function Snapshoter:ModuleInitialize()
-        self:Info("Initializing Snapshoter")
+    function Snapshotter:ModuleInitialize()
+        self:Info("Initializing Snapshotter")
         
         -- Initialize state from defaultState
         self.state = CopyTable(self.defaultState)
@@ -182,22 +181,22 @@ do -- Ace3 lifecyle methods
     end
 
     --- Enable the module
-    function Snapshoter:ModuleEnable()
-        self:Debug("Enabling Snapshoter")
+    function Snapshotter:ModuleEnable()
+        self:Debug("Enabling Snapshotter")
         -- Clear any existing snapshots when enabling
         self:ClearAllSnapshots()
     end
 
     --- Disable the module
-    function Snapshoter:ModuleDisable()
-        self:Debug("Disabling Snapshoter")
+    function Snapshotter:ModuleDisable()
+        self:Debug("Disabling Snapshotter")
         -- Clear snapshots when disabling
         self:ClearAllSnapshots()
     end
 end
 
 --- Event handler for UNIT_SPELLCAST_SUCCEEDED
-function Snapshoter:OnSpellCastSucceeded(event, unit, castGUID, spellID)
+function Snapshotter:OnSpellCastSucceeded(event, unit, castGUID, spellID)
     if unit ~= "player" then return end
     
     self:Debug(format("Spell cast succeeded: %s (ID: %d)", GetSpellInfo(spellID) or "Unknown", spellID))
@@ -207,7 +206,7 @@ function Snapshoter:OnSpellCastSucceeded(event, unit, castGUID, spellID)
 end
 
 --- Event handler for COMBAT_LOG_EVENT_UNFILTERED
-function Snapshoter:OnCombatLogEvent(event)
+function Snapshotter:OnCombatLogEvent(event)
     local timestamp, eventType, _, sourceGUID, sourceName, sourceFlags, sourceRaidFlags,
           destGUID, destName, destFlags, destRaidFlags, arg1, arg2, arg3, arg4 = CombatLogGetCurrentEventInfo()
     
@@ -244,20 +243,20 @@ function Snapshoter:OnCombatLogEvent(event)
 end
 
 --- Event handler for PLAYER_REGEN_ENABLED (combat end)
-function Snapshoter:OnCombatEnd()
+function Snapshotter:OnCombatEnd()
     self:Debug("Combat ended - clearing all snapshots")
     self:ClearAllSnapshots()
 end
 
 --- Clear all stored snapshots
-function Snapshoter:ClearAllSnapshots()
+function Snapshotter:ClearAllSnapshots()
     wipe(self.state.snapshots)
     wipe(self.state.activeBuffs)
     self:Debug("All snapshots and active buffs cleared")
 end
 
 --- Capture a complete snapshot of all supported stats
-function Snapshoter:CaptureSnapshot(spellID, reason)
+function Snapshotter:CaptureSnapshot(spellID, reason)
     if not spellID then
         self:Debug("No spellID provided to CaptureSnapshot")
         return
@@ -288,7 +287,7 @@ function Snapshoter:CaptureSnapshot(spellID, reason)
 end
 
 --- Validate stat arguments
-function Snapshoter:ValidateStatArgs(arguments)
+function Snapshotter:ValidateStatArgs(arguments)
     if not arguments then
         self:Debug("No arguments provided")
         return {}
@@ -323,7 +322,7 @@ function Snapshoter:ValidateStatArgs(arguments)
 end
 
 --- Check stored snapshot for a spell
-function Snapshoter:SnapshotCheck(arguments, spellID)
+function Snapshotter:SnapshotCheck(arguments, spellID)
     -- Validate inputs
     if not spellID or type(spellID) ~= "number" then
         self:Debug("Invalid spellID provided to SnapshotCheck")
@@ -356,7 +355,7 @@ function Snapshoter:SnapshotCheck(arguments, spellID)
 end
 
 --- Debug function to show snapshot for a specific spell
-function Snapshoter:DebugSnapshot(spellID)
+function Snapshotter:DebugSnapshot(spellID)
     local snapshot = self.state.snapshots[spellID]
     if not snapshot then
         self:Debug(format("No snapshot found for spell %d", spellID))
@@ -374,7 +373,7 @@ function Snapshoter:DebugSnapshot(spellID)
 end
 
 --- Debug function to show summary of all snapshots
-function Snapshoter:DebugSnapshotSummary()
+function Snapshotter:DebugSnapshotSummary()
     local count = 0
     for spellID, _ in pairs(self.state.snapshots) do
         count = count + 1
@@ -400,7 +399,7 @@ function Snapshoter:DebugSnapshotSummary()
 end
 
 --- Debug function to show active buffs/debuffs
-function Snapshoter:DebugActiveBuffs()
+function Snapshotter:DebugActiveBuffs()
     local count = 0
     for spellID, _ in pairs(self.state.activeBuffs) do
         count = count + 1
@@ -422,7 +421,7 @@ function Snapshoter:DebugActiveBuffs()
 end
 
 --- Get current live stat value for a given stat name
-function Snapshoter:GetCurrentStat(statName)
+function Snapshotter:GetCurrentStat(statName)
     if not statName or not CONSTANTS.VALID_STATS[statName] then
         self:Debug(format("Invalid stat name: %s", statName or "nil"))
         return 0
@@ -451,12 +450,12 @@ function Snapshoter:GetCurrentStat(statName)
 end
 
 --- Check if a buff/debuff is still active
-function Snapshoter:IsAuraActive(spellID)
+function Snapshotter:IsAuraActive(spellID)
     return self.state.activeBuffs[spellID] == true
 end
 
 -- Make module available globally through NAG
-ns.Snapshoter = Snapshoter
+ns.Snapshotter = Snapshotter
 
 -- Add global API function to NAG namespace
 do
@@ -494,8 +493,8 @@ do
     --- -- Arguments can be in any order
     --- local diff = NAG:Snapshot("ap", 67890, "mastery")  -- Returns: (current_ap + current_mastery) - (snapshot_ap + snapshot_mastery)
     function NAG:Snapshot(...)
-        local Snapshoter = NAG:GetModule("Snapshoter")
-        if not Snapshoter then
+        local Snapshotter = NAG:GetModule("Snapshotter")
+        if not Snapshotter then
             return 0
         end
 
@@ -513,9 +512,9 @@ do
         end
 
         -- Validate stat names
-        local validStats = Snapshoter:ValidateStatArgs(statNames)
+        local validStats = Snapshotter:ValidateStatArgs(statNames)
         if #validStats == 0 then
-            Snapshoter:Debug("No valid stat arguments provided")
+            Snapshotter:Debug("No valid stat arguments provided")
             return 0
         end
 
@@ -523,22 +522,22 @@ do
         if not spellID then
             local total = 0
             for _, statName in ipairs(validStats) do
-                local value = Snapshoter:GetCurrentStat(statName)
+                local value = Snapshotter:GetCurrentStat(statName)
                 total = total + value
             end
-            Snapshoter:Debug(format("Live stat sum: %d", total))
+            Snapshotter:Debug(format("Live stat sum: %d", total))
             return total
         end
 
         -- Check if snapshot exists for this spellID
-        local snapshot = Snapshoter.state.snapshots[spellID]
+        local snapshot = Snapshotter.state.snapshots[spellID]
         if not snapshot then
-            Snapshoter:Debug(format("No snapshot found for spellID %d", spellID))
+            Snapshotter:Debug(format("No snapshot found for spellID %d", spellID))
             return 0
         end
 
         -- Check if this is a buff/debuff and if it's still active
-        local isAuraActive = Snapshoter:IsAuraActive(spellID)
+        local isAuraActive = Snapshotter:IsAuraActive(spellID)
         local spellName = GetSpellInfo(spellID) or "Unknown"
         
         if isAuraActive then
@@ -546,23 +545,23 @@ do
             local total = 0
             for _, statName in ipairs(validStats) do
                 local snapshotValue = snapshot[statName] or 0
-                local currentValue = Snapshoter:GetCurrentStat(statName)
+                local currentValue = Snapshotter:GetCurrentStat(statName)
                 local difference = currentValue - snapshotValue
                 total = total + difference
-                Snapshoter:Debug(format("Stat %s: snapshot=%d, current=%d, diff=%d", 
+                Snapshotter:Debug(format("Stat %s: snapshot=%d, current=%d, diff=%d", 
                     statName, snapshotValue, currentValue, difference))
             end
-            Snapshoter:Debug(format("Active aura comparison for %s (ID: %d): %d", spellName, spellID, total))
+            Snapshotter:Debug(format("Active aura comparison for %s (ID: %d): %d", spellName, spellID, total))
             return total
         else
             -- Buff/debuff has expired - return current live values
             local total = 0
             for _, statName in ipairs(validStats) do
-                local currentValue = Snapshoter:GetCurrentStat(statName)
+                local currentValue = Snapshotter:GetCurrentStat(statName)
                 total = total + currentValue
-                Snapshoter:Debug(format("Expired aura - stat %s: current=%d", statName, currentValue))
+                Snapshotter:Debug(format("Expired aura - stat %s: current=%d", statName, currentValue))
             end
-            Snapshoter:Debug(format("Expired aura %s (ID: %d) - returning current values: %d", spellName, spellID, total))
+            Snapshotter:Debug(format("Expired aura %s (ID: %d) - returning current values: %d", spellName, spellID, total))
             return total
         end
     end

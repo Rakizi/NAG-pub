@@ -4,18 +4,18 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@type Types|ModuleBase|AceModule
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 --Libs
 
@@ -52,9 +52,9 @@ local concat = table.concat -- No WoW equivalent
 
 --File
 
---- ======= GLOBALIZE =======
---- ============================ CONTENT ============================
---==========================================Helper Functions==========================================
+-- ~~~~~~~~~~ GLOBALIZE ~~~~~~~~~~
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+--~~~~~~~~~~Helper Functions~~~~~~~~~~
 
 
 
@@ -95,7 +95,7 @@ do --== Rotation Functions ==--
         end
 
         -- Pre-register found spell IDs with DataManager
-        ---@class DataManager : ModuleBase
+        --- @type DataManager|AceModule|ModuleBase
         local DataManager = self:GetModule("DataManager")
         if DataManager then
             for spellId in pairs(spellIds) do
@@ -962,7 +962,7 @@ do --== Rotation Functions ==--
         self:Info("InitializeRotation()")
 
         -- Get class module
-        ---@class ClassBase : ModuleBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = self:GetModule(self.CLASS, true)
         if not classModule or not classModule:IsEnabled() then
             return true -- Return true for classes without modules or with disabled modules

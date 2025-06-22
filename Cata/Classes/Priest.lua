@@ -1,11 +1,11 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
----@class SpellTrackingManager : ModuleBase
+--- @type SpellTrackingManager|AceModule|ModuleBase
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
 local SpecializationCompat = ns.SpecializationCompat
 
@@ -142,11 +142,11 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.DISCIPLINE, "Cataclysm Discipline
 -- SOD ROTATION CONFIG END
 
 -- END OF GENERATED_ROTATIONS
----@class Priest : ClassBase
+--- @class Priest : ClassBase
 local Priest = NAG:CreateClassModule("PRIEST", defaults)
 if not Priest then return end
 function Priest:RegisterSpellTracking()
-    ---@class SpellTrackingManager : ModuleBase
+    --- @type SpellTrackingManager|AceModule|ModuleBase
     local SpellTracker = NAG:GetModule("SpellTrackingManager")
     if not SpellTracker then return end
 

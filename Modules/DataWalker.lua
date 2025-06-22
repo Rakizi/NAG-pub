@@ -5,9 +5,9 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -47,13 +47,13 @@ local sort = table.sort
 local concat = table.concat
 local unpack = unpack
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 local defaults = {
     global = {
         debug = false,
     },
 }
----@class DataWalker: ModuleBase, AceConsole-3.0
+--- @class DataWalker: ModuleBase, AceConsole-3.0
 local DataWalker = NAG:CreateModule("DataWalker", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
@@ -117,7 +117,7 @@ local IGNORED_PATH_COMPONENTS = {
     ["EVOKER"] = true,
 }
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function DataWalker:ModuleInitialize()
         self:Debug("DataWalker module initialized")
@@ -129,7 +129,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 -- Core walker implementation
 function DataWalker:Walk(data, processors, options)

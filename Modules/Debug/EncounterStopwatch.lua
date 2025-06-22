@@ -6,16 +6,16 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
---- @type StateManager|ModuleBase|AceModule
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 
 -- Lua APIs
@@ -34,8 +34,8 @@ local UPDATE_INTERVAL = 0.1
 local FRAME_WIDTH = 250  -- Increased for better readability
 local FRAME_HEIGHT = 140  -- Increased to accommodate the new line
 
---- ============================ CONTENT ============================
----@class EncounterStopwatch: ModuleBase
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+--- @class EncounterStopwatch: ModuleBase
 local EncounterStopwatch = NAG:CreateModule("EncounterStopwatch", {
     char = {
         position = {
@@ -58,7 +58,7 @@ local EncounterStopwatch = NAG:CreateModule("EncounterStopwatch", {
     end
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function EncounterStopwatch:ModuleInitialize()
         -- Register events for target changes and combat
@@ -84,7 +84,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     function EncounterStopwatch:OnCombatChange(event)
         if not self:GetChar().autoShow then return end
@@ -133,7 +133,7 @@ do
     end
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     function EncounterStopwatch:GetOptions()
         return {
@@ -193,7 +193,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function EncounterStopwatch:IsTrainingDummy()
     if not UnitExists("target") then return false end
     

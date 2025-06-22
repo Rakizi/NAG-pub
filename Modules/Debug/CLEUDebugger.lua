@@ -7,9 +7,9 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -38,7 +38,7 @@ local strupper = strupper -- WoW's version
 local strsplit = strsplit -- WoW's specific version
 local strjoin = strjoin   -- WoW's specific version
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
     global = {
@@ -70,8 +70,8 @@ local OUTPUT_MODES = {
     BOTH = "BOTH"
 }
 
----@class CLEUDebugger: ModuleBase, AceConsole-3.0
----@field hidden boolean
+--- @class CLEUDebugger: ModuleBase, AceConsole-3.0
+--- @field hidden boolean
 local CLEUDebugger = NAG:CreateModule("CLEUDebugger", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     moduleType = ns.MODULE_TYPES.DEBUG,
@@ -82,7 +82,7 @@ local CLEUDebugger = NAG:CreateModule("CLEUDebugger", defaults, {
     hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     --- Initialize the module
 
@@ -106,7 +106,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     --- Handle COMBAT_LOG_EVENT_UNFILTERED events
 
@@ -168,10 +168,10 @@ do
     end
 end
 
--- ============================ MESSAGE HANDLERS ============================
+-- ~~~~~~~~~~ MESSAGE HANDLERS ~~~~~~~~~~
 -- (none)
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     --- Gets the options table for CLEU Debugger settings
 
@@ -351,7 +351,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 --- Add a spell ID to track
 --- @param self CLEUDebugger
 --- @param spellID number The spell ID to track

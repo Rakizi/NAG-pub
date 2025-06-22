@@ -1,4 +1,4 @@
---- ============================ NAG Main ============================
+-- ~~~~~~~~~~ NAG Main ~~~~~~~~~~
 --- Main entry point and core logic for the Next Action Guide addon
 ---
 --- This module initializes the NAG addon, manages core settings, options, slash commands, and provides the main API for all modules.
@@ -10,11 +10,12 @@
 ---
 --- @module "NAG"
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+--- @type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
 
 -- String manipulation (WoW's optimized versions)
@@ -57,7 +58,7 @@ local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 --- ======= LOCALIZE =======
 -- Module category constants
@@ -72,7 +73,7 @@ ns.MODULE_CATEGORIES = {
 }
 
 
----@class NAG:AceModule, AceEvent-3.0, AceConsole-3.0, AceTimer-3.0
+--- @class NAG:AceModule, AceEvent-3.0, AceConsole-3.0, AceTimer-3.0
 local NAG = LibStub("AceAddon-3.0"):NewAddon("NAG", "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0")
 NAG.trinketFunctionsUsed = false -- Global flag to track if trinket functions have been used
 _G.NAG = NAG
@@ -874,7 +875,7 @@ function NAG:SlashCommand(input, editbox)
         end
         return true
     elseif command == "rotation" or command == "rot" then
-        ---@class ClassBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = self:GetModule(self.CLASS, true)
         if not classModule then return false end
 
@@ -901,7 +902,7 @@ function NAG:SlashCommand(input, editbox)
             return false
         else
             -- Toggle the Rotation Manager
-            ---@class RotationManager : ModuleBase
+            --- @type RotationManager|AceModule|ModuleBase
             local RotationManager = self:GetModule("RotationManager")
             if RotationManager then
                 RotationManager:Toggle()
@@ -987,7 +988,7 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintInfo(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
+            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
         DebugManager:Info(message, printTrace)
@@ -1000,7 +1001,7 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintDebug(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
+            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
         DebugManager:Debug(message, printTrace)
@@ -1013,7 +1014,7 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintWarn(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
+            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
         DebugManager:Warn(message, printTrace)
@@ -1026,7 +1027,7 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintError(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
+            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
         DebugManager:Error(message, printTrace)
@@ -1039,7 +1040,7 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintFatal(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
+            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
         DebugManager:Fatal(message, printTrace)
@@ -1052,7 +1053,7 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintTrace(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
+            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
         DebugManager:Trace(message, printTrace)
@@ -1083,7 +1084,7 @@ do --== WeakAuras Integration API ==--
     --- @return number The next time + optional offset
     function NAG:NextTime(offset)
         if not StateManager then
-            ---@class StateManager : ModuleBase
+            --- @type StateManager|AceModule|ModuleBase
             StateManager = self:GetModule("StateManager")
         end
         local nextTime = StateManager:GetNextTime()
@@ -1131,7 +1132,7 @@ function NAG:RefreshConfig()
     self:SendMessage("NAG_CONFIG_CHANGED")
 end
 
-do --================================== Migrations --==================================--
+do -- ~~~~~~~~~~ Migrations ~~~~~~~~~~~~
     -- Core migration definitions
     NAG.migrations = {
         [40000] = function(self) -- v4.0.0 Major DB restructure

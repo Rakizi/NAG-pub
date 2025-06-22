@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
     This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
@@ -9,7 +9,7 @@
 ]]
 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local Version = ns.Version
 if not Version:IsSoD() then return end
@@ -46,7 +46,7 @@ local setmetatable = setmetatable
 local next = next
 
 NAG.Rune = {}
----@diagnostic disable-next-line: undefined-field
+--- @diagnostic disable-next-line: undefined-field
 local isEngravingAvailable = _G.C_Engraving ~= nil
 
 --- Updates the stable pets information for the Hunter class.

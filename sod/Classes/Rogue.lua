@@ -1,9 +1,9 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
 if not Version:IsSoD() then return end
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
@@ -1001,7 +1001,7 @@ ns.AddRotationToDefaults(defaults,
     }
 )
 
----@class ROGUE : ClassBase
+--- @class ROGUE : ClassBase
 local ROGUE = NAG:CreateClassModule("ROGUE", defaults)
 
 if not ROGUE then return end

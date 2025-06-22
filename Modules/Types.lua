@@ -5,11 +5,11 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: duplicate-set-field, undefined-global, unused-local
+--- @diagnostic disable: duplicate-set-field, undefined-global, unused-local
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
@@ -43,7 +43,7 @@ local concat = table.concat -- No WoW equivalent
 local pairs = pairs
 local setmetatable = setmetatable
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Alias table for manual overrides
 local Aliases = {
     -- Example: ["APLValueRuneSlot"] = "RuneSlot",
@@ -88,7 +88,7 @@ end
 -- Cache for type lookups to avoid repetitive searching
 local TypeLookupCache = {}
 
----@class Types: ModuleBase
+--- @class Types: ModuleBase
 local Types = NAG:CreateModule("Types", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 5,     -- Early in debug options
@@ -434,7 +434,7 @@ Types.SwapSet = TypeRegistry:Register("SwapSet", {
 })
 
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function Types:ModuleInitialize()
         self.Registry = TypeRegistry
@@ -443,7 +443,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- Helper functions for class validation
 function Types:GetSpellClassSet(className)
     local classInfo = self:GetType("ClassInfo")
@@ -538,7 +538,7 @@ function Types:ImportTypesFromSchema(schema)
     return count
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     function Types:LoadSchemaTypes()
         -- Clear caches when reloading schema types
@@ -563,7 +563,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function Types:GetType(name)
     -- Quick return for nil input
     if not name then return nil end
@@ -634,7 +634,7 @@ function Types:SearchEnumValues(searchTerm)
     return TypeRegistry:SearchValues(searchTerm)
 end
 
--- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 -- Make types accessible through NAG.Types
 ns.Types = Types
 

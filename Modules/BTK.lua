@@ -6,7 +6,7 @@
 -- Status: good
 --- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -38,7 +38,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local DEFAULT_TIMER = 90
 local GROUP_TIMER_BASE = 900
@@ -53,7 +53,7 @@ local EMOTE_CHANCES = {
 }
 
 --- Behavior and Timer Keeper module for handling character emotes and version checking
---- @class BTK : ModuleBase
+--- @class BTK:ModuleBase
 --- @field state table Module state containing lastEmoteTime
 local BTK = NAG:CreateModule("BTK", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
@@ -69,7 +69,7 @@ local BTK = NAG:CreateModule("BTK", nil, {
     },
 })
 
---- ============================ ORGANIZATION ============================
+-- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~ 
 do -- Ace3 lifecycle methods
 
     --- Initialize the BTK module
@@ -100,7 +100,7 @@ do -- Event handlers
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 --- Process a received god tier message and potentially trigger an emote
 function BTK:HandleGodTierMessage()
@@ -137,5 +137,5 @@ function BTK:PerformRandomEmote()
     end
 end
 
---- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~ 
 ns.BTK = BTK

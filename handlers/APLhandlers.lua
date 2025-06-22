@@ -12,24 +12,24 @@
 ---
 --- @module "APLhandlers"
 
--- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 
 -- Addon references
---- @type NAG
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
---- @type StateManager
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
---- @type Types
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
---- @type TTDManager
+--- @type TTDManager|AceModule|ModuleBase
 local TTD = NAG:GetModule("TTDManager")
---- @type TimerManager
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
---- @type OverlayManager
+--- @type OverlayManager|AceModule|ModuleBase
 local OverlayManager = NAG:GetModule("OverlayManager")
+--- @type NAG|AceAddon
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Libraries
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
@@ -79,8 +79,7 @@ local type = type
 local tostring = tostring
 local tonumber = tonumber
 
---- ============================ CONTENT ============================
-
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 -- Helper function to translate spell IDs
 --TODO: make this be native to the parser
 local function translateSpellId(id)
@@ -90,12 +89,12 @@ local function translateSpellId(id)
     return id
 end
 
-do -- ================================= Utility Fn's =========================================== --
+do -- ~~~~~~~~~~ Utility Fn's ~~~~~~~~~~= --
 
     --- Placeholder function for spell casting.
-    ---@function NAG:CastPlaceholder
-    ---@param spellId number The ID of the spell to cast.
-    ---@return boolean True if the spell ID is valid, false otherwise.
+    --- @function NAG:CastPlaceholder
+    --- @param spellId number The ID of the spell to cast.
+    --- @return boolean True if the spell ID is valid, false otherwise.
     function NAG:CastPlaceholder(spellId)
         if spellId then
             self.nextSpell = spellId
@@ -150,7 +149,7 @@ do -- ================================= Utility Fn's ===========================
     end
 end
 
-do -- ================================= Funnel Generic Functions =================================
+do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
 
     --- Cast a spell, trinket, tinker, or item based on the provided id.
     --- @usage (NAG:Cast(73643))
@@ -550,7 +549,7 @@ do -- ================================= Funnel Generic Functions ===============
                 return self:DotNumStacks(id)
             elseif entity.flags.aura then
                 return self:AuraNumStacks(id)
-            elseif entity.flags.stack then ---@TODO: Add support for stackable spells
+            elseif entity.flags.stack then --- @TODO: Add support for stackable spells
                 return false --self:SpellNumStacks(id)
             end
         end
@@ -560,7 +559,7 @@ do -- ================================= Funnel Generic Functions ===============
     end
 end
 
-do -- ================================= Casting functions ========================================== --
+do -- ~~~~~~~~~~ Casting functions ~~~~~~~~~~
 
     --- Casts a trinket if available and ready.
     --- @param itemId number The ID of the trinket.
@@ -1073,7 +1072,7 @@ do -- ================================= Casting functions ======================
     NAG.MultiShield = NAG.Multishield
 end
 
-do -- ================================= Targets/Units APLValue Functions ======================================
+do -- ~~~~~~~~~~ Targets/Units APLValue Functions ~~~~~~~~~~=====
 
     --- Returns the distance to the target in yards.
     --- @function NAG:DistanceToTarget
@@ -1294,7 +1293,7 @@ do -- ================================= Targets/Units APLValue Functions =======
     NAG.Move = NAG.MoveToRange
 end
 
-do -- ================================= Spell APLValueFunctions ================================ --
+do -- ~~~~~~~~~~ Spell APLValueFunctions ~~~~~~~~~~
 
     --- Checks if a spell is known.
     --- @function NAG:IsKnownSpell
@@ -1718,7 +1717,7 @@ do -- ================================= Spell APLValueFunctions ================
     end
 end
 
-do -- ================================= IsActive APLValue Functions ================================ --
+do -- ~~~~~~~~~~ IsActive APLValue Functions ~~~~~~~~~~
 
     --- Checks if the player's pet has a specific aura.
     --- @function NAG:IsActivePetAura
@@ -1823,7 +1822,7 @@ do -- ================================= IsActive APLValue Functions ============
     end
 end
 
-do -- ================================= Dot APLValue Functions ================================== --
+do -- ~~~~~~~~~~ Dot APLValue Functions ~~~~~~~~~~= --
 
     --- Gets the number of stacks of a specific debuff on the player.
     --- @function NAG:DebuffNumStacks
@@ -2002,8 +2001,7 @@ do -- ================================= Dot APLValue Functions =================
     end
 end
 
-do -- ================================= Class Specific APLValue functions ======================
-    -- =========================================================================
+do -- ~~~~~~~~~~ Class Specific APLValue functions ======================
 
     -- Fire Elemental spell IDs
     local FIRE_ELEMENTAL_SPELL_ID = 2894     -- Fire Elemental Totem
@@ -2239,12 +2237,12 @@ do -- =-=============================== SOD APLValue functions
     function NAG:RuneIsEquipped(runeId)
         -- Iterate through all equipped runes
         if not runeId then return false end
-        ---@diagnostic disable-next-line: undefined-global
+        --- @diagnostic disable-next-line: undefined-global
         return C_Engraving and C_Engraving.IsRuneEquipped(runeId) or false
     end
 end
 
-do -- ================================= Class Functions ==================================================== --
+do -- ~~~~~~~~~~ Class Functions ~~~~~~~~~~
 
     --- Determine the current Eclipse phase for a Balance Druid.
     --- @function NAG:CurrentEclipsePhase
@@ -2290,7 +2288,7 @@ do -- ================================= Class Functions ========================
     end
 end
 
-do -- ================================= Dot Functions ================================== --
+do -- ~~~~~~~~~~ Dot Functions ~~~~~~~~~~= --
     -- Function to show overlay for switching targets
     local function showOverlay()
         if not NAG.overlayFrame then
@@ -2418,7 +2416,7 @@ do -- ================================= Dot Functions ==========================
 
 end
 
-do -- ================================= Pet APLValue Functions (4/4V) ================================= --
+do -- ~~~~~~~~~~ Pet APLValue Functions (4/4V) ~~~~~~~~~~
 
     --- Checks if a pet is currently active. (V)
     --- @function NAG:PetIsActive
@@ -2472,7 +2470,7 @@ do -- ================================= Pet APLValue Functions (4/4V) ==========
     end
 end
 
-do -- ================================= Target State Functions (4/4V) ================================= --
+do -- ~~~~~~~~~~ Target State Functions (4/4V) ~~~~~~~~~~
 
     --- Gets the current health percentage of the target. (V)
     --- @function NAG:TargetHealthPercent
@@ -2659,7 +2657,7 @@ function NAG:CatOptimalRotationAction()
     return false
 end
 
--- ================================= APL Value Operators =================================
+-- ~~~~~~~~~~ APL Value Operators ~~~~~~~~~~
 
 --- Returns a constant value.
 --- @function NAG:Const
@@ -2751,7 +2749,7 @@ function NAG:Min(...)
     return math.min(...)
 end
 
--- ================================= Misc =================================
+-- ~~~~~~~~~~ Misc ~~~~~~~~~~
 
 
 --- Checks if the player is in front of the target.
@@ -2763,7 +2761,7 @@ function NAG:FrontOfTarget()
     return true -- Assuming true for now.
 end
 
--- ================================= Class-specific =================================
+-- ~~~~~~~~~~ Class-specific ~~~~~~~~~~
 
 
 --- Returns the excess energy for a Feral Druid.

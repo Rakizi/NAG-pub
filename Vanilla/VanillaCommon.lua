@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
     This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
@@ -9,12 +9,12 @@
 ]]  
 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local Version = ns.Version
 if not Version:IsClassicEra() then return end
 
----@diagnostic disable-next-line:deprecated
+--- @diagnostic disable-next-line:deprecated
 --local GetSpellInfo = GetSpellInfo
 local GetStablePetInfo = ns.GetStablePetInfoUnified
 -- Lua APIs (using WoW's optimized versions where available)
@@ -81,7 +81,7 @@ function ns.HUNTER_UpdateStablePets()
 end
 
 NAG.Rune = {}
----@diagnostic disable-next-line: undefined-field
+--- @diagnostic disable-next-line: undefined-field
 local isEngravingAvailable = _G.C_Engraving ~= nil
 
 

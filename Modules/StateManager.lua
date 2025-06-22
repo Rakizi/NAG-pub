@@ -8,18 +8,18 @@
 -- Status: good
 --
 -- luacheck: ignore GetSpellInfo
--- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 
 -- Addon
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type Version
+--- @type Version
 local Version = ns.Version
----@type Types|ModuleBase|AceModule
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 --Libs
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
@@ -63,7 +63,7 @@ local concat = table.concat -- No WoW equivalent
 
 local SpecializationCompat = ns.SpecializationCompat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Initialize default state structure
 local function CreateDefaultState()
@@ -165,7 +165,7 @@ local defaults = {
 }
 
 
----@class StateManager: ModuleBase, AceTimer-3.0
+--- @class StateManager: ModuleBase, AceTimer-3.0
 local StateManager = NAG:CreateModule("StateManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 20,    -- Early in debug options
@@ -468,11 +468,11 @@ end
 
 function StateManager:UpdateTrinketState()
     local state = self.state.player.equipment
-    ---@class SpellTrackingManager
+    --- @type SpellTrackingManager|AceModule|ModuleBase
     local SpellTracker = NAG:GetModule("SpellTrackingManager")
-    ---@class TooltipParsingManager
+    --- @type TooltipParsingManager|AceModule|ModuleBase
     local TooltipParser = NAG:GetModule("TooltipParsingManager", true)
-    ---@class TrinketTrackingManager
+    --- @type TrinketTrackingManager|AceModule|ModuleBase
     local TrinketTracker = NAG:GetModule("TrinketTrackingManager")
 
     -- Track equipped trinkets and their procs
@@ -642,7 +642,7 @@ function StateManager:ResetCombat()
     NAG:ResetStrictSequences()
 
     -- Reset TTD data
-    ---@class TTDManager
+    --- @type TTDManager|AceModule
     local TTDManager = NAG:GetModule("TTDManager")
     if TTDManager then
         TTDManager:ResetTTD()

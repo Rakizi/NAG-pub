@@ -5,10 +5,10 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceSerializer = LibStub("AceSerializer-3.0")

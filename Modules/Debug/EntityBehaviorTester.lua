@@ -5,13 +5,13 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -42,7 +42,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Default settings
 local defaults = {
@@ -65,7 +65,7 @@ local defaults = {
     }
 }
 
----@class EntityBehaviorTester: ModuleBase, AceTimer-3.0
+--- @class EntityBehaviorTester: ModuleBase, AceTimer-3.0
 local EntityBehaviorTester = NAG:CreateModule("EntityBehaviorTester", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     moduleType = ns.MODULE_TYPES.DEBUG,
@@ -76,7 +76,7 @@ local EntityBehaviorTester = NAG:CreateModule("EntityBehaviorTester", defaults, 
     hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- Helper function to format values
 local function FormatValue(value)
     if value == nil then return "nil" end
@@ -178,7 +178,7 @@ local function TestEntity(entity)
     return table.concat(output, "\n")
 end
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function EntityBehaviorTester:ModuleInitialize()
         self.frame = nil
@@ -200,12 +200,12 @@ do
     end
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     -- (none required for this module)
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     function EntityBehaviorTester:GetOptions()
         local options = {}
@@ -228,7 +228,7 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API (CONTINUED) ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API (CONTINUED) ~~~~~~~~~~ 
 function EntityBehaviorTester:CreateFrame()
     local globalDB = self:GetGlobal()
     local appearance = globalDB.appearance

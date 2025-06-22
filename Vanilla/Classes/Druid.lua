@@ -1,11 +1,11 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
----@class SpellTrackingManager : ModuleBase
+--- @type SpellTrackingManager|AceModule|ModuleBase
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
 local SpecializationCompat = ns.SpecializationCompat
 
@@ -74,12 +74,12 @@ ns.AddRotationToDefaults(defaults,
 
 -- REGISTER_ROTATIONS_END
 
----@class DRUID : ClassBase
+--- @class DRUID : ClassBase
 local DRUID = NAG:CreateClassModule("DRUID", defaults)
 
 -- Override RegisterSpellTracking to set up class-specific spell tracking
 function DRUID:RegisterSpellTracking()
-    ---@class SpellTrackingManager : ModuleBase
+    --- @type SpellTrackingManager|AceModule|ModuleBase
     local SpellTracker = NAG:GetModule("SpellTrackingManager")
     if not SpellTracker then return end
 

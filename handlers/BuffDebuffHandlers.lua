@@ -1,4 +1,4 @@
---- ============================ BuffDebuffHandlers ============================
+-- ~~~~~~~~~~ BuffDebuffHandlers ~~~~~~~~~~ 
 --- Handles buff and debuff tracking functionality for NAG addon
 ---
 --- This module provides functions for checking and managing buffs and debuffs,
@@ -17,14 +17,14 @@
 --- ======= LOCALIZE =======
 local _, ns = ...
 
---- @type NAG
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
---- @type StateManager
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
---- @type APL
+--- @type APL|AceAddon
 local APL = NAG:GetModule("APL")
+--- @type NAG|AceAddon
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 --- ======= WoW API =======
 local UnitAura = ns.UnitAuraUnified
@@ -69,14 +69,10 @@ local next = next
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 -- local GetItemSpell = C_Item.GetItemSpell
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+do -- ~~~~~~~~~~ Raid Buff/Debuffs Functions ~~~~~~~~~~
 
-do -- == ============================== Raid Buff/Debuffs Functions ==================================================
-
-    --- Table of mutually exclusive buff groups.
-    --- @class mutuallyExclusiveBuffs
-    --- @field BLESSINGS table Buffs that are mutually exclusive in the Blessings group
-    --- @field SHOUTS table Buffs that are mutually exclusive in the Shouts group
+    -- Table of mutually exclusive buff groups.
     local mutuallyExclusiveBuffs = {
         BLESSINGS = {
             [19740] = true, -- Blessing of Might
@@ -285,7 +281,7 @@ do -- == ============================== Raid Buff/Debuffs Functions ============
     end
 end
 
-do -- ================================= Aura APLValue Functions ================================= --
+do -- ~~~~~~~~~~ Aura APLValue Functions ~~~~~~~~~~
 
     --- Returns the number of stacks of a specific aura on the player.
     --- @param spellId number The spell ID of the aura.
@@ -467,7 +463,7 @@ do -- ================================= Aura APLValue Functions ================
     NAG.AuraICDIsReadyWithReactionTime = NAG.AuraICDIsReady
 end
 
-do                              -- ================================= FindAura Util Functions =========================== --
+do -- ~~~~~~~~~~ FindAura Util Functions ~~~~~~~~~~
     local AURA_CACHE_TIME = 0.2 -- Only cache the final result, not all auras
     local auraCache = setmetatable({}, { __mode = "v" })
 

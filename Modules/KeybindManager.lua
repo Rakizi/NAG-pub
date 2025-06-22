@@ -9,7 +9,7 @@
 --- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -45,7 +45,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 local defaults = {
     global = {

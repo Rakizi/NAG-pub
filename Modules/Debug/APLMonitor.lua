@@ -11,14 +11,14 @@
 -- luacheck: ignore GetSpellInfo
 --- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 
---- @type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 
 -- Lua APIs (WoW-optimized versions where available)
@@ -49,7 +49,7 @@ local tContains = tContains -- WoW-specific
 local sort = table.sort
 local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Constants
 local DisplayMode = {
@@ -94,7 +94,7 @@ local defaults = {
     }
 }
 
----@class APLMonitor: ModuleBase, AceTimer-3.0
+--- @class APLMonitor: ModuleBase, AceTimer-3.0
 local APLMonitor = NAG:CreateModule("APLMonitor", defaults, {
     moduleType = ns.MODULE_TYPES.DEBUG,
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
@@ -111,7 +111,7 @@ local APLMonitor = NAG:CreateModule("APLMonitor", defaults, {
     },
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function APLMonitor:ModuleEnable()
         local profileConfig = self:GetCurrentRotation()
@@ -147,7 +147,7 @@ do
     end
 
     function APLMonitor:GetCurrentRotation()
-        ---@class ClassBase
+        --- @type ClassBase|AceModule
         local classModule = NAG:GetModule(NAG.CLASS, true)
         if classModule then
             local rotation = select(1, classModule:GetCurrentRotation())
@@ -161,7 +161,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS & HELPERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS & HELPERS ~~~~~~~~~~
 
 local function splitSubConditions(condition)
     -- Remove outermost parentheses if they enclose the entire condition
@@ -354,7 +354,7 @@ local function getConditionGroupType(condition)
     end
 end
 
--- ============================ UI & OPTIONS ============================
+-- ~~~~~~~~~~ UI & OPTIONS ~~~~~~~~~~
 
 function APLMonitor:CreateFrame(parentFrame, numConditions, rotationConfig)
     if self.frame then
@@ -696,7 +696,7 @@ function APLMonitor:UpdateGroupedView(conditions)
     end
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 
 --- Gets the options table for APL Monitor settings
 --- @return table The options table for AceConfig
@@ -825,6 +825,6 @@ function APLMonitor:UpdateAppearance()
     end
 end
 
--- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 
 ns.APLMonitor = APLMonitor

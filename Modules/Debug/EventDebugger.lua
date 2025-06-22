@@ -7,9 +7,9 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: ...
+--- @diagnostic disable: ...
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -46,7 +46,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Default settings
 local defaults = {
@@ -69,8 +69,8 @@ local defaults = {
     }
 }
 
----@class EventDebugger: ModuleBase
----@field hidden boolean
+--- @class EventDebugger: ModuleBase
+--- @field hidden boolean
 local EventDebugger = NAG:CreateModule("EventDebugger", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     moduleType = ns.MODULE_TYPES.DEBUG,
@@ -80,7 +80,7 @@ local EventDebugger = NAG:CreateModule("EventDebugger", defaults, {
     hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     --- @param self EventDebugger
     function EventDebugger:ModuleInitialize()
@@ -117,7 +117,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     --- Generic event handler to catch and print all events.
 
@@ -155,13 +155,13 @@ do
     end
 end
 
--- ============================ SLASH COMMANDS ============================
+-- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~ 
 SLASH_NAGEVENTDEBUG1 = "/nageventdebug"
 SlashCmdList["NAGEVENTDEBUG"] = function()
     EventDebugger:Toggle()
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     --- Gets the options table for Event Debugger settings
 
@@ -233,7 +233,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (none outside do blocks in this file)
 
 -- Expose in private namespace

@@ -1,4 +1,4 @@
---- ============================ Options ============================
+-- ~~~~~~~~~~ Options ============================
 --- Handles all options, configuration, and settings UI for NAG addon
 ---
 --- This module defines and manages all Ace3 options tables, configuration UI, and related logic for the Next Action Guide addon.
@@ -15,7 +15,7 @@
 ---     TODO: Fix last selected group not being remembered
 --- @module "Options"
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 --- @type NAG|AceAddon Main addon reference
@@ -51,9 +51,9 @@ local tostring = tostring
 local tonumber = tonumber
 local unpack = unpack
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
---Local Helper Functions ==============================================================================================
+-- ~~~~~~~~~~Local Helper Functions ~~~~~~~~~~
 
 
 
@@ -99,8 +99,6 @@ end
 
 do --== Reset Options ==--
 
-    --- @class NAG
-    --- @field CreateResetOptions fun(self: NAG): table
     --- @usage NAG:CreateResetOptions()
     --- @return table A container with reset options for the addon
     function NAG:CreateResetOptions()
@@ -237,12 +235,10 @@ end
 
 do --== Splash/Key Options ==--
 
-    --- @class NAG
-    --- @field CreateSplashOptions fun(self: NAG): table
     --- @usage NAG:CreateSplashOptions()
     --- @return table A container with splash options for the addon
     function NAG:CreateSplashOptions()
-        ---@class DataManager
+        --- @type DataManager|AceModule|ModuleBase
         local DataManager = NAG:GetModule("DataManager")
         return {
             logoGroup = {
@@ -430,18 +426,11 @@ end
 
 do --== Display Options ==--
 
-    --- @class NAG
-    --- @field frameControls table
-    --- @field general table
-    --- @field keybinds table
-    --- @field borders table
-    --- @field glow table
-    --- @field frames table
     --- @return table
     --- @usage NAG:CreateDisplayOptions()
     function NAG:CreateDisplayOptions()
         -- Check if we have an enabled class module
-        ---@class ClassBase : ModuleBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = self:GetModule(self.CLASS, true)
         local hasEnabledModule = classModule and classModule:IsEnabled()
 
@@ -658,7 +647,7 @@ do --== Display Options ==--
                             NAG.db.char.enableWAResourceBar = value
                             if value then
                                 -- Let the module handle its own settings
-                                ---@class ResourceBarManager : ModuleBase
+                                --- @type ResourceBarManager|AceModule|ModuleBase
                                 local RBM = NAG:GetModule("ResourceBarManager")
                                 if RBM then
                                     RBM:Disable()
@@ -680,7 +669,7 @@ do --== Display Options ==--
                             NAG.db.char.enableWABurstBoxes = value
                             if value then
                                 -- Let the module handle its own settings
-                                ---@class BurstTrackerManager : ModuleBase
+                                --- @type BurstTrackerManager|AceModule|ModuleBase
                                 local BTM = NAG:GetModule("BurstTrackerManager")
                                 if BTM then
                                     BTM:Disable()
@@ -810,8 +799,6 @@ do --== Thanks Options ==--
         EVOKER = 13
     }
 
-    --- @class NAG
-    --- @field CreateThanksOptions fun(self: NAG): table
     --- @usage NAG:CreateAcknowledgementsOptions()
     --- @return table A container with acknowledgements options for the addon
     function NAG:CreateAcknowledgementsOptions()

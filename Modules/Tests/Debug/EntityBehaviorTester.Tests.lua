@@ -1,10 +1,9 @@
 
---- ============================ HEADER ============================
 --[[
     Test Suite for EntityBehaviorTester.lua
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local APLTest = NAG:GetModule("APLTest")

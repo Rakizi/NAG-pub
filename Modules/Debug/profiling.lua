@@ -6,9 +6,9 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: undefined-field
+--- @diagnostic disable: undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -41,7 +41,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 local defaults = {
     global = {
         debug = false,
@@ -63,7 +63,7 @@ ProfilingUtility.timings = {}
 ProfilingUtility.callTimestamps = {}
 ProfilingUtility.profilingStack = {}
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     --- Called when the module is initialized
 
@@ -85,12 +85,12 @@ do
     end
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     -- No event handlers defined for this module
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 --- Performs a complete cleanup of the profiling module
 --- @param self ProfilingUtility
@@ -396,11 +396,11 @@ function ProfilingUtility:PrintReportToFrame(sortField)
         return
     end
 
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     frame:SetTitle("Profiling Report")
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     frame:SetStatusText("NAG Profiling Report")
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     frame:SetLayout("Fill")
 
     local editBox = AceGUI:Create("MultiLineEditBox")
@@ -409,13 +409,13 @@ function ProfilingUtility:PrintReportToFrame(sortField)
         return
     end
 
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     editBox:SetLabel("Report")
     editBox:SetFullWidth(true)
     editBox:SetFullHeight(true)
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     editBox:DisableButton(true)
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     frame:AddChild(editBox)
 
     local reportText = ""
@@ -426,7 +426,7 @@ function ProfilingUtility:PrintReportToFrame(sortField)
                 entry.callsPerMinute)
     end
 
-    ---@diagnostic disable-next-line: undefined-field
+    --- @diagnostic disable-next-line: undefined-field
     editBox:SetText(reportText)
 end
 

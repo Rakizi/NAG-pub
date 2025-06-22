@@ -7,11 +7,11 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -41,8 +41,8 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
----@class TimerManager: ModuleBase, AceTimer-3.0
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+--- @class TimerManager: ModuleBase, AceTimer-3.0
 local TimerManager = NAG:CreateModule("TimerManager", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 10,    -- Early in debug options, before ThrottleManager
@@ -58,7 +58,7 @@ TimerManager.Categories = {
     UI_NOTIFICATION = "ui_notification", -- UI notification and alert timers
 }
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function TimerManager:ModuleInitialize()
         -- Initialize timer tracking
@@ -79,7 +79,7 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 --- Creates and registers a new timer
 --- @param category string The category for the timer (use TimerManager.Categories)
 --- @param name string Unique name for the timer within its category

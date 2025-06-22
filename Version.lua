@@ -8,7 +8,7 @@
 -- Status: good
 --- @module "Version"
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 
@@ -53,8 +53,8 @@ local type = type
 local tostring = tostring
 local tonumber = tonumber
 
---- ============================ CONTENT ============================
----@class Version
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+--- @class Version
 local Version = {}
 
 -- Version Constants
@@ -155,14 +155,14 @@ function Version:GetExpansion()
     -- First check the WoW project ID for more specific information
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
-        ---@diagnostic disable-next-line: undefined-global
+        --- @diagnostic disable-next-line: undefined-global
         if C_GameModeManager and C_GameModeManager.IsFeatureID and C_GameModeManager.IsFeatureID(7) then
             return self.EXPANSIONS.PLUNDERSTORM
         end
         return self.EXPANSIONS.MAINLINE
     elseif WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
         -- Check for Season of Discovery
-        ---@diagnostic disable-next-line: undefined-global
+        --- @diagnostic disable-next-line: undefined-global
         if C_Engraving and C_Engraving.IsEngravingEnabled() then
             return self.EXPANSIONS.SOD  -- Special Season of Discovery expansion
         end
@@ -209,7 +209,7 @@ function Version:GetVersionInfo()
     
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
-        ---@diagnostic disable-next-line: undefined-global
+        --- @diagnostic disable-next-line: undefined-global
         if C_GameModeManager and C_GameModeManager.IsFeatureID and C_GameModeManager.IsFeatureID(7) then
             gameType = self.GAME_TYPES.PLUNDERSTORM
         else

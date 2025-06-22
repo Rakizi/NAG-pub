@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     Uptime Tracker Module
     
@@ -8,7 +7,7 @@
     Date: 2024
 ]]
 
---- ============================ MODERN API REFERENCE ============================
+-- ~~~~~~~~~~ MODERN API REFERENCE ~~~~~~~~~~
 --[[
     IMPORTANT FOR AI AGENTS:
     - ALWAYS check the handler files listed at the bottom of this section for existing
@@ -95,12 +94,12 @@
 ]]
 
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG")
 local AceGUI = LibStub("AceGUI-3.0")
 
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local DataManager = NAG:GetModule("DataManager")
 local EntityTypes = DataManager and DataManager.EntityTypes
@@ -172,7 +171,7 @@ local isPositioning = false
 local lastUpdate = 0
 local UPDATE_INTERVAL = 0.016 -- ~60 FPS
 
----@class UptimeTracker:ModuleBase
+--- @class UptimeTracker:ModuleBase
 local UptimeTracker = NAG:CreateModule("UptimeTracker", defaults, {
     moduleType = ns.MODULE_TYPES.FEATURE, -- A feature for all classes
     debug = true,
@@ -911,7 +910,7 @@ function UptimeTracker:GetOptions()
     return options
 end
 
--- ============================ AURA MANAGEMENT WINDOW ============================
+-- ~~~~~~~~~~ AURA MANAGEMENT WINDOW ~~~~~~~~~~ 
 function UptimeTracker:CreateAuraManagementWindow()
     -- If frame exists, do nothing
     if self.auraManagementFrame then

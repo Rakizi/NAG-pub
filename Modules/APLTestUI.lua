@@ -5,7 +5,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -38,10 +38,10 @@ local BACKDROP_TOOLTIP = {
     insets = { left = 4, right = 4, top = 4, bottom = 4 }
 }
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- No module creation (not a true Ace3 module), but UI singleton
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function APLTestUI:Initialize()
         APLTest = NAG:GetModule("APLTest")
@@ -58,7 +58,7 @@ do
     end
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     function APLTestUI:OnTestComplete(message, results)
         self:UpdateDisplay()
@@ -66,7 +66,7 @@ do
     end
 end
 
---- ============================ UI & HELPERS ============================
+-- ~~~~~~~~~~ UI & HELPERS ~~~~~~~~~~ 
 do
     function APLTestUI:CreateMainFrame()
         -- Create the main frame
@@ -326,7 +326,7 @@ do
     end
 end
 
---- ============================ SLASH & ADDON LOADING ============================
+-- ~~~~~~~~~~ SLASH & ADDON LOADING ~~~~~~~~~~ 
 do
     function APLTestUI.SlashCommandHook(msg)
         if msg == "report" or msg == "results" then
@@ -345,5 +345,5 @@ do
     eventFrame:SetScript("OnEvent", OnAddonLoaded)
 end
 
---- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~ 
 ns.APLTestUI = APLTestUI 

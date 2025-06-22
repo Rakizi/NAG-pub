@@ -7,17 +7,17 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 --
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@type TTDManager|ModuleBase|AceModule
+--- @type TTDManager|AceModule|ModuleBase
 local TTD = NAG:GetModule("TTDManager")
----@type StateManager|ModuleBase|AceModule
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -48,7 +48,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 local TIMER_CATEGORY = Timer.Categories.CORE
 
 local UPDATE_INTERVALS = {
@@ -59,7 +59,7 @@ local UPDATE_INTERVALS = {
     DISPLAY_UPDATE = 0.1  -- Update display visibility frequently
 }
 
----@class ThrottleManager: ModuleBase
+--- @class ThrottleManager: ModuleBase
 local ThrottleManager = NAG:CreateModule("ThrottleManager", {
     global = {
         intervals = UPDATE_INTERVALS,
@@ -102,7 +102,7 @@ local ThrottleManager = NAG:CreateModule("ThrottleManager", {
     }
 })
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function ThrottleManager:ModuleInitialize()
     end
@@ -115,7 +115,7 @@ do
     end
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     function ThrottleManager:NAG_CLASS_MODULE_READY(event, hasEnabledModule)
         if hasEnabledModule then
@@ -173,7 +173,7 @@ do
     end
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     --- Gets the options table for Throttle Manager settings
 
@@ -315,17 +315,17 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function ThrottleManager:UpdateDisplayVisibility()
     -- Update burst trackers visibility
-    ---@type BurstTrackerManager
+    --- @type BurstTrackerManager
     --local BurstTrackerManager = NAG:GetModule("BurstTrackerManager", true)
     --if BurstTrackerManager and BurstTrackerManager.IsEnabled and BurstTrackerManager:IsEnabled() then
     --    BurstTrackerManager:UpdateAllTrackersVisibility()
     --end
 
     -- Update resource bar visibility
-    ---@type ResourceBarManager
+    --- @type ResourceBarManager
     --local ResourceBarManager = NAG:GetModule("ResourceBarManager", true)
     --if ResourceBarManager and ResourceBarManager.IsEnabled and ResourceBarManager:IsEnabled() then
     --    ResourceBarManager:UpdateBarVisibility()

@@ -55,11 +55,11 @@
     - reagents         -- Crafting and spell reagents
 ]]
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type Version|ModuleBase
+--- @type Version
 local Version = ns.Version
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -89,7 +89,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 local defaults = {
     global = {
@@ -101,7 +101,7 @@ local defaults = {
 ---@class DataLoader : ModuleBase
 local DataLoader = NAG:CreateModule("DataLoader", defaults)
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     --- Initializes the DataLoader module
     function DataLoader:ModuleInitialize()
@@ -110,7 +110,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 --- Loads data specific to the current WoW version
 function DataLoader:LoadVersionSpecificData()
     local expansionKey = Version:GetExpansion()

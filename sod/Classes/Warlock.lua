@@ -1,9 +1,9 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
 if not Version:IsSoD() then return end
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
@@ -1430,7 +1430,7 @@ NAG:AutocastOtherCooldowns()
     }
 )
 
----@class WARLOCK : ClassBase
+--- @class WARLOCK : ClassBase
 local WARLOCK = NAG:CreateClassModule("WARLOCK", defaults)
 
 if not WARLOCK then return end

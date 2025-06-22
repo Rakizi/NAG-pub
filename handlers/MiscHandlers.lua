@@ -1,4 +1,4 @@
---- ============================ MiscHandlers ============================
+-- ~~~~~~~~~~ MiscHandlers ~~~~~~~~~~ 
 --- Provides miscellaneous handler functions for the NAG addon.
 ---
 --- This module includes handlers for various game events, player states,
@@ -10,38 +10,31 @@
 --- Status: good
 ---
 --- @diagnostic disable: undefined-field
---- @module "MiscHandlers"
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 
---- @type NAG
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
---- @type StateManager
+
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 --- @type Version
 local Version = ns.Version
---- @type APL
+--- @type APL|AceModule|ModuleBase
 local APL = NAG:GetModule("APL")
+--- @type Types|AceModule|ModuleBase
+local Types = NAG:GetModule("Types")
+--- @type TimerManager|AceModule|ModuleBase
+local Timer = NAG:GetModule("TimerManager")
+--- @type TrinketTrackingManager|AceModule|ModuleBase
+local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
+--- @type NAG|AceAddon
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
---- ======= WoW API =======
+-- ======= WoW API =======
 local GetTime = GetTime
 
--- Addon references
----@type NAG|AceAddon
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
-local DataManager = NAG:GetModule("DataManager")
----@type StateManager|ModuleBase|AceModule
-local StateManager = NAG:GetModule("StateManager")
----@type TrinketTrackingManager|ModuleBase|AceModule
-local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
----@type Types|ModuleBase|AceModule
-local Types = NAG:GetModule("Types")
----@type TimerManager|ModuleBase|AceModule
-local Timer = NAG:GetModule("TimerManager")
 
 local swingTimerLib = LibStub("LibClassicSwingTimerAPI")
 
@@ -82,9 +75,8 @@ local next = next
 -- WoW API direct
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 
---- ============================ CONTENT ============================
----
-do -- ================================= Timing functions =========================================== --
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+do -- ~~~~~~~~~~ Timing functions ~~~~~~~~~~
 
     --- Schedules an action after a specified delay.
     --- @param time number Delay in seconds.
@@ -583,7 +575,7 @@ do -- ================================= Timing functions =======================
 end
 
 
-do -- ================================= Time APLValue Functions ========================================== --
+do -- ~~~~~~~~~~ Time APLValue Functions ~~~~~~~~~~
 
     --- Get the current combat time.
     --- @function NAG:CurrentTime
@@ -727,7 +719,7 @@ do -- ================================= Time APLValue Functions ================
     end
 end
 
-do -- ================================= GCD/Swing/Auto APLValue Functions =============================== --
+do -- ~~~~~~~~~~ GCD/Swing/Auto APLValue Functions ~~~~~~~~~~
 
     --- Gets the auto swing time for the specified weapon type.
     --- @function NAG:AutoSwingTime
@@ -757,7 +749,7 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
     --- @return boolean True if the spell is in flight, false otherwise
     --- @usage NAG:SpellInFlight(12345)
     function NAG:SpellInFlight(spellId)
-        ---@type SpellTrackingManager | AceModule
+        --- @type SpellTrackingManager | AceModule
         local SpellTracker = self:GetModule("SpellTrackingManager")
         if not SpellTracker then return false end
         return SpellTracker:IsSpellInFlight(spellId)
@@ -900,7 +892,7 @@ do -- ================================= GCD/Swing/Auto APLValue Functions ======
     end
 
    
-    -- =========================================================================
+    -- ~~~~~~~~~~===============================
     -- Autoattack values
 
     --- Returns the time until the next auto attack.

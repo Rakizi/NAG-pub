@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
@@ -27,7 +26,7 @@
 --- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -42,7 +41,7 @@ local defaults = {
     }
 }
 
----@class SpellLearner: ModuleBase
+--- @class SpellLearner: ModuleBase
 local SpellLearner = NAG:CreateModule("SpellLearner", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     optionsOrder = 20,

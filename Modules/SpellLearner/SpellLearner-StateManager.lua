@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
@@ -31,11 +30,11 @@
 --- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local TimerManager = NAG:GetModule("TimerManager", true) -- Make it optional
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -67,7 +66,7 @@ local tremove = tremove
 -- Add these imports at the top, after the similar imports
 local GetRuneCount = GetRuneCount or function() return 0 end -- Compatibility for different WoW versions
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local CONSTANTS = {
     UPDATE_INTERVAL = 0.1,
@@ -131,7 +130,7 @@ local defaults = {
     }
 }
 
----@class SpellLearnerStateManager: ModuleBase
+--- @class SpellLearnerStateManager: ModuleBase
 local SpellLearnerStateManager = NAG:CreateModule("SpellLearnerStateManager", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG, -- Category in options UI
     optionsOrder = 20,                           -- Order within category

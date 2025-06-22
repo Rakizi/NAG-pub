@@ -8,7 +8,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -45,7 +45,7 @@ local concat = table.concat -- No WoW equivalent
 local setmetatable = setmetatable
 local next = next
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Core Modules
 local APL = nil      -- Will be set in ModuleInitialize
@@ -57,7 +57,7 @@ local defaults = {
     },
 }
 
----@class APLEditor: ModuleBase
+--- @class APLEditor: ModuleBase
 local APLEditor = NAG:CreateModule("APLEditor", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.ROTATION,

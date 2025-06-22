@@ -5,19 +5,19 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@type TimerManager|ModuleBase|AceAddon
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@type DataManager|ModuleBase|AceAddon
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type StateManager|ModuleBase|AceAddon
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true) -- Enable silent fallback
@@ -59,7 +59,7 @@ local pairs = pairs
 local ipairs = ipairs
 local select = select
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Local constants
 local PULL_TIMER_UPDATE_INTERVAL = 0.1
 local TIMER_CATEGORY = Timer.Categories.COMBAT
@@ -74,7 +74,7 @@ local defaults = {
     }
 }
 
----@class PullTimerManager: ModuleBase, AceEvent-3.0
+--- @class PullTimerManager: ModuleBase, AceEvent-3.0
 local PullTimerManager = NAG:CreateModule("PullTimerManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.CLASS, -- Place in spec options since it's spec-specific
@@ -101,7 +101,7 @@ local PullTimerManager = NAG:CreateModule("PullTimerManager", defaults, {
     }
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function PullTimerManager:ModuleInitialize()
     end
@@ -116,7 +116,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     function PullTimerManager:START_PLAYER_COUNTDOWN(event, initiatedBy, timeRemaining, duration)
         if UnitAffectingCombat("player") then return end
@@ -128,14 +128,14 @@ do
     end
 end
 
--- ============================ MESSAGE HANDLERS ============================
+-- ~~~~~~~~~~ MESSAGE HANDLERS ~~~~~~~~~~ 
 do
     function PullTimerManager:OnRotationChanged()
         self:UpdateCurrentRotation()
     end
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do --== Options Functions ==--
 
     --- Gets the options table for the PullTimerManager module
@@ -374,11 +374,11 @@ do --== Options Functions ==--
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ============================
 -- (Local helpers and public API functions should be outside do blocks for scope)
 
 function PullTimerManager:UpdateCurrentRotation()
-    ---@class ClassBase
+    --- @type ClassBase|AceModule|ModuleBase
     local classModule = NAG:GetModule(NAG.CLASS, true)
     if classModule then
         local rotation, name = classModule:GetCurrentRotation()

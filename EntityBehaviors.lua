@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
@@ -10,7 +9,7 @@
 --- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 --WoW API
 local GetSpellCooldown = ns.GetSpellCooldownUnified
@@ -87,7 +86,7 @@ ns.EntityBehaviors = {
             return count or 0
         end,
         CheckRelatedSpells = function(itemId, checkFunc)
-            ---@class DataManager : ModuleBase
+            --- @type DataManager|AceModule|ModuleBase
             local DataManager = ns.DataManager
 
             local relatedSpells = DataManager:GetRelated(itemId, DataManager.EntityTypes.ITEM,
@@ -193,7 +192,7 @@ ns.EntityBehaviors = {
             return count or 0
         end,
         IsInFlight = function(self)
-            ---@type SpellTrackingManager
+            --- @type SpellTrackingManager|AceModule|ModuleBase
             local SpellTracker = NAG:GetModule("SpellTrackingManager")
             if not SpellTracker then return false end
             return SpellTracker:IsSpellInFlight(self.id)
@@ -313,7 +312,7 @@ ns.EntityBehaviors = {
             return expirationTime or 0
         end,
         GetICDRemaining = function(self)
-            ---@type SpellTrackingManager
+            --- @type SpellTrackingManager|AceModule|ModuleBase
             local SpellTracker = NAG:GetModule("SpellTrackingManager")
             if not self.id then return 0 end
             return SpellTracker:GetICDInfo(self.id) or 0
@@ -397,7 +396,7 @@ ns.EntityBehaviors = {
             local damage = effect.targets[targetGuid].tickDamage
             -- Handle special multipliers for certain spells
             if self.id == 12846 then -- Ignite
-                ---@class ClassBase
+                --- @type ClassBase|AceModule|ModuleBase
                 local classModule = NAG:GetModule("MAGE")
                 if classModule then
                     return damage * (classModule:GetClass().settings.igniteMultiplier or 1)
@@ -670,7 +669,7 @@ ns.EntityBehaviors = {
             return max(0, (procState.lastProcTime + duration) - NAG:NextTime())
         end,
         GetICDRemaining = function(self)
-            ---@type SpellTrackingManager
+            --- @type SpellTrackingManager|AceModule|ModuleBase
             local SpellTracker = NAG:GetModule("SpellTrackingManager")
             if not self.procId then return 0 end
             return SpellTracker:GetICDInfo(self.procId) or 0

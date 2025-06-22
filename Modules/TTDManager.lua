@@ -5,13 +5,13 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
 
 -- Libraries
@@ -44,7 +44,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local MIN_SAMPLE_INTERVAL = 0.1
 local HISTORY_COUNT = 100
@@ -55,7 +55,7 @@ local TRAINING_DUMMY_AURAS = {
     [61574] = true  -- Horde Banner Aura
 }
 
----@class TTDManager: ModuleBase
+--- @class TTDManager: ModuleBase
 local TTDManager = NAG:CreateModule("TTDManager", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 25,    -- After StateManager, before TrinketTracker
@@ -70,7 +70,7 @@ local TTDManager = NAG:CreateModule("TTDManager", nil, {
     }
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function TTDManager:ModuleInitialize()
         -- Initialize iterable units
@@ -93,10 +93,10 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (none required for this module, handled by timer)
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function TTDManager:IsTrainingDummy(unit)
     if not UnitExists(unit) then return false end
     if not ns.IsTrainingDummy() then return false end

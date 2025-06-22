@@ -7,15 +7,15 @@
 -- Discord: https://discord.gg/ebonhold
 -- ISSUES: Clean it all up
 -- 1. big issue is only first item added gives the behavior, the rest are just added as flags.
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
 
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type Types|ModuleBase|AceModule
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 --- @type DebugManager|ModuleBase|AceModule
 local DebugManager = NAG:GetModule("DebugManager")
@@ -52,7 +52,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 --- ======= FORWARD DECLARATIONS =======
 --- Helper functions
 local initializeStorage
@@ -75,7 +75,7 @@ local defaults = {
     },
 }
 
----@class DataManager: ModuleBase, AceConsole-3.0, AceTimer-3.0
+--- @class DataManager: ModuleBase, AceConsole-3.0, AceTimer-3.0
 local DataManager = NAG:CreateModule("DataManager", defaults, {
     -- No defaults needed
     moduleType = ns.MODULE_TYPES.CORE,

@@ -1,4 +1,4 @@
---- ============================ Dialogs ============================
+-- ~~~~~~~~~~ Dialogs ============================
 --- Handles all dialog popups and reset logic for NAG addon
 ---
 --- This module defines and manages all static popup dialogs, reset functions, and dialog helpers for the Next Action Guide addon.
@@ -10,9 +10,9 @@
 ---
 --- @module "Dialogs"
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
---- @type NAG|AceAddon Main addon reference
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 --- @type AceConfigRegistry-3.0
@@ -58,7 +58,7 @@ local tContains = tContains
 local sort = table.sort
 local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Reset functions
 function ns.ResetAll()
     NAG:Disable()
@@ -389,7 +389,7 @@ StaticPopupDialogs["NAG_IMPORT_ROTATION_STRING"] = {
         end
 
         -- Get the ImportExport module
-        ---@class ImportExport : ModuleBase
+        --- @type ImportExport|AceModule|ModuleBase
         local ImportExport = NAG:GetModule("ImportExport")
         if not ImportExport then
             NAG:Error("ImportExport module not found")

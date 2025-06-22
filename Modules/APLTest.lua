@@ -7,9 +7,9 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -73,7 +73,7 @@ local function FormatTestResult(result)
     return msg
 end
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
     global = {
@@ -91,7 +91,7 @@ local defaults = {
     }
 }
 
----@class APLTest : ModuleBase
+--- @class APLTest : ModuleBase
 local APLTest = NAG:CreateModule("APLTest", defaults, {
     moduleType = ns.MODULE_TYPES.FEATURE,
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
@@ -123,7 +123,7 @@ local APLTest = NAG:CreateModule("APLTest", defaults, {
     }
 })
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function APLTest:ModuleInitialize()
         self:Debug("Initializing APLTest module")
@@ -169,7 +169,7 @@ do
     end
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     function APLTest:OnTestCommand(input)
         local args = {strsplit(" ", input)}
@@ -206,7 +206,7 @@ do
     end
 end
 
---- ============================ ORGANIZATION ============================
+-- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~ 
 do
     -- Ace3 lifecycle helpers
     function APLTest:ModuleResetState()
@@ -238,7 +238,7 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function APLTest:ShowHelp()
     self:Print("APL Test Suite Commands:")
     self:Print("/nagtest run [type] - Run tests (all, actions, values, or specific type)")

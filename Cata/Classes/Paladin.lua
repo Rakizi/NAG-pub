@@ -1,11 +1,11 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
----@class SpellTrackingManager : ModuleBase
+--- @type SpellTrackingManager|AceModule|ModuleBase
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
 local SpecializationCompat = ns.SpecializationCompat
 
@@ -344,7 +344,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.RETRIBUTION,
 -- SOD ROTATION CONFIG END
 
 -- END OF GENERATED_ROTATIONS
----@class Paladin : ClassBase
+--- @class Paladin : ClassBase
 
 local Paladin = NAG:CreateClassModule("PALADIN", defaults, {
     weakAuraName = "Paladin Next Action Guide",

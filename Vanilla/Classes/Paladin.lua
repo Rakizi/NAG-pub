@@ -1,11 +1,11 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
----@class SpellTrackingManager : ModuleBase
+--- @type SpellTrackingManager|AceModule|ModuleBase
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
 
 if not Version:IsClassicEra() then return end
@@ -30,12 +30,12 @@ defaults.class.specSpellLocations = {
 
 -- REGISTER_ROTATIONS_END
 
----@class PALADIN : ClassBase
+--- @class PALADIN : ClassBase
 local PALADIN = NAG:CreateClassModule("PALADIN", defaults)
 
 -- Override RegisterSpellTracking to set up class-specific spell tracking
 function PALADIN:RegisterSpellTracking()
-    ---@class SpellTrackingManager : ModuleBase
+    --- @type SpellTrackingManager|AceModule|ModuleBase
     local SpellTracker = NAG:GetModule("SpellTrackingManager")
     if not SpellTracker then return end
 

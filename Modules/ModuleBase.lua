@@ -5,10 +5,10 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
@@ -108,27 +108,27 @@ ns.DEBUG_LEVELS = {
     TRACE = 5
 }
 
---- ============================ TYPE DEFINITIONS ============================
+-- ~~~~~~~~~~ TYPE DEFINITIONS ============================
 
----@class ModuleBase : AceAddon, AceModule, AceEvent-3.0
----@field moduleType string The type of module (core, optional, debug, system, class)
----@field className string The class name this module is for (if type is class)
----@field defaults? table Module-specific database defaults
----@field migrations? table<number, function> Version-specific migration functions
----@field ModuleInitialize? function Called after OnInitialize for module-specific initialization
----@field ModuleEnable? function Called after OnEnable for module-specific enabling
----@field ModuleDisable? function Called after OnDisable for module-specific cleanup
----@field ModuleRefreshConfig? function Called when module configuration needs to be refreshed
----@field GetOptions? function Returns the module's options table for configuration UI
----@field OnSettingChanged? function Called when a module setting changes
----@field optionsCategory? string The category name for module options
----@field optionsOrder? number The order of the module in the options list
----@field childGroups? string The childGroups value for module options
+--- @class ModuleBase : AceAddon, AceModule, AceEvent-3.0
+--- @field moduleType string The type of module (core, optional, debug, system, class)
+--- @field className string The class name this module is for (if type is class)
+--- @field defaults? table Module-specific database defaults
+--- @field migrations? table<number, function> Version-specific migration functions
+--- @field ModuleInitialize? function Called after OnInitialize for module-specific initialization
+--- @field ModuleEnable? function Called after OnEnable for module-specific enabling
+--- @field ModuleDisable? function Called after OnDisable for module-specific cleanup
+--- @field ModuleRefreshConfig? function Called when module configuration needs to be refreshed
+--- @field GetOptions? function Returns the module's options table for configuration UI
+--- @field OnSettingChanged? function Called when a module setting changes
+--- @field optionsCategory? string The category name for module options
+--- @field optionsOrder? number The order of the module in the options list
+--- @field childGroups? string The childGroups value for module options
 local ModuleBase = {
     DEBUG_LEVELS = ns.DEBUG_LEVELS
 }
 
---- ============================ LIFECYCLE METHODS ============================
+-- ~~~~~~~~~~ LIFECYCLE METHODS ~~~~~~~~~~ 
 do
     --- Called when the module is initialized.
 
@@ -251,7 +251,7 @@ do
     end
 end
 
---- ============================ DATABASE METHODS ============================
+-- ~~~~~~~~~~ DATABASE METHODS ~~~~~~~~~~ 
 do
     --- Default handler for database reset events
 
@@ -377,7 +377,7 @@ do
     end
 end
 
---- ============================ STATE MANAGEMENT ============================
+-- ~~~~~~~~~~ STATE MANAGEMENT ~~~~~~~~~~ 
 do
     --- Initializes the module's state
 
@@ -453,7 +453,7 @@ do
     end
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     --- Registers the module options.
 
@@ -622,7 +622,7 @@ do
     end
 end
 
---- ============================ DEBUG LOGGING ============================
+-- ~~~~~~~~~~ DEBUG LOGGING ~~~~~~~~~~ 
 do
     --- Enables debug logging.
 
@@ -733,7 +733,7 @@ do
     end
 end
 
---- ============================ MIGRATION ============================
+-- ~~~~~~~~~~ MIGRATION ~~~~~~~~~~ 
 do 
     --- Migrates the module settings.
 
@@ -786,7 +786,7 @@ do
     end
 end
 
---- ============================ EVENT MANAGEMENT ============================
+-- ~~~~~~~~~~ EVENT MANAGEMENT ~~~~~~~~~~ 
 do
     --- Registers module event handlers from the eventHandlers table
 
@@ -880,7 +880,7 @@ do
     end
 end
 
---- ============================ MODULE CREATION ============================
+-- ~~~~~~~~~~ MODULE CREATION ~~~~~~~~~~ 
 do
     -- Set default module prototype for NAG
     NAG:SetDefaultModulePrototype(ModuleBase)
@@ -896,7 +896,7 @@ do
     --- @return ModuleBase The new module
     function NAG:CreateModule(name, defaults, mixins)
         -- Create module with our base prototype
-        ---@class ModuleBase : AceAddon, AceModule, AceEvent-3.0
+        --- @class ModuleBase : AceAddon, AceModule, AceEvent-3.0
         local module = self:NewModule(name)
 
         -- Store defaults if provided
@@ -940,7 +940,7 @@ do
     end
 end
 
---[[ ============================ EXAMPLE USAGE ============================
+--[[ ~~~~~~~~~~ EXAMPLE USAGE ============================
 -- Example of a typical core module that manages some game functionality
 do
     -- Default settings
@@ -958,7 +958,7 @@ do
         }
     }
 
-    ---@class ExampleManager : ModuleBase
+    --- @type ExampleManager|AceModule|ModuleBase
     local ExampleManager = NAG:CreateModule("ExampleManager", defaults, {
         moduleType = ns.MODULE_TYPES.CORE,
         optionsCategory = ns.MODULE_CATEGORIES.GENERAL,

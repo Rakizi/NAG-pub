@@ -5,14 +5,14 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: undefined-field
+--- @diagnostic disable: undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type Version|ModuleBase|AceModule
+--- @type Version|ModuleBase|AceModule
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceGUI = LibStub("AceGUI-3.0")
@@ -21,7 +21,7 @@ local SpecializationCompat = ns.SpecializationCompat
 
 --Libs
 local LSM = LibStub("LibSharedMedia-3.0")
----@class GlowManager : ModuleBase
+--- @type GlowManager|AceModule|ModuleBase
 local GlowManager = NAG:GetModule("GlowManager")
 if not GlowManager then error("GlowManager is required") end
 
@@ -84,7 +84,7 @@ local function formatDate(dateValue)
     return L["rotationUnknown"] or "Unknown"
 end
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 local defaults = {
     global = {
         debug = false,
@@ -116,7 +116,7 @@ local RotationManager = NAG:CreateModule("RotationManager", defaults, {
     }
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function RotationManager:ModuleInitialize()
         self.frame = nil
@@ -133,7 +133,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 function RotationManager:OnRotationChanged()
     self:Debug("OnRotationChanged: Starting")
     if self.frame and self.frame:IsShown() then
@@ -141,7 +141,7 @@ function RotationManager:OnRotationChanged()
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function RotationManager:Toggle()
     self:Debug("Toggle: Starting")
     if not self.frame then
@@ -209,7 +209,7 @@ function RotationManager:CreateFrame()
         end
 
         -- Get class module
-        ---@class ClassBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = NAG:GetModule(NAG.CLASS)
         if not classModule then
             NAG:Error("Class module not found")
@@ -408,7 +408,7 @@ function RotationManager:RefreshRotationList()
     end
 
     -- Get class module
-    ---@class ClassBase
+    --- @type ClassBase|AceModule|ModuleBase
     local classModule = NAG:GetModule(NAG.CLASS)
     if not classModule then
         self:Debug("RefreshRotationList: No class module found")
@@ -686,7 +686,7 @@ end
 -- Register slash command
 NAG:RegisterChatCommand("nagrot", function() RotationManager:Toggle() end)
 
--- ============================ VALIDATION ============================
+-- ~~~~~~~~~~ VALIDATION ~~~~~~~~~~ 
 function RotationManager:ValidateAllRotations()
     local results = {}
     local classModule = NAG:GetModule(NAG.CLASS)

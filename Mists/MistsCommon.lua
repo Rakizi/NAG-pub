@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
     This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
@@ -9,10 +9,10 @@
 ]]
 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@type StateManager|ModuleBase|AceModule
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 
 local GetStablePetInfo = ns.GetStablePetInfoUnified

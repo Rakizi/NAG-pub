@@ -1038,9 +1038,7 @@ if L then
     end
 end
 
---===================================================================================================
--- DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE
---===================================================================================================
+-- ~~~~~~~~~~ DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE ~~~~~~~~~~
 
 if L then
     -- WoW Patch 40400 UnitCreatureTypes

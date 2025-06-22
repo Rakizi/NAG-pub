@@ -1,4 +1,4 @@
---- ============================ Frames ============================
+-- ~~~~~~~~~~ Frames ~~~~~~~~~~
 --- Handles all frame creation, icon management, and border logic for NAG addon
 ---
 --- This module manages the creation and updating of all UI frames, icon frames, borders, and related display logic for the Next Action Guide addon.
@@ -10,14 +10,14 @@
 ---
 --- @module "Frames"
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
---- @type NAG|AceAddon Main addon reference
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type KeybindManager|ModuleBase|AceModule
+--- @type KeybindManager|AceModule|ModuleBase
 local KeybindManager = NAG:GetModule("KeybindManager")
---- @type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 
 -- Libs
@@ -69,7 +69,7 @@ local type = type
 local tostring = tostring
 local unpack = unpack
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 function ns.AddTooltip(frame)
     if not frame then return end
@@ -504,7 +504,7 @@ do --== Frame Creation Functions ==--
 
         if not self.Frame.iconFrames["primary"] then
             self:Debug("CreateOrUpdateIconFrames: Creating primary icon frame")
-            --- @class Frame
+            --- @type Frame
             local primaryFrame = NAG:CreateIconFrame("primary", parent, iconWidth, iconHeight, nil, "CENTER", parent,
                 "CENTER", 0, 0)
             primaryFrame.cooldown = CreateFrame("Cooldown", nil, primaryFrame, "CooldownFrameTemplate")
@@ -514,14 +514,14 @@ do --== Frame Creation Functions ==--
             ns.AddBorder(self.Frame.iconFrames["primary"])
         end
 
-        --- @class Frame
+        --- @type Frame
         local primaryFrame = self.Frame.iconFrames["primary"]
 
         -- Update or create above frames
         for i = 1, maxAboveIcons do
             local key = "above" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local aboveFrame = NAG:CreateIconFrame(key, parent, iconWidth, iconHeight * frameWeight,
                     { 0.1, 0.9, 0.25, 0.75 }, "TOP", primaryFrame, "TOP", 0, (iconHeight * frameWeight + gap) * i)
                 self.Frame.iconFrames[key] = aboveFrame
@@ -538,7 +538,7 @@ do --== Frame Creation Functions ==--
         for i = 1, maxBelowIcons do
             local key = "below" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local belowFrame = NAG:CreateIconFrame(key, parent, iconWidth, iconHeight * frameWeight,
                     { 0.1, 0.9, 0.25, 0.75 }, "BOTTOM", primaryFrame, "BOTTOM", 0, -(iconHeight * frameWeight + gap) * i)
                 self.Frame.iconFrames[key] = belowFrame
@@ -553,7 +553,7 @@ do --== Frame Creation Functions ==--
 
         -- Update or create aoe frame
         if not self.Frame.iconFrames["aoe"] then
-            --- @class Frame
+            --- @type Frame
             local aoeFrame = NAG:CreateIconFrame("aoe", parent, iconHeight * frameWeight, iconHeight,
                 { 0.25, 0.75, 0.1, 0.9 }, "RIGHT", primaryFrame, "RIGHT", 0, 0)
             aoeFrame:SetAlpha(0.75)
@@ -570,7 +570,7 @@ do --== Frame Creation Functions ==--
         for i = 1, maxLeftIcons do
             local key = "left" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local leftFrame = NAG:CreateIconFrame(key, parent, iconWidth * frameWeight, iconHeight,
                     { 0.25, 0.75, 0.1, 0.9 }, "LEFT", primaryFrame, "LEFT", -(iconHeight * frameWeight + gap) * i, 0)
                 self.Frame.iconFrames[key] = leftFrame
@@ -587,7 +587,7 @@ do --== Frame Creation Functions ==--
         for i = 1, maxRightIcons do
             local key = "right" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local rightFrame = NAG:CreateIconFrame(key, parent, iconWidth * frameWeight, iconHeight,
                     { 0.25, 0.75, 0.1, 0.9 }, "RIGHT", primaryFrame, "RIGHT", (iconHeight * frameWeight + gap) * i, 0)
                 self.Frame.iconFrames[key] = rightFrame

@@ -5,7 +5,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 
 -- Lua APIs (using WoW's optimized versions where available)

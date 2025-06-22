@@ -5,18 +5,18 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 local LSM = LibStub("LibSharedMedia-3.0")
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
     global = {
@@ -116,7 +116,7 @@ local OverlayManager = NAG:CreateModule("OverlayManager", defaults, {
     }
 })
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function OverlayManager:CreateOverlay(frame, overlayType, customConfig)
     if not frame or not overlayType then
         self:Debug("CreateOverlay: Missing frame or overlayType")
@@ -957,7 +957,7 @@ function OverlayManager:ShowInfo(frame, text, duration)
     })
 end
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function OverlayManager:ModuleEnable()
         -- Register callback for LSM updates
@@ -969,5 +969,5 @@ do
     end
 end
 
--- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~ 
 ns.OverlayManager = OverlayManager

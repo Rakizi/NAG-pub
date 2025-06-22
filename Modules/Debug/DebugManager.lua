@@ -7,9 +7,9 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -42,7 +42,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Constants
 local DEBUG_LEVELS = {
@@ -94,7 +94,7 @@ local dlapiBuffer = {}
 local isInitialized = false
 local isDLAPIReady = false
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function DebugManager:ModuleInitialize()
         isInitialized = true
@@ -141,7 +141,7 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 --- Check if debug output is enabled for a given severity
 --- @param severity string The severity level to check
@@ -290,10 +290,10 @@ function DebugManager:Fatal(message, printTrace)
     self:Log(message, "FATAL", printTrace)
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (No explicit event handlers outside Ace3 lifecycle in this module)
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     --- Gets the options table for debug settings
 
@@ -391,7 +391,7 @@ do
     end
 end
 
---- ============================ SLASH COMMANDS ============================
+-- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~ 
 SLASH_NAGDEBUGLEVEL1 = "/nagdebuglevel"
 SlashCmdList["NAGDEBUGLEVEL"] = function(msg)
     local level = tonumber(msg)

@@ -8,14 +8,14 @@
 -- Status: good
 --
 -- luacheck: ignore GetSpellInfo
--- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type TrinketTrackingManager|ModuleBase|AceModule
+--- @type TrinketTrackingManager|ModuleBase|AceModule
 local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -91,7 +91,7 @@ local defaults = {
     },
 }
 
----@class TrinketRegistrationManager: ModuleBase
+--- @class TrinketRegistrationManager: ModuleBase
 local TrinketRegistrationManager = NAG:CreateModule("TrinketRegistrationManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.GENERAL,

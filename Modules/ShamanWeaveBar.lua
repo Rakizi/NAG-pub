@@ -4,19 +4,19 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG")
----@type SpecializationCompat
+--- @type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
 
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@type ShamanWeaveModule|ModuleBase|AceModule
+--- @type ShamanWeaveModule|ModuleBase|AceModule
 local ShamanWeaveModule = NAG:GetModule("ShamanWeaveModule", true)
 
 -- Check if player is a Shaman
@@ -102,7 +102,7 @@ local UPDATE_INTERVAL = 0.016 -- Approximately 60 FPS for smooth movement
 local currentCastSpellId = nil
 local currentCastEndTime = nil
 
----@class ShamanWeaveBar:ModuleBase
+--- @class ShamanWeaveBar:ModuleBase
 local ShamanWeaveBar = NAG:CreateModule("ShamanWeaveBar", defaults, {
     moduleType = ns.MODULE_TYPES.CLASS,
     debug = true,

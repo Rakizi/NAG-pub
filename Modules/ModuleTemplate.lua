@@ -6,7 +6,7 @@
 -- Status: good
 
 
---- ============================ LIBRARY REFERENCE ============================
+-- ~~~~~~~~~~ LIBRARY REFERENCE ~~~~~~~~~~
 --[[
 
     This is a reference of available modern C_ API functions in this environment. 
@@ -96,11 +96,11 @@
 --- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local TimerManager = NAG:GetModule("TimerManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -160,7 +160,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local CONSTANTS = {
     DEFAULT_SIZE = 32,
@@ -202,7 +202,7 @@ local defaults = {
     }
 }
 
----@class ModuleTemplate: ModuleBase
+--- @class ModuleTemplate: ModuleBase
 local ModuleTemplate = NAG:CreateModule("ModuleTemplate", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DISPLAY, -- Category in options UI
     optionsOrder = 50,                              -- Order within category

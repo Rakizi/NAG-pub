@@ -1,4 +1,4 @@
---- ============================ ResourceHandlers ============================
+-- ~~~~~~~~~~ ResourceHandlers ~~~~~~~~~~ 
 --- Handles resource management and tracking for the NAG addon.
 ---
 --- This module provides functions for checking player resources such as mana,
@@ -9,29 +9,27 @@
 --- Discord: https://discord.gg/ebonhold
 --- Status: good
 ---
---- @module "ResourceHandlers"
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 
---- @type NAG
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type StateManager
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
---- @type APL
+--- @type APL|AceModule|ModuleBase
 local APL = NAG:GetModule("APL")
-
---- ======= WoW API =======
-local UnitPower = UnitPower
-
---- @type Types|AceModule
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 --- @type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
 --- @type Version
 local Version = ns.Version
+--- @type NAG|AceAddon
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
--- ============================ FUNCTION LOCALIZATION ============================
+--- ======= WoW API =======
+local UnitPower = UnitPower
+
+-- ~~~~~~~~~~ FUNCTION LOCALIZATION ~~~~~~~~~~ 
 -- Math operations (WoW optimized)
 local format = format or string.format
 local floor = floor or math.floor
@@ -72,8 +70,7 @@ local C_SpecializationInfo = _G.C_SpecializationInfo
 local GetItemInfo = ns.GetItemInfoUnified
 local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
 local UnitClass = _G.UnitClass
---- ============================ CONTENT ============================
-
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 -- Module level variables
 local spellNames = {}
 
@@ -323,7 +320,7 @@ do --== RESOURCE CHECKS ==--
         return (currentResource / maxResource) * 100
     end
 
-    ---@TODO: Implement secondary resource type
+    --- @TODO: Implement secondary resource type
     function NAG:GetSecondaryResourceType()
     end
 
@@ -530,7 +527,7 @@ do --== RESOURCE CHECKS ==--
 end
 
 
-do -- ================================= Resource APLValue Functions ======================== --
+do -- ~~~~~~~~~~ Resource APLValue Functions ~~~~~~~~~~
     -- Helper function to get the secondary resource type for the current spec
     local function GetSecondaryResourceType()
         local _, class = UnitClass("player")
@@ -696,7 +693,7 @@ do -- ================================= Resource APLValue Functions ============
         return baseMax + bonusFromTalents
     end
 
-    -- ================================= Chi ======================================
+    -- ~~~~~~~~~~ Chi ~~~~~~~~~~
 
     --- Gets current chi
     --- @return number Current chi value
@@ -858,7 +855,7 @@ do -- ================================= Resource APLValue Functions ============
         return UnitPower("player", Enum.PowerType.Maelstrom)
     end
 
-    -- =========================================================================
+    -- ~~~~~~~~~~
     -- Rune Resource values
 
     --- Returns the current count of active runes of a specific type.
@@ -1199,7 +1196,7 @@ do -- ================================= Resource APLValue Functions ============
     end
 end
 
-do -- ================================= Resource APLValue Functions (4/4V) ================================= --
+do -- ~~~~~~~~~~ Resource APLValue Functions (4/4V) ~~~~~~~~~~
 
     --- Gets the current amount of Demonic Fury. (V)
     --- @function NAG:CurrentDemonicFury

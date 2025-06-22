@@ -1,4 +1,4 @@
---- ============================ StatHandlers ============================
+-- ~~~~~~~~~~ StatHandlers ~~~~~~~~~~
 --- Handles player stat calculations and checks for the NAG addon.
 ---
 --- This module provides functions for retrieving and evaluating player stats
@@ -12,10 +12,10 @@
 ---
 --- @module "StatHandlers"
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 
---- @type NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 --- ======= WoW API =======
@@ -26,9 +26,8 @@ local GetSpellBonusDamage = GetSpellBonusDamage
 -- Math operations (WoW optimized)
 local format = format or string.format
 
---- ============================ CONTENT ============================
-
-do -- ================================= Stat APLValue Functions ========================== --
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+do -- ~~~~~~~~~~ Stat APLValue Functions ~~~~~~~~~~ 
 
     --- Calculates the average weapon damage for a given weapon.
     --- This includes base damage, buffs, and debuffs. It does not include attack power scaling.

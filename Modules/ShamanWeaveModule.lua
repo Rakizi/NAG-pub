@@ -6,16 +6,16 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG")
 local SpecializationCompat = ns.SpecializationCompat
 
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
---- @type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
 
 -- Check if player is a Shaman
@@ -67,7 +67,7 @@ local defaults = {
     }
 }
 
----@class ShamanWeaveModule:ModuleBase
+--- @class ShamanWeaveModule:ModuleBase
 local ShamanWeaveModule = NAG:CreateModule("ShamanWeaveModule", defaults, {
     moduleType = ns.MODULE_TYPES.CLASS,
     optionsCategory = ns.MODULE_CATEGORIES.CLASS,

@@ -5,9 +5,9 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -47,7 +47,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Constants
 local EXPORT_VERSION = "1.0"
@@ -64,7 +64,7 @@ local ImportExport = NAG:CreateModule("ImportExport", defaults, {
     libs = { "AceConsole-3.0" }
 })
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 -- Helper function to safely inspect tables
 local function inspectTable(t, maxDepth)
@@ -176,7 +176,7 @@ end
 function ImportExport:RegisterRotationEntities(config)
     if not config then return end
     
-    ---@class DataManager : ModuleBase
+    --- @type DataManager|AceModule|ModuleBase
     local DataManager = NAG:GetModule("DataManager")
     if not DataManager then return end
 
@@ -248,21 +248,21 @@ end
     
     
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function ImportExport:ModuleInitialize()
         -- Remove dialog creation since it's now in Dialogs.lua
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 -- Core Export Function
 function ImportExport:ExportRotation(specID, rotationName, options)
     self:Debug(format("ExportRotation: Starting with specID: %s, rotationName: %s", specID, rotationName))
 
     -- Get class module
-    ---@class ClassBase
+    --- @type ClassBase|AceModule|ModuleBase
     local classModule = NAG:GetModule(NAG.CLASS)
     if not classModule then
         self:Debug(format("ExportRotation: Failed to get class module for class: %s", NAG.CLASS))

@@ -1027,9 +1027,7 @@ if L then
     end
 end
 
---===================================================================================================
--- DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE
---===================================================================================================
+-- ~~~~~~~~~~ DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE ~~~~~~~~~~
 
 if L then
     do --== Class Names/Specializations - These should match ingame class/specialization localized names ==--

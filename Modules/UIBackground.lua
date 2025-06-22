@@ -5,7 +5,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -20,7 +20,7 @@ local tinsert = tinsert
 local tremove = tremove
 local wipe = wipe
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local CONSTANTS = {
     DEFAULT_SCALE = 1.0,
@@ -41,7 +41,7 @@ local defaults = {
     }
 }
 
----@class UIBackground: ModuleBase
+--- @class UIBackground: ModuleBase
 local UIBackground = NAG:CreateModule("UIBackground", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.DISPLAY,

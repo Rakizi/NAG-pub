@@ -20,16 +20,16 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
--- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type TimerManager|ModuleBase|AceModule
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@type StateManager|ModuleBase|AceModule
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -59,14 +59,14 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 local defaults = {
     global = {
         debug = false,
     },
 }
 
----@class SpellTrackingManager: ModuleBase, AceEvent-3.0, AceTimer-3.0
+--- @class SpellTrackingManager: ModuleBase, AceEvent-3.0, AceTimer-3.0
 local SpellTrackingManager = NAG:CreateModule("SpellTrackingManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 25,    -- Early in debug options

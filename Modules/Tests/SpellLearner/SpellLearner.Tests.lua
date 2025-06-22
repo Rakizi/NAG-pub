@@ -1,10 +1,9 @@
---- ============================ HEADER ============================
 --[[
     Test Suite for SpellLearner.lua
     Verifies that the main module correctly orchestrates its sub-modules.
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local APLTest = NAG:GetModule("APLTest")

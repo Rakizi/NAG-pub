@@ -8,7 +8,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 --- @type NAG|AceAddon
@@ -46,7 +46,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Core Modules
 local APL = nil -- Will be set in ModuleInitialize
@@ -57,7 +57,7 @@ local defaults = {
     },
 }
 
----@class APLSchema: ModuleBase
+--- @class APLSchema: ModuleBase
 local APLSchema = NAG:CreateModule("APLSchema", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
@@ -1956,8 +1956,8 @@ end
 
 
 -- Get UI metadata for an action
----@param actionName string The name of the action in snake_case (e.g., "cast_spell")
----@return table|nil The UI metadata for the action, or nil if not found
+--- @param actionName string The name of the action in snake_case (e.g., "cast_spell")
+--- @return table|nil The UI metadata for the action, or nil if not found
 function APLSchema:GetActionUIMetadata(actionName)
     local schema = self:GetSchema()
     if not schema or not schema.messages then
@@ -1984,8 +1984,8 @@ function APLSchema:GetActionUIMetadata(actionName)
 end
 
 -- Get UI metadata for a value
----@param valueName string The name of the value in snake_case (e.g., "current_health")
----@return table|nil The UI metadata for the value, or nil if not found
+--- @param valueName string The name of the value in snake_case (e.g., "current_health")
+--- @return table|nil The UI metadata for the value, or nil if not found
 function APLSchema:GetValueUIMetadata(valueName)
     local schema = self:GetSchema()
     if not schema or not schema.messages then
@@ -2012,7 +2012,7 @@ function APLSchema:GetValueUIMetadata(valueName)
 end
 
 -- Get a list of all actions with their UI metadata
----@return table A list of actions with their UI metadata
+--- @return table A list of actions with their UI metadata
 function APLSchema:GetAllActionsWithMetadata()
     local schema = self:GetSchema()
     if not schema or not schema.messages then
@@ -2052,7 +2052,7 @@ function APLSchema:GetAllActionsWithMetadata()
 end
 
 -- Get a list of all values with their UI metadata
----@return table A list of values with their UI metadata
+--- @return table A list of values with their UI metadata
 function APLSchema:GetAllValuesWithMetadata()
     local schema = self:GetSchema()
     if not schema or not schema.messages then
@@ -2092,7 +2092,7 @@ function APLSchema:GetAllValuesWithMetadata()
 end
 
 -- Get a list of actions grouped by submenu
----@return table A table with submenu names as keys and lists of actions as values
+--- @return table A table with submenu names as keys and lists of actions as values
 function APLSchema:GetActionsGroupedBySubmenu()
     local actions = self:GetAllActionsWithMetadata()
     local grouped = {}
@@ -2114,7 +2114,7 @@ function APLSchema:GetActionsGroupedBySubmenu()
 end
 
 -- Get a list of values grouped by submenu
----@return table A table with submenu names as keys and lists of values as values
+--- @return table A table with submenu names as keys and lists of values as values
 function APLSchema:GetValuesGroupedBySubmenu()
     local values = self:GetAllValuesWithMetadata()
     local grouped = {}
@@ -2136,9 +2136,9 @@ function APLSchema:GetValuesGroupedBySubmenu()
 end
 
 -- Get the label for an enum value
----@param enumName string The name of the enum type
----@param value number The enum value
----@return string The label for the enum value, or "Unknown" if not found
+--- @param enumName string The name of the enum type
+--- @param value number The enum value
+--- @return string The label for the enum value, or "Unknown" if not found
 function APLSchema:GetEnumLabel(enumName, value)
     -- First try to get from registered types
     local Types = NAG:GetModule("Types")
@@ -2159,9 +2159,9 @@ function APLSchema:GetEnumLabel(enumName, value)
 end
 
 -- Validate an enum value
----@param enumName string The name of the enum type
----@param value number The value to validate
----@return boolean Whether the value is valid for this enum
+--- @param enumName string The name of the enum type
+--- @param value number The value to validate
+--- @return boolean Whether the value is valid for this enum
 function APLSchema:ValidateEnumValue(enumName, value)
     local Types = NAG:GetModule("Types")
     if Types then
@@ -2187,8 +2187,8 @@ function APLSchema:ValidateEnumValue(enumName, value)
 end
 
 -- Get all valid values for an enum
----@param enumName string The name of the enum type
----@return table A table of valid enum values
+--- @param enumName string The name of the enum type
+--- @return table A table of valid enum values
 function APLSchema:GetEnumValues(enumName)
     local Types = NAG:GetModule("Types")
     if Types then
@@ -2208,8 +2208,8 @@ function APLSchema:GetEnumValues(enumName)
 end
 
 -- Get enum metadata
----@param enumName string The name of the enum type
----@return table|nil The metadata for the enum, or nil if not found
+--- @param enumName string The name of the enum type
+--- @return table|nil The metadata for the enum, or nil if not found
 function APLSchema:GetEnumMetadata(enumName)
     local Types = NAG:GetModule("Types")
     if Types then
@@ -2228,10 +2228,10 @@ function APLSchema:GetEnumMetadata(enumName)
 end
 
 -- Determine if an action should be included in the current context
----@param actionName string The name of the action in snake_case
----@param isPrepull boolean Whether the action is being checked for prepull context
----@param playerSpec number|nil The player's specialization ID if relevant
----@return boolean Whether the action should be included
+--- @param actionName string The name of the action in snake_case
+--- @param isPrepull boolean Whether the action is being checked for prepull context
+--- @param playerSpec number|nil The player's specialization ID if relevant
+--- @return boolean Whether the action should be included
 function APLSchema:ShouldIncludeAction(actionName, isPrepull, playerSpec)
     local metadata = self:GetActionUIMetadata(actionName)
     if not metadata then
@@ -2270,10 +2270,10 @@ function APLSchema:ShouldIncludeAction(actionName, isPrepull, playerSpec)
 end
 
 -- Determine if a value should be included in the current context
----@param valueName string The name of the value in snake_case
----@param isPrepull boolean Whether the value is being checked for prepull context
----@param playerSpec number|nil The player's specialization ID if relevant
----@return boolean Whether the value should be included
+--- @param valueName string The name of the value in snake_case
+--- @param isPrepull boolean Whether the value is being checked for prepull context
+--- @param playerSpec number|nil The player's specialization ID if relevant
+--- @return boolean Whether the value should be included
 function APLSchema:ShouldIncludeValue(valueName, isPrepull, playerSpec)
     local metadata = self:GetValueUIMetadata(valueName)
     if not metadata then

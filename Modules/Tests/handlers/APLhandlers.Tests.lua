@@ -1,10 +1,9 @@
---- ============================ HEADER ============================
 --[[
     Test Suite for APLHandlers.lua
     Verifies that the main APL functions correctly delegate calls.
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local APLTest = NAG:GetModule("APLTest")

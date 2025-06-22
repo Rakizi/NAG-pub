@@ -6,9 +6,9 @@
 -- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
+--- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -50,7 +50,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Add GenerateUniqueName utility function to ns namespace
 --- Generates a unique name by appending a number if needed
 --- @param baseRotations table Table of base rotations to check against
@@ -93,7 +93,7 @@ function ns.AddRotationToDefaults(defaults, specID, name, config)
     defaults.char.selectedRotations = defaults.char.selectedRotations or {}
 
     -- Register tracked IDs with DataManager using ImportExport's registration function
-    ---@class ImportExport : ModuleBase
+    --- @type ImportExport|AceModule|ModuleBase
     local ImportExport = ns.ImportExport
     if ImportExport and ImportExport.RegisterRotationEntities then
         ImportExport:RegisterRotationEntities(config)
@@ -203,7 +203,7 @@ function NAG:CreateClassModule(name, classDefaults, mixins)
     end
 
     -- Create module with ModuleBase as prototype
-    ---@class ClassBase : ModuleBase
+    --- @type ClassBase|AceModule|ModuleBase
     local module = self:CreateModule(name, mergedDefaults, mixins)
 
     -- Set class module flags
@@ -287,7 +287,7 @@ do -- Ace3 lifecycle
     --- This method should be overridden by class modules to register their specific spells
     --- @param self ClassBase
     function ClassBase:RegisterSpellTracking()
-        ---@class SpellTrackingManager : ModuleBase
+        --- @type SpellTrackingManager|AceModule|ModuleBase
         local SpellTracker = NAG:GetModule("SpellTrackingManager")
         if not SpellTracker then return end
 
@@ -897,7 +897,7 @@ do  -- Rotation handling
     --- @param self ClassBase
     --- @param config table The rotation configuration containing spell locations
     function ClassBase:ProcessSpellLocations(config)
-        ---@class DataManager : ModuleBase
+        --- @type DataManager|AceModule|ModuleBase
         local DataManager = ns.DataManager
         if not config then
             self:Debug("ProcessSpellLocations: No config provided")
@@ -946,7 +946,7 @@ do  -- Rotation handling
         end
 
         -- Get the ImportExport module
-        ---@class ImportExport : ModuleBase
+        --- @type ImportExport|AceModule|ModuleBase
         local ImportExport = ns.ImportExport
         if not ImportExport then
             return false, "ImportExport module not found"
@@ -1034,7 +1034,7 @@ do  -- Import/Export
             tostring(specID) .. ", rotation: " .. tostring(rotationName))
 
         -- Get the ImportExport module
-        ---@class ImportExport : ModuleBase
+        --- @type ImportExport|AceModule|ModuleBase
         local ImportExport = NAG:GetModule("ImportExport")
         if not ImportExport then
             self:Error("ImportExport module not found")
@@ -1061,7 +1061,7 @@ do  -- Import/Export
     --- @return string|nil error Error message if import failed
     function ClassBase:ImportRotation()
         -- Get the ImportExport module
-        ---@class ImportExport : ModuleBase
+        --- @type ImportExport|AceModule|ModuleBase
         local ImportExport = NAG:GetModule("ImportExport")
         if not ImportExport then
             self:Error("ImportExport module not found")
@@ -1146,7 +1146,7 @@ end
 --- @param self ClassBase
 --- @return table Returns the class options configuration group
 function ClassBase:GetOptions()
-    ---@class DataManager : ModuleBase
+    --- @type DataManager|AceModule|ModuleBase
     local DataManager = ns.DataManager
     -- Create the main container for class options
     local options = {}
@@ -1191,7 +1191,7 @@ function ClassBase:GetOptions()
                         order = 2,
                         width = 1,
                         func = function()
-                            ---@class RotationManager : ModuleBase
+                            --- @type RotationManager|AceModule|ModuleBase
                             local RotationManager = NAG:GetModule("RotationManager")
                             if RotationManager then
                                 RotationManager:Toggle()
@@ -1386,7 +1386,7 @@ end
 --- @return table Options table for spell locations
 function ClassBase:CreateSpellLocationOptions()
     -- Get DataManager reference
-    ---@class DataManager : ModuleBase
+    --- @type DataManager|AceModule|ModuleBase
     local DataManager = NAG:GetModule("DataManager")
     if not DataManager then return {} end
 

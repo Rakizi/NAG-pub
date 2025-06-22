@@ -8,11 +8,11 @@
 --- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
----@type NAG|AceAddon
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type DataManager|ModuleBase|AceModule
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@type Types|ModuleBase|AceModule
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 
 --WoW API
@@ -45,13 +45,13 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
 local defaults = {
     global = {
         debug = false,
     },
 }
----@class TrinketTrackingManager: ModuleBase, AceTimer-3.0
+--- @class TrinketTrackingManager: ModuleBase, AceTimer-3.0
 local TrinketTrackingManager = NAG:CreateModule("TrinketTrackingManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 303,   -- After StateManager
@@ -348,7 +348,7 @@ do -- Trinket Analysis Functions
         }
 
         -- First check if we have a TooltipParsingManager to use
-        ---@type TooltipParsingManager
+        --- @type TooltipParsingManager|AceModule
         local TooltipParser = NAG:GetModule("TooltipParsingManager", true)
         if TooltipParser then
             local tooltipInfo = TooltipParser:AnalyzeTrinket(itemId)
@@ -637,7 +637,7 @@ do -- Legacy Tooltip Scanning Functions - Kept for backward compatibility
         if not itemId then return nil end
         
         -- Get TooltipParsingManager if available
-        ---@type TooltipParsingManager
+        --- @type TooltipParsingManager|AceModule
         local TooltipParser = NAG:GetModule("TooltipParsingManager", true)
         if TooltipParser then
             return TooltipParser:ParseItemTooltip(itemId)

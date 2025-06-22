@@ -1,4 +1,4 @@
---- ============================ ItemHandlers ============================
+-- ~~~~~~~~~~ ItemHandlers ~~~~~~~~~~ 
 --- Handles item-related functionality for the NAG addon.
 ---
 --- This module provides functions for checking and managing items, including item cooldowns,
@@ -14,19 +14,19 @@
 ---
 --- @module "ItemHandlers"
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 
---- @type NAG
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---- @type DataManager
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
---- @type StateManager
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 --- @type TrinketTrackingManager|ModuleBase|AceModule
 local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
 --- @type Version
 local Version = ns.Version
+--- @type NAG|AceAddon
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 --- ======= WoW API =======
 local GetItemCooldown = ns.GetItemCooldownUnified
@@ -65,9 +65,8 @@ local next = next
 -- WoW API direct
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
 
---- ============================ CONTENT ============================
-
-do -- ================================= Item APLValue Functions ========================== --
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~ 
+do -- ~~~~~~~~~~ Item APLValue Functions ~~~~~~~~~~
 
     --- Gets the remaining time on a trinket buff
     --- @param id number The trinket ID
@@ -179,7 +178,7 @@ do -- ================================= Item APLValue Functions ================
     end
 end
 
-do -- ================================= Tiersets Functions
+do -- ~~~~~~~~~~ Tiersets Functions ~~~~~~~~~~
 
     --- Retrieves the tier set for a given item ID
     --- @param id number The item ID
@@ -217,7 +216,7 @@ do -- ================================= Tiersets Functions
     end
 end
 
-do -- ================================= Trinket/Proc Functions (0/6V) ================================= --
+do -- ~~~~~~~~~~ Trinket/Proc Functions (0/6V) ~~~~~~~~~~
 
     --- Helper function to check if a trinket matches specified stat types
     --- @param self NAG The NAG addon object

@@ -5,7 +5,7 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local addonName, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
@@ -42,7 +42,7 @@ local concat = table.concat -- No WoW equivalent
 local setmetatable = setmetatable
 local next = next
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Core Modules
 local APLSchema = nil -- Will be set in ModuleInitialize
 local Types = nil     -- Will be set in ModuleInitialize
@@ -53,7 +53,7 @@ local defaults = {
     },
 }
 
----@class APL: ModuleBase
+--- @class APL: ModuleBase
 local APLModule = NAG:CreateModule("APL", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 10,
@@ -72,7 +72,7 @@ APLModule.Implementations = {
     Actions = {}
 }
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function APLModule:ModuleInitialize()
         local startTime = debugprofilestop()
@@ -120,13 +120,13 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (No event handlers defined in this module)
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 -- (No options UI defined in this module)
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~ 
 function APLModule:InitializeMetadataFromSchema()
     local startTime = debugprofilestop()
     self:Debug("Initializing metadata from schema")

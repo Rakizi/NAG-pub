@@ -1,11 +1,10 @@
 
---- ============================ HEADER ============================
 --[[
     Test Suite for APLMonitor.lua
     Verifies the logic for parsing and categorizing APL conditions.
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local APLTest = NAG:GetModule("APLTest")

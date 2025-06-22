@@ -1,11 +1,11 @@
----@diagnostic disable: undefined-global
+--- @diagnostic disable: undefined-global
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
----@class SpellTrackingManager : ModuleBase
+--- @type SpellTrackingManager|AceModule|ModuleBase
 local SpellTracker = NAG:GetModule("SpellTrackingManager")
 local SpecializationCompat = ns.SpecializationCompat
 
@@ -454,7 +454,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.UNHOLY, "DeathKnight Unholy - Def
     items = itemsDeathKnightUnholyDefault or {},
 }
 )
----@class DEATHKNIGHT : ClassBase
+--- @class DEATHKNIGHT : ClassBase
 local DEATHKNIGHT = NAG:CreateClassModule("DEATHKNIGHT", defaults, {
     weakAuraName = "DK Next Action Guide - by Fonsas",
 })

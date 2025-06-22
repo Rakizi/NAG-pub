@@ -1,9 +1,8 @@
---- ============================ HEADER ============================
 --[[
     Test Suite for the Data Pipeline (DataLoader, DataWalker, DataManager)
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local APLTest = NAG:GetModule("APLTest")

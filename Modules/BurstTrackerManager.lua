@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     See LICENSE for full license text.
     Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
@@ -7,24 +6,24 @@
     TODO: Refactor for modularity, add more customization options
     License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 ]]
----@diagnostic disable: undefined-global, undefined-field
+--- @diagnostic disable: undefined-global, undefined-field
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class KeybindManager : ModuleBase
+--- @type KeybindManager|AceModule|ModuleBase
 local KeybindManager = NAG:GetModule("KeybindManager")
----@class Version
+--- @class Version
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
----@class GlowManager : ModuleBase
+--- @type GlowManager|AceModule|ModuleBase
 local GlowManager = NAG:GetModule("GlowManager")
----@class LibSharedMedia-3.0
+--- @class LibSharedMedia-3.0
 local LSM = LibStub("LibSharedMedia-3.0")
 
 --WoW API
@@ -60,7 +59,7 @@ local tContains = tContains -- WoW's specific version
 local sort = table.sort     -- No WoW equivalent
 local concat = table.concat -- No WoW equivalent
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
     global = {
@@ -97,7 +96,7 @@ local defaults = {
     }
 }
 
----@class BurstTrackerManager: ModuleBase
+--- @class BurstTrackerManager: ModuleBase
 local BurstTrackerManager = NAG:CreateModule("BurstTrackerManager", defaults, {
     moduleType = ns.MODULE_TYPES.FEATURE,
     optionsCategory = ns.MODULE_CATEGORIES.FEATURE,
@@ -125,7 +124,7 @@ BurstTrackerManager.trackers = {}
 BurstTrackerManager.activeGlows = {}
 BurstTrackerManager.LSM = LibStub("LibSharedMedia-3.0")
 
---- ============================ ORGANIZATION ============================
+-- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~
 do -- Ace3 lifecycle methods
     function BurstTrackerManager:ModuleInitialize()
         self.trackers = {}
@@ -171,7 +170,7 @@ do -- Event handlers
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (All other public and helper functions remain unchanged, placed here)
 
 --- Checks if burst trackers should be shown based on char settings
@@ -1386,7 +1385,7 @@ function BurstTrackerManager:GetCurrentBurstTrackers()
 
     -- If rotation settings should be used and are available, use them instead
     if self.db.char.useRotationBurstTrackers then
-        ---@class ClassBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = NAG:GetModule(NAG.CLASS, true)
         if classModule then
             local rotation = select(1, classModule:GetCurrentRotation())
@@ -1403,7 +1402,7 @@ end
 --- @return table A table of available spells with their info
 function BurstTrackerManager:GetAvailableSpells()
     local spells = {}
-    ---@class StateManager
+    --- @type StateManager|AceModule|ModuleBase
     local StateManager = NAG:GetModule("StateManager")
     if not StateManager then return spells end
 
@@ -1453,7 +1452,7 @@ function BurstTrackerManager:GetAvailableSpells()
     return spells
 end
 
---- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 ns.BurstTrackerManager = BurstTrackerManager
 
 

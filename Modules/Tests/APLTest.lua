@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     APLTest Module
     A simple in-game unit testing framework for NAG.
@@ -7,11 +6,11 @@
     - Provides a slash command interface.
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@class APLTest : ModuleBase
+--- @class APLTest : ModuleBase
 local APLTest = NAG:CreateModule("APLTest", nil, {
     moduleType = ns.MODULE_TYPES.DEBUG,
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,

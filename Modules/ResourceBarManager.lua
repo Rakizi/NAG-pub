@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
@@ -23,12 +22,12 @@
     STATUS: Initial implementation
 ]]
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -36,7 +35,7 @@ local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 --Libs
 local LSM = LibStub("LibSharedMedia-3.0")
----@class GlowManager : ModuleBase
+--- @type GlowManager|AceModule|ModuleBase
 local GlowManager = NAG:GetModule("GlowManager")
 if not GlowManager then error("GlowManager is required") end
 
@@ -79,7 +78,7 @@ local pairs = pairs
 local ipairs = ipairs
 local select = select
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local COLORS = {
     ACTIVE = { 0.0, 1.0, 0.0, 0.4 },   -- Green with 40% opacity
@@ -124,7 +123,7 @@ local defaults = {
     }
 }
 
----@class ResourceBarManager: ModuleBase
+--- @class ResourceBarManager: ModuleBase
 local ResourceBarManager = NAG:CreateModule("ResourceBarManager", defaults, {
     moduleType = ns.MODULE_TYPES.FEATURE,
     optionsCategory = ns.MODULE_CATEGORIES.FEATURE, -- Place in spec options since it's spec-specific
@@ -162,7 +161,7 @@ ResourceBarManager.activeGlows = {}
 ResourceBarManager.trackedAuras = {}
 ResourceBarManager.iconPool = nil
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~ 
 do
     function ResourceBarManager:ModuleInitialize()
         -- Initialize module state
@@ -202,7 +201,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~ 
 do
     function ResourceBarManager:OnPowerUpdate(event, unit, powerType)
         if unit ~= "player" then return end
@@ -249,7 +248,7 @@ do
     end
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~ 
 do
     function ResourceBarManager:GetOptions()
         -- Get base options from ModuleBase
@@ -682,7 +681,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (Local helpers and public API functions should be outside do blocks for scope)
 
 function ResourceBarManager:ShouldShowBar()
@@ -1055,7 +1054,7 @@ function ResourceBarManager:GetCurrentResourceBar()
 
     -- If rotation settings should be used and are available, use them
     if self.db.char.useRotationResourceBar then
-        ---@class ClassBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = NAG:GetModule(NAG.CLASS, true)
         if classModule then
             local rotation = select(1, classModule:GetCurrentRotation())

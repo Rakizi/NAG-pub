@@ -1,10 +1,9 @@
---- ============================ HEADER ============================
 --[[
     Test Suite for APICompat.lua
     Verifies that the API compatibility layer functions correctly.
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local APLTest = NAG:GetModule("APLTest")

@@ -1,11 +1,10 @@
---- ============================ HEADER ============================
 --[[
     Test Suite for APL.lua
     Verifies that the APL module correctly registers and provides access to
     its actions, values, and types.
 ]]
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local APLTest = NAG:GetModule("APLTest")

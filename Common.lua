@@ -5,15 +5,13 @@
 -- Discord: https://discord.gg/ebonhold
 -- Status: good
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~ 
 local _, ns = ...
 
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@type StateManager|ModuleBase|AceModule
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
----@class PullTimerManager : ModuleBase
---local PullTimer = NAG:GetModule("PullTimerManager")
 
 --WoW API
 local GetSpellCooldown = ns.GetSpellCooldownUnified
@@ -48,7 +46,7 @@ local concat = table.concat -- No WoW equivalent
 
 --- ======= GLOBALIZE =======
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 do --== PRE-PULL/ROTATION/THROTTLER FUNCTIONS ==--
 
