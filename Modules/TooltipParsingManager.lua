@@ -22,12 +22,28 @@ local STAT_NAMES = {
     [Types:GetType("Stat").STAMINA] = STAT_STAMINA or "Stamina",
     [Types:GetType("Stat").INTELLECT] = STAT_INTELLECT or "Intellect",
     [Types:GetType("Stat").SPIRIT] = STAT_SPIRIT or "Spirit",
+    [Types:GetType("Stat").ARMOR] = ARMOR or "Armor",
+    [Types:GetType("Stat").BONUS_ARMOR] = "Bonus Armor", -- No simple global for this, but the parsing logic handles it.
     [Types:GetType("Stat").CRIT] = CRIT_RATING_NAME or "Crit",
     [Types:GetType("Stat").HASTE] = HASTE_RATING_NAME or "Haste",
     [Types:GetType("Stat").MASTERY] = MASTERY_RATING_NAME or "Mastery",
+    [Types:GetType("Stat").DODGE] = DODGE_RATING_NAME or "Dodge",
+    [Types:GetType("Stat").PARRY] = PARRY_RATING_NAME or "Parry",
+    [Types:GetType("Stat").HIT] = HIT_RATING_NAME or "Hit",
+    [Types:GetType("Stat").EXPERTISE] = EXPERTISE_RATING_NAME or "Expertise",
     [Types:GetType("Stat").ATTACK_POWER] = STAT_ATTACK_POWER or "Attack Power",
     [Types:GetType("Stat").SPELL_POWER] = SPELL_POWER or "Spell Power",
     [Types:GetType("Stat").RANGED_ATTACK_POWER] = STAT_RANGED_ATTACK_POWER or "Ranged Attack Power",
+    [Types:GetType("Stat").SPELL_PENETRATION] = ITEM_MOD_SPELL_PENETRATION_SHORT or "Spell Penetration",
+    [Types:GetType("Stat").RESILIENCE] = RESILIENCE_RATING_NAME or "Resilience",
+    [Types:GetType("Stat").ARCANE_RESISTANCE] = RESISTANCE6_NAME or "Arcane Resistance",
+    [Types:GetType("Stat").FIRE_RESISTANCE] = RESISTANCE2_NAME or "Fire Resistance",
+    [Types:GetType("Stat").FROST_RESISTANCE] = RESISTANCE4_NAME or "Frost Resistance",
+    [Types:GetType("Stat").NATURE_RESISTANCE] = RESISTANCE3_NAME or "Nature Resistance",
+    [Types:GetType("Stat").SHADOW_RESISTANCE] = RESISTANCE5_NAME or "Shadow Resistance",
+    [Types:GetType("Stat").HEALTH] = STAT_HEALTH or "Health",
+    [Types:GetType("Stat").MANA] = STAT_MANA or "Mana",
+    [Types:GetType("Stat").MP5] = MANA_REGEN_TOOLTIP or "Mana per 5 sec.",
 }
 
 --- @type DataManager|AceModule|ModuleBase
@@ -187,6 +203,8 @@ do
             [strlower(ITEM_MOD_STAMINA_SHORT or "+# Stamina")] = Types:GetType("Stat").STAMINA,
             [strlower(ITEM_MOD_INTELLECT_SHORT or "+# Intellect")] = Types:GetType("Stat").INTELLECT,
             [strlower(ITEM_MOD_SPIRIT_SHORT or "+# Spirit")] = Types:GetType("Stat").SPIRIT,
+            [strlower(ITEM_MOD_ARMOR_SHORT or "+# Armor")] = Types:GetType("Stat").ARMOR,
+            [strlower(ITEM_MOD_BONUS_ARMOR_SHORT or "+# Bonus Armor")] = Types:GetType("Stat").BONUS_ARMOR,
             [strlower(ITEM_MOD_HIT_RATING_SHORT or "+# Hit")] = Types:GetType("Stat").HIT,
             [strlower(ITEM_MOD_CRIT_RATING_SHORT or "+# Critical Strike")] = Types:GetType("Stat").CRIT,
             [strlower(ITEM_MOD_HASTE_RATING_SHORT or "+# Haste")] = Types:GetType("Stat").HASTE,
@@ -219,8 +237,15 @@ do
             [Types:GetType("Stat").CRIT] = {"critical strike", "crit", "critical"},
             [Types:GetType("Stat").HASTE] = {"haste", "attack speed"},
             [Types:GetType("Stat").MASTERY] = {"mastery"},
+            [Types:GetType("Stat").HIT] = {"hit", "hit rating"},
+            [Types:GetType("Stat").EXPERTISE] = {"expertise", "exp"},
+            [Types:GetType("Stat").DODGE] = {"dodge", "dodge rating"},
+            [Types:GetType("Stat").PARRY] = {"parry", "parry rating"},
+            [Types:GetType("Stat").RESILIENCE] = {"resilience", "resil"},
             [Types:GetType("Stat").ATTACK_POWER] = {"attack power", "ap"},
             [Types:GetType("Stat").SPELL_POWER] = {"spell power", "sp", "spellpower"},
+            [Types:GetType("Stat").SPELL_PENETRATION] = {"spell penetration", "spell pen", "spellpen"},
+            [Types:GetType("Stat").MP5] = {"mana per 5 sec", "mana regen", "mp5"}
         }
 
         for stat, words in pairs(variations) do
