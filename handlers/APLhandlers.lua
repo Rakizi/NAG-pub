@@ -1132,6 +1132,83 @@ do -- ~~~~~~~~~~ Targets/Units APLValue Functions ~~~~~~~~~~
         end
     end
 
+    --- Get the number of targets in range that have a specific debuff applied by the player.
+    --- @function NAG:NumberTargetsWithDebuff
+    --- @param debuffId number The ID of the debuff to check for
+    --- @param range number|nil Optional range to use for counting targets (default: uses TTD default ranges)
+    --- @usage NAG:NumberTargetsWithDebuff(55078) -- Check how many targets have Blood Plague
+    --- @usage NAG:NumberTargetsWithDebuff(55095, 10) -- Check how many targets within 10 yards have Frost Fever
+    --- @return number The number of targets with the specified debuff
+    function NAG:NumberTargetsWithDebuff(debuffId, range)
+        if not debuffId then
+            self:Error("NumberTargetsWithDebuff: No debuffId provided")
+            return 0
+        end
+        
+        if not range then
+            range = 15
+        end
+
+        if not RC then
+            self:Error("LibRangeCheck-3.0 not found")
+            return 0
+        end
+
+        local count = 0
+        
+        -- Get iterable units from TTD
+        local iterableUnits = TTD:GetIterableUnits()
+        if not iterableUnits then
+            return 0
+        end
+
+        -- Skip first 4 units (player, pet, target, mouseover) as they're handled separately
+        local ignoredCount = 4
+
+        for i = ignoredCount + 1, #iterableUnits do
+            local unit = iterableUnits[i]
+            
+            -- Check if unit exists and can be attacked
+            if UnitExists(unit) and UnitCanAttack("player", unit) then
+                -- Check if unit is in combat with player
+                if UnitAffectingCombat("player") then
+                    -- Get range info
+                    local minRange, maxDist = RC:GetRange(unit, true)
+                    local distance = minRange or maxDist
+                    
+                    -- Check if unit is within specified range
+                    local inRange = false
+                    if range then
+                        inRange = distance and distance <= range
+                    else
+                        -- Use TTD's default range logic
+                        local targetCount = TTD:GetTargetCount()
+                        if targetCount then
+                            -- If TTD found this unit, it's in range
+                            inRange = true
+                        end
+                    end
+                    
+                    if inRange then
+                        -- Check if the debuff is applied by the player
+                        -- Iterate through all debuffs on the unit with PLAYER filter
+                        for j = 1, 40 do
+                            local name, _, _, _, _, _, _, _, _, spellId = UnitDebuff(unit, j, "PLAYER")
+                            if name and spellId == debuffId then
+                                count = count + 1
+                                break -- Found the debuff, no need to check more
+                            elseif not name then
+                                break -- No more debuffs to check
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        return count
+    end
+
     --- Count the number of enemies in range.
     --- @function NAG:CountEnemiesInRange
     --- @param maxRange number The maximum range to check (1-100 yards).
