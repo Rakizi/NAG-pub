@@ -648,7 +648,7 @@ do --== Display Options ==--
                             if value then
                                 -- Let the module handle its own settings
                                 --- @type ResourceBarManager|AceModule|ModuleBase
-                                local RBM = NAG:GetModule("ResourceBarManager")
+                                local RBM = NAG:GetModule("ResourceBarManager", true)
                                 if RBM then
                                     RBM:Disable()
                                     RBM:GetChar().enabled = false

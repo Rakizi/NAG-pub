@@ -62,6 +62,8 @@ if L then
         L["bothOutput"] = "调试和聊天都输出"
         L["btk"] = "BTK"
         L["btkDesc"] = "Bent The Knee模块功能"
+        L["btkDisableEmotes"] = "禁用屈膝表情"
+        L["btkDisableEmotesDesc"] = "禁用自动表情功能，当godtier用户获得/失去增益时让其他玩家跪下或敬礼（仅限Godtier）"
         L["buffCheckInterval"] = "增益检查间隔"
         L["buffCheckIntervalDesc"] = "检查缺失团队增益的频率（秒）"
         L["buffSuggestionThreshold"] = "增益建议阈值"

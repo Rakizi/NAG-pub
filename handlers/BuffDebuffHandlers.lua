@@ -303,6 +303,11 @@ do -- ~~~~~~~~~~ Aura APLValue Functions ~~~~~~~~~~
                 return 0
             end
         end
+        -- TODO: Remove this once we have a better way to handle this or the bug is resolved.
+        -- Storm, Earth and Fire and Storm, Earth, and Fire are different spells.
+        if spellId == 138228 then
+            spellId = 137639
+        end
         -- Validate spell exists
         local spell = DataManager:Get(spellId, DataManager.EntityTypes.SPELL)
         if not spell then

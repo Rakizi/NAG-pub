@@ -62,6 +62,8 @@ if L then
         L["bothOutput"] = "Output Debug e Chat"
         L["btk"] = "BTK"
         L["btkDesc"] = "Funzionalità del modulo Bent The Knee"
+        L["btkDisableEmotes"] = "Disabilita emote Piega il Ginocchio"
+        L["btkDisableEmotesDesc"] = "Disabilita la funzionalità di emote automatica che fa inginocchiare o salutare altri giocatori quando gli utenti godtier guadagnano/perdono buff (solo Godtier)"
         L["buffCheckInterval"] = "Intervallo Controllo Buff"
         L["buffCheckIntervalDesc"] = "Quanto spesso controllare i buff mancanti del raid (in secondi)"
         L["buffSuggestionThreshold"] = "Soglia Suggerimento Buff"

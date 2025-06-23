@@ -62,6 +62,8 @@ if L then
         L["bothOutput"] = "同時輸出到除錯和聊天"
         L["btk"] = "BTK"
         L["btkDesc"] = "Bent The Knee模組功能"
+        L["btkDisableEmotes"] = "停用屈膝表情"
+        L["btkDisableEmotesDesc"] = "停用自動表情功能，當godtier用戶獲得/失去增益時讓其他玩家跪下或敬禮（僅限Godtier）"
         L["buffCheckInterval"] = "增益檢查間隔"
         L["buffCheckIntervalDesc"] = "檢查缺少團隊增益的頻率（秒）"
         L["buffSuggestionThreshold"] = "增益建議閾值"

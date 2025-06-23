@@ -61,6 +61,8 @@ if L then
         L["bothOutput"] = "디버그와 채팅 모두"
         L["btk"] = "BTK"
         L["btkDesc"] = "BTK 모듈 기능"
+        L["btkDisableEmotes"] = "무릎 꿇기 감정 표현 비활성화"
+        L["btkDisableEmotesDesc"] = "godtier 사용자가 버프를 얻거나 잃을 때 다른 플레이어가 무릎을 꿇거나 경례하도록 하는 자동 감정 표현 기능 비활성화 (Godtier만)"
         L["buffCheckInterval"] = "버프 확인 간격"
         L["buffCheckIntervalDesc"] = "누락된 공격대 버프 확인 빈도 (초)"
         L["buffSuggestionThreshold"] = "버프 제안 임계값"

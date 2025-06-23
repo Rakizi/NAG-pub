@@ -62,6 +62,8 @@ if L then
         L["bothOutput"] = "Salida de Depuración y Chat"
         L["btk"] = "BTK"
         L["btkDesc"] = "Funcionalidad del módulo Bent The Knee"
+        L["btkDisableEmotes"] = "Desactivar emotes Doblar la Rodilla"
+        L["btkDisableEmotesDesc"] = "Desactivar la funcionalidad de emote automático que hace que otros jugadores se arrodillen o saluden cuando los usuarios godtier ganan/pierden buffs (solo Godtier)"
         L["buffCheckInterval"] = "Intervalo de Comprobación de Beneficios"
         L["buffCheckIntervalDesc"] = "Con qué frecuencia comprobar beneficios de banda faltantes (en segundos)"
         L["buffSuggestionThreshold"] = "Umbral de Sugerencia de Beneficios"

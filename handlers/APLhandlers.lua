@@ -165,7 +165,11 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
             self:Error(format("Cast: spellId %s is not a number", tostring(id)))
             return false
         end
-
+        -- TODO: Remove this once we have a better way to handle this or the bug is resolved.
+        -- Storm, Earth and Fire and Storm, Earth, and Fire are different spells.
+        if id == 138228 then
+            id = 137639
+        end
         -- Try to find entity in DataManager
         local entity = DataManager:Get(id, DataManager.EntityTypes.SPELL) or
             DataManager:Get(id, DataManager.EntityTypes.ITEM)

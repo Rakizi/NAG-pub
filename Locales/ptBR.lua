@@ -62,6 +62,8 @@ if L then
         L["bothOutput"] = "Saída de Debug e Chat"
         L["btk"] = "BTK"
         L["btkDesc"] = "Configurações do módulo Bent The Knee"
+        L["btkDisableEmotes"] = "Desativar emotes Dobrar o Joelho"
+        L["btkDisableEmotesDesc"] = "Desativar a funcionalidade de emote automático que faz outros jogadores se ajoelharem ou saudarem quando usuários godtier ganham/perdem buffs (apenas Godtier)"
         L["buffCheckInterval"] = "Intervalo de Verificação de Buff"
         L["buffCheckIntervalDesc"] = "Com que frequência verificar buffs de raide ausentes (em segundos)"
         L["buffSuggestionThreshold"] = "Limiar de Sugestão de Buff"

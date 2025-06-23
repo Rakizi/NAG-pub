@@ -67,6 +67,8 @@ if L then
         L["btk"] = "BTK"
         L["btkDesc"] = "Bent The Knee module functionality"
         L["btkDesc"] = "Bent The Knee module settings"
+        L["btkDisableEmotes"] = "Disable Bend The Knee Emotes"
+        L["btkDisableEmotesDesc"] = "Disable the automatic emote functionality that makes other players kneel or salute when godtier users gain/lose buffs (Godtier only)"
         L["buffCheckInterval"] = "Buff Check Interval"
         L["buffCheckIntervalDesc"] = "How often to check for missing raid buffs (in seconds)"
         L["buffSuggestionThreshold"] = "Buff Suggestion Threshold"

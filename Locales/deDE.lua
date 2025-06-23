@@ -63,6 +63,8 @@ if L then
         L["bothOutput"] = "Debug und Chat"
         L["btk"] = "BTK"
         L["btkDesc"] = "Bent The Knee Modul-Funktionalität"
+        L["btkDisableEmotes"] = "Beuge das Knie-Emotes deaktivieren"
+        L["btkDisableEmotesDesc"] = "Automatische Emote-Funktionalität deaktivieren, die andere Spieler knien oder salutieren lässt, wenn Godtier-Benutzer Buffs gewinnen/verlieren (nur Godtier)"
         L["buffCheckInterval"] = "Buff-Überprüfungsintervall"
         L["buffCheckIntervalDesc"] = "Wie oft nach fehlenden Schlachtzug-Buffs suchen (in Sekunden)"
         L["buffSuggestionThreshold"] = "Buff-Vorschlags-Schwellenwert"

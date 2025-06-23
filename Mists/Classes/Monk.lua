@@ -45,7 +45,7 @@ defaults.class.specSpellLocations = {
         },
         RIGHT = {
             123986, -- Chi Burst
-            138228,
+            138228, 137639,
             115181  -- Breath of Fire
         },
         LEFT = {
@@ -89,7 +89,7 @@ defaults.class.specSpellLocations = {
         BELOW = {
         },
         RIGHT = {
-            123904, 138228
+            123904, 138228, 137639
         },
         LEFT = {
             115288, -- Energizing Brew
