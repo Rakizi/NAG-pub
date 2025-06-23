@@ -488,9 +488,10 @@ end
 --- Unified GetSpellPowerCost function.
 -- Retrieves the power cost of a spell across both Retail and Classic.
 --- @param spellID number The ID of the spell to retrieve the power cost for.
---- @return table<number, SpellPowerCostInfo>|nil A table containing one or more SpellPowerCostInfo objects, one for each power type this spell costs.
+--- @return table A list of SpellPowerCostInfo-like tables, or an empty table if the spell has no cost or is not found.
 function ns.GetSpellPowerCostUnified(spellID)
-    if not spellID then return nil end
+    if not spellID then return {} end
+
     local costs
     local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
@@ -502,24 +503,16 @@ function ns.GetSpellPowerCostUnified(spellID)
     end
 
     if not costs or #costs == 0 then
-        costs = {}
-        return costs
+        return {}
     end
 
     -- In Mists of Pandaria, Death Knight spells with a variable Runic Power cost (like Frost Strike)
     -- should use minCost as their effective cost due to mastery reducing it.
     if NAG.Version:IsMists() and NAG.CLASS == "DEATHKNIGHT" then
         for i, costInfo in ipairs(costs) do
-            if costInfo.type == Enum.PowerType.RunicPower then
-                if costInfo.minCost and costInfo.minCost > 0 then
-                    -- Use minCost as it's available and valid for Runic Power.
-                    costs[i].cost = costInfo.minCost
-                else
-                    -- Fallback to the original cost if minCost is not valid.
-                    -- This is technically redundant as 'cost' is already set,
-                    -- but it makes the logic explicit.
-                    costs[i].cost = costInfo.cost
-                end
+            if costInfo.type == Enum.PowerType.RunicPower and costInfo.minCost and costInfo.minCost > 0 then
+                -- Use minCost as it's available and valid for Runic Power.
+                costs[i].cost = costInfo.minCost
             end
         end
     end

@@ -778,6 +778,18 @@ do --== Display Options ==--
                     end
                 end,
             },
+
+            minimapDetach = {
+                type = "toggle",
+                name = L["minimapDetach"] or "Detach Minimap Icon",
+                desc = L["minimapDetachDesc"] or "Show the minimap icon as a draggable icon anywhere on your screen instead of attached to the minimap.",
+                order = 6,
+                get = function() return self.db.global.minimap.detached end,
+                set = function(_, value)
+                    self.db.global.minimap.detached = value
+                    NAG:UpdateMinimapIconMode()
+                end,
+            },
         }
     end
 end
