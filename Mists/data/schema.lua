@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-06-22 20:47:58
+-- Generated schema for mop on 2025-06-22 21:12:38
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -27113,6 +27113,8 @@ ns.protoSchema['mists'] = {
     },
     consumables = {
       ConjuredDarkRune = {
+        source = "generic_object",
+        source_file = "consumables.ts",
         ids = {
           item = {
             12662
@@ -27127,6 +27129,8 @@ ns.protoSchema['mists'] = {
         }
       },
       ConjuredHealthstone = {
+        source = "generic_object",
+        source_file = "consumables.ts",
         ids = {
           item = {
             5512
@@ -27141,6 +27145,8 @@ ns.protoSchema['mists'] = {
         }
       },
       ConjuredRogueThistleTea = {
+        source = "generic_object",
+        source_file = "consumables.ts",
         ids = {
           item = {
             7676
@@ -27158,6 +27164,8 @@ ns.protoSchema['mists'] = {
         }
       },
       ExplosiveBigDaddy = {
+        source = "generic_object",
+        source_file = "consumables.ts",
         ids = {
           item = {
             63396
@@ -27173,6 +27181,8 @@ ns.protoSchema['mists'] = {
         }
       },
       HighpoweredBoltGun = {
+        source = "generic_object",
+        source_file = "consumables.ts",
         ids = {
           item = {
             60223
@@ -27190,6 +27200,8 @@ ns.protoSchema['mists'] = {
     },
     buffs_debuffs = {
       StatsBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1126,
@@ -27208,6 +27220,8 @@ ns.protoSchema['mists'] = {
         }
       },
       AttackPowerBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6673,
@@ -27224,6 +27238,8 @@ ns.protoSchema['mists'] = {
         }
       },
       AttackSpeedBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             30809,
@@ -27242,6 +27258,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SpellPowerBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1459,
@@ -27258,6 +27276,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SpellHasteBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24907,
@@ -27273,6 +27293,8 @@ ns.protoSchema['mists'] = {
         }
       },
       CritBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1459,
@@ -27291,6 +27313,8 @@ ns.protoSchema['mists'] = {
         }
       },
       MasteryBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19740,
@@ -27307,6 +27331,8 @@ ns.protoSchema['mists'] = {
         }
       },
       StaminaBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             469,
@@ -27323,6 +27349,8 @@ ns.protoSchema['mists'] = {
         }
       },
       MajorHasteBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             2825
@@ -27336,6 +27364,8 @@ ns.protoSchema['mists'] = {
         }
       },
       DefensiveCooldownBuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6940,
@@ -27353,6 +27383,8 @@ ns.protoSchema['mists'] = {
         }
       },
       CastSpeedDebuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             5761,
@@ -27371,6 +27403,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SpellDamageDebuff = {
+        source = "icon_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1490,
@@ -27389,6 +27423,8 @@ ns.protoSchema['mists'] = {
         }
       },
       Skullbanner = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             114207
@@ -27404,6 +27440,8 @@ ns.protoSchema['mists'] = {
         }
       },
       StormLashTotem = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             120668
@@ -27419,6 +27457,8 @@ ns.protoSchema['mists'] = {
         }
       },
       ManaTideTotem = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16190
@@ -27433,6 +27473,8 @@ ns.protoSchema['mists'] = {
         countField = "ManaTideTotemCount"
       },
       TricksOfTheTrade = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             45767
@@ -27448,6 +27490,8 @@ ns.protoSchema['mists'] = {
         }
       },
       UnholyFrenzy = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             49016
@@ -27463,6 +27507,8 @@ ns.protoSchema['mists'] = {
         countField = "UnholyFrenzyCount"
       },
       ShatteringThrow = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             64382
@@ -27478,6 +27524,8 @@ ns.protoSchema['mists'] = {
         countField = "ShatteringThrowCount"
       },
       MajorArmorDebuff = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             113746
@@ -27492,6 +27540,8 @@ ns.protoSchema['mists'] = {
         }
       },
       PhysicalDamageDebuff = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             81326
@@ -27506,6 +27556,8 @@ ns.protoSchema['mists'] = {
         }
       },
       DamageReduction = {
+        source = "config_array",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             115798
@@ -27519,6 +27571,8 @@ ns.protoSchema['mists'] = {
         }
       },
       BlessingOfKings = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20217
@@ -27526,6 +27580,8 @@ ns.protoSchema['mists'] = {
         }
       },
       MarkOfTheWild = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1126
@@ -27533,6 +27589,8 @@ ns.protoSchema['mists'] = {
         }
       },
       EmbraceOfTheShaleSpider = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             90363
@@ -27540,6 +27598,8 @@ ns.protoSchema['mists'] = {
         }
       },
       LegacyOfTheEmperor = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             115921
@@ -27547,6 +27607,8 @@ ns.protoSchema['mists'] = {
         }
       },
       TrueshotAura = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19506
@@ -27554,6 +27616,8 @@ ns.protoSchema['mists'] = {
         }
       },
       HornOfWinter = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57330
@@ -27561,6 +27625,8 @@ ns.protoSchema['mists'] = {
         }
       },
       BattleShout = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6673
@@ -27568,6 +27634,8 @@ ns.protoSchema['mists'] = {
         }
       },
       UnholyAura = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             55610
@@ -27575,6 +27643,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SerpentsSwiftness = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             128433
@@ -27582,6 +27652,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SwiftbladesCunning = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             113742
@@ -27589,6 +27661,8 @@ ns.protoSchema['mists'] = {
         }
       },
       UnleashedRage = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             30809
@@ -27596,6 +27670,8 @@ ns.protoSchema['mists'] = {
         }
       },
       CacklingHowl = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             128432
@@ -27603,6 +27679,8 @@ ns.protoSchema['mists'] = {
         }
       },
       ArcaneBrilliance = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1459
@@ -27610,6 +27688,8 @@ ns.protoSchema['mists'] = {
         }
       },
       StillWater = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             126309
@@ -27617,6 +27697,8 @@ ns.protoSchema['mists'] = {
         }
       },
       BurningWrath = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             77747
@@ -27624,6 +27706,8 @@ ns.protoSchema['mists'] = {
         }
       },
       DarkIntent = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             109773
@@ -27631,6 +27715,8 @@ ns.protoSchema['mists'] = {
         }
       },
       MoonkinAura = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24907
@@ -27638,6 +27724,8 @@ ns.protoSchema['mists'] = {
         }
       },
       MindQuickening = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             49868
@@ -27645,6 +27733,8 @@ ns.protoSchema['mists'] = {
         }
       },
       ElementalOath = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             51470
@@ -27652,6 +27742,8 @@ ns.protoSchema['mists'] = {
         }
       },
       LeaderOfThePack = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17007
@@ -27659,6 +27751,8 @@ ns.protoSchema['mists'] = {
         }
       },
       FuriousHowl = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24604
@@ -27666,6 +27760,8 @@ ns.protoSchema['mists'] = {
         }
       },
       TerrifyingRoar = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             90309
@@ -27673,6 +27769,8 @@ ns.protoSchema['mists'] = {
         }
       },
       LegacyOfTheWhiteTiger = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             116781
@@ -27680,6 +27778,8 @@ ns.protoSchema['mists'] = {
         }
       },
       BlessingOfMight = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19740
@@ -27687,6 +27787,8 @@ ns.protoSchema['mists'] = {
         }
       },
       RoarOfCourage = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             93435
@@ -27694,6 +27796,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SpiritBeastBlessing = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             128997
@@ -27701,6 +27805,8 @@ ns.protoSchema['mists'] = {
         }
       },
       GraceOfAir = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             116956
@@ -27708,6 +27814,8 @@ ns.protoSchema['mists'] = {
         }
       },
       CommandingShout = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             469
@@ -27715,6 +27823,8 @@ ns.protoSchema['mists'] = {
         }
       },
       PowerWordFortitude = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             21562
@@ -27722,6 +27832,8 @@ ns.protoSchema['mists'] = {
         }
       },
       QirajiFortitude = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             90364
@@ -27729,6 +27841,8 @@ ns.protoSchema['mists'] = {
         }
       },
       Bloodlust = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             2825
@@ -27736,6 +27850,8 @@ ns.protoSchema['mists'] = {
         }
       },
       HandOfSacrificeCount = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6940
@@ -27743,6 +27859,8 @@ ns.protoSchema['mists'] = {
         }
       },
       DevotionAuraCount = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31821
@@ -27750,6 +27868,8 @@ ns.protoSchema['mists'] = {
         }
       },
       PainSuppressionCount = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             33206
@@ -27757,6 +27877,8 @@ ns.protoSchema['mists'] = {
         }
       },
       GuardianSpirits = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47788
@@ -27764,6 +27886,8 @@ ns.protoSchema['mists'] = {
         }
       },
       RallyingCryCount = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             97462
@@ -27771,6 +27895,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SkullBannerCount = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             114207
@@ -27778,6 +27904,8 @@ ns.protoSchema['mists'] = {
         }
       },
       StormlashTotemCount = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             120668
@@ -27785,6 +27913,8 @@ ns.protoSchema['mists'] = {
         }
       },
       WeakenedArmor = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             113746
@@ -27792,6 +27922,8 @@ ns.protoSchema['mists'] = {
         }
       },
       WeakenedBlows = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             115798
@@ -27799,6 +27931,8 @@ ns.protoSchema['mists'] = {
         }
       },
       NecroticStrike = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             73975
@@ -27806,6 +27940,8 @@ ns.protoSchema['mists'] = {
         }
       },
       LavaBreath = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58604
@@ -27813,6 +27949,8 @@ ns.protoSchema['mists'] = {
         }
       },
       SporeCloud = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             50274
@@ -27820,6 +27958,8 @@ ns.protoSchema['mists'] = {
         }
       },
       MindNumbingPoison = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             5761
@@ -27827,6 +27967,8 @@ ns.protoSchema['mists'] = {
         }
       },
       Slow = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31589
@@ -27834,6 +27976,8 @@ ns.protoSchema['mists'] = {
         }
       },
       CurseOfEnfeeblement = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             109466
@@ -27841,6 +27985,8 @@ ns.protoSchema['mists'] = {
         }
       },
       PhysicalVulnerability = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             81326
@@ -27848,6 +27994,8 @@ ns.protoSchema['mists'] = {
         }
       },
       LightningBreath = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24844
@@ -27855,6 +28003,8 @@ ns.protoSchema['mists'] = {
         }
       },
       CurseOfElements = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1490
@@ -27862,6 +28012,8 @@ ns.protoSchema['mists'] = {
         }
       },
       MasterPoisoner = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58410
@@ -27869,6 +28021,8 @@ ns.protoSchema['mists'] = {
         }
       },
       FireBreath = {
+        source = "buff_input",
+        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             34889
@@ -27878,5 +28032,823 @@ ns.protoSchema['mists'] = {
     },
     consumables_unparsed = {
 
+    },
+    diagnostic = {
+      actions = {
+        total_found = 25,
+        matched = 25,
+        missing = {
+
+        },
+        missing_attributes = {
+          uiLabel = 0,
+          shortDescription = 0,
+          fields = 0
+        },
+        missing_attr_items = {
+          uiLabel = {
+
+          },
+          shortDescription = {
+
+          },
+          fields = {
+
+          }
+        }
+      },
+      values = {
+        total_found = 98,
+        matched = 98,
+        missing = {
+
+        },
+        missing_attributes = {
+          uiLabel = 0,
+          shortDescription = 3,
+          fields = 0
+        },
+        missing_attr_items = {
+          uiLabel = {
+
+          },
+          shortDescription = {
+            "boss_spell_is_casting",
+            "boss_spell_time_to_ready",
+            "unit_is_moving"
+          },
+          fields = {
+
+          }
+        }
+      }
+    },
+    go_diagnostic = {
+      files_scanned = 721,
+      functions_scanned = 3405,
+      registrations_found = 865,
+      registrations_parsed = 770,
+      registrations_missed = {
+        {
+          file = "sim/rogue/rupture.go",
+          ["function"] = "registerRupture",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.ActionID{SpellID: RuptureSpellID}, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSpecial,..."
+        },
+        {
+          file = "sim/rogue/assassination/venomous_wounds.go",
+          ["function"] = "registerVenomousWounds",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Venomous Wounds Aura",  		OnPeriodicDamageDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult)...]]
+        },
+        {
+          file = "sim/rogue/assassination/mutilate.go",
+          ["function"] = "newMutilateHitSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       actionID, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       procMask, 		Flags:          core.SpellFlagMeleeMetrics | r..."
+        },
+        {
+          file = "sim/rogue/assassination/mutilate.go",
+          ["function"] = "registerMutilateSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.ActionID{SpellID: MutilateSpellID, Tag: 0}, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskEmpty,..."
+        },
+        {
+          file = "sim/rogue/assassination/sealfate.go",
+          ["function"] = "applySealFate",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Seal Fate", 		OnSpellHitDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) { 			if !spell.Fla...]]
+        },
+        {
+          file = "sim/rogue/subtlety/hemorrhage.go",
+          ["function"] = "registerHemorrhageSpell",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       hemoActionID, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSpecial, 		Flags:          core.Sp..."
+        },
+        {
+          file = "sim/rogue/subtlety/sanguinary_vein.go",
+          ["function"] = "registerSanguinaryVein",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 			Label:    "Sanguinary Vein Debuff", 			Duration: core.NeverExpires, 			// Action ID Suppressed to not fill debuff log 			OnGain: func(aura *core....]]
+        },
+        {
+          file = "sim/rogue/subtlety/sanguinary_vein.go",
+          ["function"] = "registerSanguinaryVein",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Sanguinary Vein Talent", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim)...]]
+        },
+        {
+          file = "sim/rogue/subtlety/find_weakness.go",
+          ["function"] = "applyFindWeakness",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Find Weakness", 		Duration: core.NeverExpires,  		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		}, 		O...]]
+        },
+        {
+          file = "sim/rogue/combat/bandits_guile.go",
+          ["function"] = "registerBanditsGuile",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = "{ 			Label:    label, 			ActionID: actionID, 			Duration: time.Second * 15,  			OnGain: func(aura *core.Aura, sim *core.Simulation) { 				comRogue.Aut..."
+        },
+        {
+          file = "sim/rogue/combat/combat_potency.go",
+          ["function"] = "applyCombatPotency",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Combat Potency", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		}, 		O...]]
+        },
+        {
+          file = "sim/druid/forms.go",
+          ["function"] = "applyMoonkinForm",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Moonkin Form", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Activate(sim...]]
+        },
+        {
+          file = "sim/druid/shared_feral_passives.go",
+          ["function"] = "ApplyPrimalFury",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Primal Fury", 		Duration: core.NeverExpires,  		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		},  		On...]]
+        },
+        {
+          file = "sim/druid/shared_feral_passives.go",
+          ["function"] = "ApplyLeaderOfThePack",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Icd:      &icd, 		Label:    "Improved Leader of the Pack", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) {...]]
+        },
+        {
+          file = "sim/druid/feral/_omen_of_clarity.go",
+          ["function"] = "applyOmenOfClarity",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Omen of Clarity", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		},...]]
+        },
+        {
+          file = "sim/druid/balance/balance.go",
+          ["function"] = "ApplyTalents",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 			Label:    "Moonfury", 			Duration: core.NeverExpires, 			ActionID: core.ActionID{ 				SpellID: 16913, 			}, 			OnReset: func(aura *core.Aura, sim...]]
+        },
+        {
+          file = "sim/death_knight/rune_weapon_pet.go",
+          ["function"] = "registerFirstHitDamageAura",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "First Hit Penalty Bypass" + runeWeapon.Label, 		Duration: core.SpellBatchWindow,  		OnReset: func(aura *core.Aura, sim *core.Simulation...]]
+        },
+        {
+          file = "sim/death_knight/ghoul_pet.go",
+          ["function"] = "registerClaw",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.ActionID{SpellID: ghoulPet.clawSpellID}, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSp..."
+        },
+        {
+          file = "sim/death_knight/death_strike.go",
+          ["function"] = "registerDeathStrike",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Death Strike Damage Taken", 		OnSpellHitTaken: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) {...]]
+        },
+        {
+          file = "sim/death_knight/runic_power_decay.go",
+          ["function"] = "registerRunicPowerDecay",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Runic Power Decay" + dk.Label, 		Duration: core.NeverExpires, 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			if sim.Current...]]
+        },
+        {
+          file = "sim/death_knight/soul_reaper.go",
+          ["function"] = "registerSoulReaper",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       SoulReaperActionID.WithTag(tag), 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSpecial, 		Flag..."
+        },
+        {
+          file = "sim/death_knight/blood/hotfix_passive.go",
+          ["function"] = "registerHotfixPassive",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Hotfix Passive" + bdk.Label, 	}...]]
+        },
+        {
+          file = "sim/death_knight/unholy/unholy_frenzy.go",
+          ["function"] = "registerUnholyFrenzy",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       actionID, 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagReadinessTrinket, 		ClassSpellMask: death_kn..."
+        },
+        {
+          file = "sim/encounters/firelands/bethtilac_ai.go",
+          ["function"] = "registerEmberFlameSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:         core.ActionID{SpellID: emberFlameSpellID}, 		SpellSchool:      core.SpellSchoolFire, 		ProcMask:         core.ProcMaskSpellDamag..."
+        },
+        {
+          file = "sim/shaman/bloodlust.go",
+          ["function"] = "registerBloodlustCD",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       actionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskBloodlust,  		ManaCost: core.ManaCostOptions{ 			BaseCos..."
+        },
+        {
+          file = "sim/shaman/weapon_imbues.go",
+          ["function"] = "newFlametongueImbueSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:         core.ActionID{SpellID: int32(8024)}, 		SpellSchool:      core.SpellSchoolFire, 		ProcMask:         core.ProcMaskSpellDamageProc,..."
+        },
+        {
+          file = "sim/shaman/weapon_imbues.go",
+          ["function"] = "RegisterEarthlivingImbue",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Earthliving Imbue", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		},...]]
+        },
+        {
+          file = "sim/shaman/stormlash_totem.go",
+          ["function"] = "registerStormlashCD",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       actionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskStormlashTotem,  		ManaCost: core.ManaCostOptions{ 			Ba..."
+        },
+        {
+          file = "sim/shaman/talents_elemental.go",
+          ["function"] = "ApplyElementalTalents",
+          registration_index = 4,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:           "Lava Surge Proc Aura", 		ActionIDForProc: core.ActionID{SpellID: 77762}, 		OnPeriodicDamageDealt: func(aura *core.Aura, sim *cor...]]
+        },
+        {
+          file = "sim/shaman/talents.go",
+          ["function"] = "ApplyAncestralSwiftness",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:      "Ancestral Swiftness Passive", 		BuildPhase: core.CharacterBuildPhaseTalents, 		OnGain: func(aura *core.Aura, sim *core.Simulation) {...]]
+        },
+        {
+          file = "sim/shaman/talents.go",
+          ["function"] = "ApplyEchoOfTheElements",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Echo of The Elements Dummy", 		OnSpellHitDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) {...]]
+        },
+        {
+          file = "sim/monk/ww_storm_earth_and_fire.go",
+          ["function"] = "registerStormEarthAndFire",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:     "Storm, Earth, and Fire", 		ActionID:  core.ActionID{SpellID: SEFSpellID}, 		Duration:  core.NeverExpires, 		MaxStacks: 2, 		OnCastComp...]]
+        },
+        {
+          file = "sim/monk/ww_storm_earth_and_fire.go",
+          ["function"] = "registerStormEarthAndFire",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.ActionID{SpellID: SEFSpellID}, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: MonkSpellStormEarthAndFire,  		EnergyCo..."
+        },
+        {
+          file = "sim/monk/stances.go",
+          ["function"] = "makeStanceSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: aura.ActionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer..."
+        },
+        {
+          file = "sim/monk/windwalker/passives.go",
+          ["function"] = "registerComboBreaker",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 			Label:    fmt.Sprintf("Combo Breaker: %s %s", labelSuffix, ww.Label), 			ActionID: core.ActionID{SpellID: spellID}, 			Duration: time.Second * 20...]]
+        },
+        {
+          file = "sim/monk/brewmaster/guard.go",
+          ["function"] = "registerGuard",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       actionID, 		Flags:          monk.SpellFlagSpender | core.SpellFlagAPL | core.SpellFlagReadinessTrinket, 		ClassSpellMask: monk.Mon..."
+        },
+        {
+          file = "sim/hunter/pet_abilities.go",
+          ["function"] = "newPetDebuff",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:    core.ActionID{SpellID: config.SpellID}, 		SpellSchool: config.School, // Adjust the spell school as needed 		ProcMask:    core.ProcMa..."
+        },
+        {
+          file = "sim/hunter/pet_abilities.go",
+          ["function"] = "newFocusDump",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.ActionID{SpellID: spellID}, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSpecial, 		Clas..."
+        },
+        {
+          file = "sim/hunter/pet_abilities.go",
+          ["function"] = "newSpecialAbility",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:    core.ActionID{SpellID: config.SpellID}, 		SpellSchool: config.School, 		ProcMask:    procMask, 		Flags:       flags,  		DamageMultipl..."
+        },
+        {
+          file = "sim/hunter/aspects.go",
+          ["function"] = "registerAspectSpell",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		Label:      label, 		ActionID:   actionID, 		Duration:   core.NeverExpires, 		BuildPhase: core.CharacterBuildPhaseBase, 		OnGain: func(a *core.Aur..."
+        },
+        {
+          file = "sim/hunter/aspects.go",
+          ["function"] = "registerAspectSpell",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagAPL, 		ApplyEffects: func(sim *core.Simulation, _ *core.Unit, _ *core.Spell) { 			aura.Activate(sim)..."
+        },
+        {
+          file = "sim/hunter/glaive_toss.go",
+          ["function"] = "registerGlaiveTossSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 			ActionID:                 core.ActionID{SpellID: spellID}, 			SpellSchool:              core.SpellSchoolPhysical, 			ProcMask:                 co..."
+        },
+        {
+          file = "sim/hunter/serpent_sting.go",
+          ["function"] = "registerSerpentStingSpell",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: core.ActionID{OtherID: 1978}, 		ProcMask: core.ProcMaskEmpty, 		Flags:    core.SpellFlagNone, 		Cast: core.CastConfig{ 			CD: core.Coold..."
+        },
+        {
+          file = "sim/hunter/talents.go",
+          ["function"] = "applyThrillOfTheHunt",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Thrill of the Hunt Proccer", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(s...]]
+        },
+        {
+          file = "sim/hunter/survival/specializations.go",
+          ["function"] = "applyLNL",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Lock and Load", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		}, 		On...]]
+        },
+        {
+          file = "sim/hunter/marksmanship/specializations.go",
+          ["function"] = "MasterMarksmanAura",
+          registration_index = 3,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Master Marksman Internal", 		OnCastComplete: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell) { 			if !spell.Matches(hunter....]]
+        },
+        {
+          file = "sim/hunter/marksmanship/specializations.go",
+          ["function"] = "PiercingShotsAura",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Piercing Shots Talent", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim)...]]
+        },
+        {
+          file = "sim/hunter/marksmanship/marksmanship.go",
+          ["function"] = "applyMastery",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Wild Quiver Mastery", 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		}...]]
+        },
+        {
+          file = "sim/priest/_power_word_shield.go",
+          ["function"] = "registerPowerWordShieldSpell",
+          registration_index = 3,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 			ActionID:    core.ActionID{ItemID: 42408}, 			SpellSchool: core.SpellSchoolHoly, 			ProcMask:    core.ProcMaskSpellHealing, 			Flags:       core...."
+        },
+        {
+          file = "sim/priest/shadowfiend_pet.go",
+          ["function"] = "NewShadowfiend",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Autoattack mana regen", 		OnSpellHitDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) { 			r...]]
+        },
+        {
+          file = "sim/priest/_prayer_of_mending.go",
+          ["function"] = "makePrayerOfMendingAura",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "PrayerOfMending" + strconv.Itoa(int(priest.Index)), 		Duration: time.Second * 30, 		OnGain: func(aura *core.Aura, sim *core.Simulation)...]]
+        },
+        {
+          file = "sim/priest/mindbender_pet.go",
+          ["function"] = "NewMindBender",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Autoattack mana regen", 		OnSpellHitDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) { 			r...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyImprovedMindBlast",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Improved Mind Blast", 		OnSpellHitDealt: func(_ *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) { 			if res...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyImprovedDevouringPlague",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Improved Devouring Plague Talent",  		OnSpellHitDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellRe...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyMasochism",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 			Label:    "Masochism", 			Duration: core.NeverExpires, 			OnReset: func(aura *core.Aura, sim *core.Simulation) { 				aura.Activate(sim) 			},...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyDivineAegis",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Divine Aegis Talent", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Activ...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyGrace",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Grace Talent", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Activate(sim...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyBorrowedTime",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Borrwed Time Talent", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Activ...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyInspiration",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Inspiration Talent", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Activa...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyHolyConcentration",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Holy Concentration Talent", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applySerendipity",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Serendipity Talent", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Activa...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applySurgeOfLight",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Surge of Light", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Activate(s...]]
+        },
+        {
+          file = "sim/priest/_talents.go",
+          ["function"] = "applyMisery",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ // 		Label:    "Priest Shadow Effects", // 		Duration: core.NeverExpires, // 		OnReset: func(aura *core.Aura, sim *core.Simulation) { // 			aura.Act...]]
+        },
+        {
+          file = "sim/priest/_prayer_of_healing.go",
+          ["function"] = "registerPrayerOfHealingSpell",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 			ActionID:    core.ActionID{ItemID: 42409}, 			SpellSchool: core.SpellSchoolHoly, 			ProcMask:    core.ProcMaskSpellHealing, 			Flags:       core...."
+        },
+        {
+          file = "sim/priest/shadow/shadow.go",
+          ["function"] = "ApplyTalents",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Shadowform", 		ActionID: core.ActionID{ 			SpellID: 15473, 		}, 	}...]]
+        },
+        {
+          file = "sim/priest/shadow/devouring_plague.go",
+          ["function"] = "registerDevouringPlagueSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:                 actionID, 		SpellSchool:              core.SpellSchoolShadow, 		ProcMask:                 core.ProcMaskSpellDamage, 		Fl..."
+        },
+        {
+          file = "sim/priest/shadow/devouring_plague.go",
+          ["function"] = "registerDevouringPlagueSpell",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:                 actionID.WithTag(1), 		SpellSchool:              core.SpellSchoolShadow, 		ProcMask:                 core.ProcMaskSpellD..."
+        },
+        {
+          file = "sim/priest/shadow/shadowy_recall.go",
+          ["function"] = "registerShadowyRecall",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Shadowy Recall (Mastery)", 		OnPeriodicDamageDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResul...]]
+        },
+        {
+          file = "sim/priest/shadow/shadowy_recall.go",
+          ["function"] = "buildSingleTickSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:         core.ActionID{SpellID: spellId}.WithTag(77486), 		SpellSchool:      core.SpellSchoolShadow, 		Flags:            core.SpellFlagNo..."
+        },
+        {
+          file = "sim/priest/shadow/talents.go",
+          ["function"] = "registerSurgeOfDarkness",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Surge of Darkness (Talent)", 		OnPeriodicDamageDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellRes...]]
+        },
+        {
+          file = "sim/priest/shadow/talents.go",
+          ["function"] = "registerTwistOfFate",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Twist of Fate (Talent)", 		OnPeriodicDamageDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult)...]]
+        },
+        {
+          file = "sim/priest/shadow/talents.go",
+          ["function"] = "registerDivineInsight",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Divine Insight (Talent)", 		OnPeriodicDamageDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult...]]
+        },
+        {
+          file = "sim/warlock/talents.go",
+          ["function"] = "BuildAndRegisterSummonSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:    core.ActionID{SpellID: id}, 		SpellSchool: core.SpellSchoolShadow, 		Flags:       core.SpellFlagAPL, 		ProcMask:    core.ProcMaskEmpt..."
+        },
+        {
+          file = "sim/warlock/destruction/chaotic_energy.go",
+          ["function"] = "ApplyChaoticEnergy",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Chaotic Energy", 	}...]]
+        },
+        {
+          file = "sim/warlock/destruction/emberstorm.go",
+          ["function"] = "ApplyMastery",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Mastery: Emberstorm", 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			generatorMod.Activate() 			spenderMod.Activate() 		}, 		O...]]
+        },
+        {
+          file = "sim/warlock/demonology/wild_imp.go",
+          ["function"] = "registerWildImpPassive",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Wild Imp - Controller", 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			cd := time.Duration(sim.Roll(float64(time.Second), floa...]]
+        },
+        {
+          file = "sim/warlock/affliction/malefic_effect.go",
+          ["function"] = "registerMaleficEffect",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 			ActionID:       core.ActionID{SpellID: id}.WithTag(1), 			Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagNoSpellMods | core.Spell..."
+        },
+        {
+          file = "sim/paladin/devotion_aura.go",
+          ["function"] = "registerDevotionAura",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.DevotionAuraActionID, 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagReadinessTrinket, 		ClassSp..."
+        },
+        {
+          file = "sim/paladin/talents.go",
+          ["function"] = "registerSacredShield",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:    actionID, 		Flags:       core.SpellFlagAPL | core.SpellFlagHelpful, 		ProcMask:    core.ProcMaskSpellHealing, 		SpellSchool: core.Spe..."
+        },
+        {
+          file = "sim/paladin/talents.go",
+          ["function"] = "divinePurposeFactory",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		Label:    label + paladin.Label, 		ActionID: core.ActionID{SpellID: spellID}, 		Duration: duration, 	}..."
+        },
+        {
+          file = "sim/paladin/retribution/sword_of_light.go",
+          ["function"] = "registerSwordOfLight",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Sword of Light Mana Regen" + ret.Label, 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			core.StartPeriodicAction(sim, core.Peri...]]
+        },
+        {
+          file = "sim/paladin/retribution/hotfix_passive.go",
+          ["function"] = "registerHotfixPassive",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Hotfix Passive" + ret.Label, 	}...]]
+        },
+        {
+          file = "sim/paladin/protection/protection.go",
+          ["function"] = "trackDamageTakenLastGlobal",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Damage Taken Last Global",  		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			prot.DamageTakenLastGlobal = 0.0 		}, 		OnSpellHitT...]]
+        },
+        {
+          file = "sim/paladin/protection/guarded_by_the_light.go",
+          ["function"] = "registerGuardedByTheLight",
+          registration_index = 2,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Guarded by the Light Mana Regen" + prot.Label, 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			core.StartPeriodicAction(sim, co...]]
+        },
+        {
+          file = "sim/paladin/holy/hotfix_passive.go",
+          ["function"] = "registerHotfixPassive",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Hotfix Passive" + holy.Label, 	}...]]
+        },
+        {
+          file = "sim/mage/_talents_fire.go",
+          ["function"] = "applyMasterOfElements",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Master of Elements", 		OnSpellHitDealt: func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) { 			if s...]]
+        },
+        {
+          file = "sim/mage/_talents_fire.go",
+          ["function"] = "applyMoltenFury",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 			Label:    "Molten Fury", 			Duration: core.NeverExpires, 			OnGain: func(aura *core.Aura, sim *core.Simulation) { 				mage.AttackTables[aura.Unit...]]
+        },
+        {
+          file = "sim/mage/mana_gems.go",
+          ["function"] = "registerManaGems",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL | core.SpellFlagHelpful,  		Cast: core.CastConfig{ 			CD: core...."
+        },
+        {
+          file = "sim/mage/frost/frost.go",
+          ["function"] = "registerMastery",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label: "Mastery: Icicles - Water Elemental", 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			frostMasteryMod.Activate() 		}, 		OnExpire...]]
+        },
+        {
+          file = "sim/warrior/rallying_cry.go",
+          ["function"] = "registerRallyingCry",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.RallyingCryActionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskRallyingCry,  		Cast: core.CastConfig{..."
+        },
+        {
+          file = "sim/warrior/shouts.go",
+          ["function"] = "MakeShoutSpellHelper",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       actionID, 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful, 		ClassSpellMask: spellMask,  		Cast: core.CastConfig{ 			D..."
+        },
+        {
+          file = "sim/warrior/banners.go",
+          ["function"] = "registerSkullBanner",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.SkullBannerActionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskSkullBanner,  		Cast: core.CastConfig{..."
+        },
+        {
+          file = "sim/warrior/banners.go",
+          ["function"] = "registerDemoralizingBanner",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:       core.SkullBannerActionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskDemoralizingBanner,  		Cast: core.CastCo..."
+        },
+        {
+          file = "sim/warrior/stances.go",
+          ["function"] = "makeStanceSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer:..."
+        },
+        {
+          file = "sim/warrior/protection/_talents.go",
+          ["function"] = "applyHeavyRepercussions",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 		Label:    "Heavy Repercussions", 		Duration: 10 * time.Second, 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			damageMod.Activate() 		}...]]
+        }
+      }
     }
   }
