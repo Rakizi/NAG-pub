@@ -2081,6 +2081,71 @@ do -- ~~~~~~~~~~ Dot APLValue Functions ~~~~~~~~~~
         end
         return false
     end
+
+    --- Get the number of targets in range that have Time To Death higher than a given threshold.
+    --- @function NAG:NumberTargetsWithTTD
+    --- @param minTTD number The minimum Time To Death threshold in seconds
+    --- @param range number|nil Optional range to use for counting targets (default: 15)
+    --- @usage NAG:NumberTargetsWithTTD(10) -- Check how many targets have TTD > 10 seconds
+    --- @usage NAG:NumberTargetsWithTTD(5, 20) -- Check how many targets within 20 yards have TTD > 5 seconds
+    --- @return number The number of targets with TTD higher than the threshold
+    function NAG:NumberTargetsWithTTD(minTTD, range)
+        if not minTTD then
+            self:Error("NumberTargetsWithTTD: No minTTD provided")
+            return 0
+        end
+
+        if not RC then
+            self:Error("LibRangeCheck-3.0 not found")
+            return 0
+        end
+
+        if not range then
+            range = 15
+        end
+
+        local count = 0
+        
+        -- Get iterable units from TTD
+        local iterableUnits = TTD:GetIterableUnits()
+        if not iterableUnits then
+            return 0
+        end
+
+        -- Skip first 4 units (player, pet, target, mouseover) as they're handled separately
+        local ignoredCount = 4
+
+        for i = ignoredCount + 1, #iterableUnits do
+            local unit = iterableUnits[i]
+            
+            -- Check if unit exists and can be attacked
+            if UnitExists(unit) and UnitCanAttack("player", unit) then
+                -- Check if unit is in combat with player
+                if UnitAffectingCombat("player") then
+                    -- Get range info
+                    local minRange, maxDist = RC:GetRange(unit, true)
+                    local distance = minRange or maxDist
+                    
+                    -- Check if unit is within specified range
+                    if distance and distance <= range then
+                        -- Get the unit's GUID
+                        local guid = UnitGUID(unit)
+                        if guid then
+                            -- Get TTD for this unit using TTDManager
+                            local ttd = TTD:GetTTD(guid, 3) -- Use minimum 3 samples
+                            
+                            -- Check if TTD is valid and higher than threshold
+                            if ttd and ttd > 0 and ttd < 7777 and ttd > minTTD then
+                                count = count + 1
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        return count
+    end
 end
 
 do -- ~~~~~~~~~~ Class Specific APLValue functions ======================
