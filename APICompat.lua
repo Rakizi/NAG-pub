@@ -508,7 +508,7 @@ function ns.GetSpellPowerCostUnified(spellID)
 
     -- In Mists of Pandaria, Death Knight spells with a variable Runic Power cost (like Frost Strike)
     -- should use minCost as their effective cost due to mastery reducing it.
-    if NAG.Version:IsMists() and NAG.CLASS == "DEATHKNIGHT" then
+    if NAG.Version and NAG.Version:IsMists() and NAG.CLASS == "DEATHKNIGHT" then
         for i, costInfo in ipairs(costs) do
             if costInfo.type == Enum.PowerType.RunicPower and costInfo.minCost and costInfo.minCost > 0 then
                 -- Use minCost as it's available and valid for Runic Power.
@@ -564,8 +564,9 @@ function ns.GetItemSpellUnified(itemInfo)
 end
 
 function ns.GetNumTalentsUnified(tabIndex)
+    local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
     -- In Mists, each class has 6 talent choices (3 per row, 6 rows)
-    if Version and Version.IsMists and Version:IsMists() then
+    if NAG.Version and NAG.Version:IsMists() then
         return 6
     end
     -- Pre-Mists: use the original API (dynamic per tab)
