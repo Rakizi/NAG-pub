@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-06-22 23:45:44
+-- Generated schema for mop on 2025-06-24 12:34:12
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -16636,10 +16636,6 @@ ns.protoSchema['mists'] = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/army_of_the_dead.go",
           registrationType = "RegisterSpell",
           functionName = "registerArmyOfTheDead",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
           spellId = 42650,
           cast = [[{
 			DefaultCast: core.Cast{
@@ -17024,10 +17020,6 @@ ns.protoSchema['mists'] = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/raise_dead.go",
           registrationType = "RegisterSpell",
           functionName = "registerRaiseDead",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
           spellId = 46584,
           cast = [[{
 			DefaultCast: core.Cast{
@@ -19717,9 +19709,6 @@ ns.protoSchema['mists'] = {
           },
           spellId = 30823,
           cast = [[{
-			DefaultCast: core.Cast{
-				GCD: core.GCDDefault,
-			},
 			IgnoreHaste: true,
 			CD: core.Cooldown{
 				Timer:    ele.NewTimer(),
@@ -21178,7 +21167,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Minute * 2",
             seconds = 120
           },
-          Flags = "core.SpellFlagAPL | core.SpellFlagApplyArmorReduction",
+          Flags = "core.SpellFlagAPL | core.SpellFlagApplyArmorReduction | core.SpellFlagRanged",
           ClassSpellMask = "HunterSpellSerpentSting",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskProc",
@@ -21193,7 +21182,7 @@ ns.protoSchema['mists'] = {
           registrationType = "RegisterSpell",
           functionName = "registerSerpentStingSpell",
           spellId = 82834,
-          Flags = "core.SpellFlagPassiveSpell",
+          Flags = "core.SpellFlagPassiveSpell | core.SpellFlagRanged",
           ClassSpellMask = "HunterSpellSerpentSting",
           SpellSchool = "core.SpellSchoolNature",
           ProcMask = "core.ProcMaskDirect",
@@ -21678,8 +21667,8 @@ ns.protoSchema['mists'] = {
           registrationType = "RegisterSpell",
           functionName = "applyMastery",
           spellId = 76659,
-          Flags = "core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell",
-          SpellSchool = "core.SpellSchoolNature",
+          Flags = "core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagRanged",
+          SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskEmpty",
           DamageMultiplier = "0.8",
           CritMultiplier = "hunter.DefaultCritMultiplier()",
@@ -27386,15 +27375,11 @@ ns.protoSchema['mists'] = {
           spellId = 64382,
           cast = [[{
 			DefaultCast: core.Cast{
-				GCD:      core.GCDDefault,
-				CastTime: time.Millisecond * 1500,
+				GCD: core.GCDDefault,
 			},
 			CD: core.Cooldown{
 				Timer:    war.NewTimer(),
 				Duration: time.Minute * 5,
-			},
-			ModifyCast: func(sim *core.Simulation, spell *core.Spell, cast *core.Cast) {
-				war.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime, war.AutoAttacks.MH().SwingSpeed == war.AutoAttacks.OH().SwingSpeed)
 			},
 			IgnoreHaste: true,
 		}]],
@@ -29049,8 +29034,8 @@ ns.protoSchema['mists'] = {
       }
     },
     go_diagnostic = {
-      files_scanned = 721,
-      functions_scanned = 3405,
+      files_scanned = 723,
+      functions_scanned = 3409,
       registrations_found = 865,
       registrations_parsed = 842,
       registrations_missed = {

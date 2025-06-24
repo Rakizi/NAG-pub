@@ -1,7 +1,7 @@
--- Generated schema for classic on 2025-06-22 23:45:42
+-- Generated schema for classic on 2025-06-24 12:34:10
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
-ns.protoSchema['classic'] = {
+ns.protoSchema['vanilla'] = {
     messages = {
       PriestTalents = {
         fields = {

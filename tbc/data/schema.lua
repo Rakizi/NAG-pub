@@ -1,4 +1,4 @@
--- Generated schema for tbc on 2025-06-22 23:45:40
+-- Generated schema for tbc on 2025-06-24 12:34:08
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['tbc'] = {

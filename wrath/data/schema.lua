@@ -1,4 +1,4 @@
--- Generated schema for wotlk on 2025-06-22 23:45:46
+-- Generated schema for wotlk on 2025-06-24 12:34:13
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['wotlk'] = {
