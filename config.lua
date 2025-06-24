@@ -520,6 +520,25 @@ do --== Rotation Functions ==--
                     return false, "Invalid sequence name format"
                 end
             },
+            position = {
+                name = "position",
+                pattern = false,
+                validate = function(arg)
+                    -- Remove quotes if present
+                    local position = arg:match('^["\'](.+)["\']$') or arg
+                    -- Convert to uppercase for validation
+                    local upperPos = position:upper()
+                    -- Valid positions based on Cast function implementation
+                    local validPositions = {
+                        LEFT = true,
+                        RIGHT = true,
+                        UP = true,
+                        DOWN = true,
+                        AOE = true
+                    }
+                    return validPositions[upperPos] == true, "Invalid position (must be 'LEFT', 'RIGHT', 'UP', 'DOWN', or 'AOE')"
+                end
+            },
         }
         -- Add a single dynamic type validator
         genericTypes["typeValidator"] = {
@@ -578,7 +597,7 @@ do --== Rotation Functions ==--
             DotTickFrequency = { required = { "id" }, optional = { "targetUnit" } },
 
             -- Casting actions
-            Cast = { required = { "id" }, optional = { "tolerance" } },
+            Cast = { required = { "id" }, optional = { "tolerance", "position" } },
             CastFriendly = { required = { "id" }, optional = { "target" } },
             Channel = { required = { "id" }, optional = { "interruptIf", "boolean" } },
             ChannelSpell = { required = { "id" }, optional = { "interruptIf", "boolean" } },

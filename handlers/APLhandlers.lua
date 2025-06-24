@@ -340,11 +340,31 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
 
     --- Cast a spell, trinket, tinker, or item based on the provided id.
     --- @usage (NAG:Cast(73643))
+    --- @usage (NAG:Cast(73643, 10)) -- With tolerance
+    --- @usage (NAG:Cast(73643, 'LEFT')) -- With position
+    --- @usage (NAG:Cast(73643, 10, 'LEFT')) -- With tolerance and position
     --- @param id number The id of the spell, trinket, tinker, or item to cast.
-    --- @param tolerance number|nil Optional tolerance value for casting spells.
+    --- @param toleranceOrPosition number|string|nil Optional tolerance value for casting spells, or position string.
+    --- @param position string|nil Optional position override ('LEFT', 'RIGHT', 'UP', 'DOWN', 'AOE').
     --- @return boolean True if the cast was successful, false otherwise.
-    function NAG:Cast(id, tolerance)
-        tolerance = tolerance or 0
+    function NAG:Cast(id, toleranceOrPosition, position)
+        -- Parse parameters based on types
+        local tolerance = 0
+        local overridePosition = nil
+        
+        if toleranceOrPosition then
+            if type(toleranceOrPosition) == "number" then
+                tolerance = toleranceOrPosition
+                -- If third parameter exists and is string, it's the position
+                if position and type(position) == "string" then
+                    overridePosition = position
+                end
+            elseif type(toleranceOrPosition) == "string" then
+                -- Second parameter is position, use default tolerance
+                overridePosition = toleranceOrPosition
+            end
+        end
+        
         if not id then return false end
 
         -- Validate ID
@@ -352,11 +372,33 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
             self:Error(format("Cast: spellId %s is not a number", tostring(id)))
             return false
         end
+        
+        -- Validate position if provided
+        if overridePosition then
+            local validPositions = {
+                LEFT = "LEFT",
+                RIGHT = "RIGHT", 
+                UP = "ABOVE", -- Map UP to ABOVE (standard position name)
+                DOWN = "BELOW", -- Map DOWN to BELOW (standard position name)
+                AOE = "AOE"
+            }
+            
+            local upperPosition = strupper(overridePosition)
+            if not validPositions[upperPosition] then
+                self:Error(format("Cast: Invalid position '%s'. Valid positions: LEFT, RIGHT, UP, DOWN, AOE", tostring(overridePosition)))
+                return false
+            end
+            
+            -- Convert to standard position name
+            overridePosition = validPositions[upperPosition]
+        end
+        
         -- TODO: Remove this once we have a better way to handle this or the bug is resolved.
         -- Storm, Earth and Fire and Storm, Earth, and Fire are different spells.
         if id == 138228 then
             id = 137639
         end
+        
         -- Try to find entity in DataManager
         local entity = DataManager:Get(id, DataManager.EntityTypes.SPELL) or
             DataManager:Get(id, DataManager.EntityTypes.ITEM)
@@ -373,27 +415,70 @@ do -- ~~~~~~~~~~ Funnel Generic Functions ~~~~~~~~~~
             self:Error(format("Cast: ID %s not found", tostring(id)))
             return false
         end
+        
+        -- Store original position for restoration
+        local originalPosition = entity.position
+        
+        -- Temporarily override position if provided
+        if overridePosition then
+            DataManager:SetSpellPosition(id, overridePosition)
+        end
+        
+        -- Ensure position is restored after cast attempt
+        local function restorePosition()
+            if overridePosition then
+                -- Need to map lowercase position values back to uppercase keys for SetSpellPosition
+                local positionValueToKey = {
+                    ["left"] = "LEFT",
+                    ["right"] = "RIGHT",
+                    ["above"] = "ABOVE",
+                    ["below"] = "BELOW",
+                    ["aoe"] = "AOE"
+                }
+                
+                local originalKey = originalPosition and positionValueToKey[originalPosition] or nil
+                DataManager:SetSpellPosition(id, originalKey)
+            end
+        end
+        
         if entity.flags.stance and not NAG.Class.db.char.enableStances then
+            restorePosition()
             self:Error(format("Cast: entity.flags.stance and not NAG.Class.db.char.enableStances"))
             return false
         end
+        
+        local result = false
+        
         -- Handle different entity types
         if entity.IsItem then
-            return entity:Cast()
+            result = entity:Cast()
         elseif entity.IsSpell then
             if entity.flags.stance and StateManager:GetShapeshiftFormID() == entity.shapeshiftForm then
-                return false
+                result = false
             elseif entity.flags.tinker then
-                return self:CastTinker(id)
+                result = self:CastTinker(id)
             elseif entity.flags.battlepet then
-                return entity:Cast()
+                result = entity:Cast()
             else
-                return self:CastSpell(id, tolerance)
+                result = self:CastSpell(id, tolerance)
             end
+        else
+            self:Error(format("Cast: Unknown entity type for ID %s", tostring(id)))
+            result = false
         end
-
-        self:Error(format("Cast: Unknown entity type for ID %s", tostring(id)))
-        return false
+        
+        -- Delay position restoration to allow visual update to complete
+        if overridePosition then
+            Timer:Create(
+                Timer.Categories.UI_NOTIFICATION,
+                "restorePosition_" .. id,
+                restorePosition,
+                0.1, -- Small delay to let UpdateIcons process
+                false -- Don't repeat
+            )
+        end
+        
+        return result
     end
 
     --- Checks if a spell, trinket, tinker, or item is known.
@@ -1639,17 +1724,17 @@ do -- ~~~~~~~~~~ Spell APLValueFunctions ~~~~~~~~~~
         if not NAG:IsKnownSpell(spellId) then return false end
 
         if self.CLASS == "DEATHKNIGHT" then
-            if not self:HasRunicPower(spellId) then
+            if not self:HasRunicPower(spellId, tolerance) then
                 return false
             end
             --TODO believe this can be removed?
             -- Rune Strike has no cooldown, it becomes usable after a dodge or parry
-            if spellId == 56815 then                        --Rune Strike
-                local usable = IsUsableSpell(spellId)
-                if not usable or IsCurrentSpell(56815) then --Rune Strike
-                    return false
-                end
-            end
+            --if spellId == 56815 then                        --Rune Strike
+            --    local usable = IsUsableSpell(spellId)
+            --    if not usable or IsCurrentSpell(56815) then --Rune Strike
+            --        return false
+            --    end
+            --end
         elseif self.CLASS == "WARRIOR" then
             if tolerance then
                 if tolerance > 6 then

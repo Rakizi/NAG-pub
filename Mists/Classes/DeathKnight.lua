@@ -45,7 +45,7 @@ defaults.class.specSpellLocations = {
             48982   -- Rune Tap
         },
         BELOW = { 77575 },  -- Outbreak
-        RIGHT = {46584},
+        RIGHT = {46584, 114866},
         LEFT = {
             45529,  -- Blood Tap
             47568,  -- Empower Rune Weapon
@@ -79,7 +79,7 @@ defaults.class.specSpellLocations = {
             48982   -- Rune Tap
         },
         BELOW = {77575},
-        RIGHT = {46584},
+        RIGHT = {46584, 114866},
         LEFT = {
             45529,  -- Blood Tap
             47568,  -- Empower Rune Weapon
@@ -118,7 +118,7 @@ defaults.class.specSpellLocations = {
             48982   -- Rune Tap
         },
         BELOW = {77575},
-        RIGHT = { 46584 },  -- Raise Dead
+        RIGHT = { 46584, 114866 },  -- Raise Dead
         LEFT = {
             63560,
             45529,  -- Blood Tap
@@ -195,6 +195,7 @@ local rotationDeathKnightBloodSimple = [[
     or (NAG:CurrentRunicPower() >= 30 and NAG:SpellIsReady(56815)) and NAG:Cast(56815)
     or (NAG:CountEnemiesInRange(10) <= 3 and NAG:CurrentRuneCount(1) >= 1 and NAG:SpellIsReady(55050) and not NAG:IsExecutePhase(35)) and NAG:Cast(55050)
     or NAG:Cast(57330)
+    or (NAG:CurrentRunicPower() >= 20 and NAG:CurrentRunicPower() < 30 and NAG:Cast(56815, 10, 'RIGHT'))
     or     (((((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost)) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost)) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightUnholy)) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightUnholy) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftUnholy))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftUnholy)) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftUnholy) < NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightUnholy))))) and NAG:Cast(55050, 10))
     or     NAG:Cast(49998, 10)
 ]]

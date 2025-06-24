@@ -115,9 +115,10 @@ do --== RESOURCE CHECKS ==--
     --- @function NAG:HasResource
     --- @param spellId number The ID of the spell.
     --- @param powerType Enum.PowerType The type of resource to check.
+    --- @param tolerance number|nil Optional tolerance in seconds for resource prediction
     --- @usage NAG:HasResource(73643, Enum.PowerType.Mana)
     --- @return boolean True if the player has enough of the specified resource, false otherwise.
-    function NAG:HasResource(spellId, powerType)
+    function NAG:HasResource(spellId, powerType, tolerance)
         if not spellId or type(spellId) ~= "number" then
             self:Error("HasResource: Invalid spellId provided")
             return false
@@ -147,6 +148,17 @@ do --== RESOURCE CHECKS ==--
         end
 
         local predictedResource = self:PredictResourceValue(NAG:NextTime(), powerType)
+        
+        -- Add RP prediction from auto attacks if tolerance is provided and we're a Death Knight
+        if tolerance and tolerance > 0 and powerType == Enum.PowerType.RunicPower and self.CLASS == "DEATHKNIGHT" then
+            local rpFromAutoAttacks = self:PredictRunicPowerFromAutoAttacks(tolerance)
+            predictedResource = predictedResource + rpFromAutoAttacks
+            
+            -- Cap at max RP (130 for DK in Cataclysm)
+            local maxRP = UnitPowerMax("player", Enum.PowerType.RunicPower) or 130
+            predictedResource = min(predictedResource, maxRP)
+        end
+        
         local hasEnough = not cost or cost <= predictedResource
         
         local currentResource = UnitPower("player", powerType)
@@ -226,9 +238,10 @@ do --== RESOURCE CHECKS ==--
 
     --- Checks if the player has enough Runic Power for a spell.
     --- @param spellId number The ID of the spell to check
+    --- @param tolerance number|nil Optional tolerance in seconds for RP prediction
     --- @return boolean True if the player has enough Runic Power, false otherwise
-    function NAG:HasRunicPower(spellId)
-        return self:HasResource(spellId, Enum.PowerType.RunicPower)
+    function NAG:HasRunicPower(spellId, tolerance)
+        return self:HasResource(spellId, Enum.PowerType.RunicPower, tolerance)
     end
 
     --- Checks if the player has enough Rage for a spell.
@@ -412,6 +425,68 @@ do --== RESOURCE CHECKS ==--
     --- @return number runicPowerRegen The runic power regeneration rate per second
     function NAG:GetRunicPowerRegen()
         return 10 -- Base Runic Power regeneration rate for Death Knights in Cataclysm
+    end
+
+    --- Predicts Runic Power generation from auto attacks over a given time period.
+    --- Each auto attack grants 10 RP. Function calculates how many auto attacks will happen.
+    --- @param timeWindow number The time window in seconds to predict RP generation for
+    --- @return number predictedRP The predicted RP from auto attacks in the time window
+    function NAG:PredictRunicPowerFromAutoAttacks(timeWindow)
+        if not timeWindow or timeWindow <= 0 then
+            return 0
+        end
+        
+        -- Only apply for Death Knights
+        if self.CLASS ~= "DEATHKNIGHT" then
+            return 0
+        end
+        
+        -- Safety checks - don't predict if not in combat or no weapon equipped
+        if not UnitAffectingCombat("player") then
+            return 0
+        end
+        
+        -- Get weapon speed using UnitAttackSpeed
+        local weaponSpeed = UnitAttackSpeed("player")
+        if not weaponSpeed or weaponSpeed <= 0 then
+            return 0 -- No weapon or invalid weapon speed
+        end
+        
+        -- Get time to next auto attack using NAG:AutoTimeToNext function from MiscHandlers
+        local timeToNextSwing = 0
+        if NAG.AutoTimeToNext then
+            timeToNextSwing = NAG:AutoTimeToNext() or 0
+        end
+        if timeToNextSwing < 0 then
+            timeToNextSwing = 0 -- Sanity check
+        end
+        
+        local rpFromAutoAttacks = 0
+        local remainingTime = timeWindow
+        
+        -- If we have time until next swing
+        if timeToNextSwing > 0 and timeToNextSwing <= remainingTime then
+            -- First swing will happen
+            rpFromAutoAttacks = rpFromAutoAttacks + 10
+            remainingTime = remainingTime - timeToNextSwing
+            
+            -- Calculate additional swings after the first one
+            local additionalSwings = floor(remainingTime / weaponSpeed)
+            rpFromAutoAttacks = rpFromAutoAttacks + (additionalSwings * 10)
+        elseif timeToNextSwing <= 0 then
+            -- Next swing is happening now or very soon
+            rpFromAutoAttacks = rpFromAutoAttacks + 10
+            remainingTime = remainingTime - 0.1 -- Small buffer
+            
+            -- Calculate additional swings
+            local additionalSwings = floor(remainingTime / weaponSpeed)
+            rpFromAutoAttacks = rpFromAutoAttacks + (additionalSwings * 10)
+        end
+        
+        self:Debug(format("PredictRunicPowerFromAutoAttacks: timeWindow=%.2f, weaponSpeed=%.2f, timeToNext=%.2f, predictedRP=%d", 
+                         timeWindow, weaponSpeed, timeToNextSwing, rpFromAutoAttacks))
+        
+        return rpFromAutoAttacks
     end
 
     --- Retrieves the haste factor for the player.

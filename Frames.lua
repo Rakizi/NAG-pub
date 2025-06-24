@@ -780,7 +780,10 @@ do --== Icon Frame Update Functions ==--
                 elseif entity.position == DataManager.SpellPosition.AOE then
                     aoeSpellId = spellId
                     local key = "aoe"
-                    if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                    if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                        -- Frame exists and is available, use it
+                    else
+                        -- Frame doesn't exist or is occupied, fall back to left
                         if leftIndex > char.numLeftIcons then
                             self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                             return
@@ -793,15 +796,17 @@ do --== Icon Frame Update Functions ==--
                 elseif entity.position == DataManager.SpellPosition.ABOVE then
                     -- Handle above spells
                     local key = "above" .. aboveIndex
-                    if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                    if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                        -- Frame exists and is available, use it
+                        aboveIndex = aboveIndex + 1
+                    else
+                        -- Frame doesn't exist or is occupied, fall back to left
                         if leftIndex > char.numLeftIcons then
                             self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                             return
                         end
                         key = "left" .. leftIndex
                         leftIndex = leftIndex + 1
-                    else
-                        aboveIndex = aboveIndex + 1
                     end
                     NAG.Frame.iconFrames[key].spellId = spellId
                     self:UpdateIcon(key, spellId)
@@ -809,15 +814,17 @@ do --== Icon Frame Update Functions ==--
                     -- Handle below spells/totems
                     if totemCount < maxBelowFrames then
                         local key = "below" .. belowIndex
-                        if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                        if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                            -- Frame exists and is available, use it
+                            belowIndex = belowIndex + 1
+                        else
+                            -- Frame doesn't exist or is occupied, fall back to left
                             if leftIndex > char.numLeftIcons then
                                 self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                                 return
                             end
                             key = "left" .. leftIndex
                             leftIndex = leftIndex + 1
-                        else
-                            belowIndex = belowIndex + 1
                         end
                         NAG.Frame.iconFrames[key].spellId = spellId
                         self:UpdateIcon(key, spellId)
@@ -826,15 +833,17 @@ do --== Icon Frame Update Functions ==--
                 elseif entity.position == DataManager.SpellPosition.RIGHT then
                     -- Handle right side spells
                     local key = "right" .. rightIndex
-                    if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                    if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                        -- Frame exists and is available, use it
+                        rightIndex = rightIndex + 1
+                    else
+                        -- Frame doesn't exist or is occupied, fall back to left
                         if leftIndex > char.numLeftIcons then
                             self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                             return
                         end
                         key = "left" .. leftIndex
                         leftIndex = leftIndex + 1
-                    else
-                        rightIndex = rightIndex + 1
                     end
                     NAG.Frame.iconFrames[key].spellId = spellId
                     self:UpdateIcon(key, spellId)
