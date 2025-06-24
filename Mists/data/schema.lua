@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-06-24 12:34:12
+-- Generated schema for mop on 2025-06-24 15:27:11
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -7857,6 +7857,7 @@ ns.protoSchema['mists'] = {
 			},
 		}]],
                 Flags = "core.SpellFlagMeleeMetrics",
+                ClassSpellMask = "HunterSpellLynxRush",
                 SpellSchool = "core.SpellSchoolPhysical",
                 ProcMask = "core.ProcMaskProc",
                 DamageMultiplier = "1",
@@ -20994,7 +20995,8 @@ ns.protoSchema['mists'] = {
           cooldown = {
             raw = "time.Second * 30",
             seconds = 30
-          }
+          },
+          ClassSpellMask = "HunterSpellFervor"
         },
         registerGlaiveTossSpell_2 = {
           sourceFile = "extern/wowsims-mop/sim/hunter/glaive_toss.go",
@@ -21015,34 +21017,9 @@ ns.protoSchema['mists'] = {
             seconds = 15
           },
           Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "HunterSpellGlaiveToss",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskProc",
-          DamageMultiplierAdditive = "1",
-          CritMultiplier = "hunter.DefaultCritMultiplier()",
-          ThreatMultiplier = "1"
-        },
-        registerKillCommandSpell_1 = {
-          sourceFile = "extern/wowsims-mop/sim/hunter/kill_command.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerKillCommandSpell",
-          spellId = 34026,
-          cast = [[{
-			DefaultCast: core.Cast{
-				GCD: time.Second,
-			},
-			CD: core.Cooldown{
-				Timer:    hunter.NewTimer(),
-				Duration: time.Second * 6,
-			},
-		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagAPL",
-          ClassSpellMask = "HunterSpellKillCommand",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMelee",
           DamageMultiplierAdditive = "1",
           CritMultiplier = "hunter.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
@@ -21146,7 +21123,8 @@ ns.protoSchema['mists'] = {
           cooldown = {
             raw = "time.Second * 30",
             seconds = 30
-          }
+          },
+          ClassSpellMask = "HunterSpellDireBeast"
         },
         registerAMOCSpell_Peck = {
           sourceFile = "extern/wowsims-mop/sim/hunter/a_murder_of_crows.go",
@@ -21168,7 +21146,7 @@ ns.protoSchema['mists'] = {
             seconds = 120
           },
           Flags = "core.SpellFlagAPL | core.SpellFlagApplyArmorReduction | core.SpellFlagRanged",
-          ClassSpellMask = "HunterSpellSerpentSting",
+          ClassSpellMask = "HunterSpellAMurderOfCrows",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskProc",
           DamageMultiplierAdditive = "1",
@@ -21287,7 +21265,7 @@ ns.protoSchema['mists'] = {
             seconds = 45
           },
           Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagRanged",
-          ClassSpellMask = "hunter.HunterSpellAimedShot",
+          ClassSpellMask = "HunterSpellPowershot",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskRangedSpecial",
           DamageMultiplier = "6",
@@ -21330,6 +21308,7 @@ ns.protoSchema['mists'] = {
 			},
 		}]],
           Flags = "core.SpellFlagMeleeMetrics",
+          ClassSpellMask = "HunterSpellLynxRush",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskProc",
           DamageMultiplier = "1",
@@ -21392,12 +21371,12 @@ ns.protoSchema['mists'] = {
           cast = [[{
 			CD: core.Cooldown{
 				Timer:    hunter.NewTimer(),
-				Duration: time.Minute * 5,
+				Duration: time.Minute * 3,
 			},
 		}]],
           cooldown = {
-            raw = "time.Minute * 5",
-            seconds = 300
+            raw = "time.Minute * 3",
+            seconds = 180
           },
           Flags = "core.SpellFlagReadinessTrinket",
           ClassSpellMask = "HunterSpellRapidFire"
@@ -21523,6 +21502,154 @@ ns.protoSchema['mists'] = {
           ThreatMultiplier = "1",
           IgnoreHaste = "true",
           label = "Explosive Shot"
+        }
+      },
+      beast_mastery = {
+        registerKillCommandSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/kill_command.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerKillCommandSpell",
+          spellId = 34026,
+          cast = [[{
+			DefaultCast: core.Cast{
+				GCD: time.Second,
+			},
+			CD: core.Cooldown{
+				Timer:    bmHunter.NewTimer(),
+				Duration: time.Second * 6,
+			},
+		}]],
+          cooldown = {
+            raw = "time.Second * 6",
+            seconds = 6
+          },
+          Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "hunter.HunterSpellKillCommand",
+          SpellSchool = "core.SpellSchoolPhysical",
+          ProcMask = "core.ProcMaskMelee",
+          DamageMultiplierAdditive = "1",
+          CritMultiplier = "bmHunter.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        applyFrenzy_Frenzy = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/specializations.go",
+          registrationType = "RegisterAura",
+          functionName = "applyFrenzy",
+          spellId = 19623,
+          auraDuration = {
+            raw = "time.Second * 30",
+            seconds = 30
+          },
+          label = "Frenzy"
+        },
+        applyFrenzy_FrenzyHandler = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/specializations.go",
+          registrationType = "RegisterAura",
+          functionName = "applyFrenzy",
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "FrenzyHandler"
+        },
+        applyGoForTheThroat_GofortheThroat = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/specializations.go",
+          registrationType = "RegisterAura",
+          functionName = "applyGoForTheThroat",
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Go for the Throat"
+        },
+        applyCobraStrikes_CobraStrikes = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/specializations.go",
+          registrationType = "RegisterAura",
+          functionName = "applyCobraStrikes",
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Cobra Strikes"
+        },
+        applyInvigoration_Invigoration = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/specializations.go",
+          registrationType = "RegisterAura",
+          functionName = "applyInvigoration",
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Invigoration"
+        },
+        registerBestialWrathCD_BestialWrathPet = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/bestial_wrath.go",
+          registrationType = "RegisterAura",
+          functionName = "registerBestialWrathCD",
+          spellId = 19574,
+          auraDuration = {
+            raw = "duration",
+            seconds = nil
+          },
+          label = "Bestial Wrath Pet"
+        },
+        registerBestialWrathCD_BestialWrath = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/bestial_wrath.go",
+          registrationType = "RegisterAura",
+          functionName = "registerBestialWrathCD",
+          spellId = 19574,
+          auraDuration = {
+            raw = "duration",
+            seconds = nil
+          },
+          label = "Bestial Wrath"
+        },
+        registerBestialWrathCD_3 = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/bestial_wrath.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerBestialWrathCD",
+          majorCooldown = {
+            type = "core.CooldownTypeDPS",
+            priority = nil
+          },
+          spellId = 19574,
+          cast = [[{
+			CD: core.Cooldown{
+				Timer:    bmHunter.NewTimer(),
+				Duration: time.Minute * 1,
+			},
+		}]],
+          cooldown = {
+            raw = "time.Minute * 1",
+            seconds = 60
+          },
+          ClassSpellMask = "hunter.HunterSpellBestialWrath"
+        },
+        registerFocusFireSpell_FocusFire = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/focus_fire.go",
+          registrationType = "RegisterAura",
+          functionName = "registerFocusFireSpell",
+          spellId = 82692,
+          auraDuration = {
+            raw = "time.Second * 20",
+            seconds = 20
+          },
+          label = "Focus Fire"
+        },
+        registerFocusFireSpell_2 = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/focus_fire.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerFocusFireSpell",
+          majorCooldown = {
+            type = "core.CooldownTypeDPS",
+            priority = nil
+          },
+          spellId = 82692,
+          cast = [[{
+			DefaultCast: core.Cast{
+				GCD: time.Second,
+			},
+		}]]
         }
       },
       marksmanship = {
@@ -21671,7 +21798,7 @@ ns.protoSchema['mists'] = {
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskEmpty",
           DamageMultiplier = "0.8",
-          CritMultiplier = "hunter.DefaultCritMultiplier()",
+          CritMultiplier = "mm.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
         applyMastery_WildQuiverMastery = {
@@ -29034,10 +29161,10 @@ ns.protoSchema['mists'] = {
       }
     },
     go_diagnostic = {
-      files_scanned = 723,
-      functions_scanned = 3409,
-      registrations_found = 865,
-      registrations_parsed = 842,
+      files_scanned = 727,
+      functions_scanned = 3414,
+      registrations_found = 878,
+      registrations_parsed = 853,
       registrations_missed = {
         {
           file = "sim/death_knight/ghoul_pet.go",
@@ -29070,6 +29197,22 @@ ns.protoSchema['mists'] = {
           registration_type = "RegisterSpell",
           reason = "Could not extract spellId",
           block_preview = "{ 		ActionID: aura.ActionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer..."
+        },
+        {
+          file = "sim/monk/ww_rising_sun_kick.go",
+          ["function"] = "registerRisingSunKick",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 			Label:    fmt.Sprintf("Rising Sun Kick %s", target.Label), 			ActionID: risingSunKickActionID, 			Duration: time.Second * 15, 		}...]]
+        },
+        {
+          file = "sim/monk/ww_rising_sun_kick.go",
+          ["function"] = "registerSEFRisingSunKick",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = [[{ 			Label:    fmt.Sprintf("Rising Sun Kick - Clone %s", target.Label), 			ActionID: risingSunKickActionID.WithTag(SEFSpellID), 			Duration: time.Seco...]]
         },
         {
           file = "sim/monk/windwalker/passives.go",
