@@ -89,6 +89,193 @@ local function translateSpellId(id)
     return id
 end
 
+-- ~~~~~~~~~~ DRW TRACKING SYSTEM ~~~~~~~~~~
+-- Dancing Rune Weapon tracking system for Death Knight
+local DRW_Tracking = {
+    -- DRW spell IDs (different for different specs/expansions)
+    DRW_SPELL_IDS = {
+        49028, -- Dancing Rune Weapon (Blood)
+        81256, -- Dancing Rune Weapon (Frost) 
+        49028, -- Dancing Rune Weapon (Unholy)
+    },
+    
+    -- State tracking
+    playerGUID = nil,
+    drwGUID = nil,
+    drwExpireTime = 0,
+    drwDebuffs = {}, -- Format: { targetGUID = { spellId = { appliedTime, expirationTime } } }
+    
+    -- Initialize the tracking system
+    Initialize = function(self)
+        self.playerGUID = UnitGUID("player")
+        
+        -- Register combat log events
+        local frame = CreateFrame("Frame")
+        frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+        frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+        
+        frame:SetScript("OnEvent", function(_, event, ...)
+            if event == "PLAYER_ENTERING_WORLD" then
+                self.playerGUID = UnitGUID("player")
+                self:ClearDRWData()
+            elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+                self:ProcessCombatLogEvent(CombatLogGetCurrentEventInfo())
+            end
+        end)
+        
+        self.frame = frame
+    end,
+    
+    -- Process combat log events
+    ProcessCombatLogEvent = function(self, timestamp, subevent, _, sourceGUID, sourceName, sourceFlags, _, destGUID, destName, destFlags, _, spellId, spellName, _, auraType)
+        -- Check if old DRW expired
+        self:CheckDRWExpiration()
+        
+        -- Capture DRW summon
+        if subevent == "SPELL_SUMMON" and sourceGUID == self.playerGUID and tContains(self.DRW_SPELL_IDS, spellId) then
+            self.drwGUID = destGUID
+            self.drwExpireTime = GetTime() + 30 -- DRW typically lasts 30 seconds
+            NAG:Debug(format("DRW Tracking: Captured DRW GUID: %s", destGUID))
+        end
+        
+        -- Track DRW debuff applications
+        if (subevent == "SPELL_AURA_APPLIED" or subevent == "SPELL_AURA_REFRESH") and 
+           sourceGUID == self.drwGUID and auraType == "DEBUFF" then
+            self:TrackDRWDebuff(destGUID, spellId, subevent == "SPELL_AURA_REFRESH")
+        end
+        
+        -- Clear DRW data when it dies
+        if subevent == "UNIT_DIED" and destGUID == self.drwGUID then
+            self:ClearDRWData()
+        end
+    end,
+    
+    -- Track a debuff applied by DRW
+    TrackDRWDebuff = function(self, targetGUID, spellId, isRefresh)
+        if not targetGUID or not spellId then return end
+        
+        -- Initialize target entry if needed
+        if not self.drwDebuffs[targetGUID] then
+            self.drwDebuffs[targetGUID] = {}
+        end
+        
+        local currentTime = GetTime()
+        local debuffData = self.drwDebuffs[targetGUID][spellId]
+        
+        if isRefresh and debuffData then
+            -- Refresh existing debuff
+            debuffData.appliedTime = currentTime
+            debuffData.expirationTime = currentTime + (debuffData.expirationTime - debuffData.appliedTime)
+        else
+            -- New debuff application - estimate duration
+            local duration = self:EstimateDebuffDuration(spellId)
+            self.drwDebuffs[targetGUID][spellId] = {
+                appliedTime = currentTime,
+                expirationTime = currentTime + duration
+            }
+        end
+        
+        NAG:Debug(format("DRW Tracking: %s debuff %d on target %s", 
+                        isRefresh and "Refreshed" or "Applied", spellId, targetGUID))
+    end,
+    
+    -- Estimate debuff duration based on spell ID
+    EstimateDebuffDuration = function(self, spellId)
+        -- Common Death Knight debuff durations
+        local durations = {
+            [55078] = 21, -- Blood Plague
+            [55095] = 21, -- Frost Fever
+            [194310] = 6,  -- Festering Wound
+            [191587] = 6,  -- Virulent Plague
+            [155159] = 6,  -- Necrotic Strike
+            [194679] = 6,  -- Rune Tap
+        }
+        
+        return durations[spellId] or 15 -- Default to 15 seconds
+    end,
+    
+    -- Check if DRW has expired
+    CheckDRWExpiration = function(self)
+        if self.drwGUID and GetTime() > self.drwExpireTime then
+            NAG:Debug("DRW Tracking: DRW expired, clearing data")
+            self:ClearDRWData()
+        end
+    end,
+    
+    -- Clear all DRW tracking data
+    ClearDRWData = function(self)
+        self.drwGUID = nil
+        self.drwExpireTime = 0
+        wipe(self.drwDebuffs)
+    end,
+    
+    -- Check if a target has a specific debuff applied by DRW
+    HasDRWDebuff = function(self, targetGUID, spellId)
+        if not targetGUID or not spellId or not self.drwDebuffs[targetGUID] then
+            return false
+        end
+        
+        local debuffData = self.drwDebuffs[targetGUID][spellId]
+        if not debuffData then return false end
+        
+        local currentTime = GetTime()
+        return currentTime < debuffData.expirationTime
+    end,
+    
+    -- Get remaining time for a DRW-applied debuff
+    GetDRWDebuffRemainingTime = function(self, targetGUID, spellId)
+        if not targetGUID or not spellId or not self.drwDebuffs[targetGUID] then
+            return 0
+        end
+        
+        local debuffData = self.drwDebuffs[targetGUID][spellId]
+        if not debuffData then return 0 end
+        
+        local currentTime = GetTime()
+        local remaining = debuffData.expirationTime - currentTime
+        return max(0, remaining)
+    end,
+    
+    -- Get number of targets with DRW-applied debuff in range
+    CountTargetsWithDRWDebuff = function(self, spellId, range)
+        if not spellId then return 0 end
+        
+        local count = 0
+        local currentTime = GetTime()
+        
+        -- Get iterable units from TTD
+        local iterableUnits = TTD:GetIterableUnits()
+        if not iterableUnits then return 0 end
+        
+        -- Skip first 4 units (player, pet, target, mouseover)
+        for i = 5, #iterableUnits do
+            local unit = iterableUnits[i]
+            if UnitExists(unit) and UnitCanAttack("player", unit) then
+                local unitGUID = UnitGUID(unit)
+                if unitGUID and self:HasDRWDebuff(unitGUID, spellId) then
+                    -- Check range if specified
+                    if range then
+                        if RC then
+                            local minRange, maxDist = RC:GetRange(unit, true)
+                            local distance = minRange or maxDist
+                            if distance and distance <= range then
+                                count = count + 1
+                            end
+                        end
+                    else
+                        count = count + 1
+                    end
+                end
+            end
+        end
+        
+        return count
+    end
+}
+
+-- Initialize DRW tracking system
+DRW_Tracking:Initialize()
+
 do -- ~~~~~~~~~~ Utility Fn's ~~~~~~~~~~
 
     --- Placeholder function for spell casting.
@@ -2958,4 +3145,122 @@ end
 function NAG:BrewmasterMonkCurrentStaggerPercent()
     self:Print("Warning: BrewmasterMonkCurrentStaggerPercent is not yet fully implemented.")
     return 0
+end
+
+--- Check if the current target has a specific debuff applied by Dancing Rune Weapon.
+--- @function NAG:TargetHasDRWDebuff
+--- @param spellId number The ID of the debuff to check for
+--- @usage NAG:TargetHasDRWDebuff(55095) -- Check if target has DRW's Frost Fever
+--- @return boolean True if the target has the DRW-applied debuff, false otherwise
+function NAG:TargetHasDRWDebuff(spellId)
+    if not spellId then
+        self:Error("TargetHasDRWDebuff: No spellId provided")
+        return false
+    end
+    
+    local targetGUID = UnitGUID("target")
+    if not targetGUID then return false end
+    
+    return DRW_Tracking:HasDRWDebuff(targetGUID, spellId)
+end
+
+--- Get the remaining time for a DRW-applied debuff on the current target.
+--- @function NAG:TargetDRWDebuffRemainingTime
+--- @param spellId number The ID of the debuff to check for
+--- @usage NAG:TargetDRWDebuffRemainingTime(55095) -- Get remaining time for DRW's Frost Fever
+--- @return number The remaining time in seconds, or 0 if not found
+function NAG:TargetDRWDebuffRemainingTime(spellId)
+    if not spellId then
+        self:Error("TargetDRWDebuffRemainingTime: No spellId provided")
+        return 0
+    end
+    
+    local targetGUID = UnitGUID("target")
+    if not targetGUID then return 0 end
+    
+    return DRW_Tracking:GetDRWDebuffRemainingTime(targetGUID, spellId)
+end
+
+--- Get the number of targets in range that have a specific debuff applied by Dancing Rune Weapon.
+--- @function NAG:NumberTargetsWithDRWDebuff
+--- @param spellId number The ID of the debuff to check for
+--- @param range number|nil Optional range to use for counting targets (default: 15)
+--- @usage NAG:NumberTargetsWithDRWDebuff(55095) -- Count targets with DRW's Frost Fever
+--- @usage NAG:NumberTargetsWithDRWDebuff(55078, 10) -- Count targets within 10 yards with DRW's Blood Plague
+--- @return number The number of targets with the DRW-applied debuff
+function NAG:NumberTargetsWithDRWDebuff(spellId, range)
+    if not spellId then
+        self:Error("NumberTargetsWithDRWDebuff: No spellId provided")
+        return 0
+    end
+    
+    return DRW_Tracking:CountTargetsWithDRWDebuff(spellId, range)
+end
+
+--- Check if a specific unit has a DRW-applied debuff.
+--- @function NAG:UnitHasDRWDebuff
+--- @param unit string The unit to check (e.g., "target", "focus", "nameplate1")
+--- @param spellId number The ID of the debuff to check for
+--- @usage NAG:UnitHasDRWDebuff("target", 55095) -- Check if target has DRW's Frost Fever
+--- @return boolean True if the unit has the DRW-applied debuff, false otherwise
+function NAG:UnitHasDRWDebuff(unit, spellId)
+    if not unit or not spellId then
+        self:Error("UnitHasDRWDebuff: Invalid parameters")
+        return false
+    end
+    
+    local unitGUID = UnitGUID(unit)
+    if not unitGUID then return false end
+    
+    return DRW_Tracking:HasDRWDebuff(unitGUID, spellId)
+end
+
+--- Get the remaining time for a DRW-applied debuff on a specific unit.
+--- @function NAG:UnitDRWDebuffRemainingTime
+--- @param spellIdOrUnit number|string The spell ID or unit string
+--- @param unitOrSpellId string|number|nil The unit string or spell ID (optional)
+--- @usage NAG:UnitDRWDebuffRemainingTime(55095) -- Get remaining time for DRW's Frost Fever on target
+--- @usage NAG:UnitDRWDebuffRemainingTime(55095, "focus") -- Get remaining time for DRW's Frost Fever on focus
+--- @usage NAG:UnitDRWDebuffRemainingTime("nameplate1", 55078) -- Get remaining time for DRW's Blood Plague on nameplate1
+--- @return number The remaining time in seconds, or 0 if not found
+function NAG:UnitDRWDebuffRemainingTime(spellIdOrUnit, unitOrSpellId)
+    local spellId, unit
+    
+    -- Determine parameter types and assign accordingly
+    if type(spellIdOrUnit) == "number" then
+        -- First parameter is spellId
+        spellId = spellIdOrUnit
+        if type(unitOrSpellId) == "string" then
+            -- Second parameter is unit
+            unit = unitOrSpellId
+        else
+            -- No unit specified, default to target
+            unit = "target"
+        end
+    elseif type(spellIdOrUnit) == "string" then
+        -- First parameter is unit
+        unit = spellIdOrUnit
+        if type(unitOrSpellId) == "number" then
+            -- Second parameter is spellId
+            spellId = unitOrSpellId
+        else
+            -- No spellId specified, error
+            self:Error("UnitDRWDebuffRemainingTime: No spellId provided")
+            return 0
+        end
+    else
+        -- Invalid first parameter
+        self:Error("UnitDRWDebuffRemainingTime: Invalid parameters")
+        return 0
+    end
+    
+    if not spellId then
+        self:Error("UnitDRWDebuffRemainingTime: No spellId provided")
+        return 0
+    end
+    
+    local unitGUID = UnitGUID(unit)
+    if not unitGUID then return 0 end
+    
+    return DRW_Tracking:GetDRWDebuffRemainingTime(unitGUID, spellId)
 end
