@@ -483,9 +483,6 @@ do --== RESOURCE CHECKS ==--
             rpFromAutoAttacks = rpFromAutoAttacks + (additionalSwings * 10)
         end
         
-        self:Debug(format("PredictRunicPowerFromAutoAttacks: timeWindow=%.2f, weaponSpeed=%.2f, timeToNext=%.2f, predictedRP=%d", 
-                         timeWindow, weaponSpeed, timeToNextSwing, rpFromAutoAttacks))
-        
         return rpFromAutoAttacks
     end
 
