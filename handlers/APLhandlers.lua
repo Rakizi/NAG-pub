@@ -1388,12 +1388,14 @@ do -- ~~~~~~~~~~ Targets/Units APLValue Functions ~~~~~~~~~~
         return distance
     end
 
-    --- Get the number of targets.
+    --- Get the number of targets within range of the player.
+    --- This function uses TTD (Target Time to Die) to count valid targets.
+    --- If no range is specified, uses default behavior of 7 yards for melee and (target distance + 5) for ranged.
     --- @function NAG:NumberTargets
     --- @param range number|nil Optional range to use for counting targets (substitutes for hardcoded distances)
-    --- @usage NAG:NumberTargets() -- Uses default ranges
+    --- @usage NAG:NumberTargets() -- Uses default ranges (7 yards melee, target distance + 5 ranged)
     --- @usage NAG:NumberTargets(10) -- Uses 10 yards for both melee and ranged fallback
-    --- @return number The number of targets.
+    --- @return number The number of valid targets within range. Returns 0 if no targets found.
     function NAG:NumberTargets(range)
         if range then
             -- If a single range is provided, use it for both melee and ranged scenarios
