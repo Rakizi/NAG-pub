@@ -325,33 +325,57 @@ do -- Core ACE3 functions --
         end
 
         local LDB = LibStub("LibDataBroker-1.1")
-        local icon = LDB:GetDataObjectByName("NAG")
-        if not icon then
-            icon = LDB:NewDataObject("NAG", {
-                type = "launcher",
-                icon = "Interface\\AddOns\\NAG\\Media\\NAGminimap.png",
-                OnClick = function(_, button)
-                    self:HandleIconClick(button)
-                end,
-                OnTooltipShow = function(tooltip)
-                    tooltip:AddLine("Next Action Guide")
-                    tooltip:AddLine("|cFFFFFFFFLeft Click|r to open settings")
-                    tooltip:AddLine("|cFFFFFFFFRight Click|r to select rotation")
-                    tooltip:AddLine("|cFFFFFFFFAlt+Right Click|r to toggle edit mode")
-                    if self:IsDevModeEnabled() then
-                        tooltip:AddLine("|cFFFFFFFFShift-Right Click|r to open dev menu")
+        local icon = LDB:NewDataObject("NAG", {
+            type = "launcher",
+            icon = "Interface\\AddOns\\NAG\\Media\\NAGminimap.png",
+            OnClick = function(_, button)
+                if button == "LeftButton" then
+                    if AceConfigDialog.OpenFrames["NAG"] then
+                        AceConfigDialog:Close("NAG")
+                    else
+                        AceConfigDialog:Open("NAG")
                     end
-                end,
-            })
-        end
-        if not icon then
-            error("LibDataBroker-1.1: Data object 'NAG' could not be created or found!")
-        end
+                elseif button == "RightButton" then
+                    if IsShiftKeyDown() and self:IsDevModeEnabled() then
+                        -- Show debug menu when shift-right clicking in debug mode
+                        local menu = {
+                            { text = "Next Action Guide Dev", isTitle = true },
+                            {
+                                text = "Encounter Stopwatch",
+                                func = function() self:GetModule("EncounterStopwatch"):Toggle() end
+                            },
+                            {
+                                text = "Entity Behavior Tester",
+                                func = function() self:GetModule("EntityBehaviorTester"):Toggle() end
+                            },
+                            { text = "APL Monitor",             func = function() self:GetModule("APLMonitor"):Toggle() end },
+                            { text = "Event Debugger",          func = function() self:GetModule("EventDebugger"):Toggle() end },
+                            { text = "CLEU Debugger",           func = function() self:GetModule("CLEUDebugger"):Toggle() end },
+                            { text = "Toggle Script Errors",    func = function() self:ToggleScriptErrors() end },
+                        }
+                        if not self.debugMenuFrame then
+                            self.debugMenuFrame = LibStub("LibUIDropDownMenu-4.0"):Create_UIDropDownMenu(
+                                "NAGDebugMenuFrame", UIParent)
+                        end
+                        LibStub("LibUIDropDownMenu-4.0"):EasyMenu(menu, self.debugMenuFrame, "cursor", 0, 0, "MENU")
+                    else
+                        self:ToggleEditMode()
+                    end
+                end
+            end,
+            OnTooltipShow = function(tooltip)
+                tooltip:AddLine("Next Action Guide")
+                tooltip:AddLine("|cFFFFFFFFLeft Click|r to open settings")
+                tooltip:AddLine("|cFFFFFFFFRight Click|r to toggle edit mode")
+                if self:IsDevModeEnabled() then
+                    tooltip:AddLine("|cFFFFFFFFShift-Right Click|r to open dev menu")
+                end
+            end,
+        })
+
+        -- Register with LibDBIcon
         local LibDBIcon = LibStub("LibDBIcon-1.0")
-        if not LibDBIcon:IsRegistered("NAG") then
-            LibDBIcon:Register("NAG", icon, self.db.global.minimap)
-        end
-        self:UpdateMinimapIconMode()
+        LibDBIcon:Register("NAG", icon, self.db.global.minimap)
     end
 
     --- @param self NAG The addon object
@@ -363,7 +387,7 @@ do -- Core ACE3 functions --
             SetCVar("nameplateShowAll", 1)
             SetCVar("nameplateMaxDistance", 41)
         end)
-        self:UpdateMinimapIconMode()
+        
         -- Show welcome message
     end
 
@@ -1369,7 +1393,7 @@ do --== Addon Compartment Functions ==--
             GameTooltip:AddLine("Next Action Guide")
             GameTooltip:AddLine("|cFFFFFFFFLeft Click|r to open settings")
             GameTooltip:AddLine("|cFFFFFFFFRight Click|r to toggle edit mode")
-            if NAG and NAG.IsDevModeEnabled and NAG:IsDevModeEnabled() then
+            if _G.NAG and _G.NAG:IsDevModeEnabled() then
                 GameTooltip:AddLine("|cFFFFFFFFShift-Right Click|r to open dev menu")
             end
             GameTooltip:Show()
@@ -1380,148 +1404,5 @@ do --== Addon Compartment Functions ==--
     --- @param frame Frame The button being left.
     function NAG_OnAddonCompartmentLeave(frame)
         GameTooltip:Hide()
-    end
-end
-
--- ============================ Unified Icon Click Handler ============================
--- Handles all click logic for both minimap and detached icons.
-function NAG:HandleIconClick(button)
-    if button == "LeftButton" then
-        if AceConfigDialog.OpenFrames["NAG"] then
-            AceConfigDialog:Close("NAG")
-        else
-            AceConfigDialog:Open("NAG")
-        end
-    elseif button == "RightButton" or button == "RotationMenu" then
-        -- Show rotation selector dropdown
-        if not self.rotationMenuFrame then
-            self.rotationMenuFrame = LibStub("LibUIDropDownMenu-4.0"):Create_UIDropDownMenu("NAGRotationMenu", UIParent)
-        end
-        local menu = self:BuildRotationMenu()
-        LibStub("LibUIDropDownMenu-4.0"):EasyMenu(menu, self.rotationMenuFrame, "cursor", 0, 0, "MENU")
-    elseif IsAltKeyDown() and button == "RightButton" then
-        self:ToggleEditMode()
-    elseif IsShiftKeyDown() and button == "RightButton" and self:IsDevModeEnabled() then
-        -- Show dev menu
-        if not self.devMenuFrame then
-            self.devMenuFrame = LibStub("LibUIDropDownMenu-4.0"):Create_UIDropDownMenu("NAGDevMenu", UIParent)
-        end
-        local menu = self:BuildDevMenu()
-        LibStub("LibUIDropDownMenu-4.0"):EasyMenu(menu, self.devMenuFrame, "cursor", 0, 0, "MENU")
-    end
-end
-
-
--- Update detached icon to use unified click handler
-local function GetOrCreateDetachedIcon(self)
-    if self.detachedIcon and self.detachedIcon:IsObjectType("Button") then
-        return self.detachedIcon
-    end
-    local icon = CreateFrame("Button", "NAGDetachedMinimapIcon", UIParent, "BackdropTemplate")
-    icon:SetSize(36, 36)
-    local pos = self.db.global.minimap.detachedPos or { x = 0, y = -200 }
-    icon:SetPoint("CENTER", UIParent, "CENTER", pos.x, pos.y)
-    icon:SetMovable(true)
-    icon:EnableMouse(true)
-    icon:RegisterForDrag("LeftButton")
-    icon:SetScript("OnDragStart", function(self) self:StartMoving() end)
-    icon:SetScript("OnDragStop", function(self)
-        self:StopMovingOrSizing()
-        local x, y = self:GetCenter()
-        local px, py = UIParent:GetCenter()
-        if NAG and NAG.db and NAG.db.global and NAG.db.global.minimap then
-            NAG.db.global.minimap.detachedPos = { x = x - px, y = y - py }
-        end
-    end)
-    icon:SetNormalTexture("Interface\\AddOns\\NAG\\Media\\NAGminimap.png")
-    icon:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
-    icon:SetPushedTexture("Interface\\Buttons\\UI-Quickslot-Depress")
-    icon:SetFrameStrata("DIALOG")
-    icon:SetClampedToScreen(true)
-    icon:Hide()
-    -- Tooltip
-    icon:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:AddLine("Next Action Guide")
-        GameTooltip:AddLine("Left Click to open settings")
-        GameTooltip:AddLine("Right Click to select rotation")
-        GameTooltip:AddLine("Alt+Right Click to toggle edit mode")
-        if NAG and NAG.IsDevModeEnabled and NAG:IsDevModeEnabled() then
-            GameTooltip:AddLine("Shift+Right Click to open dev menu")
-        end
-        GameTooltip:Show()
-    end)
-    icon:SetScript("OnLeave", function(self)
-        GameTooltip:Hide()
-    end)
-    -- Unified click handler
-    icon:SetScript("OnMouseUp", function(_, button)
-        print("Button:", button, "Alt:", IsAltKeyDown(), "Shift:", IsShiftKeyDown())
-        if button == "RightButton" and IsAltKeyDown() then
-            NAG:ToggleEditMode()
-        elseif button == "RightButton" and IsShiftKeyDown() and NAG and NAG.IsDevModeEnabled and NAG:IsDevModeEnabled() then
-            if not NAG.devMenuFrame then
-                NAG.devMenuFrame = LibStub("LibUIDropDownMenu-4.0"):Create_UIDropDownMenu("NAGDevMenu", UIParent)
-            end
-            local menu = NAG:BuildDevMenu()
-            LibStub("LibUIDropDownMenu-4.0"):EasyMenu(menu, NAG.devMenuFrame, "cursor", 0, 0, "MENU")
-        elseif button == "RightButton" then
-            NAG:HandleIconClick("RotationMenu")
-        else
-            NAG:HandleIconClick(button)
-        end
-    end)
-    self.detachedIcon = icon
-    return icon
-end
-
--- Helper to build the rotation selector menu (copied from RotationManager)
-function NAG:BuildRotationMenu()
-    local menu = {
-        { text = "Select Rotation", isTitle = true, notCheckable = true },
-    }
-    local classModule = self:GetModule(self.CLASS)
-    if not classModule then return menu end
-    local rotations, displayNames = classModule:GetAvailableRotations(nil, true)
-    for name, config in pairs(rotations) do
-        local displayName = displayNames[name] or name
-        table.insert(menu, {
-            text = displayName,
-            notCheckable = true,
-            func = function()
-                local specID = config.specID or 0
-                classModule:SelectRotation(specID, name)
-                -- Optionally refresh UI
-            end
-        })
-    end
-    table.insert(menu, { text = "Close", notCheckable = true })
-    return menu
-end
-
--- Helper to build the dev menu (copied from minimap icon logic)
-function NAG:BuildDevMenu()
-    local menu = {
-        { text = "Next Action Guide Dev", isTitle = true },
-        { text = "Encounter Stopwatch", func = function() self:GetModule("EncounterStopwatch"):Toggle() end },
-        { text = "Entity Behavior Tester", func = function() self:GetModule("EntityBehaviorTester"):Toggle() end },
-        { text = "APL Monitor", func = function() self:GetModule("APLMonitor"):Toggle() end },
-        { text = "Event Debugger", func = function() self:GetModule("EventDebugger"):Toggle() end },
-        { text = "CLEU Debugger", func = function() self:GetModule("CLEUDebugger"):Toggle() end },
-        { text = "Toggle Script Errors", func = function() self:ToggleScriptErrors() end },
-    }
-    return menu
-end
-
--- Update icon visibility/state based on detach option
-function NAG:UpdateMinimapIconMode()
-    local LibDBIcon = LibStub("LibDBIcon-1.0")
-    if self.db.global.minimap.detached then
-        LibDBIcon:Hide("NAG")
-        local icon = GetOrCreateDetachedIcon(self)
-        icon:Show()
-    else
-        if self.detachedIcon then self.detachedIcon:Hide() end
-        LibDBIcon:Show("NAG")
     end
 end
