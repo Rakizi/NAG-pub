@@ -1,11 +1,12 @@
---- Handles pull timer management and countdown functionality for NAG.
 --- @module "PullTimerManager"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- Handles pull timer management and countdown functionality for NAG.
+---
+--- This module provides functions for managing pull timers and countdown functionality.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon

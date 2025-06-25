@@ -1,12 +1,8 @@
---- Provides a base class for all class modules in NAG.
----
---- Provides a base class for all class modules in NAG.
 --- @module "ClassBase"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
+--- Provides a base class for all class modules in NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...

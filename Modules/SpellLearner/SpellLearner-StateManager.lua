@@ -27,7 +27,7 @@
     "bad argument #2 to 'format'" errors caused by double formatting.
 ]]
 
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
 --- @type NAG|AceAddon

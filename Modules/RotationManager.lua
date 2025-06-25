@@ -1,11 +1,9 @@
+--- @module "RotationManager"
 --- Module for managing user rotations in NAG
 ---
 --- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
---- @module "RotationManager"
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---- @diagnostic disable: undefined-field
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 

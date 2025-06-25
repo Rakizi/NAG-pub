@@ -1,3 +1,4 @@
+--- @module "SpellTrackingManager"
 --- Manages spell-related state tracking.
 ---
 ---  Responsibilities:
@@ -13,12 +14,9 @@
 ---        castTracking = {},    -- {spellId = {recentCasts = {timestamp, ...}, lastCast = timestamp}}
 ---        icdTracking = {},     -- {spellId = {duration = number, lastProc = number}} -- Track both ICD duration and last proc time
 ---    }
-
---- @module "SpellTrackingManager"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon

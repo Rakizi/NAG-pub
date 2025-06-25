@@ -1,12 +1,13 @@
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "EntityBehaviors"
+--- Handles all entity behaviors for the NAG addon
+---
+--- This module defines and manages all entity behaviors for the Next Action Guide addon.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    Entity Behaviors System
-    ----------------------
-    Defines behavior sets for different entity types in NAG.
-    Behaviors can be inherited and overridden based on entity type.
-]]
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
 --- @type NAG|AceAddon

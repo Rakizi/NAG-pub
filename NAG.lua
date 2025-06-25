@@ -1,21 +1,19 @@
--- ~~~~~~~~~~ NAG Main ~~~~~~~~~~
+--- @module "NAG"
 --- Main entry point and core logic for the Next Action Guide addon
 ---
 --- This module initializes the NAG addon, manages core settings, options, slash commands, and provides the main API for all modules.
 ---
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
----
---- @module "NAG"
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
---- @type SpecializationCompat
+
+---@type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
 
 -- String manipulation (WoW's optimized versions)
@@ -60,7 +58,7 @@ local abs = abs or math.abs
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 -- Module category constants
 ns.MODULE_CATEGORIES = {
     GENERAL = "general",                   -- General options
@@ -71,10 +69,9 @@ ns.MODULE_CATEGORIES = {
     DEBUG = "debug",                       -- Debug options
     ACKNOWLEDGEMENTS = "acknowledgements", -- Acknowledgements options
 }
-
-
---- @class NAG:AceModule, AceEvent-3.0, AceConsole-3.0, AceTimer-3.0
+---@class NAG
 local NAG = LibStub("AceAddon-3.0"):NewAddon("NAG", "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0")
+
 NAG.trinketFunctionsUsed = false -- Global flag to track if trinket functions have been used
 _G.NAG = NAG
 NAG.x = ns
@@ -882,7 +879,7 @@ function NAG:SlashCommand(input, editbox)
         end
         return true
     elseif command == "rotation" or command == "rot" then
-        --- @type ClassBase|AceModule|ModuleBase
+        ---@type ClassBase|AceModule|ModuleBase
         local classModule = self:GetModule(self.CLASS, true)
         if not classModule then return false end
 
@@ -909,7 +906,7 @@ function NAG:SlashCommand(input, editbox)
             return false
         else
             -- Toggle the Rotation Manager
-            --- @type RotationManager|AceModule|ModuleBase
+            ---@type RotationManager|AceModule|ModuleBase
             local RotationManager = self:GetModule("RotationManager")
             if RotationManager then
                 RotationManager:Toggle()

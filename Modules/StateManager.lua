@@ -1,11 +1,10 @@
+--- @module "StateManager"
 --- Manages the state of the NAG addon.
 ---
 --- This module provides functions for checking and managing the state of the NAG addon.
---- @module "StateManager"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 --
 -- luacheck: ignore GetSpellInfo
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~

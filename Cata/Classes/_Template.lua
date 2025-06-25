@@ -1,4 +1,3 @@
---- @diagnostic disable: undefined-global
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 --- @type Version

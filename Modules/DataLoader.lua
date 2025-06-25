@@ -1,11 +1,10 @@
+--- @module "DataLoader"
 --- Handles version-specific data loading across different WoW versions.
 ---
 --- Responsible for selecting the appropriate version's data based on the current game version.
---- @module "DataLoader"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 --[[
 

@@ -1,11 +1,8 @@
---- Manages type registry and enum system for NAG modules, including schema integration and type normalization utilities.
 --- @module "Types"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
-
---- @diagnostic disable: duplicate-set-field, undefined-global, unused-local
+--- Manages type registry and enum system for NAG modules, including schema integration and type normalization utilities.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...

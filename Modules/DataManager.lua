@@ -1,13 +1,12 @@
+--- @module "DataManager"
 --- Handles data management and processing for the NAG addon.
 ---
 --- This module provides functions for managing, processing, and indexing all versioned and runtime data entities (spells, items, sets, etc) in NAG. Handles entity relationships, type/flag indexing, and provides high-level data access APIs.
---- @module "DataManager"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 -- ISSUES: Clean it all up
 -- 1. big issue is only first item added gives the behavior, the rest are just added as flags.
---- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
 
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
@@ -53,7 +52,7 @@ local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
---- ======= FORWARD DECLARATIONS =======
+-- ======= FORWARD DECLARATIONS =======
 --- Helper functions
 local initializeStorage
 local getEntityStorage

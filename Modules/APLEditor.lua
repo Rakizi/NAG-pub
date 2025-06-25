@@ -1,12 +1,11 @@
+--- @module "APLEditor"
 --- Provides a module for creating and editing action priority lists (APL) for NAG.
 ---
 --- Provides a UI for creating and editing APLs, including action selection,
 --- condition and value editing, and rotation management.
---- @module "APLEditor"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...

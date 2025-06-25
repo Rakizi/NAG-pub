@@ -1,4 +1,3 @@
---- @diagnostic disable: undefined-global
 local _, ns = ...
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")

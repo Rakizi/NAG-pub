@@ -1,11 +1,10 @@
---- Provides a base class for all modules in NAG.
 --- @module "ModuleBase"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- Provides a base class for all modules in NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+
 
 local _, ns = ...
 --- @type NAG|AceAddon

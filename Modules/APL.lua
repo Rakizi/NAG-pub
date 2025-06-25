@@ -1,9 +1,8 @@
---- Implements the APL (Action Priority List) core logic for NAG, including schema-driven function generation and implementation registration.
 --- @module "APL"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- Implements the APL (Action Priority List) core logic for NAG, including schema-driven function generation and implementation registration.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...
@@ -53,8 +52,8 @@ local defaults = {
     },
 }
 
---- @class APL: ModuleBase
-local APLModule = NAG:CreateModule("APL", defaults, {
+--- @class APL : AceModule
+APLModule = NAG:CreateModule("APL", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 10,
 })

@@ -1,11 +1,10 @@
+--- @module "TrinketRegistrationManager"
 --- Manages trinket registration functionality for NAG.
 ---
 --- This module provides functions for checking and managing trinket registration.
---- @module "TrinketRegistrationManager"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 --
 -- luacheck: ignore GetSpellInfo
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~

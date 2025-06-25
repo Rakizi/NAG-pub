@@ -1,9 +1,9 @@
+--- @module "ShamanWeaveBar"
 --- Module for Shaman weave optimization
 ---
 --- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG")

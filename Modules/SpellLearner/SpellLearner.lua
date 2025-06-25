@@ -23,7 +23,7 @@
     NOTES: Base module for SpellLearner system
 ]]
 
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
 --- @type NAG|AceAddon

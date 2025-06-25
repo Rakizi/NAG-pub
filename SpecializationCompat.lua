@@ -1,9 +1,11 @@
---- Specialization Compatibility Layer for NAG
--- Provides cross-version specialization mapping and detection
--- Supports version-based and custom overrides (e.g., SoD, Classic, Retail, etc.)
+--- @module "SpecializationCompat"
+--- Provides cross-version specialization mapping and detection
+--- Supports version-based and custom overrides (e.g., SoD, Classic, Retail, etc.)
+---
 
 local _, ns = ...
 local Version = ns.Version
+
 --- @class SpecializationCompat
 local SpecializationCompat = {}
 

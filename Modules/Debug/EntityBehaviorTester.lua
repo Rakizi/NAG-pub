@@ -1,11 +1,9 @@
 --- Tests NAG EntityBehaviors implementation
 --- @module "EntityBehaviorTester"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- @diagnostic disable: undefined-global, undefined-field
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...

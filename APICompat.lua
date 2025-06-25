@@ -1,14 +1,12 @@
+--- @module 'APICompat'
 --- Handles API compatibility for the NAG addon.
---- @module "APICompat"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Discord: https://discord.gg/ebonhold
 
---- @diagnostic disable: deprecated
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
+
 local _, ns = ...
---- @type Version
+---@type Version
 local Version = ns.Version
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -60,7 +58,6 @@ function ns.IsAddOnLoadedUnified(name)
         return loadedOrLoading, loaded
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         local loaded = _G.IsAddOnLoaded(name)
         -- In classic, if it's loaded, it's fully loaded
         return loaded, loaded
@@ -80,7 +77,6 @@ function ns.GetAddOnMetadataUnified(name, variable)
         if C_AddOns and C_AddOns.IsAddOnLoaded then
             C_AddOns.IsAddOnLoaded(name)
         else
-            --- @diagnostic disable-next-line: deprecated
             _G.IsAddOnLoaded(name)
         end
     end)
@@ -93,7 +89,6 @@ function ns.GetAddOnMetadataUnified(name, variable)
             return C_AddOns.GetAddOnMetadata(name, variable)
         else
             -- Classic version
-            --- @diagnostic disable-next-line: deprecated
             return GetAddOnMetadata(name, variable)
         end
     end)
@@ -123,7 +118,6 @@ function ns.GetItemIconUnified(itemInfo)
     end
 
     -- Classic version or fallback
-    --- @diagnostic disable-next-line: deprecated
     return _G.GetItemIcon(itemInfo)
 end
 
@@ -131,14 +125,12 @@ end
 --- @param itemInfo number The ID of the item.
 --- @return string name, string link, number rarity, number level, number minLevel, string type, string subtype, number stackCount, string equipLoc, number icon, ...
 function ns.GetItemInfoUnified(itemInfo)
-    --- @diagnostic disable-next-line: return-type-mismatch
     if not itemInfo then return nil, nil, nil, nil, nil, nil, nil, nil, nil, nil end
     if C_Item and C_Item.GetItemInfo then
         -- Retail version
         return C_Item.GetItemInfo(itemInfo)
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetItemInfo(itemInfo)
     end
 end
@@ -155,7 +147,6 @@ function ns.GetSpellTextureUnified(spellID)
         return iconID, originalIconID
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         local iconID = _G.GetSpellTexture(spellID)
         return iconID, iconID -- Return the same value for both iconID and originalIconID
     end
@@ -176,7 +167,6 @@ function ns.IsUsableSpellUnified(spellID)
         return C_Spell.IsSpellUsable(spellID)
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         return _G.IsUsableSpell(spellID)
     end
 end
@@ -191,7 +181,6 @@ function ns.IsCurrentSpellUnified(spellIdentifier)
         return C_Spell.IsCurrentSpell(spellIdentifier)
     else
         -- Classic version
-        --- @diagnostic disable-next-line: undefined-field
         return _G.IsCurrentSpell(spellIdentifier)
     end
 end
@@ -210,7 +199,6 @@ function ns.GetStablePetInfoUnified(index)
         end
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetStablePetInfo(index)
     end
 end
@@ -227,7 +215,6 @@ function ns.GetItemCooldownUnified(itemID)
         return startTime, duration, enabled, 1
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         local startTime, duration, enabled = _G.GetItemCooldown(itemID)
         return startTime, duration, enabled, 1 -- Classic doesn't have modRate, default to 1
     end
@@ -246,7 +233,6 @@ function ns.GetSpellCooldownUnified(spellID)
         return cdInfo.startTime, cdInfo.duration, cdInfo.isEnabled, cdInfo.modRate
     else
         -- Classic-like: Use GetSpellCooldown
-        --- @diagnostic disable-next-line: deprecated
         local startTime, duration, isEnabled, modRate = _G.GetSpellCooldown(spellID)
         return startTime, duration, isEnabled, modRate
     end
@@ -278,15 +264,12 @@ function ns.GetSpellChargesUnified(spell, bookType)
     end
 
     -- Fallback to classic/deprecated version
-    --- @diagnostic disable-next-line: deprecated
     if _G.GetSpellCharges then
         if bookType then
             -- If bookType is provided, use spellbook version
-            --- @diagnostic disable-next-line: deprecated
             return _G.GetSpellCharges(spell, bookType)
         else
             -- Otherwise use direct spell version
-            --- @diagnostic disable-next-line: deprecated
             return _G.GetSpellCharges(spell)
         end
     end
@@ -313,7 +296,6 @@ function ns.GetSpellInfoUnified(spellID)
     end
 
     -- Fallback to Classic API
-    --- @diagnostic disable-next-line: deprecated
     local name, rank, iconID, castTime, minRange, maxRange, ID, originalIconID = _G.GetSpellInfo(spellID)
     if not name then
         return nil, nil, nil, nil, nil, nil, nil, nil
@@ -336,7 +318,6 @@ function ns.GetSpellTabInfoUnified(tabIndex)
         end
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetSpellTabInfo(tabIndex)
     end
 end
@@ -385,7 +366,6 @@ function ns.UnitAuraUnified(unitToken, index, filter)
             auraData.points
     else
         -- Classic-like: Use UnitAura
-        --- @diagnostic disable-next-line: deprecated
         local name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, _ =
             _G.UnitAura(unitToken, index, filter)
         return name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal,
@@ -417,7 +397,6 @@ function ns.GetPlayerAuraBySpellIDUnified(spellID)
     else
         -- Classic-like: Iterate through UnitAura for the player
         for i = 1, 40 do
-            --- @diagnostic disable-next-line: deprecated
             local name, icon, count, dispelType, duration, expirationTime, source, isStealable, _, foundSpellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod =
                 _G.UnitAura("player", i)
             if foundSpellId == spellID then
@@ -441,7 +420,6 @@ function ns.IsSpellInRangeUnified(spellIdentifier, targetUnit)
         return C_Spell.IsSpellInRange(spellIdentifier, targetUnit)
     else
         -- Classic-like: Use IsSpellInRange
-        --- @diagnostic disable-next-line: undefined-field
         return _G.IsSpellInRange(spellIdentifier, targetUnit) == 1
     end
 end
@@ -498,7 +476,6 @@ function ns.GetSpellPowerCostUnified(spellID)
     if C_Spell and C_Spell.GetSpellPowerCost then
         costs = C_Spell.GetSpellPowerCost(spellID)
     else
-        --- @diagnostic disable-next-line: undefined-field
         costs = _G.GetSpellPowerCost(spellID)
     end
 
@@ -526,7 +503,6 @@ function ns.GetNumSpellTabsUnified()
     if C_SpellBook and C_SpellBook.GetNumSpellBookSkillLines then
         return C_SpellBook.GetNumSpellBookSkillLines()
     else
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetNumSpellTabs()
     end
 end
@@ -542,7 +518,6 @@ function ns.IsUsableItemUnified(itemID)
         return C_Item.IsUsableItem(itemID)
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         return _G.IsUsableItem(itemID)
     end
 end
@@ -558,7 +533,6 @@ function ns.GetItemSpellUnified(itemInfo)
         return C_Item.GetItemSpell(itemInfo)
     else
         -- Classic version
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetItemSpell(itemInfo)
     end
 end
@@ -665,7 +639,6 @@ function ns.GetNumFactionsUnified()
     if C_Reputation and C_Reputation.GetNumFactions then
         return C_Reputation.GetNumFactions()
     else
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetNumFactions()
     end
 end
@@ -677,7 +650,6 @@ function ns.GetFactionDataByIndexUnified(index)
     if C_Reputation and C_Reputation.GetFactionDataByIndex then
         return C_Reputation.GetFactionDataByIndex(index)
     else
-        --- @diagnostic disable-next-line: deprecated
         local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, factionID, hasBonusRepGain, canSetInactive = GetFactionInfo(index)
         if not name then return nil end
         return {
@@ -709,7 +681,6 @@ function ns.GetFactionDataByIDUnified(factionID)
     if C_Reputation and C_Reputation.GetFactionDataByID then
         return C_Reputation.GetFactionDataByID(factionID)
     else
-        --- @diagnostic disable-next-line: deprecated
         local name, description, standingID, barMin, barMax, barValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild, id, hasBonusRepGain, canSetInactive = GetFactionInfoByID(factionID)
         if not name then return nil end
         return {
@@ -741,7 +712,6 @@ function ns.GetWatchedFactionIdUnified()
         local data = C_Reputation.GetWatchedFactionData()
         return data and data.factionID or nil
     else
-        --- @diagnostic disable-next-line: deprecated
         return select(6, GetWatchedFactionInfo())
     end
 end
@@ -752,7 +722,6 @@ function ns.ExpandFactionHeaderUnified(factionID)
     if C_Reputation and C_Reputation.ExpandFactionHeader then
         return C_Reputation.ExpandFactionHeader(factionID)
     else
-        --- @diagnostic disable-next-line: deprecated
         return _G.ExpandFactionHeader(factionID)
     end
 end
@@ -763,7 +732,6 @@ function ns.CollapseFactionHeaderUnified(factionID)
     if C_Reputation and C_Reputation.CollapseFactionHeader then
         return C_Reputation.CollapseFactionHeader(factionID)
     else
-        --- @diagnostic disable-next-line: deprecated
         return _G.CollapseFactionHeader(factionID)
     end
 end
@@ -842,13 +810,11 @@ function ns.GetSpecializationInfoForClassIDUnified(classID, specIndex)
         if not specID then
             return nil
         end
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetSpecializationInfoByID(specID)
     end
 
     if _G.GetSpecializationInfoForClassID then
         -- Standard API call
-        --- @diagnostic disable-next-line: deprecated
         return _G.GetSpecializationInfoForClassID(classID, specIndex)
     end
 

@@ -1,12 +1,4 @@
---- @diagnostic disable: undefined-global
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-    liable for any damages arising from the use of this software.
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-]]
+--- @module "SoDCommon"
 
 local _, ns = ...
 --- @type NAG|AceAddon
@@ -46,7 +38,6 @@ local setmetatable = setmetatable
 local next = next
 
 NAG.Rune = {}
---- @diagnostic disable-next-line: undefined-field
 local isEngravingAvailable = _G.C_Engraving ~= nil
 
 --- Updates the stable pets information for the Hunter class.

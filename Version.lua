@@ -1,12 +1,11 @@
+--- @module "Version"
 --- Version detection module for World of Warcraft across all versions
 ---
 --- Provides a standardized way to detect and handle different WoW versions.
 ---
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---- @module "Version"
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
@@ -155,14 +154,12 @@ function Version:GetExpansion()
     -- First check the WoW project ID for more specific information
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
-        --- @diagnostic disable-next-line: undefined-global
         if C_GameModeManager and C_GameModeManager.IsFeatureID and C_GameModeManager.IsFeatureID(7) then
             return self.EXPANSIONS.PLUNDERSTORM
         end
         return self.EXPANSIONS.MAINLINE
     elseif WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
         -- Check for Season of Discovery
-        --- @diagnostic disable-next-line: undefined-global
         if C_Engraving and C_Engraving.IsEngravingEnabled() then
             return self.EXPANSIONS.SOD  -- Special Season of Discovery expansion
         end
@@ -209,7 +206,6 @@ function Version:GetVersionInfo()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
-        --- @diagnostic disable-next-line: undefined-global
         if C_GameModeManager and C_GameModeManager.IsFeatureID and C_GameModeManager.IsFeatureID(7) then
             gameType = self.GAME_TYPES.PLUNDERSTORM
         else

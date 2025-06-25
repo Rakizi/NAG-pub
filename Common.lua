@@ -1,9 +1,8 @@
---- Handles common functionality for the NAG addon.
 --- @module "Common"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- Handles common functionality for the NAG addon.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
@@ -44,7 +43,7 @@ local concat = table.concat
 
 --File
 
---- ======= GLOBALIZE =======
+-- ======= GLOBALIZE =======
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 

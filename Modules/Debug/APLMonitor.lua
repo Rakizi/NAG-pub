@@ -1,15 +1,14 @@
+--- @module "APLMonitor"
 --- Debugging and visualizing action priority lists (APL) for NAG
 ---
 --- Provides a UI for monitoring and analyzing APL conditions in real time.
 --- Useful for developers and advanced users to debug rotations.
---- @module "APLMonitor"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 --
 -- luacheck: ignore GetSpellInfo
---- @diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...

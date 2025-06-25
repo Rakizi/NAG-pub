@@ -1,9 +1,35 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
-    <Script file="APLhandlers.lua"/>
-    <Script file="BuffDebuffHandlers.lua"/>
-    <Script file="ItemHandlers.lua"/>
-    <Script file="MiscHandlers.lua"/>
+    <!-- APL Handlers -->
+
+    <Script file="APL_Core.lua"/>
+    <Script file="APL_Targets.lua"/>
+    <Script file="APL_Spells.lua"/>
+    <Script file="APL_Operators.lua"/>
+    <Script file="APL_DRW.lua"/>
+    <Script file="APL_Class.lua"/>
+    <Script file="APL_Pet.lua"/>
+
+    <!-- Resource Handlers -->
     <Script file="ResourceHandlers.lua"/>
+    <Script file="ResourceHandlers_Core.lua"/>
+    <Script file="ResourceHandlers_Class.lua"/>
+
+    <!-- Buff/Debuff/Aura Handlers -->
+    <Script file="BuffDebuffHandlers.lua"/>
+    <Script file="AuraHandlers.lua"/>
+
+    <!-- Misc/Timing/State Handlers -->
+    <Script file="MiscHandlers.lua"/>
+    <Script file="StateHandlers.lua"/>
+
+    <!-- Item/Trinket/Tinker/TierSet Handlers -->
+    <Script file="ItemHandlers.lua"/>
+    <Script file="ItemHandlers_Core.lua"/>
+    <Script file="TrinketHandlers.lua"/>
+    <Script file="TinkerHandlers.lua"/>
+    <Script file="TierSetHandlers.lua"/>
+
+    <!-- Stat Handlers (unchanged) -->
     <Script file="StatHandlers.lua"/>
 </Ui>

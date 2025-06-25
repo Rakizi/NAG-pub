@@ -1,14 +1,12 @@
--- ~~~~~~~~~~ Dialogs ~~~~~~~~~~
+--- @module "Dialogs"
 --- Handles all dialog popups and reset logic for NAG addon
 ---
 --- This module defines and manages all static popup dialogs, reset functions, and dialog helpers for the Next Action Guide addon.
 ---
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 ---
---- @module "Dialogs"
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...

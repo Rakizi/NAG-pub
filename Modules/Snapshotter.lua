@@ -1,57 +1,39 @@
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "Snapshotter"
+--- Snapshotter module for automatic real-time snapshot recording of player stats
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+---
+---    PURPOSE: Provides fully automatic real-time snapshot recording of player stats during
+---    spell casts and debuff applications. Snapshots are temporary and exist only during combat.
+---
+---    USAGE:
+---    The Snapshotter module automatically records snapshots for:
+---    - Every successful spell cast by the player
+---    - Every buff applied to the player
+---    - Every debuff applied by the player to the target
+---
+---    To query stored snapshots:
+---    NAG:Snapshot(arguments, spellID)
+---    - arguments: string or table of stat names ("str", "agi", "int", "crit", "haste", "mastery", "ap")
+---    - spellID: number of the spell to check
+---    - Returns:
+---      * For active buffs/debuffs: difference between current and snapshot values (current - snapshot)
+---      * For expired buffs/debuffs: current live stat values
+---      * For spells without snapshots: 0
+---      * For live stats only: sum of current stat values
+---
+---    EXAMPLES:
+---    - NAG:Snapshot("str", 45477) - Compare strength snapshot vs current for spell 45477
+---    - NAG:Snapshot("str", "agi") - Get current strength + agility (no spellID)
+---    - NAG:Snapshot(12345, "crit", "haste") - Compare crit+haste for spell 12345
+---
+---    DEBUG COMMANDS:
+---    - /nagsnapshot - List all stored spellIDs with spell names and active buffs/debuffs
+---    - /nagsnapshot <spellID> - Show detailed stored stats for specific spellID
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-    STATUS: Development
-    NOTES: Snapshotter module for automatic real-time snapshot recording of player stats
-
-    PURPOSE: Provides fully automatic real-time snapshot recording of player stats during
-    spell casts and debuff applications. Snapshots are temporary and exist only during combat.
-
-    USAGE:
-    The Snapshotter module automatically records snapshots for:
-    - Every successful spell cast by the player
-    - Every buff applied to the player
-    - Every debuff applied by the player to the target
-
-    To query stored snapshots:
-    NAG:Snapshot(arguments, spellID)
-    - arguments: string or table of stat names ("str", "agi", "int", "crit", "haste", "mastery", "ap")
-    - spellID: number of the spell to check
-    - Returns:
-      * For active buffs/debuffs: difference between current and snapshot values (current - snapshot)
-      * For expired buffs/debuffs: current live stat values
-      * For spells without snapshots: 0
-      * For live stats only: sum of current stat values
-
-    EXAMPLES:
-    - NAG:Snapshot("str", 45477) - Compare strength snapshot vs current for spell 45477
-    - NAG:Snapshot("str", "agi") - Get current strength + agility (no spellID)
-    - NAG:Snapshot(12345, "crit", "haste") - Compare crit+haste for spell 12345
-
-    DEBUG COMMANDS:
-    - /nagsnapshot - List all stored spellIDs with spell names and active buffs/debuffs
-    - /nagsnapshot <spellID> - Show detailed stored stats for specific spellID
-]]
-
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
 --- @type NAG|AceAddon

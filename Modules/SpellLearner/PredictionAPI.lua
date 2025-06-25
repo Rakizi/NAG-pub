@@ -23,7 +23,7 @@
     NOTES: Prediction API interface for SpellLearner system
 ]]
 
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")

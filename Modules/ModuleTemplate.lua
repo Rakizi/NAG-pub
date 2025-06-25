@@ -1,10 +1,8 @@
---- Template module demonstrating best practices for NAG modules
 --- @module "ModuleTemplate"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
-
+--- Template module demonstrating best practices for NAG modules
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LIBRARY REFERENCE ~~~~~~~~~~
 --[[
@@ -93,7 +91,7 @@
 ]]
 
 
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
 --- @type NAG|AceAddon

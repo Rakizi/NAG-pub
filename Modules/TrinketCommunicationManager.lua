@@ -1,11 +1,8 @@
---- Manages communication and data exchange for trinket-related operations in NAG.
 --- @module "TrinketCommunicationManager"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
-
---- @diagnostic disable: undefined-global, undefined-field
+--- Manages communication and data exchange for trinket-related operations in NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 local _, ns = ...
 --- @type NAG|AceAddon

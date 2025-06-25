@@ -1,11 +1,8 @@
---- Manages tooltip parsing for items, especially trinkets.
 --- @module "TooltipParsingManager"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
-
---- @diagnostic disable: undefined-global, undefined-field, redundant-parameter, missing-parameter, param-type-mismatch
+--- Manages tooltip parsing for items, especially trinkets.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...

@@ -1,19 +1,17 @@
--- ~~~~~~~~~~ Options ~~~~~~~~~~
+--- @module "Options"
 --- Handles all options, configuration, and settings UI for NAG addon
 ---
 --- This module defines and manages all Ace3 options tables, configuration UI, and related logic for the Next Action Guide addon.
 ---
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
----     TODO: Modify to dynamically retrieve class icons, druid/deathknight icons weren't correct in last attempt
----     TODO: remove any toggle functions, add methods(tooltips)
----     TODO: Verify all table returns, make sure all return correct
----     TODO: Change glow color selection to dropdown with color swatches (or use a color picker)
----     TODO: rewrite burst tracker options to have similar structure to resource bar options
----     TODO: Fix last selected group not being remembered
---- @module "Options"
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+--- ToDo:  Modify to dynamically retrieve class icons, druid/deathknight icons weren't correct in last attempt
+--- ToDo:  remove any toggle functions, add methods(tooltips)
+--- ToDo:  Verify all table returns, make sure all return correct
+--- ToDo:  Change glow color selection to dropdown with color swatches (or use a color picker)
+--- ToDo:  rewrite burst tracker options to have similar structure to resource bar options
+--- ToDo:  Fix last selected group not being remembered
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon

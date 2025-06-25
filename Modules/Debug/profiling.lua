@@ -1,12 +1,10 @@
+--- @module "ProfilingUtility"
 --- Provides a module for measuring and reporting code performance in NAG.
 ---
 --- Provides function timing, cumulative timing, and reporting tools for debugging and optimization.
---- @module "ProfilingUtility"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
---- @diagnostic disable: undefined-field
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
@@ -396,11 +394,8 @@ function ProfilingUtility:PrintReportToFrame(sortField)
         return
     end
 
-    --- @diagnostic disable-next-line: undefined-field
     frame:SetTitle("Profiling Report")
-    --- @diagnostic disable-next-line: undefined-field
     frame:SetStatusText("NAG Profiling Report")
-    --- @diagnostic disable-next-line: undefined-field
     frame:SetLayout("Fill")
 
     local editBox = AceGUI:Create("MultiLineEditBox")
@@ -409,13 +404,10 @@ function ProfilingUtility:PrintReportToFrame(sortField)
         return
     end
 
-    --- @diagnostic disable-next-line: undefined-field
     editBox:SetLabel("Report")
     editBox:SetFullWidth(true)
     editBox:SetFullHeight(true)
-    --- @diagnostic disable-next-line: undefined-field
     editBox:DisableButton(true)
-    --- @diagnostic disable-next-line: undefined-field
     frame:AddChild(editBox)
 
     local reportText = ""
@@ -426,7 +418,6 @@ function ProfilingUtility:PrintReportToFrame(sortField)
                 entry.callsPerMinute)
     end
 
-    --- @diagnostic disable-next-line: undefined-field
     editBox:SetText(reportText)
 end
 

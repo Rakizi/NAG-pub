@@ -1,12 +1,11 @@
+--- @module "APLSchema"
 --- Provides a module for managing and displaying the APL schema for NAG.
 ---
 --- Provides a UI for browsing and exploring the APL schema, message types,
 --- and field definitions.
---- @module "APLSchema"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon

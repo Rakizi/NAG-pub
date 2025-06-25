@@ -1,14 +1,12 @@
--- ~~~~~~~~~~ Frames ~~~~~~~~~~
+--- @module "Frames"
 --- Handles all frame creation, icon management, and border logic for NAG addon
 ---
 --- This module manages the creation and updating of all UI frames, icon frames, borders, and related display logic for the Next Action Guide addon.
 ---
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 ---
---- @module "Frames"
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon

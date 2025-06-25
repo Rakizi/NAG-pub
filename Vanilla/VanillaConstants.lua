@@ -22,7 +22,7 @@
     STATUS: Initial implementation
     NOTES: Constants for vanilla WoW consumables, sourced from WoWSims
 ]]
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
 

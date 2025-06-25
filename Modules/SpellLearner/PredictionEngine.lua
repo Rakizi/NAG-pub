@@ -23,7 +23,7 @@
     NOTES: Prediction engine for SpellLearner system that predicts optimal future actions
 ]]
 
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
 --- @type NAG|AceAddon

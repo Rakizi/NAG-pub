@@ -1,13 +1,11 @@
+--- @module "APLTest"
 --- Automated APL (Action Priority List) test suite for NAG.
 ---
 --- Provides batch and randomized testing of APL actions and values, with result recording and reporting.
---- @module "APLTest"
--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
--- Discord: https://discord.gg/ebonhold
--- Status: good
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- @diagnostic disable: undefined-global, undefined-field
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...

@@ -1,12 +1,9 @@
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: BurstTrackerManager - Handles burst tracker frames, spell tracking, and related UI for NAG.
-    STATUS: Initial implementation
-    TODO: Refactor for modularity, add more customization options
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
---- @diagnostic disable: undefined-global, undefined-field
+--- @module "BurstTrackerManager"
+--- Module Purpose: BurstTrackerManager - Handles burst tracker frames, spell tracking, and related UI for NAG.
+--- STATUS: Initial implementation
+--- TODO: Refactor for modularity, add more customization options
+--- License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
