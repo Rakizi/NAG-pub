@@ -1,4 +1,4 @@
--- Generated schema for cata on 2025-06-24 15:27:16
+-- Generated schema for cata on 2025-06-25 21:28:32
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['cata'] = {

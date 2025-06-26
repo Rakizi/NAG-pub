@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-06-24 15:27:11
+-- Generated schema for mop on 2025-06-25 21:28:27
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -4385,12 +4385,12 @@ ns.protoSchema['mists'] = {
             type = "message",
             label = "optional",
             message_type = "APLValueCurrentSolarEnergy",
-            uiLabel = "Lunar Energy",
+            uiLabel = "Solar Energy",
             submenu = {
               "Resources",
               "Eclipse"
             },
-            shortDescription = "Amount of currently available Lunar Energy",
+            shortDescription = "Amount of currently available Solar Energy.",
             includeIf = "(player: Player<any>, _isPrepull: boolean) => player.getSpec() == Spec.SpecBalanceDruid",
             prepullOnly = false,
             combatOnly = false,
@@ -4404,12 +4404,12 @@ ns.protoSchema['mists'] = {
             type = "message",
             label = "optional",
             message_type = "APLValueCurrentLunarEnergy",
-            uiLabel = "Solar Energy",
+            uiLabel = "Lunar Energy",
             submenu = {
               "Resources",
               "Eclipse"
             },
-            shortDescription = "Amount of currently available Solar Energy.",
+            shortDescription = "Amount of currently available Lunar Energy",
             includeIf = "(player: Player<any>, _isPrepull: boolean) => player.getSpec() == Spec.SpecBalanceDruid",
             prepullOnly = false,
             combatOnly = false,
@@ -7575,13 +7575,8 @@ ns.protoSchema['mists'] = {
                 registrationType = "RegisterSpell",
                 functionName = "registerNetherTempest",
                 spellId = 114923,
-                cast = [[{
-			DefaultCast: core.Cast{
-				GCD: core.GCDDefault,
-			},
-		}]],
                 Flags = "core.SpellFlagAPL",
-                ClassSpellMask = "MageSpellNetherTempest",
+                ClassSpellMask = "MageSpellNetherTempestDot",
                 SpellSchool = "core.SpellSchoolArcane",
                 ProcMask = "core.ProcMaskSpellDamage",
                 DamageMultiplier = "1",
@@ -8103,7 +8098,20 @@ ns.protoSchema['mists'] = {
           natures_vigil = {
             id = 18,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              {
+                sourceFile = "extern/wowsims-mop/sim/druid/talents.go",
+                registrationType = "RegisterAura",
+                functionName = "registerNaturesVigil",
+                spellId = 124974,
+                auraDuration = {
+                  raw = "time.Second * 30",
+                  seconds = 30
+                },
+                label = "Nature's Vigil"
+              }
+            }
           }
         },
         oneofs = {
@@ -9089,6 +9097,11 @@ ns.protoSchema['mists'] = {
             type = "int32",
             label = "optional"
           },
+          cooldown_duration = {
+            id = 9,
+            type = "int32",
+            label = "optional"
+          },
           effect_ids = {
             id = 8,
             type = "int32",
@@ -9106,6 +9119,7 @@ ns.protoSchema['mists'] = {
           "name",
           "icon",
           "buff_duration",
+          "cooldown_duration",
           "effect_ids"
         }
       },
@@ -16200,22 +16214,12 @@ ns.protoSchema['mists'] = {
           },
           label = "Bear Form"
         },
-        applyMoonkinForm_MoonkinForm = {
-          sourceFile = "extern/wowsims-mop/sim/druid/forms.go",
-          registrationType = "RegisterAura",
-          functionName = "applyMoonkinForm",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Moonkin Form"
-        },
         registerMoonfireDoTSpell_Moonfire = {
           sourceFile = "extern/wowsims-mop/sim/druid/moonfire.go",
           registrationType = "RegisterSpell",
           functionName = "registerMoonfireDoTSpell",
           spellId = 8921,
-          Flags = "SpellFlagOmenTrigger | core.SpellFlagPassiveSpell",
+          Flags = "core.SpellFlagPassiveSpell",
           ClassSpellMask = "DruidSpellMoonfireDoT",
           SpellSchool = "core.SpellSchoolArcane",
           ProcMask = "core.ProcMaskSpellDamage",
@@ -16246,23 +16250,6 @@ ns.protoSchema['mists'] = {
           },
           label = "Savage Roar Aura"
         },
-        registerFireseedSpell_1 = {
-          sourceFile = "extern/wowsims-mop/sim/druid/burning_treant.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerFireseedSpell",
-          spellId = 99026,
-          cast = [[{
-			DefaultCast: core.Cast{
-				GCD:      0,
-				CastTime: time.Second * 2,
-			},
-		}]],
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          CritMultiplier = "treant.DefaultCritMultiplier()",
-          ThreatMultiplier = "1"
-        },
         ApplyPrimalFury_PrimalFury = {
           sourceFile = "extern/wowsims-mop/sim/druid/shared_feral_passives.go",
           registrationType = "RegisterAura",
@@ -16282,6 +16269,16 @@ ns.protoSchema['mists'] = {
             seconds = -1
           },
           label = "Improved Leader of the Pack"
+        },
+        ApplyGlyphs_GlyphofHealingTouch = {
+          sourceFile = "extern/wowsims-mop/sim/druid/glyphs.go",
+          registrationType = "RegisterAura",
+          functionName = "ApplyGlyphs",
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Glyph of Healing Touch"
         },
         registerBerserkCD_BerserkCat = {
           sourceFile = "extern/wowsims-mop/sim/druid/berserk.go",
@@ -16305,39 +16302,6 @@ ns.protoSchema['mists'] = {
           },
           label = "Berserk (Bear)"
         },
-        RegisterEclipseAuras_EclipseLunar = {
-          sourceFile = "extern/wowsims-mop/sim/druid/_eclipse.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterEclipseAuras",
-          spellId = 48518,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Eclipse (Lunar)"
-        },
-        RegisterEclipseAuras_EclipseSolar = {
-          sourceFile = "extern/wowsims-mop/sim/druid/_eclipse.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterEclipseAuras",
-          spellId = 48517,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Eclipse (Solar)"
-        },
-        RegisterEclipseEnergyGainAura_EclipseEnergy = {
-          sourceFile = "extern/wowsims-mop/sim/druid/_eclipse.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterEclipseEnergyGainAura",
-          spellId = 89265,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Eclipse Energy"
-        },
         registerProwlSpell_Prowl = {
           sourceFile = "extern/wowsims-mop/sim/druid/prowl.go",
           registrationType = "RegisterAura",
@@ -16349,41 +16313,16 @@ ns.protoSchema['mists'] = {
           },
           label = "Prowl"
         },
-        registerWildMushrooms_WildMushroomStacks = {
-          sourceFile = "extern/wowsims-mop/sim/druid/wild_mushrooms.go",
+        registerNaturesSwiftness_NaturesSwiftness = {
+          sourceFile = "extern/wowsims-mop/sim/druid/natures_swiftness.go",
           registrationType = "RegisterAura",
-          functionName = "registerWildMushrooms",
-          spellId = 88747,
+          functionName = "registerNaturesSwiftness",
+          spellId = 132158,
           auraDuration = {
             raw = "core.NeverExpires",
             seconds = -1
           },
-          label = "Wild Mushroom Stacks"
-        },
-        registerSunfireDoTSpell_Sunfire = {
-          sourceFile = "extern/wowsims-mop/sim/druid/sunfire.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSunfireDoTSpell",
-          spellId = 93402,
-          Flags = "SpellFlagOmenTrigger | core.SpellFlagPassiveSpell",
-          ClassSpellMask = "DruidSpellSunfireDoT",
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          CritMultiplier = "druid.DefaultCritMultiplier()",
-          ThreatMultiplier = "1",
-          label = "Sunfire"
-        },
-        ApplyGlyphs_GlyphofStarsurge = {
-          sourceFile = "extern/wowsims-mop/sim/druid/_glyphs.go",
-          registrationType = "RegisterAura",
-          functionName = "ApplyGlyphs",
-          spellId = 62971,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Glyph of Starsurge"
+          label = "Nature's Swiftness"
         },
         registerMightOfUrsocCD_MightofUrsoc = {
           sourceFile = "extern/wowsims-mop/sim/druid/might_of_ursoc.go",
@@ -16406,6 +16345,17 @@ ns.protoSchema['mists'] = {
             seconds = nil
           },
           label = "Survival Instincts"
+        },
+        registerNaturesVigil_NaturesVigil = {
+          sourceFile = "extern/wowsims-mop/sim/druid/talents.go",
+          registrationType = "RegisterAura",
+          functionName = "registerNaturesVigil",
+          spellId = 124974,
+          auraDuration = {
+            raw = "time.Second * 30",
+            seconds = 30
+          },
+          label = "Nature's Vigil"
         }
       },
       guardian = {
@@ -16478,15 +16428,184 @@ ns.protoSchema['mists'] = {
         }
       },
       balance = {
-        ApplyTalents_Moonfury = {
-          sourceFile = "extern/wowsims-mop/sim/druid/balance/balance.go",
+        RegisterEclipseAuras_EclipseLunar = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/eclipse.go",
           registrationType = "RegisterAura",
-          functionName = "ApplyTalents",
+          functionName = "RegisterEclipseAuras",
+          spellId = 48518,
           auraDuration = {
             raw = "core.NeverExpires",
             seconds = -1
           },
-          label = "Moonfury"
+          label = "Eclipse (Lunar)"
+        },
+        RegisterEclipseAuras_EclipseSolar = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/eclipse.go",
+          registrationType = "RegisterAura",
+          functionName = "RegisterEclipseAuras",
+          spellId = 48517,
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Eclipse (Solar)"
+        },
+        RegisterEclipseEnergyGainAura_EclipseEnergy = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/eclipse.go",
+          registrationType = "RegisterAura",
+          functionName = "RegisterEclipseEnergyGainAura",
+          spellId = 89265,
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Eclipse Energy"
+        },
+        registerStarfallSpell_Starfall = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/starfall.go",
+          registrationType = "RegisterAura",
+          functionName = "registerStarfallSpell",
+          spellId = 48505,
+          auraDuration = {
+            raw = "time.Second * 10",
+            seconds = 10
+          },
+          label = "Starfall"
+        },
+        registerWrathSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/treants.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerWrathSpell",
+          spellId = 113769,
+          cast = [[{
+			DefaultCast: core.Cast{
+				GCD:      time.Millisecond * 500,
+				CastTime: time.Millisecond * 2500,
+			},
+		}]],
+          SpellSchool = "core.SpellSchoolNature",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
+          CritMultiplier = "treant.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        registerMoonkinForm_MoonkinForm = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/passives.go",
+          registrationType = "RegisterAura",
+          functionName = "registerMoonkinForm",
+          label = "Moonkin Form"
+        },
+        registerShootingStars_ShootingStars = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/passives.go",
+          registrationType = "RegisterAura",
+          functionName = "registerShootingStars",
+          spellId = 93400,
+          auraDuration = {
+            raw = "time.Second * 12",
+            seconds = 12
+          },
+          label = "Shooting Stars"
+        },
+        registerNaturesGrace_NaturesGrace = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/passives.go",
+          registrationType = "RegisterAura",
+          functionName = "registerNaturesGrace",
+          spellId = 16886,
+          auraDuration = {
+            raw = "time.Second * 15",
+            seconds = 15
+          },
+          label = "Nature's Grace"
+        },
+        registerLunarShower_LunarShower = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/passives.go",
+          registrationType = "RegisterAura",
+          functionName = "registerLunarShower",
+          spellId = 81192,
+          auraDuration = {
+            raw = "time.Second * 3",
+            seconds = 3
+          },
+          label = "Lunar Shower"
+        },
+        registerLunarShower_LunarShowerHandler = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/passives.go",
+          registrationType = "RegisterAura",
+          functionName = "registerLunarShower",
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Lunar Shower Handler"
+        },
+        registerCelestialAlignmentSpell_CelestialAlignment = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/celestial_alignment.go",
+          registrationType = "RegisterAura",
+          functionName = "registerCelestialAlignmentSpell",
+          spellId = 112071,
+          auraDuration = {
+            raw = "time.Second * 15",
+            seconds = 15
+          },
+          label = "Celestial Alignment"
+        },
+        registerWildMushrooms_WildMushroomsTracker = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/wild_mushrooms.go",
+          registrationType = "RegisterAura",
+          functionName = "registerWildMushrooms",
+          spellId = 88747,
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Wild Mushrooms (Tracker)"
+        },
+        registerSunfireDoTSpell_Sunfire = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/sunfire.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerSunfireDoTSpell",
+          spellId = 93402,
+          Flags = "core.SpellFlagPassiveSpell",
+          ClassSpellMask = "druid.DruidSpellSunfireDoT",
+          SpellSchool = "core.SpellSchoolNature",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
+          CritMultiplier = "moonkin.DefaultCritMultiplier()",
+          ThreatMultiplier = "1",
+          label = "Sunfire"
+        },
+        registerIncarnation_IncarnationChosenofElune = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/talents.go",
+          registrationType = "RegisterAura",
+          functionName = "registerIncarnation",
+          spellId = 102560,
+          auraDuration = {
+            raw = "time.Second * 30",
+            seconds = 30
+          },
+          label = "Incarnation: Chosen of Elune"
+        },
+        registerDreamOfCenarius_DreamofCenarius = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/talents.go",
+          registrationType = "RegisterAura",
+          functionName = "registerDreamOfCenarius",
+          spellId = 145151,
+          auraDuration = {
+            raw = "time.Second * 30",
+            seconds = 30
+          },
+          label = "Dream of Cenarius"
+        },
+        registerSoulOfTheForest_AstralInsightSotF = {
+          sourceFile = "extern/wowsims-mop/sim/druid/balance/talents.go",
+          registrationType = "RegisterAura",
+          functionName = "registerSoulOfTheForest",
+          spellId = 145138,
+          auraDuration = {
+            raw = "time.Second * 30",
+            seconds = 30
+          },
+          label = "Astral Insight (SotF)"
         }
       },
       death_knight = {
@@ -16516,16 +16635,6 @@ ns.protoSchema['mists'] = {
           CritMultiplier = "dk.DefaultCritMultiplier()",
           ThreatMultiplier = "1",
           label = "Death and Decay"
-        },
-        registerFirstHitDamageAura_FirstHitPenaltyBypass = {
-          sourceFile = "extern/wowsims-mop/sim/death_knight/rune_weapon_pet.go",
-          registrationType = "RegisterAura",
-          functionName = "registerFirstHitDamageAura",
-          auraDuration = {
-            raw = "core.SpellBatchWindow",
-            seconds = nil
-          },
-          label = "First Hit Penalty Bypass"
         },
         registerPlagueStrike_1 = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/plague_strike.go",
@@ -17019,6 +17128,17 @@ ns.protoSchema['mists'] = {
         },
         registerRaiseDead_RaiseDead = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/raise_dead.go",
+          registrationType = "RegisterAura",
+          functionName = "registerRaiseDead",
+          spellId = 46584,
+          auraDuration = {
+            raw = "time.Minute * 1",
+            seconds = 60
+          },
+          label = "Raise Dead"
+        },
+        registerRaiseDead_2 = {
+          sourceFile = "extern/wowsims-mop/sim/death_knight/raise_dead.go",
           registrationType = "RegisterSpell",
           functionName = "registerRaiseDead",
           spellId = 46584,
@@ -17037,8 +17157,7 @@ ns.protoSchema['mists'] = {
           },
           Flags = "core.SpellFlagAPL",
           ClassSpellMask = "DeathKnightSpellRaiseDead",
-          RelatedSelfBuff = "dk.RegisterAura(core.Aura{",
-          label = "Raise Dead"
+          RelatedSelfBuff = "dk.RaiseDeadAura"
         },
         registerBloodBoil_1 = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/blood_boil.go",
@@ -18132,7 +18251,7 @@ ns.protoSchema['mists'] = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/blood/rune_strike.go",
           registrationType = "RegisterSpell",
           functionName = "registerDrwRuneStrike",
-          spellId = 62036,
+          spellId = 56815,
           Flags = "core.SpellFlagMeleeMetrics",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMH"
@@ -18394,6 +18513,19 @@ ns.protoSchema['mists'] = {
           RelatedSelfBuff = "suddenDoomAura"
         }
       },
+      mop = {
+        newXuenCloakEffect_EnduranceofNiuzao = {
+          sourceFile = "extern/wowsims-mop/sim/common/mop/cloaks_phase_4_54.go",
+          registrationType = "RegisterAura",
+          functionName = "newXuenCloakEffect",
+          spellId = 146193,
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Endurance of Niuzao"
+        }
+      },
       dragonsoul = {
         registerDevastate_1 = {
           sourceFile = "extern/wowsims-mop/sim/encounters/dragonsoul/blackhorn_ai.go",
@@ -18500,7 +18632,7 @@ ns.protoSchema['mists'] = {
 				CastTime: time.Second * 2,
 			},
 			ModifyCast: func(sim *core.Simulation, spell *core.Spell, cast *core.Cast) {
-				spell.Unit.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime, false)
+				spell.Unit.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime)
 			},
 		}]],
           cooldown = {
@@ -21582,6 +21714,28 @@ ns.protoSchema['mists'] = {
           },
           label = "Invigoration"
         },
+        applyBeastCleave_1 = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/specializations.go",
+          registrationType = "RegisterSpell",
+          functionName = "applyBeastCleave",
+          spellId = 115939,
+          Flags = "core.SpellFlagIgnoreModifiers | core.SpellFlagNoSpellMods | core.SpellFlagPassiveSpell | core.SpellFlagNoOnCastComplete",
+          ClassSpellMask = "hunter.HunterPetBeastCleaveHit",
+          SpellSchool = "core.SpellSchoolPhysical",
+          ProcMask = "core.ProcMaskEmpty",
+          DamageMultiplier = "0.75",
+          ThreatMultiplier = "1"
+        },
+        applyBeastCleave_BeastCleave = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/specializations.go",
+          registrationType = "RegisterAura",
+          functionName = "applyBeastCleave",
+          auraDuration = {
+            raw = "core.NeverExpires",
+            seconds = -1
+          },
+          label = "Beast Cleave"
+        },
         registerBestialWrathCD_BestialWrathPet = {
           sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/bestial_wrath.go",
           registrationType = "RegisterAura",
@@ -21623,6 +21777,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Minute * 1",
             seconds = 60
           },
+          Flags = "core.SpellFlagReadinessTrinket",
           ClassSpellMask = "hunter.HunterSpellBestialWrath"
         },
         registerFocusFireSpell_FocusFire = {
@@ -26195,22 +26350,20 @@ ns.protoSchema['mists'] = {
           ThreatMultiplier = "1"
         },
         registerFireballSpell_1 = {
-          sourceFile = "extern/wowsims-mop/sim/mage/fireball.go",
+          sourceFile = "extern/wowsims-mop/sim/mage/mirror_image.go",
           registrationType = "RegisterSpell",
           functionName = "registerFireballSpell",
-          spellId = 133,
+          spellId = 88082,
           cast = [[{
 			DefaultCast: core.Cast{
 				GCD:      core.GCDDefault,
 				CastTime: time.Millisecond * 2500,
 			},
 		}]],
-          Flags = "core.SpellFlagAPL",
-          ClassSpellMask = "MageSpellFireball",
           SpellSchool = "core.SpellSchoolFire",
           ProcMask = "core.ProcMaskSpellDamage",
           DamageMultiplier = "1",
-          CritMultiplier = "mage.DefaultCritMultiplier()",
+          CritMultiplier = "mi.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
         registerArcaneBlastSpell_1 = {
@@ -26261,50 +26414,27 @@ ns.protoSchema['mists'] = {
           CritMultiplier = "mage.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
-        registerScorchSpell_1 = {
-          sourceFile = "extern/wowsims-mop/sim/mage/scorch.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerScorchSpell",
-          spellId = 2948,
-          cast = [[{
-			DefaultCast: core.Cast{
-				GCD:      core.GCDDefault,
-				CastTime: time.Millisecond * 1500,
-			},
-		}]],
-          Flags = "core.SpellFlagAPL",
-          ClassSpellMask = "MageSpellScorch",
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          CritMultiplier = "mage.DefaultCritMultiplier()",
-          ThreatMultiplier = "1"
-        },
-        registerDragonsBreathSpell_1 = {
-          sourceFile = "extern/wowsims-mop/sim/mage/dragons_breath.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDragonsBreathSpell",
-          spellId = 31661,
-          cast = [[{
-			DefaultCast: core.Cast{
-				GCD: core.GCDDefault,
-			},
-			CD: core.Cooldown{
-				Timer:    mage.NewTimer(),
-				Duration: time.Second * 20,
-			},
-		}]],
-          cooldown = {
-            raw = "time.Second * 20",
-            seconds = 20
+        registerHeatingUp_HeatingUp = {
+          sourceFile = "extern/wowsims-mop/sim/mage/heating_up.go",
+          registrationType = "RegisterAura",
+          functionName = "registerHeatingUp",
+          spellId = 48107,
+          auraDuration = {
+            raw = "time.Second * 10",
+            seconds = 10
           },
-          Flags = "core.SpellFlagAoE | core.SpellFlagAPL",
-          ClassSpellMask = "MageSpellDragonsBreath",
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          CritMultiplier = "mage.DefaultCritMultiplier()",
-          ThreatMultiplier = "1"
+          label = "Heating Up"
+        },
+        registerHeatingUp_Pyroblast = {
+          sourceFile = "extern/wowsims-mop/sim/mage/heating_up.go",
+          registrationType = "RegisterAura",
+          functionName = "registerHeatingUp",
+          spellId = 48108,
+          auraDuration = {
+            raw = "time.Second * 15",
+            seconds = 15
+          },
+          label = "Pyroblast!"
         },
         registerConeOfColdSpell_1 = {
           sourceFile = "extern/wowsims-mop/sim/mage/cone_of_cold.go",
@@ -26422,6 +26552,46 @@ ns.protoSchema['mists'] = {
           ProcMask = "core.ProcMaskSpellDamage",
           label = "Blizzard"
         },
+        registerAlterTimeCD_AlterTime = {
+          sourceFile = "extern/wowsims-mop/sim/mage/alter_time.go",
+          registrationType = "RegisterAura",
+          functionName = "registerAlterTimeCD",
+          spellId = 108978,
+          auraDuration = {
+            raw = "time.Second * 6",
+            seconds = 6
+          },
+          label = "Alter Time"
+        },
+        registerAlterTimeCD_2 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/alter_time.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerAlterTimeCD",
+          spellId = 108978,
+          cast = [[{
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+			DefaultCast: core.Cast{
+				NonEmpty: true,
+			},
+		}]],
+          cooldown = {
+            raw = "time.Minute * 3",
+            seconds = 180
+          },
+          Flags = "core.SpellFlagNoOnCastComplete",
+          ClassSpellMask = "MageSpellAlterTime",
+          RelatedSelfBuff = "mage.AlterTimeAura"
+        },
+        registerAlterTimeCD_3 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/alter_time.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerAlterTimeCD",
+          spellId = 108978,
+          Flags = "core.SpellFlagNoOnCastComplete | core.SpellFlagAPL"
+        },
         registerLivingBomb_1 = {
           sourceFile = "extern/wowsims-mop/sim/mage/living_bomb.go",
           registrationType = "RegisterSpell",
@@ -26447,6 +26617,7 @@ ns.protoSchema['mists'] = {
 			},
 		}]],
           Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "MageSpellLivingBombApply",
           SpellSchool = "core.SpellSchoolFire",
           ProcMask = "core.ProcMaskSpellDamage",
           CritMultiplier = "mage.DefaultCritMultiplier()",
@@ -26466,48 +26637,60 @@ ns.protoSchema['mists'] = {
           ThreatMultiplier = "1",
           label = "LivingBomb"
         },
-        registerBlastWaveSpell_1 = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_blast_wave.go",
+        registerFlamestrikeSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/flamestrike.go",
           registrationType = "RegisterSpell",
-          functionName = "registerBlastWaveSpell",
-          spellId = 11113,
+          functionName = "registerFlamestrikeSpell",
+          spellId = 2120,
           cast = [[{
 			DefaultCast: core.Cast{
-				GCD:    time.Millisecond * 500,
-				GCDMin: time.Millisecond * 500,
+				GCD:      core.GCDDefault,
+				CastTime: time.Second * 2,
 			},
-			IgnoreHaste: true,
 			CD: core.Cooldown{
 				Timer:    mage.NewTimer(),
-				Duration: time.Second * 15,
+				Duration: time.Second * 12,
 			},
 		}]],
           cooldown = {
-            raw = "time.Second * 15",
-            seconds = 15
+            raw = "time.Second * 12",
+            seconds = 12
           },
           Flags = "core.SpellFlagAoE | core.SpellFlagAPL",
-          ClassSpellMask = "MageSpellBlastWave",
+          ClassSpellMask = "MageSpellFlamestrike",
           SpellSchool = "core.SpellSchoolFire",
           ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplierAdditive = "1",
+          DamageMultiplier = "1",
+          CritMultiplier = "mage.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        registerFlamestrikeSpell_FlameStrikeDOT = {
+          sourceFile = "extern/wowsims-mop/sim/mage/flamestrike.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerFlamestrikeSpell",
+          spellId = 2120,
+          Flags = "core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell",
+          ClassSpellMask = "MageSpellFlamestrikeDot",
+          SpellSchool = "core.SpellSchoolFire",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
           CritMultiplier = "mage.DefaultCritMultiplier()",
           ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+          label = "FlameStrike DOT"
         },
         registerNetherTempest_1 = {
           sourceFile = "extern/wowsims-mop/sim/mage/nether_tempest.go",
           registrationType = "RegisterSpell",
           functionName = "registerNetherTempest",
           spellId = 114954,
-          ClassSpellMask = "MageSpellNetherTempest",
+          ClassSpellMask = "MageSpellNetherTempestDot",
           SpellSchool = "core.SpellSchoolArcane",
           ProcMask = "core.ProcMaskSpellDamage",
           DamageMultiplier = "1",
           CritMultiplier = "mage.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
-        registerNetherTempest_NetherTempest = {
+        registerNetherTempest_2 = {
           sourceFile = "extern/wowsims-mop/sim/mage/nether_tempest.go",
           registrationType = "RegisterSpell",
           functionName = "registerNetherTempest",
@@ -26519,6 +26702,18 @@ ns.protoSchema['mists'] = {
 		}]],
           Flags = "core.SpellFlagAPL",
           ClassSpellMask = "MageSpellNetherTempest",
+          SpellSchool = "core.SpellSchoolArcane",
+          ProcMask = "core.ProcMaskSpellDamage",
+          CritMultiplier = "mage.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        registerNetherTempest_NetherTempest = {
+          sourceFile = "extern/wowsims-mop/sim/mage/nether_tempest.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerNetherTempest",
+          spellId = 114923,
+          Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "MageSpellNetherTempestDot",
           SpellSchool = "core.SpellSchoolArcane",
           ProcMask = "core.ProcMaskSpellDamage",
           DamageMultiplier = "1",
@@ -26565,73 +26760,6 @@ ns.protoSchema['mists'] = {
           DamageMultiplier = "1 * 1.2",
           CritMultiplier = "mage.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
-        },
-        applyMasterOfElements_MasterofElements = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_talents_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "applyMasterOfElements",
-          label = "Master of Elements"
-        },
-        applyHotStreak_HotStreak = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_talents_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "applyHotStreak",
-          spellId = 48108,
-          auraDuration = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          label = "Hot Streak"
-        },
-        applyHotStreak_HotStreakProcAura = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_talents_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "applyHotStreak",
-          spellId = 44448,
-          label = "Hot Streak Proc Aura"
-        },
-        applyPyromaniac_Pyromaniac = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_talents_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "applyPyromaniac",
-          spellId = 83582,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Pyromaniac"
-        },
-        applyPyromaniac_PyromaniacTrackers = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_talents_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "applyPyromaniac",
-          spellId = 83582,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Pyromaniac Trackers"
-        },
-        applyMoltenFury_MoltenFury = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_talents_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "applyMoltenFury",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Molten Fury"
-        },
-        applyImpact_Impact = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_talents_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "applyImpact",
-          spellId = 64343,
-          auraDuration = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          label = "Impact"
         },
         registerDeepFreezeSpell_1 = {
           sourceFile = "extern/wowsims-mop/sim/mage/deep_freeze.go",
@@ -26813,44 +26941,6 @@ ns.protoSchema['mists'] = {
           Flags = "core.SpellFlagAPL",
           ClassSpellMask = "MagespellRuneOfPower"
         },
-        registerCombustionSpell_1 = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_combustion.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCombustionSpell",
-          spellId = 11129,
-          cast = [[{
-			CD: core.Cooldown{
-				Timer:    mage.NewTimer(),
-				Duration: time.Minute * 2,
-			},
-		}]],
-          cooldown = {
-            raw = "time.Minute * 2",
-            seconds = 120
-          },
-          Flags = "core.SpellFlagAPL",
-          ClassSpellMask = "MageSpellCombustionApplication",
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplierAdditive = "1",
-          CritMultiplier = "mage.DefaultCritMultiplier()",
-          ThreatMultiplier = "1"
-        },
-        registerCombustionSpell_CombustionDot = {
-          sourceFile = "extern/wowsims-mop/sim/mage/_combustion.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCombustionSpell",
-          spellId = 11129,
-          tag = 1,
-          Flags = "core.SpellFlagIgnoreModifiers | core.SpellFlagNoSpellMods | core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell",
-          ClassSpellMask = "MageSpellCombustion",
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskEmpty",
-          DamageMultiplier = "1",
-          CritMultiplier = "mage.DefaultCritMultiplier()",
-          ThreatMultiplier = "1",
-          label = "Combustion Dot"
-        },
         registerFireBlastSpell_1 = {
           sourceFile = "extern/wowsims-mop/sim/mage/fire_blast.go",
           registrationType = "RegisterSpell",
@@ -26860,7 +26950,7 @@ ns.protoSchema['mists'] = {
 			DefaultCast: core.Cast{
 				GCD: core.GCDDefault,
 			},
-			CD: core.Cooldown{ // Note: Impact talent triggers CD refresh on spell *land*, not cast
+			CD: core.Cooldown{
 				Timer:    mage.NewTimer(),
 				Duration: time.Second * 8,
 			},
@@ -26869,22 +26959,140 @@ ns.protoSchema['mists'] = {
             raw = "time.Second * 8",
             seconds = 8
           },
-          Flags = "core.SpellFlagAPL",
+          Flags = "core.SpellFlagAPL | core.SpellFlagAoE",
           ClassSpellMask = "MageSpellFireBlast",
           SpellSchool = "core.SpellSchoolFire",
           ProcMask = "core.ProcMaskSpellDamage",
           DamageMultiplier = "1",
-          CritMultiplier = "mage.DefaultCritMultiplier()",
-          ThreatMultiplier = "1"
+          CritMultiplier = "mage.DefaultCritMultiplier()"
         }
       },
       fire = {
-        ApplyTalents_Flashburn = {
-          sourceFile = "extern/wowsims-mop/sim/mage/fire/fire.go",
+        registerCombustionSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/combustion.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerCombustionSpell",
+          spellId = 11129,
+          cast = [[{
+			CD: core.Cooldown{
+				Timer:    fire.NewTimer(),
+				Duration: combustCD,
+			},
+		}]],
+          cooldown = {
+            raw = "combustCD",
+            seconds = nil
+          },
+          Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "mage.MageSpellCombustion",
+          SpellSchool = "core.SpellSchoolFire",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
+          CritMultiplier = "fire.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        registerCombustionSpell_CombustionDot = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/combustion.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerCombustionSpell",
+          spellId = 11129,
+          tag = 1,
+          Flags = "core.SpellFlagIgnoreModifiers | core.SpellFlagNoSpellMods | core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell",
+          ClassSpellMask = "mage.MageSpellCombustionDot",
+          SpellSchool = "core.SpellSchoolFire",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
+          CritMultiplier = "fire.DefaultCritMultiplier()",
+          ThreatMultiplier = "1",
+          label = "Combustion Dot"
+        },
+        registerInfernoBlastSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/inferno_blast.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerInfernoBlastSpell",
+          spellId = 108853,
+          cast = [[{
+			DefaultCast: core.Cast{
+				GCD: core.GCDDefault,
+			},
+			CD: core.Cooldown{
+				Timer:    fire.NewTimer(),
+				Duration: time.Second * 8,
+			},
+		}]],
+          cooldown = {
+            raw = "time.Second * 8",
+            seconds = 8
+          },
+          Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "mage.MageSpellInfernoBlast",
+          SpellSchool = "core.SpellSchoolFire",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
+          CritMultiplier = "fire.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        registerScorchSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/scorch.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerScorchSpell",
+          spellId = 2948,
+          cast = [[{
+			DefaultCast: core.Cast{
+				GCD:      core.GCDDefault,
+				CastTime: time.Millisecond * 1500,
+			},
+		}]],
+          Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "mage.MageSpellScorch",
+          SpellSchool = "core.SpellSchoolFire",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplierAdditive = "1",
+          CritMultiplier = "fire.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        registerDragonsBreathSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/dragons_breath.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerDragonsBreathSpell",
+          spellId = 31661,
+          cast = [[{
+			DefaultCast: core.Cast{
+				GCD: core.GCDDefault,
+			},
+			CD: core.Cooldown{
+				Timer:    fire.NewTimer(),
+				Duration: time.Second * 20,
+			},
+		}]],
+          cooldown = {
+            raw = "time.Second * 20",
+            seconds = 20
+          },
+          Flags = "core.SpellFlagAoE | core.SpellFlagAPL",
+          ClassSpellMask = "mage.MageSpellDragonsBreath",
+          SpellSchool = "core.SpellSchoolFire",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
+          CritMultiplier = "fire.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
+        registerCriticalMass_CriticalMass = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/critical_mass.go",
           registrationType = "RegisterAura",
-          functionName = "ApplyTalents",
-          spellId = 76595,
-          label = "Flashburn"
+          functionName = "registerCriticalMass",
+          label = "Critical Mass"
+        },
+        registerPyromaniac_Pyromaniac = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/pyromaniac.go",
+          registrationType = "RegisterAura",
+          functionName = "registerPyromaniac",
+          spellId = 132209,
+          auraDuration = {
+            raw = "time.Second * 15",
+            seconds = 15
+          },
+          label = "Pyromaniac"
         },
         registerPyroblastSpell_1 = {
           sourceFile = "extern/wowsims-mop/sim/mage/fire/pyroblast.go",
@@ -26901,7 +27109,7 @@ ns.protoSchema['mists'] = {
           ClassSpellMask = "mage.MageSpellPyroblast",
           SpellSchool = "core.SpellSchoolFire",
           ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
+          DamageMultiplier = "1 * 1.12",
           CritMultiplier = "fire.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
@@ -26910,14 +27118,34 @@ ns.protoSchema['mists'] = {
           registrationType = "RegisterSpell",
           functionName = "registerPyroblastSpell",
           spellId = 11366,
+          tag = 1,
           Flags = "core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell",
           ClassSpellMask = "mage.MageSpellPyroblastDot",
           SpellSchool = "core.SpellSchoolFire",
           ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
+          DamageMultiplier = "1 * 1.12",
           CritMultiplier = "fire.DefaultCritMultiplier()",
           ThreatMultiplier = "1",
           label = "PyroblastDoT"
+        },
+        registerFireballSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/mage/fire/fireball.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerFireballSpell",
+          spellId = 133,
+          cast = [[{
+			DefaultCast: core.Cast{
+				GCD:      core.GCDDefault,
+				CastTime: time.Millisecond * 2250,
+			},
+		}]],
+          Flags = "core.SpellFlagAPL",
+          ClassSpellMask = "mage.MageSpellFireball",
+          SpellSchool = "core.SpellSchoolFire",
+          ProcMask = "core.ProcMaskSpellDamage",
+          DamageMultiplier = "1",
+          CritMultiplier = "fire.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
         }
       },
       arcane = {
@@ -26943,7 +27171,7 @@ ns.protoSchema['mists'] = {
           ClassSpellMask = "mage.MageSpellArcaneBlast",
           SpellSchool = "core.SpellSchoolArcane",
           ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 * 1.29",
+          DamageMultiplier = "1 * 1.37",
           CritMultiplier = "arcane.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
@@ -27000,7 +27228,7 @@ ns.protoSchema['mists'] = {
           ClassSpellMask = "mage.MageSpellArcaneMissilesTick",
           SpellSchool = "core.SpellSchoolArcane",
           ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
+          DamageMultiplier = "1 * 1.28",
           CritMultiplier = "arcane.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
@@ -27054,7 +27282,7 @@ ns.protoSchema['mists'] = {
           ClassSpellMask = "mage.MageSpellArcaneBarrage",
           SpellSchool = "core.SpellSchoolArcane",
           ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 * 0.19",
+          DamageMultiplier = "1 * 1.30",
           CritMultiplier = "arcane.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         }
@@ -27537,7 +27765,7 @@ ns.protoSchema['mists'] = {
 				Duration: time.Second * 30,
 			},
 			ModifyCast: func(sim *core.Simulation, spell *core.Spell, cast *core.Cast) {
-				war.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime, war.AutoAttacks.MH().SwingSpeed == war.AutoAttacks.OH().SwingSpeed)
+				war.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime)
 			},
 			IgnoreHaste: true,
 		}]],
@@ -27585,7 +27813,7 @@ ns.protoSchema['mists'] = {
 				Duration: time.Second * 45,
 			},
 			ModifyCast: func(sim *core.Simulation, spell *core.Spell, cast *core.Cast) {
-				warrior.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime, warrior.AutoAttacks.MH().SwingSpeed == warrior.AutoAttacks.OH().SwingSpeed)
+				warrior.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime)
 			},
 			IgnoreHaste: true,
 		}]],
@@ -29161,10 +29389,10 @@ ns.protoSchema['mists'] = {
       }
     },
     go_diagnostic = {
-      files_scanned = 727,
-      functions_scanned = 3414,
-      registrations_found = 878,
-      registrations_parsed = 853,
+      files_scanned = 738,
+      functions_scanned = 3439,
+      registrations_found = 894,
+      registrations_parsed = 868,
       registrations_missed = {
         {
           file = "sim/death_knight/ghoul_pet.go",
@@ -29173,6 +29401,14 @@ ns.protoSchema['mists'] = {
           registration_type = "RegisterSpell",
           reason = "Could not extract spellId",
           block_preview = "{ 		ActionID:       core.ActionID{SpellID: ghoulPet.clawSpellID}, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSp..."
+        },
+        {
+          file = "sim/common/mop/cloaks_phase_4_54.go",
+          ["function"] = "newXuenCloakEffect",
+          registration_index = 1,
+          registration_type = "RegisterAura",
+          reason = "Could not extract spellId",
+          block_preview = "{ 				Label:    label, 				Duration: core.NeverExpires, 			}..."
         },
         {
           file = "sim/encounters/firelands/bethtilac_ai.go",
