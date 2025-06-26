@@ -3,7 +3,7 @@
 
     A flexible, class-agnostic tracker for buffs, debuffs, and cooldowns.
 
-    Author: Rakizi & Gemini
+    Author: Rakizi & Fonsas
     Date: 2024
 ]]
 
@@ -93,6 +93,7 @@
 
 ]]
 
+---@diagnostic disable: invisible
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...

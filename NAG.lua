@@ -69,7 +69,7 @@ ns.MODULE_CATEGORIES = {
     DEBUG = "debug",                       -- Debug options
     ACKNOWLEDGEMENTS = "acknowledgements", -- Acknowledgements options
 }
----@class NAG
+--- @class NAG:AceAddon
 local NAG = LibStub("AceAddon-3.0"):NewAddon("NAG", "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0")
 
 NAG.trinketFunctionsUsed = false -- Global flag to track if trinket functions have been used
@@ -80,8 +80,6 @@ ns.assertType(NAG, "table", "NAG")
 LibStub("AceEvent-3.0"):Embed(NAG) -- This adds RegisterCallback functionality to NAG
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
-
-
 
 BINDING_HEADER_NAG = "Next Action Guide"
 BINDING_NAME_NAG_TOGGLE_DEBUG_FRAME = "Toggle Debug Frame"

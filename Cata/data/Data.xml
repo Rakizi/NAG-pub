@@ -3,7 +3,6 @@
     <!-- Data Files - _classic_ 4.4.2.60192 -->
     <Script file="schema.lua"/>
     <Script file="Spells.lua"/>
-    <Script file="ClassSpellsV2.lua"/>
     <Script file="Racials.lua"/>
     <Script file="Consumables.lua"/>
     <Script file="OtherItems.lua"/>

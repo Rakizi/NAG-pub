@@ -6,6 +6,7 @@
 --- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
 --- Discord: https://discord.gg/ebonhold
 
+---@diagnostic disable: invisible
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...

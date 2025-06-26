@@ -170,7 +170,7 @@ local ClassBase = {
 --- @param name string The name of the module
 --- @param classDefaults? table Optional class-specific defaults
 --- @param mixins? table Optional additional functionality to mix in
---- @return ModuleBase? The created module
+--- @return ClassBase|AceModule|ModuleBase? The created module
 function NAG:CreateClassModule(name, classDefaults, mixins)
     -- Check if this is the player's class first
     local _, playerClass = UnitClass("player")

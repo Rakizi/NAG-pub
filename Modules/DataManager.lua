@@ -1209,28 +1209,45 @@ do -- Base processor class
                 entry.bonuses = entry.bonuses or {}
                 for count, bonus in pairs(rawData.bonuses) do
                     if bonus.spellId then
-                        -- Store bonus info
                         entry.bonuses[count] = entry.bonuses[count] or {}
-                        entry.bonuses[count].spellId = bonus.spellId
-
-                        -- Transform path for set bonus spell
-                        local spellPath = transformPath(entry.path, entry.entryType, DataManager.EntityTypes.SPELL)
-                        table.insert(spellPath, format("%dpc", count))
-
-                        -- Create spell entry
-                        local spellProcessor = ProcessorsV2[DataManager.EntityTypes.SPELL]
-                        local spellEntry = spellProcessor:process(bonus.spellId, spellPath, bonus)
-                        if spellEntry then
-                            -- Add the piece count to the spell entry
-                            spellEntry.setBonusCount = count
-
-                            -- Create relationship
-                            self:addRelationship(
-                                entry[entry.entryType .. "Id"],
-                                DataManager.EntityTypes.SPELL,
-                                bonus.spellId,
-                                getRelationshipType(entry.entryType, DataManager.EntityTypes.SPELL)
-                            )
+                        -- Support multiple spellIds (table) or single value
+                        if type(bonus.spellId) == "table" then
+                            entry.bonuses[count].spellIds = {}
+                            for _, spellId in ipairs(bonus.spellId) do
+                                table.insert(entry.bonuses[count].spellIds, spellId)
+                                -- Transform path for set bonus spell
+                                local spellPath = transformPath(entry.path, entry.entryType, DataManager.EntityTypes.SPELL)
+                                table.insert(spellPath, format("%dpc", count))
+                                -- Create spell entry
+                                local spellProcessor = ProcessorsV2[DataManager.EntityTypes.SPELL]
+                                local spellEntry = spellProcessor:process(spellId, spellPath, bonus)
+                                if spellEntry then
+                                    spellEntry.setBonusCount = count
+                                    -- Create relationship
+                                    self:addRelationship(
+                                        entry[entry.entryType .. "Id"],
+                                        DataManager.EntityTypes.SPELL,
+                                        spellId,
+                                        getRelationshipType(entry.entryType, DataManager.EntityTypes.SPELL)
+                                    )
+                                end
+                            end
+                        else
+                            entry.bonuses[count].spellId = bonus.spellId
+                            local spellId = bonus.spellId
+                            local spellPath = transformPath(entry.path, entry.entryType, DataManager.EntityTypes.SPELL)
+                            table.insert(spellPath, format("%dpc", count))
+                            local spellProcessor = ProcessorsV2[DataManager.EntityTypes.SPELL]
+                            local spellEntry = spellProcessor:process(spellId, spellPath, bonus)
+                            if spellEntry then
+                                spellEntry.setBonusCount = count
+                                self:addRelationship(
+                                    entry[entry.entryType .. "Id"],
+                                    DataManager.EntityTypes.SPELL,
+                                    spellId,
+                                    getRelationshipType(entry.entryType, DataManager.EntityTypes.SPELL)
+                                )
+                            end
                         end
                     end
                 end
@@ -1598,17 +1615,18 @@ do -- ~~~~~~~~~~~~~~~~~~~~ helper methods(SetSpellPosition, GetSetBonus, Process
     --- @param self DataManager
     --- @param setId number The set ID
     --- @param count number The piece count
-    --- @return table|nil The set bonus spell
+    --- @return table|nil The set bonus spells (table of spells or nil)
     function DataManager:GetSetBonus(setId, count)
         local bonuses = self:GetRelated(setId, self.EntityTypes.TIERSET, self.EntityTypes.SPELL)
+        local result = {}
         if bonuses then
             for spellId, spell in pairs(bonuses) do
                 if spell.setBonusCount == count then
-                    return spell
+                    table.insert(result, spell)
                 end
             end
         end
-        return nil
+        return #result > 0 and result or nil
     end
 
     --- @param self DataManager
