@@ -77,5 +77,8 @@
     <!-- New Modules -->
     <Script file="Modules\UIBackground.lua"/>
 
+    <Script file="Modules\APLWalker.lua"/>
 
+    <!-- Test Suites belong in Modules\Tests\tests.xml -->
+    
 </Ui> 

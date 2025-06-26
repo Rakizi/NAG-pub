@@ -944,6 +944,42 @@ do
 
         return 0
     end
+
+    --- Gets the static (unmodified) weapon damage for an item by scanning its tooltip.
+    --- @param itemId number The item ID to scan
+    --- @return table|nil Table with fields: itemId, min, max, name
+    function TooltipParsingManager:GetWeaponDamage(itemId)
+        if not itemId then return nil end
+        local scanningTooltip = self.state.scanningTooltip
+        if not scanningTooltip then return nil end
+        scanningTooltip:ClearLines()
+        scanningTooltip:SetHyperlink("item:" .. itemId)
+        local minDmg, maxDmg
+        for i = 2, math.min(10, scanningTooltip:NumLines()) do
+            local lineObj = _G[scanningTooltip:GetName() .. "TextLeft" .. i]
+            if lineObj then
+                local line = lineObj:GetText()
+                if line then
+                    -- Look for a pattern like '9,462 - 14,194 Damage' or '123 - 456 Damage'
+                    local min, max = string.match(line, "([%d,]+)%s*%-%s*([%d,]+)")
+                    if min and max then
+                        minDmg = tonumber((min:gsub(',', '')))
+                        maxDmg = tonumber((max:gsub(',', '')))
+                        break
+                    end
+                end
+            end
+        end
+        if minDmg and maxDmg then
+            return {
+                itemId = itemId,
+                min = minDmg,
+                max = maxDmg,
+                name = select(1, GetItemInfo(itemId))
+            }
+        end
+        return nil
+    end
 end
 
 -- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~

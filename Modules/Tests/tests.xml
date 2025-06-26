@@ -45,6 +45,7 @@
   <!-- Other Module Tests -->
   <Script file="APL.Tests.lua"/>
   <Script file="APLSchema.Tests.lua"/>
+  <Script file="APLWalker.Tests.lua"/>
   <Script file="BTK.Tests.lua"/>
   <Script file="DataPipeline.Tests.lua"/>
   <Script file="GlowManager.Tests.lua"/>

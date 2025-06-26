@@ -424,6 +424,20 @@ function StateManager:UpdateEquipmentState()
                 slot = slot,
                 flags = flags
             })
+
+            -- Track raw weapon damage for mainhand/offhand using TooltipParsingManager
+            if slot == 16 or slot == 17 then
+                local TooltipParsingManager = NAG:GetModule("TooltipParsingManager")
+                state.rawWeaponDamage = state.rawWeaponDamage or {}
+                local dmg = TooltipParsingManager and TooltipParsingManager.GetWeaponDamage and TooltipParsingManager:GetWeaponDamage(itemId)
+                state.rawWeaponDamage[slot] = dmg or { itemId = itemId, min = nil, max = nil, name = select(1, GetItemInfo(itemId)) }
+            end
+        end
+    end
+    -- Remove cached damage if weapon is unequipped
+    for _, slot in ipairs(slotCategories.weapons) do
+        if not GetInventoryItemID("player", slot) and state.rawWeaponDamage and state.rawWeaponDamage[slot] then
+            state.rawWeaponDamage[slot] = nil
         end
     end
 
@@ -809,6 +823,18 @@ do -- External Helper methods
             end
         end
         return false
+    end
+
+    --- Gets the raw (unmodified) weapon damage for a given slot (16=mainhand, 17=offhand)
+    --- @param self StateManager
+    --- @param slot number 16 for mainhand, 17 for offhand
+    --- @return table|nil Table with fields: itemId, min, max, name
+    function StateManager:GetRawWeaponDamage(slot)
+        local state = self.state.player.equipment
+        if state.rawWeaponDamage then
+            return state.rawWeaponDamage[slot]
+        end
+        return nil
     end
 end
 
