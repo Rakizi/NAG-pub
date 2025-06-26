@@ -34,12 +34,12 @@ local AURA_STAT_CACHE_DURATION = 0.2 -- Cache for 200ms
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
---- Calculates the average weapon damage for a given weapon.
+--- Calculates the average modified(paperdoll)weapon damage for a given weapon.
 --- Includes base damage, buffs, and debuffs, but not attack power scaling.
 --- @param weapon string|nil The weapon to check ("mainhand" or "offhand"). Defaults to "mainhand" if not specified.
 --- @return number The average weapon damage, or 0 if unavailable or invalid weapon type.
 --- @usage NAG:WeaponDamage("mainhand")
-function NAG:WeaponDamage(weapon)
+function NAG:PlayerWeaponDamage(weapon)
     weapon = weapon or "mainhand"
 
     local minDamage, maxDamage, minOffHandDamage, maxOffHandDamage = UnitDamage("player")
@@ -118,16 +118,15 @@ function NAG:GetStatFromAuraBySpellID(spellId, statName)
     return value
 end
 
---- Gets the static (unmodified) weapon damage for a given weapon slot.
---- This uses tooltip parsing, not the player's current stats or buffs.
+--- Gets the static (unmodified) weapon damage for a given weapon slot. 
 --- @param weapon string|nil The weapon to check ("mainhand" or "offhand"). Defaults to "mainhand" if not specified.
 --- @return number The average static weapon damage, or 0 if unavailable.
---- @usage NAG:RawWeaponDamage("mainhand")
-function NAG:RawWeaponDamage(weapon)
+--- @usage NAG:WeaponDamage("mainhand")
+function NAG:WeaponDamage(weapon)
     weapon = weapon or "mainhand"
     local StateManager = NAG:GetModule("StateManager")
     local slot = (weapon == "offhand") and 17 or 16
-    local raw = StateManager and StateManager:GetRawWeaponDamage(slot)
+    local raw = StateManager and StateManager:GetWeaponDamage(slot)
     if raw and raw.min and raw.max then
         return (raw.min + raw.max) / 2
     end

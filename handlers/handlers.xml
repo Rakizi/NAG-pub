@@ -5,6 +5,7 @@
     <Script file="APL_Core.lua"/>
     <Script file="APL_Targets.lua"/>
     <Script file="APL_Spells.lua"/>
+    <Script file="APL_Timing.lua"/>
     <Script file="APL_Operators.lua"/>
     <Script file="APL_DRW.lua"/>
     <Script file="APL_Class.lua"/>

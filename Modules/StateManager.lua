@@ -428,16 +428,16 @@ function StateManager:UpdateEquipmentState()
             -- Track raw weapon damage for mainhand/offhand using TooltipParsingManager
             if slot == 16 or slot == 17 then
                 local TooltipParsingManager = NAG:GetModule("TooltipParsingManager")
-                state.rawWeaponDamage = state.rawWeaponDamage or {}
+                state.WeaponDamage = state.WeaponDamage or {}
                 local dmg = TooltipParsingManager and TooltipParsingManager.GetWeaponDamage and TooltipParsingManager:GetWeaponDamage(itemId)
-                state.rawWeaponDamage[slot] = dmg or { itemId = itemId, min = nil, max = nil, name = select(1, GetItemInfo(itemId)) }
+                state.WeaponDamage[slot] = dmg or { itemId = itemId, min = nil, max = nil, name = select(1, GetItemInfo(itemId)) }
             end
         end
     end
     -- Remove cached damage if weapon is unequipped
     for _, slot in ipairs(slotCategories.weapons) do
-        if not GetInventoryItemID("player", slot) and state.rawWeaponDamage and state.rawWeaponDamage[slot] then
-            state.rawWeaponDamage[slot] = nil
+        if not GetInventoryItemID("player", slot) and state.WeaponDamage and state.WeaponDamage[slot] then
+            state.WeaponDamage[slot] = nil
         end
     end
 
@@ -829,10 +829,10 @@ do -- External Helper methods
     --- @param self StateManager
     --- @param slot number 16 for mainhand, 17 for offhand
     --- @return table|nil Table with fields: itemId, min, max, name
-    function StateManager:GetRawWeaponDamage(slot)
+    function StateManager:GetWeaponDamage(slot)
         local state = self.state.player.equipment
-        if state.rawWeaponDamage then
-            return state.rawWeaponDamage[slot]
+        if state.WeaponDamage then
+            return state.WeaponDamage[slot]
         end
         return nil
     end
