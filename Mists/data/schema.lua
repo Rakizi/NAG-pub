@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-06-25 21:28:27
+-- Generated schema for mop on 2025-06-27 06:19:14
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -9166,6 +9166,11 @@ ns.protoSchema['mists'] = {
             id = 4,
             type = "double",
             label = "repeated"
+          },
+          disabled_in_challenge_mode = {
+            id = 5,
+            type = "bool",
+            label = "optional"
           }
         },
         oneofs = {
@@ -9175,7 +9180,8 @@ ns.protoSchema['mists'] = {
           "id",
           "name",
           "color",
-          "stats"
+          "stats",
+          "disabled_in_challenge_mode"
         }
       },
       SimItem = {
@@ -10290,6 +10296,11 @@ ns.protoSchema['mists'] = {
             type = "enum",
             label = "optional",
             enum_type = "Profession"
+          },
+          disabled_in_challenge_mode = {
+            id = 10,
+            type = "bool",
+            label = "optional"
           }
         },
         oneofs = {
@@ -10304,7 +10315,8 @@ ns.protoSchema['mists'] = {
           "phase",
           "quality",
           "unique",
-          "required_profession"
+          "required_profession",
+          "disabled_in_challenge_mode"
         }
       },
       IconData = {
@@ -16955,7 +16967,6 @@ ns.protoSchema['mists'] = {
           spellId = 51963,
           cast = [[{
 			DefaultCast: core.Cast{
-				GCD:      core.GCDMin,
 				CastTime: time.Millisecond * 2000,
 			},
 		}]],
@@ -17930,17 +17941,6 @@ ns.protoSchema['mists'] = {
         }
       },
       blood = {
-        registerRiposte_Riposte = {
-          sourceFile = "extern/wowsims-mop/sim/death_knight/blood/riposte.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRiposte",
-          spellId = 145677,
-          auraDuration = {
-            raw = "time.Second * 20",
-            seconds = 20
-          },
-          label = "Riposte"
-        },
         registerBoneShield_BoneShield = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/blood/bone_shield.go",
           registrationType = "RegisterAura",
@@ -21130,6 +21130,20 @@ ns.protoSchema['mists'] = {
           },
           ClassSpellMask = "HunterSpellFervor"
         },
+        registerGlaiveTossSpell_1 = {
+          sourceFile = "extern/wowsims-mop/sim/hunter/glaive_toss.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerGlaiveTossSpell",
+          spellId = 117050,
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagRanged | core.SpellFlagPassiveSpell",
+          ClassSpellMask = "HunterSpellGlaiveToss",
+          SpellSchool = "core.SpellSchoolPhysical",
+          ProcMask = "core.ProcMaskRangedSpecial",
+          DamageMultiplier = "1",
+          DamageMultiplierAdditive = "1",
+          CritMultiplier = "hunter.DefaultCritMultiplier()",
+          ThreatMultiplier = "1"
+        },
         registerGlaiveTossSpell_2 = {
           sourceFile = "extern/wowsims-mop/sim/hunter/glaive_toss.go",
           registrationType = "RegisterSpell",
@@ -21195,12 +21209,12 @@ ns.protoSchema['mists'] = {
 			},
 			CD: core.Cooldown{
 				Timer:    hunter.NewTimer(),
-				Duration: time.Second * 30,
+				Duration: cooldown,
 			},
 		}]],
           cooldown = {
-            raw = "time.Second * 30",
-            seconds = 30
+            raw = "cooldown",
+            seconds = nil
           },
           Flags = "core.SpellFlagAoE | core.SpellFlagAPL",
           ClassSpellMask = "HunterSpellExplosiveTrap",
@@ -21291,7 +21305,7 @@ ns.protoSchema['mists'] = {
           sourceFile = "extern/wowsims-mop/sim/hunter/serpent_sting.go",
           registrationType = "RegisterSpell",
           functionName = "registerSerpentStingSpell",
-          spellId = 82834,
+          spellId = 1978,
           Flags = "core.SpellFlagPassiveSpell | core.SpellFlagRanged",
           ClassSpellMask = "HunterSpellSerpentSting",
           SpellSchool = "core.SpellSchoolNature",
@@ -26046,10 +26060,10 @@ ns.protoSchema['mists'] = {
           },
           label = "Sword and Board"
         },
-        registerRiposte_Ultimatum = {
+        registerUltimatum_Ultimatum = {
           sourceFile = "extern/wowsims-mop/sim/warrior/protection/passives.go",
           registrationType = "RegisterAura",
-          functionName = "registerRiposte",
+          functionName = "registerUltimatum",
           spellId = 122510,
           auraDuration = {
             raw = "10 * time.Second",
@@ -27809,11 +27823,11 @@ ns.protoSchema['mists'] = {
           cast = [[{
 			DefaultCast: core.Cast{},
 			CD: core.Cooldown{
-				Timer:    warrior.NewTimer(),
+				Timer:    war.NewTimer(),
 				Duration: time.Second * 45,
 			},
 			ModifyCast: func(sim *core.Simulation, spell *core.Spell, cast *core.Cast) {
-				warrior.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime)
+				war.AutoAttacks.StopMeleeUntil(sim, sim.CurrentTime+cast.CastTime)
 			},
 			IgnoreHaste: true,
 		}]],
@@ -27826,7 +27840,7 @@ ns.protoSchema['mists'] = {
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
           DamageMultiplier = "1",
-          CritMultiplier = "warrior.DefaultCritMultiplier()",
+          CritMultiplier = "war.DefaultCritMultiplier()",
           ThreatMultiplier = "1",
           IgnoreHaste = "true"
         },
@@ -28100,7 +28114,7 @@ ns.protoSchema['mists'] = {
           spellId = 1464,
           tag = 1,
           Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagIgnoreAttackerModifiers | core.SpellFlagNoOnCastComplete",
-          ClassSpellMask = "warrior.SpellMaskSlam",
+          ClassSpellMask = "warrior.SpellMaskSweepingSlam",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskEmpty",
           DamageMultiplier = "0.35",
@@ -28131,7 +28145,7 @@ ns.protoSchema['mists'] = {
           sourceFile = "extern/wowsims-mop/sim/warrior/arms/sweeping_strikes.go",
           registrationType = "RegisterSpell",
           functionName = "registerSweepingStrikes",
-          spellId = 12328,
+          spellId = 12723,
           Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell | core.SpellFlagNoOnCastComplete",
           ClassSpellMask = "warrior.SpellMaskSweepingStrikesHit",
           SpellSchool = "core.SpellSchoolPhysical",
@@ -28140,6 +28154,18 @@ ns.protoSchema['mists'] = {
           ThreatMultiplier = "1"
         },
         registerSweepingStrikes_2 = {
+          sourceFile = "extern/wowsims-mop/sim/warrior/arms/sweeping_strikes.go",
+          registrationType = "RegisterSpell",
+          functionName = "registerSweepingStrikes",
+          spellId = 26654,
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell | core.SpellFlagNoOnCastComplete",
+          ClassSpellMask = "warrior.SpellMaskSweepingStrikesNormalizedHit",
+          SpellSchool = "core.SpellSchoolPhysical",
+          ProcMask = "core.ProcMaskMeleeSpecial",
+          DamageMultiplier = "0.5",
+          ThreatMultiplier = "1"
+        },
+        registerSweepingStrikes_3 = {
           sourceFile = "extern/wowsims-mop/sim/warrior/arms/sweeping_strikes.go",
           registrationType = "RegisterSpell",
           functionName = "registerSweepingStrikes",
@@ -29389,10 +29415,10 @@ ns.protoSchema['mists'] = {
       }
     },
     go_diagnostic = {
-      files_scanned = 738,
-      functions_scanned = 3439,
+      files_scanned = 736,
+      functions_scanned = 3444,
       registrations_found = 894,
-      registrations_parsed = 868,
+      registrations_parsed = 869,
       registrations_missed = {
         {
           file = "sim/death_knight/ghoul_pet.go",
@@ -29505,14 +29531,6 @@ ns.protoSchema['mists'] = {
           registration_type = "RegisterSpell",
           reason = "Could not extract spellId",
           block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagAPL, 		ApplyEffects: func(sim *core.Simulation, _ *core.Unit, _ *core.Spell) { 			aura.Activate(sim)..."
-        },
-        {
-          file = "sim/hunter/glaive_toss.go",
-          ["function"] = "registerGlaiveTossSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:                 core.ActionID{SpellID: spellID}, 			SpellSchool:              core.SpellSchoolPhysical, 			ProcMask:                 co..."
         },
         {
           file = "sim/priest/shadow/shadowy_recall.go",

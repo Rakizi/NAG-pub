@@ -1,4 +1,4 @@
--- Generated schema for sod on 2025-06-25 21:28:30
+-- Generated schema for sod on 2025-06-27 06:19:17
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['sod'] = {
