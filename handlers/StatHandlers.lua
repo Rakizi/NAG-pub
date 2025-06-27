@@ -56,6 +56,7 @@ function NAG:PlayerWeaponDamage(weapon)
     end
 end
 
+--[[ Currently this is not returning proper values, using 'expensive' method below
 --- Gets the static (unmodified) weapon damage for a given weapon slot. 
 --- @param weapon string|nil The weapon to check ("mainhand" or "offhand"). Defaults to "mainhand" if not specified.
 --- @return number The average static weapon damage, or 0 if unavailable.
@@ -69,6 +70,43 @@ function NAG:WeaponDamage(weapon)
         return (raw.min + raw.max) / 2
     end
     return 0
+end
+]]
+--- Calculates the average weapon damage for a given weapon.
+--- This includes base damage, buffs, and debuffs. It does not include attack power scaling.
+--- @param weapon string The weapon to check ("mainhand" or "offhand"). Defaults to "mainhand".
+--- @return number The average weapon damage.
+--- @usage NAG:WeaponDamage("mainhand")
+function NAG:WeaponDamage(weapon)
+    weapon = weapon or "mainhand"
+
+    local lo, hi, minOffHandDamage, maxOffHandDamage = UnitDamage("player")
+    local b, p, n = UnitAttackPower("player")
+    local ap = b + p - n
+    local s = UnitAttackSpeed("player")
+    local h = GetCombatRatingBonus(20) / 100
+    local bs = s * (1 + h)
+    local apB = ap * bs / 14
+
+    if weapon == "mainhand" then
+        if not lo or not hi then return 0 end
+        -- Calculate base weapon damage by removing attack power contribution
+        local baseLo = floor(lo - apB)
+        local baseHi = floor(hi - apB)
+        return (baseLo + baseHi) / 2
+    elseif weapon == "offhand" then
+        if not minOffHandDamage or not maxOffHandDamage then return 0 end
+        -- For offhand, we need to calculate its specific attack power contribution
+        local offhandSpeed = UnitAttackSpeed("player", true) or s
+        local offhandBs = offhandSpeed * (1 + h)
+        local offhandApB = ap * offhandBs / 14
+        local baseLo = floor(minOffHandDamage - offhandApB)
+        local baseHi = floor(maxOffHandDamage - offhandApB)
+        return (baseLo + baseHi) / 2
+    else
+        self:Error("WeaponDamage: Invalid weapon type specified: " .. tostring(weapon))
+        return 0
+    end
 end
 
 --- Calculates the average ranged weapon damage for the player.
