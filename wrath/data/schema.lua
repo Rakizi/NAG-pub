@@ -1,4 +1,4 @@
--- Generated schema for wotlk on 2025-06-27 06:19:16
+-- Generated schema for wotlk on 2025-06-27 09:30:19
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['wotlk'] = {
@@ -26270,8 +26270,6 @@ ns.protoSchema['wotlk'] = {
     },
     consumables = {
       ConjuredDarkRune = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12662
@@ -26286,8 +26284,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ConjuredFlameCap = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22788
@@ -26299,8 +26295,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ConjuredHealthstone = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22105
@@ -26315,8 +26309,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ConjuredRogueThistleTea = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             7676
@@ -26334,8 +26326,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ExplosiveSaroniteBomb = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             41119
@@ -26347,8 +26337,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ExplosiveCobaltFragBomb = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40771
@@ -26360,8 +26348,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FlaskOfTheFrostWyrm = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             46376
@@ -26376,8 +26362,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FlaskOfEndlessRage = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             46377
@@ -26393,8 +26377,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FlaskOfPureMojo = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             46378
@@ -26409,8 +26391,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FlaskOfStoneblood = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             46379
@@ -26425,8 +26405,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       LesserFlaskOfToughness = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40079
@@ -26441,8 +26419,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       LesserFlaskOfResistance = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44939
@@ -26461,8 +26437,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FlaskOfBlindingLight = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22861
@@ -26471,8 +26445,6 @@ ns.protoSchema['wotlk'] = {
         value = "Flask.FlaskOfBlindingLight"
       },
       FlaskOfMightyRestoration = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22853
@@ -26481,8 +26453,6 @@ ns.protoSchema['wotlk'] = {
         value = "Flask.FlaskOfMightyRestoration"
       },
       FlaskOfPureDeath = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22866
@@ -26491,8 +26461,6 @@ ns.protoSchema['wotlk'] = {
         value = "Flask.FlaskOfPureDeath"
       },
       FlaskOfRelentlessAssault = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22854
@@ -26501,8 +26469,6 @@ ns.protoSchema['wotlk'] = {
         value = "Flask.FlaskOfRelentlessAssault"
       },
       FlaskOfSupremePower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13512
@@ -26511,8 +26477,6 @@ ns.protoSchema['wotlk'] = {
         value = "Flask.FlaskOfSupremePower"
       },
       FlaskOfFortification = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22851
@@ -26521,8 +26485,6 @@ ns.protoSchema['wotlk'] = {
         value = "Flask.FlaskOfFortification"
       },
       FlaskOfChromaticWonder = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             33208
@@ -26531,8 +26493,6 @@ ns.protoSchema['wotlk'] = {
         value = "Flask.FlaskOfChromaticWonder"
       },
       ElixirOfAccuracy = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44325
@@ -26548,8 +26508,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfArmorPiercing = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44330
@@ -26564,8 +26522,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfDeadlyStrikes = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44327
@@ -26581,8 +26537,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfExpertise = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44329
@@ -26597,8 +26551,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfLightningSpeed = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44331
@@ -26614,8 +26566,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfMightyAgility = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             39666
@@ -26630,8 +26580,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfMightyStrength = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40073
@@ -26646,8 +26594,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       GurusElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40076
@@ -26666,8 +26612,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpellpowerElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40070
@@ -26682,8 +26626,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       WrathElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40068
@@ -26699,8 +26641,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AdeptsElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             28103
@@ -26709,8 +26649,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.AdeptsElixir"
       },
       ElixirOfDemonslaying = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9224
@@ -26719,8 +26657,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfDemonslaying"
       },
       ElixirOfMajorAgility = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22831
@@ -26729,8 +26665,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfMajorAgility"
       },
       ElixirOfMajorFirePower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22833
@@ -26739,8 +26673,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfMajorFirePower"
       },
       ElixirOfMajorFrostPower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22827
@@ -26749,8 +26681,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfMajorFrostPower"
       },
       ElixirOfMajorShadowPower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22835
@@ -26759,8 +26689,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfMajorShadowPower"
       },
       ElixirOfMajorStrength = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22824
@@ -26769,8 +26697,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfMajorStrength"
       },
       ElixirOfMastery = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             28104
@@ -26779,8 +26705,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfMastery"
       },
       ElixirOfTheMongoose = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13452
@@ -26789,8 +26713,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.ElixirOfTheMongoose"
       },
       FelStrengthElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             31679
@@ -26799,8 +26721,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.FelStrengthElixir"
       },
       GreaterArcaneElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13454
@@ -26809,8 +26729,6 @@ ns.protoSchema['wotlk'] = {
         value = "BattleElixir.GreaterArcaneElixir"
       },
       ElixirOfMightyDefense = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44328
@@ -26825,8 +26743,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfMightyFortitude = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40078
@@ -26841,8 +26757,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfMightyMageblood = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40109
@@ -26857,8 +26771,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfMightyThoughts = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             44332
@@ -26873,8 +26785,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfProtection = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40097
@@ -26889,8 +26799,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfSpirit = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40072
@@ -26905,8 +26813,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       GiftOfArthas = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9088
@@ -26927,8 +26833,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElixirOfDraenicWisdom = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             32067
@@ -26937,8 +26841,6 @@ ns.protoSchema['wotlk'] = {
         value = "GuardianElixir.ElixirOfDraenicWisdom"
       },
       ElixirOfIronskin = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             32068
@@ -26947,8 +26849,6 @@ ns.protoSchema['wotlk'] = {
         value = "GuardianElixir.ElixirOfIronskin"
       },
       ElixirOfMajorDefense = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22834
@@ -26957,8 +26857,6 @@ ns.protoSchema['wotlk'] = {
         value = "GuardianElixir.ElixirOfMajorDefense"
       },
       ElixirOfMajorFortitude = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             32062
@@ -26967,8 +26865,6 @@ ns.protoSchema['wotlk'] = {
         value = "GuardianElixir.ElixirOfMajorFortitude"
       },
       ElixirOfMajorMageblood = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22840
@@ -26977,8 +26873,6 @@ ns.protoSchema['wotlk'] = {
         value = "GuardianElixir.ElixirOfMajorMageblood"
       },
       FoodFishFeast = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             43015
@@ -26996,8 +26890,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodGreatFeast = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             34753
@@ -27015,8 +26907,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodBlackenedDragonfin = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             42999
@@ -27031,8 +26921,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodHeartyRhino = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             42995
@@ -27047,8 +26935,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodMegaMammothMeal = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             34754
@@ -27064,8 +26950,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodSpicedWormBurger = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             34756
@@ -27081,8 +26965,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodRhinoliciousWormsteak = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             42994
@@ -27097,8 +26979,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodImperialMantaSteak = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             34769
@@ -27114,8 +26994,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodSnapperExtreme = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             42996
@@ -27131,8 +27009,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodMightyRhinoDogs = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             34758
@@ -27147,8 +27023,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodFirecrackerSalmon = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             34767
@@ -27163,8 +27037,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodCuttlesteak = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             42998
@@ -27179,8 +27051,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodDragonfinFilet = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             43000
@@ -27195,8 +27065,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FoodBlackenedBasilisk = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             27657
@@ -27205,8 +27073,6 @@ ns.protoSchema['wotlk'] = {
         value = "Food.FoodBlackenedBasilisk"
       },
       FoodGrilledMudfish = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             27664
@@ -27215,8 +27081,6 @@ ns.protoSchema['wotlk'] = {
         value = "Food.FoodGrilledMudfish"
       },
       FoodRavagerDog = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             27655
@@ -27225,8 +27089,6 @@ ns.protoSchema['wotlk'] = {
         value = "Food.FoodRavagerDog"
       },
       FoodRoastedClefthoof = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             27658
@@ -27235,8 +27097,6 @@ ns.protoSchema['wotlk'] = {
         value = "Food.FoodRoastedClefthoof"
       },
       FoodSpicyHotTalbuk = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             33872
@@ -27245,8 +27105,6 @@ ns.protoSchema['wotlk'] = {
         value = "Food.FoodSpicyHotTalbuk"
       },
       FoodSkullfishSoup = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             33825
@@ -27255,8 +27113,6 @@ ns.protoSchema['wotlk'] = {
         value = "Food.FoodSkullfishSoup"
       },
       FoodFishermansFeast = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             33052
@@ -27265,8 +27121,6 @@ ns.protoSchema['wotlk'] = {
         value = "Food.FoodFishermansFeast"
       },
       RunicHealingPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             33447
@@ -27281,8 +27135,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       RunicHealingInjector = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             41166
@@ -27297,8 +27149,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       RunicManaPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             33448
@@ -27313,8 +27163,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       RunicManaInjector = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             42545
@@ -27329,8 +27177,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       IndestructiblePotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40093
@@ -27346,8 +27192,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PotionOfSpeed = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40211
@@ -27364,8 +27208,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PotionOfWildMagic = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40212
@@ -27383,8 +27225,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DestructionPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22839
@@ -27393,8 +27233,6 @@ ns.protoSchema['wotlk'] = {
         value = "Potions.DestructionPotion"
       },
       HastePotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22838
@@ -27403,8 +27241,6 @@ ns.protoSchema['wotlk'] = {
         value = "Potions.HastePotion"
       },
       MightyRagePotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13442
@@ -27413,8 +27249,6 @@ ns.protoSchema['wotlk'] = {
         value = "Potions.MightyRagePotion"
       },
       SuperManaPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22832
@@ -27423,8 +27257,6 @@ ns.protoSchema['wotlk'] = {
         value = "Potions.SuperManaPotion"
       },
       FelManaPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             31677
@@ -27433,8 +27265,6 @@ ns.protoSchema['wotlk'] = {
         value = "Potions.FelManaPotion"
       },
       InsaneStrengthPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22828
@@ -27450,8 +27280,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       IronshieldPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22849
@@ -27460,8 +27288,6 @@ ns.protoSchema['wotlk'] = {
         value = "Potions.IronshieldPotion"
       },
       HeroicPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             22837
@@ -27479,8 +27305,6 @@ ns.protoSchema['wotlk'] = {
     },
     buffs_debuffs = {
       AllStatsBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17051,
@@ -27495,8 +27319,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AllStatsPercentBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             25898,
@@ -27511,8 +27333,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ArmorBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16293,
@@ -27532,8 +27352,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AttackPowerBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12861,
@@ -27551,8 +27369,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AttackPowerPercentBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19506,
@@ -27569,8 +27385,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DamagePercentBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31583,
@@ -27588,8 +27402,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DamageReductionPercentBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             25899,
@@ -27605,8 +27417,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DefensiveCooldownBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6940,
@@ -27623,8 +27433,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HastePercentBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48396,
@@ -27640,8 +27448,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HealthBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12861,
@@ -27658,8 +27464,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       IntellectBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             43002,
@@ -27678,8 +27482,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MeleeCritBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17007,
@@ -27695,8 +27497,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MeleeHasteBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29193,
@@ -27712,8 +27512,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MP5Buff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16206,
@@ -27730,8 +27528,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ReplenishmentBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31878,
@@ -27749,8 +27545,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ResistanceBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48170,
@@ -27770,8 +27564,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       RevitalizeBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             26982,
@@ -27783,8 +27575,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpellCritBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24907,
@@ -27800,8 +27590,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpellPowerBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47240,
@@ -27817,8 +27605,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpiritBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48073,
@@ -27837,8 +27623,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       StaminaBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             14767,
@@ -27856,8 +27640,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       StrengthAndAgilityBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             52456,
@@ -27878,8 +27660,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MajorArmorDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             8647,
@@ -27895,8 +27675,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MinorArmorDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             770,
@@ -27915,8 +27693,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AttackPowerDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12879,
@@ -27937,8 +27713,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BleedDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             46855,
@@ -27955,8 +27729,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       CritDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20337,
@@ -27973,8 +27745,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MeleeAttackSpeedDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12666,
@@ -27993,8 +27763,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MeleeHitDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             3043,
@@ -28009,8 +27777,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PhysicalDamageDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29859,
@@ -28026,8 +27792,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpellCritDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12873,
@@ -28043,8 +27807,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpellHitDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             33198,
@@ -28059,8 +27821,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpellDamageDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47865,
@@ -28077,8 +27837,6 @@ ns.protoSchema['wotlk'] = {
       },
       ManaTideTotem = {
         numStates = 5,
-        source = "multistate_function",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16190
@@ -28092,8 +27850,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Bloodlust = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             2825
@@ -28108,8 +27864,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SpellHasteBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             3738
@@ -28123,8 +27877,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       StrengthOfWrynn = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             73828
@@ -28140,8 +27892,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HeroicPresence = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6562
@@ -28156,8 +27906,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BraidedEterniumChain = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31025
@@ -28172,8 +27920,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ChainOfTheTwilightOwl = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31035
@@ -28188,8 +27934,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FocusMagic = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             54648
@@ -28203,8 +27947,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       EyeOfTheNight = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31033
@@ -28218,8 +27960,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Thorns = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53307
@@ -28233,8 +27973,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       RetributionAura = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             54043
@@ -28248,8 +27986,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Innervate = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29166
@@ -28263,8 +27999,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PowerInfusion = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10060
@@ -28279,8 +28013,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       TricksOfTheTrade = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57933
@@ -28296,8 +28028,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       UnholyFrenzy = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             49016
@@ -28312,8 +28042,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       JudgementOfWisdom = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53408
@@ -28328,8 +28056,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HuntersMark = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53338
@@ -28343,8 +28069,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       JudgementOfLight = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20271
@@ -28358,8 +28082,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ShatteringThrow = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             64382
@@ -28373,8 +28095,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       CrystalYield = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             15235
@@ -28388,8 +28108,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ThermalSapper = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12662
@@ -28397,8 +28115,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ExplosiveDecoy = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             40536
@@ -28406,8 +28122,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PetFood = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             46376
@@ -28415,8 +28129,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PetScrollOfAgility = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             27498
@@ -28424,8 +28136,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PetScrollOfStrength = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             27503
@@ -28433,8 +28143,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       GiftOfTheWild = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48470
@@ -28442,8 +28150,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DrumsOfTheWild = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             49634
@@ -28451,8 +28157,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BlessingOfKings = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             25898
@@ -28460,8 +28164,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DrumsOfForgottenKings = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             49633
@@ -28469,8 +28171,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BlessingOfSanctuary = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             25899
@@ -28478,8 +28178,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DevotionAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48942
@@ -28487,8 +28185,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       StoneskinTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58753
@@ -28496,8 +28192,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ScrollOfProtection = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             43468
@@ -28505,8 +28199,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BlessingOfMight = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48934
@@ -28514,8 +28206,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BattleShout = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47436
@@ -28523,8 +28213,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AbominationsMight = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53138
@@ -28532,8 +28220,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       UnleashedRage = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             30809
@@ -28541,8 +28227,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       TrueshotAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19506
@@ -28550,8 +28234,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SanctifiedRetribution = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31869
@@ -28559,8 +28241,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ArcaneEmpowerment = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31583
@@ -28568,8 +28248,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FerociousInspiration = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             34460
@@ -28577,8 +28255,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       RenewedHope = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57472
@@ -28586,8 +28262,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Vigilance = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             50720
@@ -28595,8 +28269,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HandOfSacrifices = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6940
@@ -28604,8 +28276,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DivineGuardians = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53530
@@ -28613,8 +28283,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PainSuppressions = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             33206
@@ -28622,8 +28290,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       GuardianSpirits = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47788
@@ -28631,8 +28297,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SwiftRetribution = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53648
@@ -28640,8 +28304,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MoonkinAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48396
@@ -28649,8 +28311,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       CommandingShout = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47440
@@ -28658,8 +28318,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BloodPact = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47982
@@ -28667,8 +28325,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ArcaneBrilliance = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             43002
@@ -28676,8 +28332,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FelIntelligence = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57567
@@ -28685,8 +28339,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ScrollOfIntellect = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             37092
@@ -28694,8 +28346,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       LeaderOfThePack = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17007
@@ -28703,8 +28353,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Rampage = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29801
@@ -28712,8 +28360,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       IcyTalons = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             55610
@@ -28721,8 +28367,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       WindfuryTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             65990
@@ -28730,8 +28374,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BlessingOfWisdom = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48938
@@ -28739,8 +28381,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ManaSpringTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58774
@@ -28748,8 +28388,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       VampiricTouch = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48160
@@ -28757,8 +28395,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       JudgementsOfTheWise = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31878
@@ -28766,8 +28402,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HuntingParty = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53292
@@ -28775,8 +28409,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ImprovedSoulLeech = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             54118
@@ -28784,8 +28416,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       EnduringWinter = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             44561
@@ -28793,8 +28423,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ShadowProtection = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48170
@@ -28802,8 +28430,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       NatureResistanceTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58749
@@ -28811,8 +28437,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AspectOfTheWild = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             49071
@@ -28820,8 +28444,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FrostResistanceAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48945
@@ -28829,8 +28451,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FrostResistanceTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58745
@@ -28838,8 +28458,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ElementalOath = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             51470
@@ -28847,8 +28465,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       WrathOfAirTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             3738
@@ -28856,8 +28472,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DemonicPactSp = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47240
@@ -28865,8 +28479,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       TotemOfWrath = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57722
@@ -28874,8 +28486,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FlametongueTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58656
@@ -28883,8 +28493,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DivineSpirit = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48073
@@ -28892,8 +28500,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ScrollOfSpirit = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             37098
@@ -28901,8 +28507,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PowerWordFortitude = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48161
@@ -28910,8 +28514,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ScrollOfStamina = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             37094
@@ -28919,8 +28521,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       StrengthOfEarthTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58643
@@ -28928,8 +28528,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HornOfWinter = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57623
@@ -28937,8 +28535,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ScrollOfAgility = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             43464
@@ -28946,8 +28542,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ScrollOfStrength = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             43466
@@ -28955,8 +28549,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Innervates = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29166
@@ -28964,8 +28556,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       PowerInfusions = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10060
@@ -28973,8 +28563,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       TricksOfTheTrades = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57933
@@ -28982,8 +28570,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SunderArmor = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47467
@@ -28991,8 +28577,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ExposeArmor = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             8647
@@ -29000,8 +28584,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       AcidSpit = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             55754
@@ -29009,8 +28591,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FaerieFire = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             770
@@ -29018,8 +28598,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       CurseOfWeakness = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             50511
@@ -29027,8 +28605,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Sting = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             56631
@@ -29036,8 +28612,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SporeCloud = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53598
@@ -29045,8 +28619,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Vindication = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             26016
@@ -29054,8 +28626,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DemoralizingShout = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47437
@@ -29063,8 +28633,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DemoralizingRoar = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48560
@@ -29072,8 +28640,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       DemoralizingScreech = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             55487
@@ -29081,8 +28647,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Mangle = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48564
@@ -29090,8 +28654,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Trauma = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             46855
@@ -29099,8 +28661,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Stampede = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57393
@@ -29108,8 +28668,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       HeartOfTheCrusader = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20337
@@ -29117,8 +28675,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       MasterPoisoner = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58410
@@ -29126,8 +28682,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ThunderClap = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47502
@@ -29135,8 +28689,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       FrostFever = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             55095
@@ -29144,8 +28696,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       JudgementsOfTheJust = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             53696
@@ -29153,8 +28703,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       InfectedWounds = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48485
@@ -29162,8 +28710,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       InsectSwarm = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             65855
@@ -29171,8 +28717,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ScorpidSting = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             3043
@@ -29180,8 +28724,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       BloodFrenzy = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29859
@@ -29189,8 +28731,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       SavageCombat = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58413
@@ -29198,8 +28738,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ShadowMastery = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17803
@@ -29207,8 +28745,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ImprovedScorch = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12873
@@ -29216,8 +28752,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       WintersChill = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             28593
@@ -29225,8 +28759,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       Misery = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             33198
@@ -29234,8 +28766,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       EbonPlaguebringer = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             51161
@@ -29243,8 +28773,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       EarthAndMoon = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             48511
@@ -29252,8 +28780,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       CurseOfElements = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47865
@@ -29261,8 +28787,6 @@ ns.protoSchema['wotlk'] = {
         }
       },
       ShatteringThrows = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             64382
@@ -29272,214 +28796,5 @@ ns.protoSchema['wotlk'] = {
     },
     consumables_unparsed = {
 
-    },
-    diagnostic = {
-      actions = {
-        total_found = 18,
-        matched = 18,
-        missing = {
-
-        },
-        missing_attributes = {
-          uiLabel = 0,
-          shortDescription = 0,
-          fields = 0
-        },
-        missing_attr_items = {
-          uiLabel = {
-
-          },
-          shortDescription = {
-
-          },
-          fields = {
-
-          }
-        }
-      },
-      values = {
-        total_found = 64,
-        matched = 64,
-        missing = {
-
-        },
-        missing_attributes = {
-          uiLabel = 0,
-          shortDescription = 2,
-          fields = 0
-        },
-        missing_attr_items = {
-          uiLabel = {
-
-          },
-          shortDescription = {
-            "boss_spell_is_casting",
-            "boss_spell_time_to_ready"
-          },
-          fields = {
-
-          }
-        }
-      }
-    },
-    go_diagnostic = {
-      files_scanned = 466,
-      functions_scanned = 2494,
-      registrations_found = 662,
-      registrations_parsed = 643,
-      registrations_missed = {
-        {
-          file = "sim/rogue/fan_of_knives.go",
-          ["function"] = "makeFanOfKnivesWeaponHitSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    actionID, 		SpellSchool: core.SpellSchoolPhysical, 		ProcMask:    procMask, 		Flags:       core.SpellFlagMeleeMetrics | SpellFlagCold..."
-        },
-        {
-          file = "sim/common/wotlk/other_effects.go",
-          ["function"] = "NewItemEffectWithHeroic",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 				ActionID: actionID, 				Flags:    core.SpellFlagNoOnCastComplete, 				Cast: core.CastConfig{ 					CD: core.Cooldown{ 						Timer:    character.N..."
-        },
-        {
-          file = "sim/common/wotlk/other_effects.go",
-          ["function"] = "NewItemEffectWithHeroic",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = "{ 				Label:    name, 				ActionID: actionID, 				Duration: time.Second * 2 * time.Duration(numTicks), 				OnGain: func(aura *core.Aura, sim *core.Sim..."
-        },
-        {
-          file = "sim/common/wotlk/other_effects.go",
-          ["function"] = "NewItemEffectWithHeroic",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 				ActionID:    actionID, 				SpellSchool: core.SpellSchoolHoly, 				ProcMask:    core.ProcMaskSpellHealing, 				Flags:       core.SpellFlagNoOnCas..."
-        },
-        {
-          file = "sim/common/wotlk/other_effects.go",
-          ["function"] = "NewItemEffectWithHeroic",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 				ActionID:    actionID, 				SpellSchool: core.SpellSchoolHoly, 				ProcMask:    core.ProcMaskSpellHealing, 				Flags:       core.SpellFlagNoOnCas..."
-        },
-        {
-          file = "sim/common/wotlk/other_effects.go",
-          ["function"] = "NewItemEffectWithHeroic",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 				ActionID:    actionID, 				SpellSchool: core.SpellSchoolPhysical, 				ProcMask:    core.ProcMaskEmpty, 				Flags:       core.SpellFlagNoOnCastCo..."
-        },
-        {
-          file = "sim/encounters/ulduar/hodir_ai.go",
-          ["function"] = "registerFrozenBlowSpell",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: core.TernaryInt32(ai.raidSize == 25, 63512, 62478)}, 		SpellSchool: core.SpellSchoolPhysical, 		ProcMask:    c..."
-        },
-        {
-          file = "sim/encounters/ulduar/hodir_ai.go",
-          ["function"] = "registerFrozenBlowSpell",
-          registration_index = 3,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: core.TernaryInt32(ai.raidSize == 25, 63511, 62867)}.WithTag(1), 		SpellSchool: core.SpellSchoolPhysical, 		Pro..."
-        },
-        {
-          file = "sim/encounters/ulduar/hodir_ai.go",
-          ["function"] = "registerFrozenBlowSpell",
-          registration_index = 4,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: core.TernaryInt32(ai.raidSize == 25, 63511, 62867)}.WithTag(2), 		SpellSchool: core.SpellSchoolFrost, 		ProcMa..."
-        },
-        {
-          file = "sim/encounters/icc/sindragosa25h_ai.go",
-          ["function"] = "registerFrostBreathSpell",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    actionID, 		SpellSchool: core.SpellSchoolFrost, 		ProcMask:    core.ProcMaskSpellDamage, 		Flags:       core.SpellFlagAPL,  		Cast: c..."
-        },
-        {
-          file = "sim/shaman/weapon_imbues.go",
-          ["function"] = "newFlametongueImbueSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: int32(spellID)}, 		SpellSchool: core.SpellSchoolFire, 		ProcMask:    core.ProcMaskWeaponProc,  		BonusHitRatin..."
-        },
-        {
-          file = "sim/shaman/weapon_imbues.go",
-          ["function"] = "RegisterFlametongueImbue",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		Label:    label, 		Duration: core.NeverExpires, 		OnReset: func(aura *core.Aura, sim *core.Simulation) { 			aura.Activate(sim) 		}, 		OnSpellHitDe..."
-        },
-        {
-          file = "sim/shaman/talents.go",
-          ["function"] = "registerManaTideTotemCD",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: core.ManaTideTotemActionID, 		Flags:    core.SpellFlagNoOnCastComplete, 		Cast: core.CastConfig{ 			DefaultCast: core.Cast{ 				GCD: tim..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newFocusDump",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolPhysical, 		ProcMask:    core.ProcMaskMeleeMHSpecial, 		Flags:..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newSpecialAbility",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: config.SpellID}, 		SpellSchool: config.School, 		ProcMask:    procMask, 		Flags:       flags,  		DamageMultipl..."
-        },
-        {
-          file = "sim/hunter/explosive_trap.go",
-          ["function"] = "registerExplosiveTrapSpell",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: hunter.ExplosiveTrap.ActionID.WithTag(1), 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagNoMetrics | core.SpellFlagNoLogs |..."
-        },
-        {
-          file = "sim/warrior/shouts.go",
-          ["function"] = "makeShoutSpellHelper",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL | core.SpellFlagHelpful,  		RageCost: core.RageCostOptions{..."
-        },
-        {
-          file = "sim/warrior/stances.go",
-          ["function"] = "makeStanceSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer:..."
-        },
-        {
-          file = "sim/warrior/heroic_strike_cleave.go",
-          ["function"] = "makeQueueSpellsAndAura",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    srcSpell.WithTag(1), 		SpellSchool: core.SpellSchoolPhysical, 		ProcMask:    core.ProcMaskMeleeMHSpecial, 		Flags:       core.SpellFl..."
-        }
-      }
     }
   }
