@@ -56,6 +56,21 @@ function NAG:PlayerWeaponDamage(weapon)
     end
 end
 
+--- Gets the static (unmodified) weapon damage for a given weapon slot. 
+--- @param weapon string|nil The weapon to check ("mainhand" or "offhand"). Defaults to "mainhand" if not specified.
+--- @return number The average static weapon damage, or 0 if unavailable.
+--- @usage NAG:WeaponDamage("mainhand")
+function NAG:WeaponDamage(weapon)
+    weapon = weapon or "mainhand"
+    local StateManager = NAG:GetModule("StateManager")
+    local slot = (weapon == "offhand") and 17 or 16
+    local raw = StateManager and StateManager:GetWeaponDamage(slot)
+    if raw and raw.min and raw.max then
+        return (raw.min + raw.max) / 2
+    end
+    return 0
+end
+
 --- Calculates the average ranged weapon damage for the player.
 --- Includes base damage, buffs, and debuffs, but not attack power scaling.
 --- @return number The average ranged weapon damage, or 0 if unavailable.
@@ -118,17 +133,3 @@ function NAG:GetStatFromAuraBySpellID(spellId, statName)
     return value
 end
 
---- Gets the static (unmodified) weapon damage for a given weapon slot. 
---- @param weapon string|nil The weapon to check ("mainhand" or "offhand"). Defaults to "mainhand" if not specified.
---- @return number The average static weapon damage, or 0 if unavailable.
---- @usage NAG:WeaponDamage("mainhand")
-function NAG:WeaponDamage(weapon)
-    weapon = weapon or "mainhand"
-    local StateManager = NAG:GetModule("StateManager")
-    local slot = (weapon == "offhand") and 17 or 16
-    local raw = StateManager and StateManager:GetWeaponDamage(slot)
-    if raw and raw.min and raw.max then
-        return (raw.min + raw.max) / 2
-    end
-    return 0
-end

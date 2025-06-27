@@ -429,7 +429,9 @@ function StateManager:UpdateEquipmentState()
             if slot == 16 or slot == 17 then
                 local TooltipParsingManager = NAG:GetModule("TooltipParsingManager")
                 state.WeaponDamage = state.WeaponDamage or {}
-                local dmg = TooltipParsingManager and TooltipParsingManager.GetWeaponDamage and TooltipParsingManager:GetWeaponDamage(itemId)
+                local itemLink = GetInventoryItemLink("player", slot)
+                print("itemLink: " .. itemLink)
+                local dmg = TooltipParsingManager and TooltipParsingManager.GetWeaponDamage and TooltipParsingManager:GetWeaponDamage(itemLink or itemId)
                 state.WeaponDamage[slot] = dmg or { itemId = itemId, min = nil, max = nil, name = select(1, GetItemInfo(itemId)) }
             end
         end

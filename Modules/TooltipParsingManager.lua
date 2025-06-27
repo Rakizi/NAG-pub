@@ -946,14 +946,18 @@ do
     end
 
     --- Gets the static (unmodified) weapon damage for an item by scanning its tooltip.
-    --- @param itemId number The item ID to scan
+    --- @param itemLinkOrId string|number The item link (preferred) or item ID to scan
     --- @return table|nil Table with fields: itemId, min, max, name
-    function TooltipParsingManager:GetWeaponDamage(itemId)
-        if not itemId then return nil end
+    function TooltipParsingManager:GetWeaponDamage(itemLinkOrId)
+        if not itemLinkOrId then return nil end
         local scanningTooltip = self.state.scanningTooltip
         if not scanningTooltip then return nil end
         scanningTooltip:ClearLines()
-        scanningTooltip:SetHyperlink("item:" .. itemId)
+        if type(itemLinkOrId) == "string" and itemLinkOrId:find("item:") then
+            scanningTooltip:SetHyperlink(itemLinkOrId)
+        else
+            scanningTooltip:SetHyperlink("item:" .. tostring(itemLinkOrId))
+        end
         local minDmg, maxDmg
         for i = 2, math.min(10, scanningTooltip:NumLines()) do
             local lineObj = _G[scanningTooltip:GetName() .. "TextLeft" .. i]
@@ -970,12 +974,21 @@ do
                 end
             end
         end
+        local itemId = nil
+        local name = nil
+        if type(itemLinkOrId) == "string" and itemLinkOrId:find("item:") then
+            itemId = tonumber(itemLinkOrId:match("item:(%d+)") or "")
+            name = select(1, GetItemInfo(itemLinkOrId))
+        else
+            itemId = itemLinkOrId
+            name = select(1, GetItemInfo(itemId))
+        end
         if minDmg and maxDmg then
             return {
                 itemId = itemId,
                 min = minDmg,
                 max = maxDmg,
-                name = select(1, GetItemInfo(itemId))
+                name = name
             }
         end
         return nil
