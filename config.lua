@@ -593,9 +593,11 @@ do --== Rotation Functions ==--
             DotIsActive = { required = { "id" }, optional = { "targetUnit" } },
             DotRemainingTime = { required = { "id" }, optional = { "targetUnit" } },
             DotTickFrequency = { required = { "id" }, optional = { "targetUnit" } },
+            DotPercentIncrease = { required = { "id" }, optional = { "targetUnit" } },
 
             -- Casting actions
             Cast = { required = { "id" }, optional = { "tolerance", "position" } },
+            ActivateAura = { required = { "id" }, optional = { "tolerance", "position" } },
             CastFriendly = { required = { "id" }, optional = { "target" } },
             Channel = { required = { "id" }, optional = { "interruptIf", "boolean" } },
             ChannelSpell = { required = { "id" }, optional = { "interruptIf", "boolean" } },
@@ -642,6 +644,8 @@ do --== Rotation Functions ==--
             CurrentSoulShards = { required = {} },
             CurrentDemonicFury = { required = {} },
             CurrentArcaneCharges = { required = {} },
+            MaxMana = { required = {} },
+            CurrentAttackPower = { required = {} },
 
             -- Rune functions
             CurrentRuneCount = { required = { {"typeValidator", "RuneType"} } },
@@ -675,6 +679,9 @@ do --== Rotation Functions ==--
             PetHealthPercent = { required = {} },
             PetSpellIsReady = { required = { "id" } },
             PetCast = { required = { "id" } },
+            HunterCurrentPetFocus = { required = {} },
+            HunterCurrentPetFocusPercent = { required = {} },
+            HunterPetIsActive = { required = {} },
 
             EnergyThreshold = { required = { "expression" } },
             -- Class-specific functions

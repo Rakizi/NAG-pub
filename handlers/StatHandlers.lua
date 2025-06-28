@@ -171,3 +171,13 @@ function NAG:GetStatFromAuraBySpellID(spellId, statName)
     return value
 end
 
+--- Gets the current attack power of the player.
+--- @function NAG:CurrentAttackPower
+--- @usage NAG:CurrentAttackPower() >= x
+--- @return number The current attack power of the player
+function NAG:CurrentAttackPower()
+    local base, posBuff, negBuff = UnitAttackPower("player")
+    if not base then return 0 end
+    return base + posBuff + negBuff
+end
+

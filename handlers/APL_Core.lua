@@ -649,3 +649,5 @@ function NAG:ActivateAllStatBuffProcAuras()
     self:Print("Warning: ActivateAllStatBuffProcAuras is not yet fully implemented.")
     return false
 end
+
+NAG.ActivateAura = NAG.Cast

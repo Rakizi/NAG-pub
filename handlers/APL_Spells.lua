@@ -395,12 +395,12 @@ function NAG:AuraIsActiveWithReactionTime(spellId, sourceUnit, reactionTime)
     if not spellId then return false end
     sourceUnit = sourceUnit or "player"
     reactionTime = reactionTime or self:InputDelay()
-    local _, _, _, _, _, expirationTime, startTime = self:FindAura(sourceUnit, spellId)
-    if not startTime then
+    local _, _, _, _, duration, expirationTime = self:FindAura(sourceUnit, spellId)
+    if not expirationTime or not duration or duration == 0 then
         return false
     end
-    local activeTime = GetTime() - startTime
-    return activeTime >= reactionTime
+    local remaining = expirationTime - GetTime()
+    return remaining >= reactionTime
 end
 
 --- Checks if an aura is inactive or about to expire within a reaction time window.
@@ -413,14 +413,12 @@ function NAG:AuraIsInactiveWithReactionTime(spellId, sourceUnit, reactionTime)
     if not spellId then return true end
     sourceUnit = sourceUnit or "player"
     reactionTime = reactionTime or self:InputDelay()
-    -- First check if aura is completely inactive
-    if not self:IsActive(spellId, sourceUnit) then
-        return true
+    local _, _, _, _, duration, expirationTime = self:FindAura(sourceUnit, spellId)
+    if not expirationTime or not duration or duration == 0 then
+        return true -- Aura is inactive
     end
-    -- Get remaining time on the aura
-    local remaining = self:RemainingTime(spellId, sourceUnit)
-    -- Return true if aura will expire within reaction time
-    return remaining <= reactionTime
+    local remaining = expirationTime - GetTime()
+    return remaining < reactionTime
 end
 
 --- Checks if a spell is known, with special handling for certain classes and expansions.
@@ -860,4 +858,31 @@ function NAG:SpellTimeToCharge(spellId)
     end
 
     return 0
+end
+
+--- Returns the percent increase in DoT damage if a new DoT is applied, compared to the existing one.
+--- @param spellId number The ID of the DoT spell to compare (expected new DoT).
+--- @param targetUnit? string The unit to check (defaults to "target").
+--- @return number The percent increase (e.g., 0.15 for 15% stronger), or 0 if not computable.
+--- @usage NAG:DotPercentIncrease(73643, "target")
+function NAG:DotPercentIncrease(spellId, targetUnit)
+    if not spellId then
+        self:Error("DotPercentIncrease: No spellId provided")
+        return 0
+    end
+    targetUnit = targetUnit or "target"
+    -- Get current DoT info
+    local currentEffect = ns.SpellTracker:GetPeriodicEffectInfo(spellId, targetUnit)
+    if not currentEffect or not currentEffect.snapshot or not currentEffect.snapshot.damageMultiplier then
+        self:Print("DotPercentIncrease: No current DoT snapshot found for spellId " .. tostring(spellId))
+        return 0
+    end
+    -- Calculate expected new snapshot (simulate or use current player state)
+    local newMultiplier = ns.SpellTracker:CalculateCurrentDotMultiplier(spellId)
+    if not newMultiplier or currentEffect.snapshot.damageMultiplier == 0 then
+        self:Print("DotPercentIncrease: Unable to calculate new DoT multiplier for spellId " .. tostring(spellId))
+        return 0
+    end
+    local percentIncrease = (newMultiplier - currentEffect.snapshot.damageMultiplier) / currentEffect.snapshot.damageMultiplier
+    return percentIncrease
 end

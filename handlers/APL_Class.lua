@@ -521,3 +521,28 @@ function NAG:CatEnergyAfterDuration(duration)
     local predictedEnergy = currentEnergy + (ticks * energyPerTick)
     return math.min(predictedEnergy, maxEnergy)
 end
+
+--- Gets the current focus of the Hunter's pet.
+--- @usage NAG:HunterCurrentPetFocus()
+--- @return number The current focus value of the pet.
+function NAG:HunterCurrentPetFocus()
+    return UnitPower("pet", Enum.PowerType.Focus)
+end
+
+--- Gets the current focus percent (0-100) of the Hunter's pet.
+--- @usage NAG:HunterCurrentPetFocusPercent()
+--- @return number The current focus percent (0-100) of the pet.
+function NAG:HunterCurrentPetFocusPercent()
+    if not UnitExists("pet") then return 0 end
+    local current = UnitPower("pet", Enum.PowerType.Focus)
+    local max = UnitPowerMax("pet", Enum.PowerType.Focus)
+    if not max or max == 0 then return 0 end
+    return (current / max) * 100
+end
+
+--- Checks if the Hunter's pet is currently active.
+--- @usage NAG:HunterPetIsActive()
+--- @return boolean True if the pet exists, false otherwise.
+function NAG:HunterPetIsActive()
+    return UnitExists("pet")
+end

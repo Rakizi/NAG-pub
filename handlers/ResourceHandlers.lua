@@ -1335,3 +1335,11 @@ function NAG:FocusTimeToTarget(targetFocus)
 
     return focusNeeded / regenRate
 end
+
+--- Get the maximum mana of the player
+--- @function NAG:MaxMana
+--- @usage (NAG:MaxMana() >= x)
+--- @return number The maximum mana of the player
+function NAG:MaxMana()
+    return UnitPowerMax("player", Enum.PowerType.Mana)
+end
