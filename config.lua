@@ -646,7 +646,7 @@ do --== Rotation Functions ==--
             -- Rune functions
             CurrentRuneCount = { required = { {"typeValidator", "RuneType"} } },
             CurrentNonDeathRuneCount = { required = { {"typeValidator", "RuneType"} } },
-            CurrentRuneActive = { required = { {"typeValidator", "RuneType"} } },
+            CurrentRuneActive = { required = { {"typeValidator", "RuneSlot"} } },
             CurrentRuneDeath = { required = { {"typeValidator", "RuneSlot"} } },
             RuneCooldown = { required = { {"typeValidator", "RuneType"} } },
             NextRuneCooldown = { required = { {"typeValidator", "RuneType"} } },
