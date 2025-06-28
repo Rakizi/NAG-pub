@@ -694,8 +694,14 @@ do --== Rotation Functions ==--
             CurrentSoulShards = { required = {} },
             CurrentDemonicFury = { required = {} },
             CurrentArcaneCharges = { required = {} },
+            CurrentChi = { required = {} },
+            MaxChi = { required = {} },
             MaxMana = { required = {} },
             CurrentAttackPower = { required = {} },
+
+            -- Monk-specific Chi functions (aliases)
+            MonkCurrentChi = { required = {} },
+            MonkMaxChi = { required = {} },
 
             -- Rune functions
             CurrentRuneCount = { required = { {"typeValidator", "RuneType"} } },
