@@ -180,7 +180,7 @@ do -- Ace3 lifecycle methods
         
         -- Check if module is enabled
         if not self:GetChar().enabled then
-            self:Debug("PredictionEngine is disabled, skipping initialization")
+            self:Debug("PredictionEngine is disabled by default. Use a command to enable it.")
             return
         end
         

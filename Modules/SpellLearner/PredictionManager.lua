@@ -56,7 +56,7 @@ local defaults = {
         maxObservationsPerSpell = 100, -- Limit observations to prevent memory bloat
     },
     char = {
-        enabled = true, -- Enabled by default for testing
+        enabled = false, -- Disabled by default - use commands to enable
         autoConsolidate = true, -- Automatically consolidate when observation threshold is reached
         consolidationThreshold = 5, -- Number of observations before auto-consolidation (reduced from 10)
     },
@@ -111,7 +111,7 @@ do -- Ace3 lifecycle methods
         
         -- Check if module is enabled
         if not self:GetChar().enabled then
-            self:Debug("PredictionManager is disabled, skipping initialization")
+            self:Debug("PredictionManager is disabled by default. Use a command to enable it.")
             return
         end
         

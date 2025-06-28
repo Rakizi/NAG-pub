@@ -107,7 +107,7 @@ local defaults = {
         debugMode = false,
     },
     char = {
-        enabled = true, -- Enabled by default for testing
+        enabled = false, -- Disabled by default - use commands to enable
         trackResources = true,
         trackBuffs = true,
         trackDebuffs = true,
@@ -290,7 +290,7 @@ end
         self:Debug("Enabling SpellLearnerStateManager (debug test)")
         -- Check if module is enabled
         if not self:GetChar().enabled then
-            self:Debug("SpellLearnerStateManager is disabled, skipping initialization")
+            self:Debug("SpellLearnerStateManager is disabled by default. Use a command to enable it.")
             return
         end
         

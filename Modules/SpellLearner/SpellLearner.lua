@@ -646,6 +646,13 @@ do -- Ace3 lifecycle methods
     --- Enable the module
     function SpellLearner:ModuleEnable()
         self:Debug("Enabling SpellLearner (debug test)")
+        
+        -- Check if module is enabled
+        if not self:GetChar().enabled then
+            self:Debug("SpellLearner is disabled by default. Use a command to enable it.")
+            return
+        end
+        
         self:Debug("Enabling SpellLearner")
 
         -- Enable StateManager if it exists

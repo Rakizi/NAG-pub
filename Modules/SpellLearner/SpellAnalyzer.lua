@@ -42,7 +42,7 @@ local defaults = {
         debugMode = true,
     },
     char = {
-        enabled = true, -- Enabled by default for testing
+        enabled = false, -- Disabled by default - use commands to enable
         analysisThreshold = 0.1, -- Minimum change to consider significant
     }
 }
@@ -66,6 +66,13 @@ do -- Ace3 lifecycle methods
     --- Enable the module
     function SpellAnalyzer:ModuleEnable()
         self:Debug("Enabling SpellAnalyzer (debug test)")
+        
+        -- Check if module is enabled
+        if not self:GetChar().enabled then
+            self:Debug("SpellAnalyzer is disabled by default. Use a command to enable it.")
+            return
+        end
+        
         self:Info("Enabling SpellAnalyzer")
     end
     
