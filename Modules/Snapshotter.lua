@@ -24,10 +24,27 @@
 ---      * For spells without snapshots: 0
 ---      * For live stats only: sum of current stat values
 ---
+---    To query percentage differences:
+---    NAG:SnapshotPercent(spellID, stat1, stat2, ...)
+---    - spellID: number of the spell to check (required)
+---    - stat1, stat2, ...: stat names to compare
+---    - Returns: percentage difference as decimal (0.2 = 20% increase, -0.1 = 10% decrease)
+---      * Formula: (current_total / snapshot_total) - 1
+---      * Returns 0 if no snapshot exists or snapshot total is 0
+---
+---    To query DoT damage increase based on attack power:
+---    NAG:DotDamageIncreasePercent(spellID)
+---    - spellID: number of the DoT spell to check (required)
+---    - Returns: attack power percentage difference (0.15 = 15% damage increase)
+---      * Specialized function for DoT effects that snapshot attack power
+---
 ---    EXAMPLES:
 ---    - NAG:Snapshot("str", 45477) - Compare strength snapshot vs current for spell 45477
 ---    - NAG:Snapshot("str", "agi") - Get current strength + agility (no spellID)
 ---    - NAG:Snapshot(12345, "crit", "haste") - Compare crit+haste for spell 12345
+---    - NAG:SnapshotPercent(59879, "ap") - Get AP percentage change for spell 59879
+---    - NAG:SnapshotPercent(12345, "crit", "haste") - Get combined crit+haste percentage change
+---    - NAG:DotDamageIncreasePercent(1079) - Get damage increase for Rip DoT based on AP change
 ---
 ---    DEBUG COMMANDS:
 ---    - /nagsnapshot - List all stored spellIDs with spell names and active buffs/debuffs
@@ -546,5 +563,117 @@ do
             Snapshotter:Debug(format("Expired aura %s (ID: %d) - returning current values: %d", spellName, spellID, total))
             return total
         end
+    end
+
+    --- Calculate percentage difference between current stats and snapshot values
+    --- 
+    --- This function calculates the percentage change from snapshot to current values:
+    --- - Positive values indicate stat gains (e.g., 0.2 = 20% increase)
+    --- - Negative values indicate stat losses (e.g., -0.1 = 10% decrease)
+    --- - Zero indicates no change
+    ---
+    --- @param spellID number The spell ID to compare snapshot against
+    --- @param ... string Variable number of stat names to compare ("str", "agi", "int", "crit", "haste", "mastery", "ap")
+    --- @return number The percentage difference: (current_total / snapshot_total) - 1
+    ---   - Returns 0 if no snapshot exists or snapshot total is 0
+    ---   - Returns 0 if no valid stats provided
+    ---
+    --- @usage
+    --- -- Check AP percentage difference for a buff
+    --- local apPercent = NAG:SnapshotPercent(59879, "ap")  -- Returns: (current_ap / snapshot_ap) - 1
+    ---
+    --- -- Check combined crit + haste percentage difference
+    --- local combinedPercent = NAG:SnapshotPercent(12345, "crit", "haste")  -- Returns: ((current_crit + current_haste) / (snapshot_crit + snapshot_haste)) - 1
+    ---
+    --- -- Example usage in conditions:
+    --- -- if NAG:SnapshotPercent(59879, "ap") > 0.1 then  -- If AP increased by more than 10%
+    function NAG:SnapshotPercent(spellID, ...)
+        local Snapshotter = NAG:GetModule("Snapshotter")
+        if not Snapshotter then
+            return 0
+        end
+
+        -- Validate spellID
+        if not spellID or type(spellID) ~= "number" then
+            Snapshotter:Debug("Invalid spellID provided to SnapshotPercent")
+            return 0
+        end
+
+        -- Parse stat arguments
+        local args = {...}
+        local statNames = {}
+        for _, arg in ipairs(args) do
+            if type(arg) == "string" then
+                tinsert(statNames, arg)
+            end
+        end
+
+        -- Validate stat names
+        local validStats = Snapshotter:ValidateStatArgs(statNames)
+        if #validStats == 0 then
+            Snapshotter:Debug("No valid stat arguments provided to SnapshotPercent")
+            return 0
+        end
+
+        -- Check if snapshot exists for this spellID
+        local snapshot = Snapshotter.state.snapshots[spellID]
+        if not snapshot then
+            Snapshotter:Debug(format("No snapshot found for spellID %d in SnapshotPercent", spellID))
+            return 0
+        end
+
+        -- Calculate snapshot total
+        local snapshotTotal = 0
+        for _, statName in ipairs(validStats) do
+            local value = snapshot[statName] or 0
+            snapshotTotal = snapshotTotal + value
+        end
+
+        -- Avoid division by zero
+        if snapshotTotal == 0 then
+            Snapshotter:Debug(format("Snapshot total is 0 for spellID %d, cannot calculate percentage", spellID))
+            return 0
+        end
+
+        -- Calculate current total
+        local currentTotal = 0
+        for _, statName in ipairs(validStats) do
+            local value = Snapshotter:GetCurrentStat(statName)
+            currentTotal = currentTotal + value
+        end
+
+        -- Calculate percentage difference: (current / snapshot) - 1
+        local percentDiff = (currentTotal / snapshotTotal) - 1
+        
+        local spellName = GetSpellInfo(spellID) or "Unknown"
+        Snapshotter:Debug(format("SnapshotPercent for %s (ID: %d): current=%d, snapshot=%d, diff=%.3f (%.1f%%)", 
+            spellName, spellID, currentTotal, snapshotTotal, percentDiff, percentDiff * 100))
+
+        return percentDiff
+    end
+
+    --- Calculate DoT damage increase percentage based on attack power changes
+    --- 
+    --- This is a specialized function for DoT (Damage over Time) effects that snapshot
+    --- attack power when applied. It calculates how much the DoT damage has increased
+    --- since the spell was cast based on current vs snapshot attack power.
+    ---
+    --- @param spellID number The spell ID of the DoT to check
+    --- @return number The attack power percentage difference: (current_ap / snapshot_ap) - 1
+    ---   - Positive values indicate damage increase (e.g., 0.15 = 15% more damage)
+    ---   - Negative values indicate damage decrease (e.g., -0.1 = 10% less damage)
+    ---   - Returns 0 if no snapshot exists or snapshot AP is 0
+    ---
+    --- @usage
+    --- -- Check how much a DoT's damage has increased since application
+    --- local damageIncrease = NAG:DotDamageIncreasePercent(59879)
+    --- 
+    --- -- Example usage in conditions:
+    --- -- if NAG:DotDamageIncreasePercent(rip_spellid) > 0.2 then  -- If damage increased by 20%+
+    --- --     -- Consider refreshing the DoT for higher damage
+    --- -- end
+    function NAG:DotDamageIncreasePercent(spellID)
+        -- Simply call SnapshotPercent with "ap" only
+        return NAG:SnapshotPercent(spellID, "ap")
     end
 end
