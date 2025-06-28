@@ -139,31 +139,6 @@ defaults.class.specSpellLocations = {
 if UnitClassBase('player') ~= "DEATHKNIGHT" then return end
 
 
-local rotationDeathKnightBloodDefensive = [[
-NAG:SpellCastSequence()
-    or     ((not NAG:IsActive(48263)) and NAG:Cast(48263))
-    or     NAG:AutocastOtherCooldowns()
-    or     ((NAG:CurrentHealthPercent() <= 55) and NAG:Cast(48743))
-    or     ((NAG:CurrentTime() >= 89) and NAG:Cast(48792))
-    or     (((NAG:DotRemainingTime(81130) <= 1.0) or (NAG:DotRemainingTime(55095) <= 1.0)) and NAG:Cast(77575))
-    or     ((not NAG:IsActive(49222)) and NAG:StrictSequence('someName757', 45529, 49222))
-    or     ((NAG:CurrentHealthPercent() <= 60) and NAG:Cast(55233))
-    or     (NAG:IsActive(55233) and NAG:Cast(82176))
-    or     (NAG:IsActive(96171) and NAG:Cast(48982))
-    or     (((NAG:CurrentHealthPercent() <= 50) and (not NAG:CanCast(49998))) and NAG:Cast(47568))
-    or     (((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 2.0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 2.0) or (NAG:CurrentHealthPercent() <= 50) or (not NAG:IsActive(77535))) and NAG:Cast(49998))
-    or     ((NAG:CurrentRunicPower() >= 120.0) and NAG:Cast(56815))
-    or     ((((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 1.0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 1.0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 1.0)) and (not NAG:CanCast(49998))) and NAG:StrictSequence('someName583', 45529, 49998))
-    or     NAG:Cast(49998)
-    or     ((not NAG:IsActive(81256)) and NAG:Cast(46584))
-    or     (((NAG:CurrentHealthPercent() <= 80) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 2.0)) and NAG:Cast(48982))
-    or     (NAG:IsActive(81141) and NAG:Cast(48721))
-    or     ((NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneBlood) == 2.0) and NAG:Cast(55050))
-    or     NAG:Cast(56815)
-    or     NAG:Cast(57330)
-    or     ((((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) < NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) or (NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) < NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)))) and NAG:Cast(55050, 10))
-    or     NAG:Cast(49998, 10)
-]]
 local rotationDeathKnightBloodSimple = [[
 (not NAG:AuraIsActive(49222)) and NAG:Cast(49222)
     or (not NAG:AuraIsActive(48263)) and NAG:Cast(48263)
@@ -397,56 +372,6 @@ NAG:Cast(51271)
     }
 )
 
-ns.AddRotationToDefaults(defaults,
-    SpecializationCompat:GetSpecID("DeathKnight", "Blood"),
-    "DeathKnight Blood - Defensive by APLParser",
-    {
-        -- Required parameters
-        default = false,
-        enabled = true,
-        experimental = true,
-        gameType = Version.GAME_TYPES.CLASSIC_MISTS,
-        prePull = {
-            { NAG:Cast(48263), -31000 }, { NAG:Cast(49222), -30000 }, { NAG:Cast(57330), -1500 }, { NAG:Cast(76095), -1000 }
-        },
-        rotationString = [[
-(NAG:CurrentHealthPercent() <= 0.55) and NAG:Cast(48743)
-    or NAG:AutocastOtherCooldowns()
-    or (NAG:CurrentTime() >= 89.0) and NAG:Cast(48792)
-    or ((NAG:AuraRemainingTime(55078, "target") <= 1.0) or (NAG:AuraRemainingTime(55095, "target") <= 1.0)) and NAG:Cast(77575)
-    or (not NAG:AuraIsActive(49222)) and NAG:StrictSequence("someName694", NAG:Cast(45529), NAG:Cast(49222))
-    or (NAG:CurrentHealthPercent() <= 0.6) and NAG:Cast(55233)
-    or NAG:AuraIsActive(55233) and NAG:Cast(82176)
-    or NAG:AuraIsActive(96171) and NAG:Cast(48982)
-    or ((NAG:CurrentHealthPercent() <= 0.5) and (not NAG:SpellCanCast(49998))) and NAG:Cast(47568)
-    or ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 2) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 2) or (NAG:CurrentHealthPercent() <= 0.5) or (not NAG:AuraIsActive(77535))) and NAG:Cast(49998)
-    or (NAG:CurrentRunicPower() >= 120) and NAG:Cast(56815)
-    or (((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 1) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 1) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 1)) and (not NAG:SpellCanCast(49998))) and NAG:Cast(45529)
-    or NAG:Cast(49998)
-    or (not NAG:AuraIsActive(81256)) and NAG:Cast(46584)
-    or ((NAG:CurrentHealthPercent() <= 0.8) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 2)) and NAG:Cast(48982)
-    or NAG:AuraIsActive(81141) and NAG:Cast(48721)
-    or (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneBlood) == 2) and NAG:Cast(55050)
-    or NAG:Cast(56815)
-    or NAG:Cast(57330)
-        ]],
-        
-        -- New action-based format
-        --prePullActions = {{action = {castSpell = {spellId = {spellId = 48263}}}, doAtValue = {const = {val = "-31s"}}}, {action = {castSpell = {spellId = {spellId = 49222}}}, doAtValue = {const = {val = "-30s"}}}, {action = {castSpell = {spellId = {spellId = 57330}}}, doAtValue = {const = {val = "-1.5s"}}}, {action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-1s"}}}},
-        --aplActions = {{action = {condition = {cmp = {op = "OpLe", lhs = {currentHealthPercent = {}}, rhs = {const = {val = "55%"}}}}, castSpell = {spellId = {spellId = 48743}}}}, {action = {autocastOtherCooldowns = {}}}, {action = {condition = {cmp = {op = "OpGe", lhs = {currentTime = {}}, rhs = {const = {val = "89s"}}}}, castSpell = {spellId = {spellId = 48792}}}}, {action = {condition = {or = {vals = {{cmp = {op = "OpLe", lhs = {auraRemainingTime = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 55078}}}, rhs = {const = {val = "1s"}}}}, {cmp = {op = "OpLe", lhs = {auraRemainingTime = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 55095}}}, rhs = {const = {val = "1s"}}}}}}}, castSpell = {spellId = {spellId = 77575}}}}, {action = {condition = {not = {val = {auraIsActive = {auraId = {spellId = 49222}}}}}, strictSequence = {actions = {{castSpell = {spellId = {spellId = 45529}}}, {castSpell = {spellId = {spellId = 49222}}}}, name = "someName694"}}}, {action = {condition = {cmp = {op = "OpLe", lhs = {currentHealthPercent = {}}, rhs = {const = {val = "60%"}}}}, castSpell = {spellId = {spellId = 55233}}}}, {action = {condition = {auraIsActive = {auraId = {spellId = 55233}}}, castSpell = {spellId = {spellId = 82176}}}}, {action = {condition = {auraIsActive = {auraId = {spellId = 96171}}}, castSpell = {spellId = {spellId = 48982}}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpLe", lhs = {currentHealthPercent = {}}, rhs = {const = {val = "50%"}}}}, {not = {val = {spellCanCast = {spellId = {spellId = 49998, tag = 1}}}}}}}}, castSpell = {spellId = {spellId = 47568}}}}, {action = {condition = {or = {vals = {{cmp = {op = "OpEq", lhs = {currentRuneCount = {runeType = "RuneFrost"}}, rhs = {const = {val = "2"}}}}, {cmp = {op = "OpEq", lhs = {currentRuneCount = {runeType = "RuneUnholy"}}, rhs = {const = {val = "2"}}}}, {cmp = {op = "OpLe", lhs = {currentHealthPercent = {}}, rhs = {const = {val = "50%"}}}}, {not = {val = {auraIsActive = {auraId = {spellId = 77535}}}}}}}}, castSpell = {spellId = {spellId = 49998, tag = 1}}}}, {action = {condition = {cmp = {op = "OpGe", lhs = {currentRunicPower = {}}, rhs = {const = {val = "120"}}}}, castSpell = {spellId = {spellId = 56815}}}}, {action = {condition = {and = {vals = {{or = {vals = {{cmp = {op = "OpEq", lhs = {currentRuneCount = {runeType = "RuneFrost"}}, rhs = {const = {val = "1"}}}}, {cmp = {op = "OpEq", lhs = {currentRuneCount = {runeType = "RuneUnholy"}}, rhs = {const = {val = "1"}}}}, {cmp = {op = "OpEq", lhs = {currentRuneCount = {runeType = "RuneDeath"}}, rhs = {const = {val = "1"}}}}}}}, {not = {val = {spellCanCast = {spellId = {spellId = 49998, tag = 1}}}}}}}}, castSpell = {spellId = {spellId = 45529}}}}, {action = {castSpell = {spellId = {spellId = 49998, tag = 1}}}}, {action = {condition = {not = {val = {auraIsActive = {auraId = {spellId = 81256}}}}}, castSpell = {spellId = {spellId = 46584}}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpLe", lhs = {currentHealthPercent = {}}, rhs = {const = {val = "80%"}}}}, {cmp = {op = "OpEq", lhs = {currentRuneCount = {runeType = "RuneBlood"}}, rhs = {const = {val = "2"}}}}}}}, castSpell = {spellId = {spellId = 48982}}}}, {action = {condition = {auraIsActive = {auraId = {spellId = 81141}}}, castSpell = {spellId = {spellId = 48721}}}}, {action = {condition = {cmp = {op = "OpEq", lhs = {currentNonDeathRuneCount = {runeType = "RuneBlood"}}, rhs = {const = {val = "2"}}}}, castSpell = {spellId = {spellId = 55050}}}}, {action = {castSpell = {spellId = {spellId = 56815}}}}, {action = {castSpell = {spellId = {spellId = 57330}}}}},
-
-        -- Tracked IDs for optimization
-        spells = {45529, 46584, 47568, 48721, 48743, 48792, 48982, 49222, 49998, 55050, 55078, 55095, 55233, 56815, 57330, 77535, 77575, 81141, 81256, 82176, 96171},
-        items = {},
-        auras = {},
-        runes = {},
-
-        -- Optional metadata
-        glyphs = {104049, 104048, 43826, 104101, 43550, 43672},
-        lastModified = "06/22/2025",
-        author = "APLParser"
-    }
-)
 
 ns.AddRotationToDefaults(defaults,
     SpecializationCompat:GetSpecID("DeathKnight", "Frost"),
@@ -503,6 +428,16 @@ NAG:Cast(51271)
     }
 )
 
+
+--[[ -- masterfrost last lines
+    or     ((not NAG:IsActive(2825)) and (not NAG:IsActive(51124)) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0.0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 0.0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) > 1) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood) > 1) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood) > 1) and (NAG:CurrentRunicPower() <= 30.0) and (NAG:CurrentRunicPower() >= 22.0) and NAG:Cast(45462, 10))
+    or     ((((not NAG:DotIsActive(55078)) or (NAG:DotRemainingTime(55078) < 4)) and (not NAG:DotIsActive(98957))) and (((NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy)) or (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy)) or (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy)) or (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy))) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0)) and (NAG:NumberTargets() == 1.0) and NAG:Cast(45462, 10))
+    or     (NAG:IsActive(51124) and (not NAG:IsActive(96929)) and (NAG:DotIsActive(55078) or NAG:DotIsActive(98957)) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0)) and (NAG:NumberTargets() == 1.0) and NAG:Cast(49020, 10))
+    or     (NAG:IsActive(51124) and (not NAG:IsActive(96929)) and (NAG:DotIsActive(55078) or NAG:DotIsActive(98957)) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 2.0)) and (NAG:NumberTargets() > 1.0) and NAG:Cast(49020, 10))
+    or     (((NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy) <= 1) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0)) and (NAG:NumberTargets() == 1.0) and NAG:Cast(49020, 10))
+    or     NAG:Cast(49184, 10)
+    ]]
+
 ns.AddRotationToDefaults(defaults,
     SpecializationCompat:GetSpecID("DeathKnight", "Frost"),
     "DeathKnight Frost - Masterfrost by Darkfrog",
@@ -522,16 +457,15 @@ ns.AddRotationToDefaults(defaults,
     or NAG:AutocastOtherCooldowns()
     or (NAG:SpellTimeToReady(51271) <= 5) and NAG:Cast(46584)
     or ((NAG:RemainingTime() <= 30.0) or ((NAG:RemainingTime() <= 60.0) and NAG:AuraIsActive(51271))) and NAG:Cast(76095)
-    or ((NAG:AuraNumStacks(114851) > 10) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0))) and NAG:Cast(45529)
+    or (NAG:AuraNumStacks(114851) > 10) and NAG:Cast(45529)
     or (NAG:IsExecutePhase(35) or (NAG:AuraIsKnown(138347) and NAG:IsExecutePhase(35))) and NAG:Cast(114867)
-    or (NAG:SpellIsReady(114867) and (NAG:IsExecutePhase(35) or (NAG:AuraIsKnown(138347) and NAG:IsExecutePhase(35))) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0))) and NAG:Cast(45529)
-    or (NAG:AuraIsActiveWithReactionTime(51124) and (NAG:CurrentRunicPower() < 76) and (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneUnholy) > 0) and NAG:DotIsActive(55078) and NAG:DotIsActive(55095)) and NAG:Cast(49020)
+    or (NAG:SpellIsReady(114867) and (NAG:IsExecutePhase(35) or (NAG:AuraIsKnown(138347) and NAG:IsExecutePhase(35)))) and NAG:Cast(45529)
+    or (NAG:AuraIsActiveWithReactionTime(51124) and (NAG:CurrentRunicPower() < 76) and (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneUnholy) > 0)) and NAG:Cast(49020)
     or (NAG:AuraIsActiveWithReactionTime(51124) or (NAG:CurrentRunicPower() > 88)) and NAG:Cast(49143)
-    or (((NAG:DotRemainingTime(55078) < 1) or (NAG:DotRemainingTime(55095) < 1)) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0))) and NAG:Cast(123693)
-    or ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) > 1) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) > 1)) and NAG:Cast(49184)
+    or ((NAG:DotRemainingTime(55078) < 1) or (NAG:DotRemainingTime(55095) < 1)) and NAG:Cast(123693)
+    or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) > 1) and NAG:Cast(49184)
     or (NAG:AuraIsActive(51271) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 0)) and NAG:Cast(45529)
     or ((NAG:DotRemainingTime(55078) < 3.0) or (NAG:DotRemainingTime(55095) < 3.0)) and NAG:Cast(115989)
-    or (not NAG:DotIsActive(55078)) and NAG:Cast(77575)
     or (not NAG:DotIsActive(55095)) and NAG:Cast(49184)
     or ((not NAG:DotIsActive(55078)) and (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneUnholy) > 0)) and NAG:Cast(45462)
     or NAG:AuraIsActiveWithReactionTime(59052) and NAG:Cast(49184)
@@ -543,7 +477,14 @@ ns.AddRotationToDefaults(defaults,
     or NAG:Cast(57330)
     or ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0) and (NAG:CurrentRunicPower() < 20)) and NAG:Cast(47568)
     or (((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0)) or ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0)) or ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0))) and NAG:Cast(123693)
-        ]],
+    or     ((not NAG:IsActive(2825)) and (not NAG:IsActive(51124)) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0.0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 0.0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) > 1) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood) > 1) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood) > 1) and (NAG:CurrentRunicPower() <= 30.0) and (NAG:CurrentRunicPower() >= 22.0) and NAG:Cast(45462, 10))
+    or     ((((not NAG:DotIsActive(55078)) or (NAG:DotRemainingTime(55078) < 4)) and (not NAG:DotIsActive(98957))) and (((NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy)) or (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy)) or (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy)) or (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost) > NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy))) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0)) and (NAG:NumberTargets() == 1.0) and NAG:Cast(45462, 10))
+    or     (NAG:IsActive(51124) and (not NAG:IsActive(96929)) and (NAG:DotIsActive(55078) or NAG:DotIsActive(98957)) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0)) and (NAG:NumberTargets() == 1.0) and NAG:Cast(49020, 10))
+    or     (NAG:IsActive(51124) and (not NAG:IsActive(96929)) and (NAG:DotIsActive(55078) or NAG:DotIsActive(98957)) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 2.0)) and (NAG:NumberTargets() > 1.0) and NAG:Cast(49020, 10))
+    or     (((NAG:NextRuneCooldown(NAG.Types.RuneType.RuneUnholy) <= 1) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1.0)) and (NAG:NumberTargets() == 1.0) and NAG:Cast(49020, 10))
+    or     NAG:Cast(49184, 10)
+
+    ]],
         
         -- New action-based format
         --prePullActions = {{action = {castSpell = {spellId = {spellId = 57330}}}, doAtValue = {const = {val = "-8s"}}}, {action = {castSpell = {spellId = {spellId = 46584}}}, doAtValue = {const = {val = "-7s"}}}, {action = {castSpell = {spellId = {spellId = 42650}}}, doAtValue = {const = {val = "-6s"}}}, {action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-1s"}}}, {action = {castSpell = {spellId = {spellId = 51271}}}, doAtValue = {const = {val = "-1s"}}}},

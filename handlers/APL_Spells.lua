@@ -495,6 +495,19 @@ function NAG:SpellCanCast(spellId, tolerance)
         if not self:HasRunicPower(spellId, tolerance) then
             return false
         end
+        if ns.Version:IsMoP() then 
+            if spellId == 45529 then --TODO: blood tap hardcodede bcs blizzard cant control it their end
+                if NAG:AuraNumStacks(114851) < 5 or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 2 and NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 2 and NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 2) then    
+                    return false
+                end
+            end
+            if spellId == 123693 then --TODO: plague leech hardcodede bcs blizzard cant control it their end -- 123693
+                if NAG:DotIsActive(59921) and NAG:DotIsActive(57601) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1 or NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) >= 1 or NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) >= 1) then    
+                    return false
+                end
+            end
+        end
+
         --TODO believe this can be removed?
         -- Rune Strike has no cooldown, it becomes usable after a dodge or parry
         --if spellId == 56815 then                        --Rune Strike

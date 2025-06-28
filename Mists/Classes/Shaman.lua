@@ -23,14 +23,14 @@ defaults.class.specSpellLocations = {
         [CLASS_SPECS.ELEMENTAL] = {
             ABOVE = {2062},
             BELOW = { 8071, 3599, 5394, 3738, 8190 },
-            RIGHT = {},
+            RIGHT = {3599},
             LEFT = { 16166, 2894, 33697, 79206, 2825, 26297 },
             AOE = { 421, 61882 }
         },
         [CLASS_SPECS.ENHANCEMENT] = {
             ABOVE = {403, 401, 8024, 8232},
             BELOW = { 3599, 8075, 8512, 5394, 324 },
-            RIGHT = {},
+            RIGHT = {3599},
             LEFT = { 2062,2825, 51533, 33697, 30823 },
             AOE = { 1535 }
         },

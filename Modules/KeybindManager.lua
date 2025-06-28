@@ -464,7 +464,11 @@ do -- Options/Config Functions
                                 for id, data in pairs(bindings) do
                                     tinsert(sorted, { id = id, data = data })
                                 end
-                                table.sort(sorted, function(a, b) return a.data.name < b.data.name end)
+                                table.sort(sorted, function(a, b) 
+                                    local nameA = a.data.name or ""
+                                    local nameB = b.data.name or ""
+                                    return nameA < nameB 
+                                end)
 
                                 for _, binding in ipairs(sorted) do
                                     text = text .. format("|T%s:16:16:0:0|t %s: %s\n",
@@ -491,7 +495,11 @@ do -- Options/Config Functions
                                 for id, data in pairs(bindings) do
                                     tinsert(sorted, { id = id, data = data })
                                 end
-                                table.sort(sorted, function(a, b) return a.data.name < b.data.name end)
+                                table.sort(sorted, function(a, b) 
+                                    local nameA = a.data.name or ""
+                                    local nameB = b.data.name or ""
+                                    return nameA < nameB 
+                                end)
 
                                 for _, binding in ipairs(sorted) do
                                     text = text .. format("|T%s:16:16:0:0|t %s: %s\n",
@@ -518,7 +526,11 @@ do -- Options/Config Functions
                                 for id, data in pairs(bindings) do
                                     tinsert(sorted, { id = id, data = data })
                                 end
-                                table.sort(sorted, function(a, b) return a.data.name < b.data.name end)
+                                table.sort(sorted, function(a, b) 
+                                    local nameA = a.data.name or ""
+                                    local nameB = b.data.name or ""
+                                    return nameA < nameB 
+                                end)
 
                                 for _, binding in ipairs(sorted) do
                                     text = text .. format("|T%s:16:16:0:0|t %s: %s\n",
