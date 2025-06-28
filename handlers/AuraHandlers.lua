@@ -98,6 +98,12 @@ function NAG:AuraNumStacks(spellId, sourceUnit)
     if spellId == 138228 then
         spellId = 137639
     end
+    if spellId == 128938 then
+        spellId = 128939
+    end
+    if spellId == 120267 then
+        return NAG:GetVengeanceAP()
+    end
     -- Validate spell exists
     local spell = DataManager:Get(spellId, DataManager.EntityTypes.SPELL)
     if not spell then

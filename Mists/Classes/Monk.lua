@@ -45,7 +45,8 @@ defaults.class.specSpellLocations = {
         RIGHT = {
             123986, -- Chi Burst
             138228, 137639,
-            115181  -- Breath of Fire
+            115181,  -- Breath of Fire
+            115072,
         },
         LEFT = {
             101643, -- Transcendence
@@ -63,9 +64,11 @@ defaults.class.specSpellLocations = {
             117368, -- Grapple Weapon
             116705, -- Spear Hand Strike
             122057, -- Clash
+            126456,
             115078  -- Paralysis
         },
         AOE = {
+            101546
         }
     },
     [CLASS_SPECS.MISTWEAVER] = {
@@ -88,7 +91,7 @@ defaults.class.specSpellLocations = {
         BELOW = {
         },
         RIGHT = {
-            123904, 138228, 137639
+            123904, 138228, 137639, 
         },
         LEFT = {
             115288, -- Energizing Brew
@@ -96,9 +99,11 @@ defaults.class.specSpellLocations = {
             115399, -- Chi Brew
             122470, --/touch-of-karma
             115080, --/touch-of-death
+            126456
 
         },
         AOE = {
+            101546
         }
     }
 }
@@ -107,7 +112,9 @@ defaults.class.specSpellLocations = {
 if UnitClassBase('player') ~= "MONK" then return end
 
 -- START OF GENERATED_ROTATIONS
-
+--
+--[[   
+    ]]
 -- Brewmaster Tank Rotation
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.BREWMASTER, "Monk Brewmaster", {
     default = true,
@@ -117,25 +124,25 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.BREWMASTER, "Monk Brewmaster", {
         { NAG:GetBattlePotion(), 1.5 }
     },
     rotationString = [[
-((NAG:AuraNumStacks(128938) >= 6) and NAG:AuraIsInactiveWithReactionTime(115308)) and NAG:Cast(115308)
-    or ((NAG:CurrentChi() == 0) or ((NAG:CurrentChi() <= 1) and (NAG:SpellTimeToReady(121253) >= 1.5))) and NAG:Cast(115399)
-    or ((NAG:AuraRemainingTime(115307) > 2) and (NAG:CurrentChi() >= 3) and NAG:AuraIsActive(118636) and (NAG:AuraNumStacks(120267) >= 100000)) and NAG:Cast(115295)
-    or ((NAG:SpellTimeToReady(121253) <= 1.5) and (NAG:CurrentChi() >= (NAG:MaxChi() - 1))) and NAG:Cast(100784)
-    or NAG:Cast(121253)
-    or NAG:Cast(116847)
-    or ((NAG:AuraRemainingTime(115307) <= 2) and (NAG:CurrentChi() <= 1) and (NAG:CurrentHealthPercent() < 0.95)) and NAG:Cast(115072)
-    or ((NAG:AuraRemainingTime(115307) <= 2) and (NAG:CurrentChi() <= 1)) and NAG:Cast(100780)
-    or ((NAG:AuraRemainingTime(115307) <= 1.5) or ((NAG:SpellTimeToReady(121253) <= 2) and (NAG:CurrentChi() >= (NAG:MaxChi() - 1)))) and NAG:Cast(100784)
-    or NAG:Cast(123904)
-    or (NAG:AuraNumStacks(124255) >= 150000) and NAG:Cast(119582)
-    or ((NAG:CurrentEnergy() >= 80) and (NAG:CurrentHealthPercent() < 0.95)) and NAG:Cast(115072)
-    or (NAG:CurrentEnergy() >= 80) and NAG:Cast(100780)
-    or (NAG:AuraRemainingTime(125359) <= 1.5) and NAG:Cast(100787)
-    or (NAG:CurrentChi() >= 3) and NAG:Cast(100784)
-    or NAG:Cast(115098)
-    or NAG:Cast(123986)
-    or (NAG:AuraNumStacks(124081) < 2) and NAG:Cast(124081)
-    or NAG:Cast(100787)
+(NAG:AuraNumStacks(128938) >= 6 and NAG:AuraIsInactiveWithReactionTime(115308)) and NAG:Cast(115308)
+   or ((NAG:CurrentChi() == 0) or ((NAG:CurrentChi() <= 1) and (NAG:SpellTimeToReady(121253) >= 1.5))) and NAG:Cast(115399)
+   or ((NAG:AuraRemainingTime(115307) > 2) and (NAG:CurrentChi() >= 3) and NAG:AuraIsActive(118636) and ((NAG:AuraNumStacks(120267) >= (NAG:PlayerLevel() < 70 and 0 or 50000)) or NAG:CurrentHealthPercent() < 65)) and NAG:Cast(115295))
+   or ((NAG:SpellTimeToReady(121253) <= 1.5) and (NAG:CurrentChi() >= (NAG:MaxChi() - 1))) and NAG:Cast(100784)
+   or NAG:Cast(121253)
+   or NAG:Cast(116847)
+   or ((NAG:AuraRemainingTime(115307) <= 2) and (NAG:CurrentChi() <= 1)) and NAG:Cast(115072)
+   or ((NAG:AuraRemainingTime(115307) <= 2) and (NAG:CurrentChi() <= 1)) and NAG:Cast(100780)
+   or ((NAG:AuraRemainingTime(115307) <= 1.5) or ((NAG:SpellTimeToReady(121253) <= 2) and (NAG:CurrentChi() >= (NAG:MaxChi() - 1)))) and NAG:Cast(100784)
+   or NAG:Cast(123904)
+   or (NAG:AuraNumStacks(124255) >= 150000) and NAG:Cast(119582)
+   or (NAG:CurrentEnergy() >= 80) and NAG:Cast(115072)
+   or (NAG:CurrentEnergy() >= 80) and NAG:Cast(100780)
+   or (NAG:AuraRemainingTime(125359) <= 1.5) and NAG:Cast(100787)
+   or (NAG:CurrentChi() >= 3) and NAG:Cast(100784)
+   or NAG:Cast(115098)
+   or NAG:Cast(123986)
+   or (NAG:AuraNumStacks(124081) < 2) and NAG:Cast(124081)
+   or NAG:Cast(100787)
     ]],
 
     -- MoP talents structure (one per tier)
@@ -221,33 +228,36 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.WINDWALKER, "Monk Windwalker - DP
     -- or ((NAG:CurrentChi() <= 2) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(113656) and ((1 and (true <= 10.0)) or 2 or (NAG:RemainingTime() < (true * 10)) or NAG:AllTrinketStatProcsActive(1))) and NAG:Cast(115399)
     -- removed the above.. to be placed AFTER the autocastotherCDs
     rotationString = [[
-((NAG:NumberTargets() == 2) and (NAG:AuraNumStacks(138228) < 1)) and NAG:Cast(138228)
+
+            NAG:SpellCanCast(115080) and NAG:Cast(115080)
+    or (NAG:CurrentHealth()*1.2 >= NAG:CurrentHealth("target")) and NAG:Cast(126456)
+    or ((NAG:NumberTargets() == 2) and (NAG:AuraNumStacks(138228) < 1)) and NAG:Cast(138228)
     or ((NAG:NumberTargets() > 2) and (NAG:AuraNumStacks(138228) < 2)) and NAG:Cast(138228)
-    or ((NAG:CurrentChi() < NAG:MaxChi()) and NAG:AuraIsActiveWithReactionTime(121286) and NAG:AuraIsInactiveWithReactionTime(117418) and NAG:AuraIsInactiveWithReactionTime(129914)) and NAG:Cast(121283)
-    or (NAG:AuraIsActive(2825) or (NAG:RemainingTime() <= 60.0)) and NAG:Cast(76089)
+    or (NAG:AuraIsActive(2825) or NAG:AuraIsActive(123904) or (((NAG:SpellTimeToReady(123904) + 30) > NAG:RemainingTime()) and (NAG:AuraRemainingTime(1247275) > 12.0)) or (NAG:AuraIsActive(1247275) and NAG:AuraIsActive(138228) and (NAG:AuraNumStacks(138228) == math.min((NAG:NumberTargets() - 1), 2)))) and NAG:Cast(76089)
+    or ((NAG:CurrentChi() < NAG:MaxChi()) and NAG:AuraIsActiveWithReactionTime(121286) and NAG:AuraIsInactiveWithReactionTime(129914)) and NAG:Cast(121283)
+    or (((NAG:CurrentChi() <= (NAG:MaxChi() - 2)) and NAG:AuraIsActive(1247275) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4)) or ((NAG:CurrentChi() <= (NAG:MaxChi() - 2)) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4))) and NAG:Cast(115399)
+    or ((not NAG:AuraIsActive(1247275)) and ((NAG:AuraNumStacks(1247279) >= 18) or ((NAG:CurrentChi() >= 2) and ((NAG:AuraNumStacks(1247279) >= 13) or (NAG:RemainingTime() < 30.0) or ((NAG:AuraNumStacks(1247279) >= 10)) or ((NAG:CurrentTime() < 10) and (NAG:AuraNumStacks(1247279) >= 7)))))) and NAG:Cast(1247275)
+    or (NAG:AuraIsInactiveWithReactionTime(2825) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 5.0)) and NAG:Cast(115288)
+    or NAG:Cast(123904)
     or NAG:AutocastOtherCooldowns()
-   or (NAG:AuraIsActive(125359) and (NAG:AuraRemainingTime(125359) <= 3.0) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418)) and NAG:Cast(100787)
-    or ((not NAG:AuraIsActive(116740)) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and ((NAG:AuraNumStacks(125195) == 20) or ((NAG:CurrentChi() >= 2) and ((NAG:AuraNumStacks(125195) >= 15) or (NAG:RemainingTime() < 40.0) or NAG:AllTrinketStatProcsActive(1) or NAG:AllTrinketStatProcsActive()) and NAG:AuraIsActive(130320, "target") and NAG:AuraIsActive(125359)) or NAG:AllTrinketStatProcsActive(1))) and NAG:Cast(116740)
-    or (NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 5.0)) and NAG:Cast(115288)
-    or ((not NAG:AuraIsActive(130320, "target")) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418)) and NAG:Cast(130320)
-    or ((not NAG:AuraIsActive(125359)) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and (NAG:AuraRemainingTime(130320, "target") > 1.0) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 1.0)) and NAG:Cast(100787)
-    or (NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and ((NAG:NumberTargets() < 3) or ((NAG:NumberTargets() >= 3) and (NAG:CurrentChi() == NAG:MaxChi())))) and NAG:Cast(130320)
-    or ((NAG:NumberTargets() < 3) and (not NAG:AuraIsActive(115288)) and NAG:AuraIsInactiveWithReactionTime(101546) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4) and (NAG:AuraRemainingTime(125359) > 4.0)) and NAG:Cast(113656)
-    or ((NAG:NumberTargets() < 3) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 2.0) and (NAG:AuraNumStacks(124081) < 2)) and NAG:Cast(124081)
-    or ((NAG:NumberTargets() < 3) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 2.0)) and NAG:Cast(115098)
-    or ((NAG:NumberTargets() < 3) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 2.0)) and NAG:Cast(123986)
-    or ((NAG:NumberTargets() < 3) and NAG:AuraIsActiveWithReactionTime(116768) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418)) and NAG:Cast(100784)
-    or ((NAG:NumberTargets() < 3) and NAG:AuraIsActiveWithReactionTime(118864) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and ((NAG:AuraRemainingTime(118864) <= 2.0) or (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) >= 2.0))) and NAG:Cast(100787)
-    or ((NAG:NumberTargets() < 3) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and ((NAG:MaxChi() - NAG:CurrentChi()) >= 2) and ((not NAG:AuraIsKnown(129914)) or (not NAG:UnitIsMoving()) or ((NAG:MaxChi() - NAG:CurrentChi()) >= 3))) and NAG:Cast(100780)
-    or ((NAG:NumberTargets() < 3) and NAG:AuraIsInactiveWithReactionTime(101546) and NAG:AuraIsInactiveWithReactionTime(117418) and ((NAG:CurrentEnergy() + (NAG:EnergyRegenPerSecond() * NAG:SpellTimeToReady(130320))) >= 40)) and NAG:Cast(100784)
     or (NAG:NumberTargets() >= 3) and NAG:Cast(116847)
+    or NAG:Cast(130320)
+    or (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) >= 1.0) and NAG:Cast(115098)
+    or (NAG:AuraRemainingTime(125359) <= 1.0) and NAG:Cast(100787)
+    or NAG:AuraIsActiveWithReactionTime(116768) and NAG:Cast(100784)
+    or ((not NAG:AuraIsActive(115288)) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4)) and NAG:Cast(113656)
+    or ((NAG:NumberTargets() < 3) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 2.0) and (NAG:AuraNumStacks(124081) < 2)) and NAG:Cast(124081)
+    or ((NAG:CurrentTime() > 23) and NAG:AuraIsInactiveWithReactionTime(115288) and NAG:AuraIsActiveWithReactionTime(118864) and ((NAG:AuraRemainingTime(118864) <= 1.0) or (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) >= 2.0))) and NAG:Cast(100787)
+    or (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 2.0) and NAG:Cast(123986)
+    or ((NAG:NumberTargets() >= 3) and ((NAG:MaxChi() - NAG:CurrentChi()) >= 1)) and NAG:Cast(101546)
+    or ((NAG:MaxChi() - NAG:CurrentChi()) >= 2) and NAG:Cast(100780)
     or (NAG:AuraNumStacks(124081) < 2) and NAG:Cast(124081)
-    or ((NAG:NumberTargets() >= 3) and NAG:AuraIsInactiveWithReactionTime(101546)) and NAG:Cast(115098)
-    or ((NAG:NumberTargets() >= 3) and NAG:AuraIsInactiveWithReactionTime(101546)) and NAG:Cast(123986)
-    or ((NAG:NumberTargets() >= 3) and NAG:AuraIsInactiveWithReactionTime(101546) and (NAG:CurrentChi() == NAG:MaxChi())) and NAG:Cast(130320)
-    or ((NAG:NumberTargets() >= 3) and (not NAG:SpellIsReady(130320)) and NAG:AuraIsInactiveWithReactionTime(101546) and (NAG:CurrentChi() >= (NAG:MaxChi() - 2))) and NAG:Cast(100784)
-    or ((NAG:NumberTargets() >= 3) and NAG:AuraIsInactiveWithReactionTime(101546)) and NAG:Cast(101546)
-                ]],
+    or ((((NAG:CurrentEnergy() + (NAG:EnergyRegenPerSecond() * NAG:SpellTimeToReady(130320))) >= 35) and (NAG:NumberTargets() <= 2)) or (((NAG:CurrentEnergy() + (NAG:EnergyRegenPerSecond() * NAG:SpellTimeToReady(130320))) >= 105) and (NAG:NumberTargets() >= 3))) and NAG:Cast(100784)
+    or ((NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4)) and NAG:Cast(115288, "AOE")
+    or (NAG:CurrentChi() <= (NAG:MaxChi() - 4)) and NAG:Cast(115399, "AOE")
+  
+    ]],
+
 
     -- MoP talents structure (one per tier)
     talents = {

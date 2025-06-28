@@ -297,6 +297,32 @@ do --== Rotation Functions ==--
                     return num ~= nil and num >= 0, "Invalid tolerance value (must be >= 0)"
                 end
             },
+            position = {
+                name = "position",
+                pattern = false,
+                validate = function(arg)
+                    -- Remove quotes if present
+                    local pos = arg:match('^["\'](.+)["\']$') or arg
+                    -- Convert to uppercase for validation
+                    local upperPos = pos:upper()
+                    local validPositions = {
+                        ["LEFT"] = true,
+                        ["RIGHT"] = true,
+                        ["UP"] = true,
+                        ["DOWN"] = true,
+                        ["ABOVE"] = true,
+                        ["BELOW"] = true,
+                        ["AOE"] = true,
+                        ["PRIMARY"] = true,
+                        ["CENTER"] = true,
+                        ["MIDDLE"] = true
+                    }
+                    if validPositions[upperPos] then
+                        return true, nil
+                    end
+                    return false, "Invalid position value (must be LEFT, RIGHT, UP, DOWN, ABOVE, BELOW, AOE, PRIMARY, CENTER, or MIDDLE)"
+                end
+            },
             id = {
                 name = "id",
                 pattern = false,
@@ -538,6 +564,30 @@ do --== Rotation Functions ==--
                 end
             },
         }
+
+        -- Add sourceUnit type for unit validation
+        genericTypes["sourceUnit"] = {
+            name = "sourceUnit",
+            pattern = patterns.unit,
+            validate = function(arg)
+                -- Remove quotes if present and validate unit name
+                local unit = arg:match('^["\'](.+)["\']$') or arg
+                local validUnits = {
+                    "player", "target", "focus", "mouseover", "pet",
+                    "party1", "party2", "party3", "party4",
+                    "raid1", "raid2", "raid3", "raid4", "raid5",
+                    "arena1", "arena2", "arena3", "arena4", "arena5",
+                    "boss1", "boss2", "boss3", "boss4", "boss5"
+                }
+                for _, validUnit in ipairs(validUnits) do
+                    if unit == validUnit then
+                        return true, nil
+                    end
+                end
+                return false, "Invalid unit name (must be player, target, focus, etc.)"
+            end
+        }
+
         -- Add a single dynamic type validator
         genericTypes["typeValidator"] = {
             name = "typeValidator",
@@ -596,7 +646,7 @@ do --== Rotation Functions ==--
             DotPercentIncrease = { required = { "id" }, optional = { "targetUnit" } },
 
             -- Casting actions
-            Cast = { required = { "id" }, optional = { "tolerance", "position" } },
+            Cast = { required = { "id" }, optional = { {"tolerance", "position"}, "position" } },
             ActivateAura = { required = { "id" }, optional = { "tolerance", "position" } },
             CastFriendly = { required = { "id" }, optional = { "target" } },
             Channel = { required = { "id" }, optional = { "interruptIf", "boolean" } },
@@ -628,7 +678,7 @@ do --== Rotation Functions ==--
             RemainingTimePercent = { required = {} },
 
             -- Resource functions
-            CurrentHealth = { required = {} },
+            CurrentHealth = { required = {}, optional = { "sourceUnit" } },
             CurrentHealthPercent = { required = {} },
             CurrentMana = { required = {} },
             CurrentManaPercent = { required = {} },

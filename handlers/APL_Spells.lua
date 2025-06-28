@@ -553,11 +553,23 @@ function NAG:SpellCanCast(spellId, tolerance)
         --if not self:HasEnergy(spellId) then
         --    return true
         --end
+
         if spellId == 116740 then
             return NAG:AuraNumStacks(125195) >= 1
         end
         if not self:HasChi(spellId) then
             return false
+        end
+        if spellId == 115080 then
+            -- Touch of Death: Only usable on non-player targets who have equal or less health than you
+            if not UnitExists("target") then return false end
+            if UnitIsPlayer("target") then return false end
+            
+            local playerHealth = UnitHealth("player")
+            local targetHealth = UnitHealth("target")
+            
+            -- Target must have equal or less health than player
+            return targetHealth <= playerHealth
         end
     elseif self.CLASS == "ROGUE" then
         -- Removed for 3/6 to account for pooling issues. But still showing when pooling energy.

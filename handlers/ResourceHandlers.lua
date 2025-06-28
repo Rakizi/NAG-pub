@@ -631,12 +631,18 @@ function NAG:CurrentGenericResource()
     return UnitPower("player", resourceType) or 0
 end
 
---- Get the current health of the player
+--- Get the current health of a unit
 --- @function NAG:CurrentHealth
---- @usage (NAG:CurrentHealth() >= x)
---- @return number The current health of the player
-function NAG:CurrentHealth()
-    return UnitHealth("player")
+--- @param unit? string The unit to check health for (defaults to "player")
+--- @usage (NAG:CurrentHealth() >= x) -- player health
+--- @usage (NAG:CurrentHealth("target") >= x) -- target health
+--- @return number The current health of the specified unit
+function NAG:CurrentHealth(unit)
+    unit = unit or "player"
+    if type(unit) ~= "string" then
+        unit = "player"
+    end
+    return UnitHealth(unit)
 end
 
 --- Get the maximum health of the player
@@ -1345,10 +1351,61 @@ function NAG:FocusTimeToTarget(targetFocus)
     return focusNeeded / regenRate
 end
 
+--- Calculates a level-scaled threshold value using exponential growth.
+--- Provides smooth scaling from minLevel to maxLevel with exponential curve.
+--- @param maxValue number The maximum value to scale to at max level
+--- @param maxLevel? number Optional override for max level (auto-detected by expansion if nil)
+--- @return number The scaled threshold value based on player level
+--- @usage NAG:LevelThreshold(100000, 90) -- Scale to 100k at level 90
+function NAG:LevelThreshold(maxValue, maxLevel)
+    if not maxValue or maxValue <= 0 then
+        self:Warn("LevelThreshold: Invalid maxValue provided")
+        return 0
+    end
+
+    local level = self:PlayerLevel()
+    local minLevel = 40
+  
+    -- Determine maxLevel based on game version
+    if not maxLevel then
+        if ns.Version:IsMoP() then
+            maxLevel = 90
+        elseif ns.Version:IsCata() then
+            maxLevel = 85
+        elseif ns.Version:IsSoD() or ns.Version:IsClassicEra() then
+            maxLevel = 60
+        elseif ns.Version:IsRetail() then
+            maxLevel = 80
+        else
+            maxLevel = 70  -- TBC/WotLK fallback
+        end
+    end
+  
+    -- If level is below minLevel, return 0
+    if level < minLevel then return 0 end
+    
+    -- If at or above maxLevel, return full value
+    if level >= maxLevel then return maxValue end
+  
+    -- Exponential growth from minLevel to maxLevel
+    local progress = (level - minLevel) / (maxLevel - minLevel)
+    progress = math.min(math.max(progress, 0), 1) -- clamp in [0,1]
+    local scaled = (2^progress - 1) / (2 - 1)     -- normalized exponential scale (0 to 1)
+    return math.floor(scaled * maxValue)
+end
+
 --- Get the maximum mana of the player
 --- @function NAG:MaxMana
 --- @usage (NAG:MaxMana() >= x)
 --- @return number The maximum mana of the player
 function NAG:MaxMana()
     return UnitPowerMax("player", Enum.PowerType.Mana)
+end
+
+--- Get the current level of the player
+--- @function NAG:PlayerLevel
+--- @usage NAG:PlayerLevel() >= 70
+--- @return number The current level of the player
+function NAG:PlayerLevel()
+    return UnitLevel("player") or 1
 end

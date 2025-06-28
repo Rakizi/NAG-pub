@@ -160,12 +160,15 @@ function NAG:Cast(id, toleranceOrPosition, position)
             RIGHT = "RIGHT", 
             UP = "ABOVE", -- Map UP to ABOVE (standard position name)
             DOWN = "BELOW", -- Map DOWN to BELOW (standard position name)
-            AOE = "AOE"
+            AOE = "AOE",
+            PRIMARY = "PRIMARY", -- Primary/center position
+            CENTER = "PRIMARY", -- Alias for primary
+            MIDDLE = "PRIMARY" -- Alias for primary
         }
         
         local upperPosition = strupper(overridePosition)
         if not validPositions[upperPosition] then
-            self:Error(format("Cast: Invalid position '%s'. Valid positions: LEFT, RIGHT, UP, DOWN, AOE", tostring(overridePosition)))
+            self:Error(format("Cast: Invalid position '%s'. Valid positions: LEFT, RIGHT, UP, DOWN, AOE, PRIMARY, CENTER, MIDDLE", tostring(overridePosition)))
             return false
         end
         
@@ -213,7 +216,8 @@ function NAG:Cast(id, toleranceOrPosition, position)
                 ["right"] = "RIGHT",
                 ["above"] = "ABOVE",
                 ["below"] = "BELOW",
-                ["aoe"] = "AOE"
+                ["aoe"] = "AOE",
+                ["primary"] = "PRIMARY"
             }
             
             local originalKey = originalPosition and positionValueToKey[originalPosition] or nil
