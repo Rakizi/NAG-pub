@@ -80,7 +80,7 @@ local tonumber = tonumber
 --- Returns "SolarPhase", "LunarPhase", or the last known phase if neither is active.
 --- @usage NAG:CurrentEclipsePhase() == "SolarPhase"
 --- @return string The current Eclipse phase ("SolarPhase", "LunarPhase", or "NeutralPhase").
-function NAG:CurrentEclipsePhase()
+function NAG:DruidCurrentEclipsePhase()
     -- Verify these spells exist in our table
     local spell1 = DataManager:Get(48517, DataManager.EntityTypes.SPELL)
     local spell2 = DataManager:Get(48518, DataManager.EntityTypes.SPELL)
@@ -102,6 +102,7 @@ function NAG:CurrentEclipsePhase()
         return self.lastEclipsePhase
     end
 end
+NAG.CurrentEclipsePhase = NAG.DruidCurrentEclipsePhase
 
 --- Checks if the Warlock's pet is currently active.
 --- @usage NAG:WarlockPetIsActive()
@@ -115,6 +116,30 @@ end
 --- @return number The current mana value of the pet.
 function NAG:WarlockCurrentPetMana()
     return UnitPower("pet", Enum.PowerType.Mana)
+end
+
+--- Checks if Hand of Guldan is currently in flight
+--- @usage NAG:HandOfGuldanInFlight()
+--- @return boolean True if Hand of Guldan is in flight, false otherwise.
+function NAG:WarlockHandOfGuldanInFlight()
+    local handOfGuldan = DataManager:Get(108294, DataManager.EntityTypes.SPELL)
+    if not handOfGuldan then
+        self:Error("HandOfGuldanInFlight: Hand of Guldan not found in spell table")
+        return false
+    end
+    return handOfGuldan.inFlightTime ~= nil and handOfGuldan.inFlightTime > 0
+end
+
+--- Checks if Haunt is currently in flight
+--- @usage NAG:WarlockHauntInFlight()
+--- @return boolean True if Haunt is in flight, false otherwise.
+function NAG:WarlockHauntInFlight()
+    local haunt = DataManager:Get(108294, DataManager.EntityTypes.SPELL)
+    if not haunt then
+        self:Error("HauntInFlight: Haunt not found in spell table")
+        return false
+    end
+    return haunt.inFlightTime ~= nil and haunt.inFlightTime > 0
 end
 
 --- Gets the current mana percent of the Warlock's pet.

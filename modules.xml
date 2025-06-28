@@ -24,6 +24,8 @@
     <Script file="Modules\Types.lua"/>
     <Script file="Modules\APL.lua"/>
     <Script file="Modules\APLSchema.lua"/>
+    <Script file="Modules\APLParser.lua"/>
+    <Script file="Modules\APLExecutor.lua"/>
     <Script file="Modules\KeybindManager.lua"/>
     <Script file="Modules\DataWalker.lua"/>
     <Script file="Modules\DataManager.lua"/>
@@ -62,7 +64,8 @@
     <Script file="Modules\Debug\EntityBehaviorTester.lua"/>
     <Script file="Modules\Debug\CLEUDebugger.lua"/>
     <Script file="Modules\Debug\EncounterStopwatch.lua"/>
-    
+    <Script file="Modules\Debug\SchemaHandlerValidator.lua"/>
+
     <!-- APL Editor -->
     <Script file="Modules\APLEditor.lua"/>
 

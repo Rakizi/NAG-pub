@@ -768,13 +768,21 @@ end
 function NAG:CurrentChi()
     return UnitPower("player", Enum.PowerType.Chi) or 0
 end
+NAG.MonkCurrentChi = NAG.CurrentChi
 
 --- Gets maximum chi
 --- @return number Maximum chi value
 function NAG:MaxChi()
     return UnitPowerMax("player", Enum.PowerType.Chi) or 6
 end
+NAG.MonkMaxChi = NAG.MaxChi
 
+
+--- Gets maximum rage
+--- @return number Maximum rage value
+function NAG:MaxRage()
+    return UnitPowerMax("player", Enum.PowerType.Rage) or 100
+end
 
 --- Gets time until target energy level is reached
 --- @param targetEnergy number|table The target energy level to reach
@@ -882,6 +890,7 @@ end
 function NAG:CurrentSoulShards()
     return UnitPower("player", Enum.PowerType.SoulShards)
 end
+NAG.WarlockCurrentSoulShards = NAG.CurrentSoulShards
 
 --- Get the current lunar energy of the player
 --- @function NAG:CurrentLunarEnergy

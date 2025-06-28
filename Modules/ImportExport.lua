@@ -384,12 +384,58 @@ function ImportExport:ExportRotation(specID, rotationName, options)
     return finalString
 end
 
--- Core Import Function
-function ImportExport:ImportRotation(importString)
-    self:Debug(format("ImportRotation: Starting import process for importString: %s", importString))
+-- Converts an external AST/JSON (e.g., from wowsims) to a valid NAG rotation config
+function ImportExport:ImportFromExternalJSON(jsonTable)
+    -- Attempt to extract relevant fields from the external JSON
+    local player = jsonTable.player or {}
+    local class = player.class or "UNKNOWN"
+    local rotation = player.rotation or {}
+    local specID = 0 -- Default to 0 if not found
+    local name
+    local lastModified = time()
+    -- Use WoW's date() and GetTime() for compatibility
+    local dateStr = date("%Y%m%d")
+    if class and rotation and rotation.type then
+        name = string.format("%s %s %s %d", class, rotation.type, dateStr, lastModified)
+    else
+        name = "Imported Rotation " .. tostring(lastModified)
+    end
+    -- Use WoW API for gameType
+    local gameType = "UNKNOWN"
+    if ns.Version and ns.Version.GetGameType then
+        gameType = ns.Version:GetGameType()
+    end
+    local author = "ExternalImport"
+
+    -- Build the NAG rotation config
+    local config = {
+        name = name,
+        specID = specID,
+        class = class,
+        rotationString = nil, -- Not used for AST-based rotations
+        apl = rotation, -- Store the AST directly
+        prePull = rotation.prepullActions or {},
+        macros = {},
+        burstTrackers = {},
+        resourceBar = {},
+        enabled = true,
+        userModified = true,
+        gameType = gameType,
+        authors = { author },
+        lastModified = lastModified,
+        lastModifiedBy = author,
+        exportTime = lastModified,
+        imported = true,
+        importTime = lastModified,
+    }
+    return config
+end
+
+function ImportExport:ImportRotationLegacy(importString)
+    self:Debug(format("ImportRotationLegacy: Starting import process for importString: %s", importString))
 
     if not importString then
-        self:Debug(format("ImportRotation: No import string provided"))
+        self:Debug(format("ImportRotationLegacy: No import string provided"))
         return false, "No import string provided"
     end
 
@@ -400,21 +446,21 @@ function ImportExport:ImportRotation(importString)
     -- Decode Base64
     local decoded = decodeData(encodedData)
     if not decoded then
-        self:Debug("ImportRotation: Failed to decode import string")
+        self:Debug("ImportRotationLegacy: Failed to decode import string")
         return false, "Failed to decode import string"
     end
 
     -- Try JSON deserialization
     local success, result = pcall(json.Deserialize, decoded)
     if not success or not result then
-        self:Debug("ImportRotation: Failed to deserialize JSON")
+        self:Debug("ImportRotationLegacy: Failed to deserialize JSON")
         return false, "Failed to deserialize JSON"
     end
 
     -- Validate config
     local isValid, validationError = validateRotationConfig(result)
     if not isValid then
-        self:Debug(format("ImportRotation: Config validation failed: %s", validationError))
+        self:Debug(format("ImportRotationLegacy: Config validation failed: %s", validationError))
         return false, validationError
     end
 
@@ -428,6 +474,22 @@ end
 
 function ImportExport:ShowExportDialog(exportString)
     StaticPopup_Show("NAG_EXPORT_ROTATION_STRING", nil, nil, exportString)
+end
+
+-- Wrapper that auto-detects import format and dispatches to the correct function
+function ImportExport:ImportRotation(importString)
+    if not importString then
+        self:Debug("ImportRotation: No import string provided")
+        return false, "No import string provided"
+    end
+    -- Detect direct JSON input (starts with '{')
+    if strsub(importString, 1, 1) == '{' then
+        -- Call the new AST/JSON-based import logic
+        return self:ImportRotationJSON(importString)
+    else
+        -- Call the legacy string-based import logic
+        return self:ImportRotationLegacy(importString)
+    end
 end
 
 -- Expose in private namespace

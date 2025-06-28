@@ -138,7 +138,7 @@ end
 --- @param minIcdSeconds? number Minimum ICD in seconds to consider (optional)
 --- @return number The maximum remaining ICD time in seconds, or 0 if a low-ICD trinket is found
 --- @usage local maxIcd = NAG:TrinketProcsMaxRemainingIcd(Types:GetType("Stat").HASTE)
-function NAG:TrinketProcsMaxRemainingIcd(statType1, statType2, statType3, minIcdSeconds)
+function NAG:TrinketProcsMaxRemainingICD(statType1, statType2, statType3, minIcdSeconds)
     self.trinketFunctionsUsed = true -- Set the global flag
     local maxRemaining = 0
     local hasLowIcdMatch = false
@@ -196,6 +196,7 @@ function NAG:TrinketProcsMaxRemainingIcd(statType1, statType2, statType3, minIcd
 
     return maxRemaining
 end
+NAG.TrinketProcsMaxRemainingIcd = NAG.TrinketProcsMaxRemainingICD
 
 --- Returns the minimum remaining time among active trinket procs of specified stat types.
 --- Finds the minimum remaining time among all active trinket procs that match the given stat types and ICD threshold. Returns 0 if a low-ICD trinket is found and no active procs, or 999 if none found.
