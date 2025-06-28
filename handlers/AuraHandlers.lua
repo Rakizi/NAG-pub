@@ -36,6 +36,7 @@ local IsCurrentSpell = ns.IsCurrentSpellUnified
 local IsUsableItem = ns.IsUsableItemUnified
 local GetItemSpell = ns.GetItemSpellUnified
 local GetTalentInfo = ns.GetTalentInfoUnified
+local GetItemInfo = ns.GetItemInfoUnified
 
 -- Lua APIs (WoW optimized where available)
 -- Math operations (WoW optimized)
