@@ -248,26 +248,6 @@ do -- Ace3 lifecycle
         if self.className == "DEATHKNIGHT" then
             self:Print("Setting Death Knight module to enabled")
             self:SetEnabledState(true)
-
-            -- Check for WeakAuras after a delay to ensure WeakAuras is loaded
-            C_Timer.After(6, function()
-                local hasOldWA = ns.IsWeakAuraLoaded("DK Next Action Guide - by Fonsas")
-                local hasNewWA = ns.IsWeakAuraLoaded("DK Next Action Guide (comp) - by Fonsas")
-
-                if hasOldWA or not hasNewWA then
-                    C_Timer.After(2, function()
-                        local message = "\124cffF772E6 [Fonsas] whispers: "
-                        if hasOldWA and hasNewWA then
-                            message = message .. "Hey there! I noticed you have both the old and new DK WeakAuras installed. Please delete the old 'DK Next Action Guide - by Fonsas' WeakAura to avoid any conflicts! Keep the new 'WA is DK Next Action Guide (comp) - by Fonsas' for the best experience! You can find the latest WeakAura under /nag > Class > Import WeakAura. \124r"
-                        elseif hasOldWA and not hasNewWA then
-                            message = message .. "Hey there! I noticed you're still using my old DK WeakAura. It's time to let it go - like Arthas and his crown! Please delete the old 'DK Next Action Guide - by Fonsas' WeakAura and import the new 'WA is DK Next Action Guide (comp) - by Fonsas' for the best experience! You can find the latest WeakAura under /nag > Class > Import WeakAura. \124r"
-                        elseif not hasNewWA then
-                            message = message .. "Hey there! Don't forget to import the new DK WeakAura 'DK Next Action Guide (comp) - by Fonsas' for the best experience! You can find it under /nag > Class > Import WeakAura. \124r"
-                        end
-                        print(message)
-                    end)
-                end
-            end)
         end
 
         -- Register class-specific options

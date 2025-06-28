@@ -9,7 +9,7 @@ local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceSerializer = LibStub("AceSerializer-3.0")
-
+local GetItemInfo = ns.GetItemInfoUnified
 -- Constants
 local ADDON_PREFIX = "NAGTrinket"
 local REQUEST_TIMEOUT = 3.0  -- Wait 2 seconds for responses
@@ -268,11 +268,13 @@ function TrinketCommunicationManager:CHAT_MSG_ADDON(event, prefix, message, chan
         self:Debug("Received trinket data response from %s for itemId: %d", sender, itemId)
 
         -- Parse the trinket data from the response
+        self:Debug("Attempting to deserialize data: %s", serializedData)
         local trinketData = self:DeserializeTrinketData(serializedData)
         if not trinketData then
             self:Debug("Failed to deserialize trinket data from response")
             return
         end
+        self:Debug("Successfully deserialized trinket data: buffId=%d, duration=%.1f", trinketData.buffId, trinketData.duration)
 
         -- Check if we already have a response for this trinket
         if self.state.responseData[itemId] then
@@ -323,6 +325,33 @@ end
 --- @param trinketData table The received trinket data
 --- @param sender string The player who sent the data
 function TrinketCommunicationManager:ShowValidationWindow(itemId, trinketData, sender)
+    -- Validate inputs
+    if not itemId or type(itemId) ~= "number" then
+        self:Debug("Invalid itemId provided to ShowValidationWindow")
+        return
+    end
+    
+    if not trinketData or type(trinketData) ~= "table" then
+        self:Debug("Invalid trinketData provided to ShowValidationWindow: %s", type(trinketData))
+        return
+    end
+    
+    if not sender or type(sender) ~= "string" then
+        self:Debug("Invalid sender provided to ShowValidationWindow")
+        return
+    end
+    
+    -- Validate required trinket data fields
+    if not trinketData.buffId or type(trinketData.buffId) ~= "number" then
+        self:Debug("Invalid or missing buffId in trinketData")
+        return
+    end
+    
+    if not trinketData.duration or type(trinketData.duration) ~= "number" then
+        self:Debug("Invalid or missing duration in trinketData")
+        return
+    end
+
     -- Check if any window is already open
     if self.state.activeWindow then
         self:Debug("Registration window already open, skipping new window for trinket: %d", itemId)
@@ -562,9 +591,32 @@ function TrinketCommunicationManager:DeserializeTrinketData(serializedData)
         return nil
     end
 
-    local success, data = pcall(function() return AceSerializer:Deserialize(serializedData) end)
+    if not serializedData or type(serializedData) ~= "string" then
+        self:Debug("Invalid serialized data provided")
+        return nil
+    end
+
+    -- AceSerializer:Deserialize returns (success, data) or (success, error)
+    local success, data = AceSerializer:Deserialize(serializedData)
     if not success then
         self:Debug("Failed to deserialize trinket data: %s", tostring(data))
+        return nil
+    end
+
+    -- Additional validation to ensure we got a proper table
+    if not data or type(data) ~= "table" then
+        self:Debug("Deserialized data is not a table: %s", type(data))
+        return nil
+    end
+
+    -- Validate required fields
+    if not data.buffId or type(data.buffId) ~= "number" then
+        self:Debug("Deserialized data missing or invalid buffId")
+        return nil
+    end
+
+    if not data.duration or type(data.duration) ~= "number" then
+        self:Debug("Deserialized data missing or invalid duration")
         return nil
     end
 

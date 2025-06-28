@@ -157,8 +157,8 @@ do
             self:MigrateModuleSettings()
         end
 
-        -- Register options if GetOptions is implemented
-        if self.GetOptions then
+        -- Register options if GetOptions is defined and not skipped
+        if self.GetOptions and not self.skipAutoOptions then
             self:RegisterModuleOptions()
         end
 
@@ -610,7 +610,7 @@ do
     --- Called by NAG's core RefreshConfig
     --- @param self ModuleBase
     function ModuleBase:RefreshConfig()
-        if self.GetOptions then
+        if self.GetOptions and not self.skipAutoOptions then
             self:RegisterModuleOptions()
         end
 

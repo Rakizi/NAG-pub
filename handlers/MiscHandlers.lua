@@ -333,6 +333,288 @@ function NAG:PLAYER_REGEN_ENABLED()
     self.lastSwingTimestampOH = 0
 end
 
+do -- ~~~~~~~~~~ Spell Position Checking Functions ~~~~~~~~~~
+
+    --- Check if a spell ID is displayed at a specific position.
+    --- @param spellId number The spell ID to check
+    --- @param position string The position to check (e.g., "primary", "left1", "right2")
+    --- @return boolean True if the spell is displayed at that position
+    --- @usage NAG:IsSpellAtPosition(12345, "primary")
+    function NAG:IsSpellAtPosition(spellId, position)
+        if not spellId or not position then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        local frame = NAG.Frame.iconFrames[position]
+        if not frame then
+            return false
+        end
+        
+        return frame.spellId == spellId and frame:IsVisible()
+    end
+
+    --- Check if a spell ID is displayed anywhere in the NAG frames.
+    --- @param spellId number The spell ID to check
+    --- @return table|nil Returns position info if found, nil if not found
+    --- @usage NAG:GetSpellPosition(12345)
+    function NAG:GetSpellPosition(spellId)
+        if not spellId then return nil end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return nil
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                return {
+                    position = position,
+                    frame = frame,
+                    isPrimary = position == "primary",
+                    isAOE = position == "aoe",
+                    isLeft = strmatch(position, "^left") ~= nil,
+                    isRight = strmatch(position, "^right") ~= nil,
+                    isAbove = strmatch(position, "^above") ~= nil,
+                    isBelow = strmatch(position, "^below") ~= nil
+                }
+            end
+        end
+        
+        return nil
+    end
+
+    --- Get all spells currently displayed in NAG frames.
+    --- @return table Table of displayed spells with their positions
+    --- @usage NAG:GetDisplayedSpells()
+    function NAG:GetDisplayedSpells()
+        local displayedSpells = {}
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return displayedSpells
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId and frame:IsVisible() then
+                displayedSpells[position] = {
+                    spellId = frame.spellId,
+                    frame = frame,
+                    isPrimary = position == "primary",
+                    isAOE = position == "aoe",
+                    isLeft = strmatch(position, "^left") ~= nil,
+                    isRight = strmatch(position, "^right") ~= nil,
+                    isAbove = strmatch(position, "^above") ~= nil,
+                    isBelow = strmatch(position, "^below") ~= nil
+                }
+            end
+        end
+        
+        return displayedSpells
+    end
+
+    --- Check if a spell is displayed in left positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any left position
+    --- @usage NAG:IsSpellInLeftPositions(12345)
+    function NAG:IsSpellInLeftPositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^left") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed in right positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any right position
+    --- @usage NAG:IsSpellInRightPositions(12345)
+    function NAG:IsSpellInRightPositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^right") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed in above positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any above position
+    --- @usage NAG:IsSpellInAbovePositions(12345)
+    function NAG:IsSpellInAbovePositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^above") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed in below positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any below position
+    --- @usage NAG:IsSpellInBelowPositions(12345)
+    function NAG:IsSpellInBelowPositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^below") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed as the primary spell.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if the spell is the primary spell
+    --- @usage NAG:IsPrimarySpell(12345)
+    function NAG:IsPrimarySpell(spellId)
+        return self:IsSpellAtPosition(spellId, "primary")
+    end
+
+    --- Check if a spell is displayed as the AOE spell.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if the spell is the AOE spell
+    --- @usage NAG:IsAOESpell(12345)
+    function NAG:IsAOESpell(spellId)
+        return self:IsSpellAtPosition(spellId, "aoe")
+    end
+
+    --- Get all positions where a spell is displayed.
+    --- @param spellId number The spell ID to check
+    --- @return table Array of positions where the spell is displayed
+    --- @usage NAG:GetSpellPositions(12345)
+    function NAG:GetSpellPositions(spellId)
+        if not spellId then return {} end
+        
+        local positions = {}
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return positions
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                tinsert(positions, position)
+            end
+        end
+        
+        return positions
+    end
+
+    --- Check if any spell is displayed at a specific position.
+    --- @param position string The position to check (e.g., "primary", "left1", "right2")
+    --- @return boolean True if any spell is displayed at that position
+    --- @usage NAG:IsPositionOccupied("primary")
+    function NAG:IsPositionOccupied(position)
+        if not position then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        local frame = NAG.Frame.iconFrames[position]
+        if not frame then
+            return false
+        end
+        
+        return frame.spellId ~= nil and frame:IsVisible()
+    end
+
+    --- Get the spell ID displayed at a specific position.
+    --- @param position string The position to check (e.g., "primary", "left1", "right2")
+    --- @return number|nil The spell ID at that position, or nil if no spell
+    --- @usage NAG:GetSpellAtPosition("primary")
+    function NAG:GetSpellAtPosition(position)
+        if not position then return nil end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return nil
+        end
+        
+        local frame = NAG.Frame.iconFrames[position]
+        if not frame or not frame:IsVisible() then
+            return nil
+        end
+        
+        return frame.spellId
+    end
+
+    --- Count how many positions a spell is displayed in.
+    --- @param spellId number The spell ID to check
+    --- @return number The number of positions where the spell is displayed
+    --- @usage NAG:GetSpellDisplayCount(12345)
+    function NAG:GetSpellDisplayCount(spellId)
+        if not spellId then return 0 end
+        
+        local count = 0
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return count
+        end
+        
+        for _, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                count = count + 1
+            end
+        end
+        
+        return count
+    end
+
+    --- Check if a spell is displayed in any secondary position (non-primary, non-AOE).
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if the spell is in a secondary position
+    --- @usage NAG:IsSpellInSecondaryPosition(12345)
+    function NAG:IsSpellInSecondaryPosition(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                -- Check if it's not primary or AOE
+                if position ~= "primary" and position ~= "aoe" then
+                    return true
+                end
+            end
+        end
+        
+        return false
+    end
+
+end
+
 --- Placeholder for moving the player for a specific duration.
 --- @function NAG:MoveDuration
 --- @param duration number The duration to move for.

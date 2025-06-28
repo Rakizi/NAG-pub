@@ -18,9 +18,15 @@ local Types
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
--- ======= WoW API =======
+--- ======= Lua APIs =======
+local floor = floor or math.floor
+
+--- ======= WoW API =======
 local UnitDamage = UnitDamage
 local UnitRangedDamage = UnitRangedDamage
+local UnitAttackPower = UnitAttackPower
+local UnitAttackSpeed = UnitAttackSpeed
+local GetCombatRatingBonus = GetCombatRatingBonus
 local GetTime = GetTime
 
 -- Module References
@@ -42,19 +48,34 @@ local AURA_STAT_CACHE_DURATION = 0.2 -- Cache for 200ms
 function NAG:PlayerWeaponDamage(weapon)
     weapon = weapon or "mainhand"
 
-    local minDamage, maxDamage, minOffHandDamage, maxOffHandDamage = UnitDamage("player")
+        local lo, hi, minOffHandDamage, maxOffHandDamage = UnitDamage("player")
+        local b, p, n = UnitAttackPower("player")
+        local ap = b + p - n
+        local s = UnitAttackSpeed("player")
+        local h = GetCombatRatingBonus(20) / 100
+        local bs = s * (1 + h)
+        local apB = ap * bs / 14
 
-    if weapon == "mainhand" then
-        if not minDamage or not maxDamage then return 0 end
-        return (minDamage + maxDamage) / 2
-    elseif weapon == "offhand" then
-        if not minOffHandDamage or not maxOffHandDamage then return 0 end
-        return (minOffHandDamage + maxOffHandDamage) / 2
-    else
-        self:Error("WeaponDamage: Invalid weapon type specified: " .. tostring(weapon))
-        return 0
+        if weapon == "mainhand" then
+            if not lo or not hi then return 0 end
+            -- Calculate base weapon damage by removing attack power contribution
+            local baseLo = floor(lo - apB)
+            local baseHi = floor(hi - apB)
+            return (baseLo + baseHi) / 2
+        elseif weapon == "offhand" then
+            if not minOffHandDamage or not maxOffHandDamage then return 0 end
+            -- For offhand, we need to calculate its specific attack power contribution
+            local offhandSpeed = UnitAttackSpeed("player", true) or s
+            local offhandBs = offhandSpeed * (1 + h)
+            local offhandApB = ap * offhandBs / 14
+            local baseLo = floor(minOffHandDamage - offhandApB)
+            local baseHi = floor(maxOffHandDamage - offhandApB)
+            return (baseLo + baseHi) / 2
+        else
+            self:Error("WeaponDamage: Invalid weapon type specified: " .. tostring(weapon))
+            return 0
+        end
     end
-end
 
 --[[ Currently this is not returning proper values, using 'expensive' method below
 --- Gets the static (unmodified) weapon damage for a given weapon slot. 

@@ -36,12 +36,6 @@
   <Script file="Debug/EventDebugger.Tests.lua"/>
   <!--Script file="Debug/ProfilingUtility.Tests.lua"/-->
 
-  <!-- SpellLearner Tests -->
-  <Script file="SpellLearner/PredictionAPI.Tests.lua"/>
-  <Script file="SpellLearner/PredictionEngine.Tests.lua"/>
-  <Script file="SpellLearner/SpellLearner-StateManager.Tests.lua"/>
-  <Script file="SpellLearner/SpellLearner.Tests.lua"/>
-
   <!-- Other Module Tests -->
   <Script file="APL.Tests.lua"/>
   <Script file="APLSchema.Tests.lua"/>
@@ -53,6 +47,7 @@
   <Script file="KeybindManager.Tests.lua"/>
   <Script file="OverlayManager.Tests.lua"/>
   <!--Script file="PullTimerManager.Tests.lua"/-->
+  <Script file="PredictionAPI.Tests.lua"/>
   <Script file="RotationManager.Tests.lua"/>
   <Script file="ShamanWeaving.Tests.lua"/>
   <Script file="SpellTrackingManager.Tests.lua"/>

@@ -233,6 +233,8 @@ NAG.defaults = {
     }
 }
 
+-- Spell Cost Learner modules register their options inline below
+
 do -- Core ACE3 functions --
 
     --- Initializes the addon.
@@ -299,8 +301,8 @@ do -- Core ACE3 functions --
         NAG.Version = ns.Version
         NAG.Types = NAG:GetModule("Types")
         NAG.OM = NAG:GetModule("OverlayManager")
-        NAG.SL = NAG:GetModule("SpellLearner")
-        NAG.SLM = NAG:GetModule("SpellLearnerStateManager")
+        --NAG.SL = NAG:GetModule("SpellLearner")
+        --NAG.SLM = NAG:GetModule("SpellLearnerStateManager")
 
         -- Validate keys
         ns.retrieveValidKeys()
@@ -636,6 +638,16 @@ do -- Core options
             self.options[category] = self:CreateOptionsGroup(category, category, nil, getter, setter)
         end
 
+        -- In InitializeOptions, set up the group with a dummy args (will be replaced in GetOptions)
+        self.options[ns.MODULE_CATEGORIES.FEATURE].args = self.options[ns.MODULE_CATEGORIES.FEATURE].args or {}
+        self.options[ns.MODULE_CATEGORIES.FEATURE].args.spellCostLearner = {
+            type = "group",
+            name = "Spell Cost Learner",
+            order = 1,
+            childGroups = "tab",
+            args = {}, -- will be replaced in GetOptions
+        }
+
         -- Register options table
         LibStub("AceConfig-3.0"):RegisterOptionsTable("NAG", function() return self:GetOptions() end)
 
@@ -690,6 +702,25 @@ do -- Core options
                     self.options[category].args[moduleName] = moduleOpts
                 end
             end
+        end
+        -- Update Spell Cost Learner sub-tabs with direct module options
+        if self.options[ns.MODULE_CATEGORIES.FEATURE]
+            and self.options[ns.MODULE_CATEGORIES.FEATURE].args
+            and self.options[ns.MODULE_CATEGORIES.FEATURE].args.spellCostLearner then
+            
+            local spellLearner = NAG:GetModule("SpellLearner", true)
+            local predictionManager = NAG:GetModule("PredictionManager", true)
+            local predictionAPI = NAG:GetModule("PredictionAPI", true)
+            local spellAnalyzer = NAG:GetModule("SpellAnalyzer", true)
+            local stateManager = NAG:GetModule("SpellLearnerStateManager", true)
+            
+            self.options[ns.MODULE_CATEGORIES.FEATURE].args.spellCostLearner.args = {
+                SpellLearner = spellLearner and spellLearner.GetOptions and spellLearner:GetOptions() or nil,
+                PredictionManager = predictionManager and predictionManager.GetOptions and predictionManager:GetOptions() or nil,
+                PredictionAPI = predictionAPI and predictionAPI.GetOptions and predictionAPI:GetOptions() or nil,
+                SpellAnalyzer = spellAnalyzer and spellAnalyzer.GetOptions and spellAnalyzer:GetOptions() or nil,
+                SpellLearnerStateManager = stateManager and stateManager.GetOptions and stateManager:GetOptions() or nil,
+            }
         end
         -- Return the complete options table
         return {

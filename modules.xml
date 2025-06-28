@@ -49,10 +49,12 @@
     <Script file="Modules\Snapshotter.lua"/>
 
     <!-- SpellLearner Modules -->
-    <Script file="Modules\SpellLearner\SpellLearner.lua"/>
-    <Script file="Modules\SpellLearner\SpellLearner-StateManager.lua"/>
-    <Script file="Modules\SpellLearner\PredictionAPI.lua"/>
-    <Script file="Modules\SpellLearner\PredictionEngine.lua"/>
+<Script file="Modules\SpellLearner\SpellAnalyzer.lua"/>
+<Script file="Modules\SpellLearner\SpellLearner-StateManager.lua"/>
+<Script file="Modules\SpellLearner\PredictionManager.lua"/>
+<Script file="Modules\SpellLearner\PredictionAPI.lua"/>
+<Script file="Modules\SpellLearner\SpellLearner.lua"/>
+<!-- <Script file="Modules\SpellLearner\PredictionEngine.lua"/> -->
     
     <!-- Debug Modules -->
     <Script file="Modules\Debug\APLMonitor.lua"/>

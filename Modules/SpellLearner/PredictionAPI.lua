@@ -23,380 +23,470 @@
     NOTES: Prediction API interface for SpellLearner system
 ]]
 
--- ======= LOCALIZE =======
--- Addon
+--- ============================ HEADER ============================
+--[[
+    PredictionAPI.lua - Lightweight interface for querying learned spell behavior
+    
+    This module provides a simple API for accessing consolidated spell learning data
+    collected by PredictionManager. It summarizes resource costs, cooldowns, and
+    buff/debuff applications with confidence scoring.
+    
+    Usage:
+        local api = NAG:GetModule("PredictionAPI")
+        local cost = api:GetLearnedCost(spellId)
+        local buffs = api:GetAppliedBuffs(spellId)
+        local debuffs = api:GetAppliedDebuffs(spellId)
+]]
+
+--- ======= LOCALIZE =======
 local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
-local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
+local L = ns.L
 
--- Create the API table
-NAG.PredictionAPI = NAG.PredictionAPI or {}
-local PredictionAPI = NAG.PredictionAPI
+-- Default settings
+local defaults = {
+    global = {
+        version = 1,
+        debugMode = false,
+    },
+    char = {
+        enabled = false, -- Disabled by default during development break
+    }
+}
 
---- Evaluates NAG's rotation with a simulated state
--- @param state table The simulated state to evaluate
--- @return number The spell ID that would be cast next, or nil if unavailable
-function PredictionAPI:EvaluateState(state)
-    if not state then return nil end
+--- @class PredictionAPI: ModuleBase
+local PredictionAPI = NAG:CreateModule("PredictionAPI", defaults, {
+    moduleType = ns.MODULE_TYPES.FEATURE,
+    optionsCategory = ns.MODULE_CATEGORIES.FEATURE,
+    optionsOrder = 40,
+    childGroups = "tab",
+    skipAutoOptions = true,
+})
 
-    -- Create state container that preserves original game state
-    local simulationActive = true
+-- Get required modules (will be available after initialization)
+local StateManager
+local PredictionManager
 
-    -- Store function references
-    local originalGetResource = NAG.GetResource
-    local originalGetBuffRemaining = NAG.GetBuffRemaining
-    local originalIsBuffActive = NAG.IsBuffActive
-    local originalIsOnCooldown = NAG.IsOnCooldown
-    local originalGetRuneCount = NAG.GetRuneCount
-    local originalGetRuneCooldown = NAG.GetRuneCooldown
+-- Constants
+local MIN_OBSERVATIONS = 3  -- Minimum observations for confidence
+local MAX_VARIANCE_RATIO = 0.2  -- Maximum variance ratio for confidence (20%)
 
-    -- Override resource function
-    NAG.GetResource = function(self, resourceType)
-        if simulationActive then
-            return state.resources and state.resources[resourceType] or 0
-        else
-            return originalGetResource(self, resourceType)
-        end
+--- ======= PRIVATE FUNCTIONS =======
+
+-- Calculate confidence score based on observations and variance
+local function CalculateConfidence(observations, values)
+    if #observations < MIN_OBSERVATIONS then
+        return 0
     end
-
-    -- Override buff remaining function
-    NAG.GetBuffRemaining = function(self, buffID)
-        if simulationActive then
-            local buff = state.buffs and state.buffs.player and state.buffs.player[buffID]
-            return buff and buff.remaining or 0
-        else
-            return originalGetBuffRemaining(self, buffID)
-        end
+    
+    -- Calculate mean and variance
+    local sum = 0
+    for _, value in ipairs(values) do
+        sum = sum + value
     end
-
-    -- Override is buff active function
-    NAG.IsBuffActive = function(self, buffID)
-        if simulationActive then
-            return (NAG:GetBuffRemaining(buffID) > 0)
-        else
-            return originalIsBuffActive(self, buffID)
-        end
+    local mean = sum / #values
+    
+    local variance = 0
+    for _, value in ipairs(values) do
+        variance = variance + (value - mean) ^ 2
     end
-
-    -- Override cooldown function
-    NAG.IsOnCooldown = function(self, spellID)
-        if simulationActive then
-            return (state.cooldowns and state.cooldowns[spellID] or 0) > 0
-        else
-            return originalIsOnCooldown(self, spellID)
-        end
+    variance = variance / #values
+    
+    -- Calculate coefficient of variation (CV = std_dev / mean)
+    local cv = math.sqrt(variance) / math.abs(mean)
+    if cv > MAX_VARIANCE_RATIO then
+        return 0
     end
-
-    -- Override rune functions for Death Knights
-    NAG.GetRuneCount = function(self, runeType)
-        if simulationActive then
-            if state.runes then
-                local count = 0
-                for i = 1, 6 do -- Maximum of 6 runes
-                    local rune = state.runes[i]
-                    if rune and rune.ready and (runeType == 0 or rune.type == runeType) then
-                        count = count + 1
-                    end
-                end
-                return count
-            end
-            return 0
-        else
-            return originalGetRuneCount and originalGetRuneCount(self, runeType) or 0
-        end
-    end
-
-    NAG.GetRuneCooldown = function(self, runeIndex)
-        if simulationActive then
-            if state.runes and state.runes[runeIndex] then
-                return state.runes[runeIndex].ready and 0 or state.runes[runeIndex].timeLeft or 0
-            end
-            return 0
-        else
-            return originalGetRuneCooldown and originalGetRuneCooldown(self, runeIndex) or 0
-        end
-    end
-
-    -- Call main rotation function in safe context
-    local success, result = pcall(function()
-        -- Call actual rotation logic to get next spell
-        -- This could be different depending on how NAG determines the next spell
-
-        -- Option 1: NAG's nextSpell is set during normal rotation
-        -- Simply return it
-        return NAG.nextSpell
-
-        -- Option 2: If NAG has a specific function to calculate next action
-        -- We could call that instead:
-        -- local actionTable = {}
-        -- NAG:RunRotation(actionTable)
-        -- return actionTable.nextSpell or NAG.nextSpell
-    end)
-
-    -- Restore original functions
-    NAG.GetResource = originalGetResource
-    NAG.GetBuffRemaining = originalGetBuffRemaining
-    NAG.IsBuffActive = originalIsBuffActive
-    NAG.IsOnCooldown = originalIsOnCooldown
-
-    if originalGetRuneCount then
-        NAG.GetRuneCount = originalGetRuneCount
-    end
-
-    if originalGetRuneCooldown then
-        NAG.GetRuneCooldown = originalGetRuneCooldown
-    end
-
-    simulationActive = false
-
-    -- Return result or nil on error
-    return success and result or nil
+    
+    -- Confidence increases with more observations and lower variance
+    local observationBonus = math.min((#observations - MIN_OBSERVATIONS) / 5, 0.3)
+    local varianceBonus = math.max(0, (MAX_VARIANCE_RATIO - cv) / MAX_VARIANCE_RATIO * 0.4)
+    
+    return math.min(0.3 + observationBonus + varianceBonus, 1.0)
 end
 
---- Applies simulated effects of a spell to a state
--- @param spellID number The spell ID to simulate
--- @param state table The current state to modify
--- @param spellData table Optional spell data to use instead of looking it up
--- @return table The modified state after applying spell effects
-function PredictionAPI:ApplySpellEffects(spellID, state, spellData)
-    if not spellID or not state then return state end
-
-    -- Create a copy of the state using pooling instead of deep copy
-    local newState = self:CreateStateObject()
-
-    -- Copy essential state data
-    -- Resources
-    if state.resources then
-        for k, v in pairs(state.resources) do
-            if type(v) == "table" then
-                -- Handle structured resource objects
-                newState.resources[k] = {}
-                for subKey, subVal in pairs(v) do
-                    newState.resources[k][subKey] = subVal
-                end
-            else
-                -- Simple value
-                newState.resources[k] = v
-            end
-        end
+-- Get consolidated data for a spell
+local function GetConsolidatedData(spellId)
+    local PredictionManager = NAG:GetModule("PredictionManager")
+    if not PredictionManager then
+        return nil
     end
+    
+    -- Get consolidated data from PredictionManager instead of raw observations
+    local data = PredictionManager:GetConsolidatedData(spellId)
+    
+    return data
+end
 
-    -- Buffs
-    if state.buffs then
-        newState.buffs.player = newState.buffs.player or {}
-        newState.buffs.target = newState.buffs.target or {}
+--- ======= PUBLIC API =======
 
-        if state.buffs.player then
-            for buffId, buffData in pairs(state.buffs.player) do
-                if type(buffData) == "table" then
-                    newState.buffs.player[buffId] = {
-                        remaining = buffData.remaining,
-                        stacks = buffData.stacks
-                    }
-                else
-                    newState.buffs.player[buffId] = buffData
-                end
-            end
-        end
-
-        if state.buffs.target then
-            for buffId, buffData in pairs(state.buffs.target) do
-                if type(buffData) == "table" then
-                    newState.buffs.target[buffId] = {
-                        remaining = buffData.remaining,
-                        stacks = buffData.stacks
-                    }
-                else
-                    newState.buffs.target[buffId] = buffData
+-- Get learned resource cost for a spell
+function PredictionAPI:GetLearnedCost(spellId)
+    local data = GetConsolidatedData(spellId)
+    if not data then
+        return nil, 0
+    end
+    
+    local costs = {}
+    local totalConfidence = 0
+    local confidenceCount = 0
+    
+    -- 🔧 FIX: Check consolidated data structure for all resource types
+    if data.cost then
+        -- Check regular resources
+        if data.cost.resources then
+            for resourceType, resourceData in pairs(data.cost.resources) do
+                if resourceData.average and resourceData.frequency then
+                    -- 🔧 FIX: Handle both number and table-based averages
+                    if type(resourceData.average) == "number" and resourceData.average > 0 then
+                        costs[resourceType] = resourceData.average
+                        local confidence = resourceData.frequency or 0
+                        totalConfidence = totalConfidence + confidence
+                        confidenceCount = confidenceCount + 1
+                    elseif type(resourceData.average) == "table" then
+                        -- Handle table-based averages (shouldn't happen for regular resources, but be safe)
+                        for subType, amount in pairs(resourceData.average) do
+                            if amount > 0 then
+                                costs[resourceType .. "_" .. subType] = amount
+                                local confidence = resourceData.frequency or 0
+                                totalConfidence = totalConfidence + confidence
+                                confidenceCount = confidenceCount + 1
+                            end
+                        end
+                    end
                 end
             end
         end
-    end
-
-    -- Cooldowns
-    if state.cooldowns then
-        for spellId, cooldown in pairs(state.cooldowns) do
-            newState.cooldowns[spellId] = cooldown
-        end
-    end
-
-    -- Runes for Death Knights
-    if state.runes then
-        for i = 1, 6 do
-            if state.runes[i] then
-                newState.runes[i] = {
-                    type = state.runes[i].type,
-                    ready = state.runes[i].ready,
-                    timeLeft = state.runes[i].timeLeft
-                }
+        
+        -- Check secondary resources
+        if data.cost.secondary then
+            for resourceType, resourceData in pairs(data.cost.secondary) do
+                if resourceData.average and resourceData.frequency then
+                    -- 🔧 FIX: Handle both number and table-based averages
+                    if type(resourceData.average) == "number" and resourceData.average > 0 then
+                        costs[resourceType] = resourceData.average
+                        local confidence = resourceData.frequency or 0
+                        totalConfidence = totalConfidence + confidence
+                        confidenceCount = confidenceCount + 1
+                    elseif type(resourceData.average) == "table" then
+                        for subType, amount in pairs(resourceData.average) do
+                            if amount > 0 then
+                                costs[resourceType .. "_" .. subType] = amount
+                                local confidence = resourceData.frequency or 0
+                                totalConfidence = totalConfidence + confidence
+                                confidenceCount = confidenceCount + 1
+                            end
+                        end
+                    end
+                end
             end
         end
-    end
-
-    -- Get the prediction engine module
-    local PredictionEngine = NAG:GetModule("PredictionEngine")
-    if not PredictionEngine then return newState end
-
-    -- Get spell data from PredictionEngine if not provided
-    spellData = spellData or (PredictionEngine:GetChar().compiled and PredictionEngine:GetChar().compiled[spellID])
-    if not spellData then return newState end
-
-    -- Default to best context match
-    local contextKey = "default"
-    if newState.buffs and newState.buffs.player then
-        contextKey = PredictionEngine:GenerateContextKey(newState.buffs.player)
-    end
-
-    local contextData = spellData[contextKey] or spellData["default"]
-    if not contextData then return newState end
-
-    -- Apply resource costs
-    if contextData.cost then
-        for resourceType, amount in pairs(contextData.cost) do
-            if newState.resources then
-                newState.resources[resourceType] = math.max(0, (newState.resources[resourceType] or 0) - amount)
-            end
-        end
-    end
-
-    -- Apply resource generation
-    if contextData.generates then
-        for resourceType, amount in pairs(contextData.generates) do
-            if newState.resources then
-                local current = newState.resources[resourceType] or 0
-                local max = newState.resources[resourceType .. "Max"] or 100
-                newState.resources[resourceType] = math.min(max, current + amount)
-            end
-        end
-    end
-
-    -- Apply rune costs for Death Knights
-    if contextData.runeUsage and contextData.runeUsage.typePatterns and newState.runes then
-        local mostCommonPattern = nil
-        local highestCount = 0
-
-        -- Find the most common rune pattern
-        for pattern, count in pairs(contextData.runeUsage.typePatterns) do
-            if count > highestCount then
-                highestCount = count
-                mostCommonPattern = pattern
-            end
-        end
-
-        -- Apply the pattern if found
-        if mostCommonPattern then
-            local runeTypes = {}
-            for runeType in mostCommonPattern:gmatch("%d+") do
-                table.insert(runeTypes, tonumber(runeType))
-            end
-
-            -- For each rune type in the pattern, use an available rune
-            for _, runeType in ipairs(runeTypes) do
-                for i = 1, 6 do
-                    local rune = newState.runes[i]
-                    if rune and rune.ready and rune.type == runeType then
-                        rune.ready = false
-                        rune.timeLeft = 10 -- Standard rune cooldown
-                        break -- Use only one rune of this type
+        
+        -- 🔧 FIX: Check rune costs specifically with enhanced table handling
+        if data.cost.runes then
+            for runeResource, runeData in pairs(data.cost.runes) do
+                if runeData.average and runeData.frequency then
+                    local confidence = runeData.frequency or 0
+                    
+                    if type(runeData.average) == "table" then
+                        -- Handle table-based rune averages (e.g., { Unholy = 1.0, Frost = 1.0 })
+                        for runeType, amount in pairs(runeData.average) do
+                            if amount > 0 then
+                                costs["rune_" .. runeType] = amount
+                                totalConfidence = totalConfidence + confidence
+                                confidenceCount = confidenceCount + 1
+                            end
+                        end
+                    elseif type(runeData.average) == "number" and runeData.average > 0 then
+                        -- Handle number-based rune averages (fallback)
+                        costs["rune_" .. runeResource] = runeData.average
+                        totalConfidence = totalConfidence + confidence
+                        confidenceCount = confidenceCount + 1
                     end
                 end
             end
         end
     end
-
-    -- Apply buff changes
-    if contextData.applies then
-        newState.buffs = newState.buffs or {}
-        newState.buffs.player = newState.buffs.player or {}
-
-        for buffId, chance in pairs(contextData.applies) do
-            if chance > 0.7 then -- Only apply buffs with high confidence
-                newState.buffs.player[buffId] = {
-                    remaining = contextData.durations and contextData.durations[buffId] or 30,
-                    stacks = contextData.maxStacks and contextData.maxStacks[buffId] or 1
-                }
-            end
-        end
+    
+    -- Calculate average confidence
+    local avgConfidence = confidenceCount > 0 and (totalConfidence / confidenceCount) or 0
+    
+    -- Return first cost found or nil if no costs
+    if next(costs) then
+        return costs, avgConfidence
     end
-
-    -- Apply buff removals
-    if contextData.removes then
-        if newState.buffs and newState.buffs.player then
-            for buffId, chance in pairs(contextData.removes) do
-                if chance > 0.5 and newState.buffs.player[buffId] then -- Only remove with moderate confidence
-                    newState.buffs.player[buffId] = nil
-                end
-            end
-        end
-    end
-
-    -- Apply cooldown to the cast spell
-    if newState.cooldowns then
-        newState.cooldowns[spellID] = contextData.cooldown or 0
-    end
-
-    return newState
+    
+    return nil, 0
 end
 
---- Deep copies a table
--- @param orig table The table to copy
--- @return table A deep copy of the original table
-function PredictionAPI:DeepCopy(orig)
-    if type(orig) ~= "table" then return orig end
+-- Get learned cooldown duration for a spell
+function PredictionAPI:GetLearnedCooldown(spellId)
+    local data = GetConsolidatedData(spellId)
+    if not data then
+        return nil, 0
+    end
+    
+    -- Check consolidated data structure
+    if data.cooldowns and data.cooldowns.triggered then
+        for cdId, cooldownData in pairs(data.cooldowns.triggered) do
+            if cooldownData.averageDuration and cooldownData.averageDuration > 0 then
+                -- Use frequency as confidence indicator
+                local confidence = cooldownData.frequency or 0
+                return cooldownData.averageDuration, confidence
+            end
+        end
+    end
+    
+    return nil, 0
+end
 
-    -- Use pooled object if copying a state
-    local isState = orig.resources ~= nil and orig.buffs ~= nil and orig.cooldowns ~= nil
-    local copy = isState and self:GetStateObject() or {}
+-- Get buffs applied by a spell
+function PredictionAPI:GetAppliedBuffs(spellId)
+    local data = GetConsolidatedData(spellId)
+    if not data then
+        return {}, 0
+    end
+    
+    local result = {}
+    local totalObservations = data.observationCount or 0
+    
+    -- Check consolidated data structure
+    if data.applies and data.applies.buffs then
+        for buffId, buffData in pairs(data.applies.buffs) do
+            -- Only include buffs that appear frequently enough
+            if buffData.frequency and buffData.frequency >= 0.6 then  -- 60% threshold
+                table.insert(result, tonumber(buffId))
+            end
+        end
+    end
+    
+    local confidence = totalObservations >= MIN_OBSERVATIONS and 0.8 or 0.3
+    return result, confidence
+end
 
-    for orig_key, orig_value in pairs(orig) do
-        if type(orig_value) == "table" then
-            copy[orig_key] = self:DeepCopy(orig_value)
+-- Get debuffs applied by a spell
+function PredictionAPI:GetAppliedDebuffs(spellId)
+    local data = GetConsolidatedData(spellId)
+    if not data then
+        return {}, 0
+    end
+    
+    local result = {}
+    local totalObservations = data.observationCount or 0
+    
+    -- Check consolidated data structure
+    if data.applies and data.applies.debuffs then
+        for debuffId, debuffData in pairs(data.applies.debuffs) do
+            -- Only include debuffs that appear frequently enough
+            if debuffData.frequency and debuffData.frequency >= 0.6 then  -- 60% threshold
+                table.insert(result, tonumber(debuffId))
+            end
+        end
+    end
+    
+    local confidence = totalObservations >= MIN_OBSERVATIONS and 0.8 or 0.3
+    return result, confidence
+end
+
+-- Get comprehensive spell summary
+function PredictionAPI:GetSpellSummary(spellId)
+    local costs, costConfidence = self:GetLearnedCost(spellId)
+    local cooldown, cooldownConfidence = self:GetLearnedCooldown(spellId)
+    local buffs, buffsConfidence = self:GetAppliedBuffs(spellId)
+    local debuffs, debuffsConfidence = self:GetAppliedDebuffs(spellId)
+    
+    -- 🔧 FIX: Better confidence handling for partial data
+    local validConfidences = {}
+    if costConfidence and costConfidence > 0 then
+        table.insert(validConfidences, costConfidence)
+    end
+    if cooldownConfidence and cooldownConfidence > 0 then
+        table.insert(validConfidences, cooldownConfidence)
+    end
+    if buffsConfidence and buffsConfidence > 0 then
+        table.insert(validConfidences, buffsConfidence)
+    end
+    if debuffsConfidence and debuffsConfidence > 0 then
+        table.insert(validConfidences, debuffsConfidence)
+    end
+    
+    -- Check if we have any learned data with confidence > 0
+    local hasAnyLearnedData = #validConfidences > 0
+    
+    -- 🔧 FIX: Calculate overall confidence as average of valid confidences
+    local overallConfidence = 0
+    if #validConfidences > 0 then
+        local sum = 0
+        for _, conf in ipairs(validConfidences) do
+            sum = sum + conf
+        end
+        overallConfidence = sum / #validConfidences
+    end
+    
+    return {
+        spellId = spellId,
+        cost = costs, -- Now returns a table of all costs
+        costConfidence = costConfidence,
+        cooldown = cooldown,
+        cooldownConfidence = cooldownConfidence,
+        buffs = buffs,
+        buffsConfidence = buffsConfidence,
+        debuffs = debuffs,
+        debuffsConfidence = debuffsConfidence,
+        overallConfidence = overallConfidence,
+        hasAnyLearnedData = hasAnyLearnedData
+    }
+end
+
+-- Check if we have any learned data for a spell
+function PredictionAPI:HasLearnedData(spellId)
+    local data = GetConsolidatedData(spellId)
+    return data ~= nil
+end
+
+-- Get list of all spells with learned data
+function PredictionAPI:GetLearnedSpells()
+    local StateManager = NAG:GetModule("SpellLearnerStateManager")
+    if not StateManager or not StateManager.db or not StateManager.db.char or not StateManager.db.char.spellChanges then
+        return {}
+    end
+    
+    local spells = {}
+    for spellId, _ in pairs(StateManager.db.char.spellChanges) do
+        table.insert(spells, tonumber(spellId))
+    end
+    
+    return spells
+end
+
+-- Get statistics about learned data
+function PredictionAPI:GetStatistics()
+    local spells = self:GetLearnedSpells()
+    local totalSpells = #spells
+    local confidentSpells = 0
+    
+    for _, spellId in ipairs(spells) do
+        local summary = self:GetSpellSummary(spellId)
+        if summary.hasAnyLearnedData then
+            confidentSpells = confidentSpells + 1
+        end
+    end
+    
+    return {
+        totalSpells = totalSpells,
+        confidentSpells = confidentSpells,
+        confidenceRate = totalSpells > 0 and (confidentSpells / totalSpells) or 0
+    }
+end
+
+--- ======= MODULE INITIALIZATION =======
+
+function PredictionAPI:OnInitialize()
+    -- Get required modules after initialization
+    StateManager = NAG:GetModule("SpellLearnerStateManager")
+    PredictionManager = NAG:GetModule("PredictionManager")
+    -- Restore saved enabled state
+    self:SetEnabledState(self:GetChar().enabled ~= false)
+end
+
+function PredictionAPI:OnEnable()
+    self:Debug("PredictionAPI enabled")
+    -- All logic that runs when the module is enabled goes here.
+end
+
+function PredictionAPI:OnDisable()
+    self:Debug("PredictionAPI module disabled")
+end
+
+--- Gets the options table for module settings
+--- @return table The options table for AceConfig
+function PredictionAPI:GetOptions()
+    return {
+        type = "group",
+        name = "PredictionAPI",
+        order = 1,
+        args = {
+            enabled = {
+                type = "toggle",
+                name = "Enabled",
+                desc = "Enable the PredictionAPI module",
+                order = 1,
+                get = function() return self:IsEnabled() end,
+                set = function(_, value)
+                    self:GetChar().enabled = value
+                    if value then
+                        self:Enable()
+                    else
+                        self:Disable()
+                    end
+                end,
+            },
+            debugMode = {
+                type = "toggle",
+                name = "Debug Mode",
+                desc = "Enable debug messages for PredictionAPI",
+                order = 2,
+                get = function() return self:GetGlobal().debugMode == true end,
+                set = function(_, value)
+                    self:GetGlobal().debugMode = value
+                    self:Debug("Debug Mode set to: " .. tostring(value))
+                end,
+            },
+        }
+    }
+end
+
+-- Module is available through NAG:GetModule("PredictionAPI")
+-- No global namespace assignment needed
+
+-- Add a test function to verify module is working
+function PredictionAPI:TestModule()
+    self:Debug("=== PredictionAPI Module Test ===")
+    self:Debug("Module is working correctly!")
+    
+    local StateManager = NAG:GetModule("SpellLearnerStateManager")
+    local PredictionManager = NAG:GetModule("PredictionManager")
+    
+    self:Debug("StateManager available: " .. (StateManager and "Yes" or "No"))
+    self:Debug("PredictionManager available: " .. (PredictionManager and "Yes" or "No"))
+    self:Debug("=== Test Complete ===")
+end
+
+--- Get consolidated data for a spell
+--- @param spellId number The spell ID
+--- @return table|nil Consolidated data or nil if not found
+function PredictionAPI:GetConsolidatedData(spellId)
+    local PredictionManager = NAG:GetModule("PredictionManager")
+    if not PredictionManager then
+        self:Debug("🔍 PredictionAPI: PredictionManager not available yet")
+        return nil
+    end
+    
+    local data = PredictionManager:GetConsolidatedData(spellId)
+    if data then
+        self:Debug("🔍 PredictionAPI: Found consolidated data for spell %d", spellId)
+        self:Debug("🔍 Observation count: %d", data.observationCount or 0)
+    else
+        self:Debug("🔍 PredictionAPI: No consolidated data found for spell %d", spellId)
+    end
+    
+    return data
+end
+
+--- Override Debug method to check debugMode instead of debug
+--- @param msg string The debug message
+--- @param ... any Additional arguments to format the message
+function PredictionAPI:Debug(msg, ...)
+    if self:GetGlobal().debugMode == true then
+        local args = {...}
+        local success, result = pcall(function()
+            return format("[%s] %s", self:GetName(), format(msg, unpack(args)))
+        end)
+        if success then
+            NAG:Debug(result)
         else
-            copy[orig_key] = orig_value
+            -- If formatting fails, just print the raw message
+            NAG:Debug(format("[%s] %s", self:GetName(), tostring(msg)))
         end
     end
-
-    return copy
 end
-
--- Initialize API into NAG system
-NAG.PredictionAPI = PredictionAPI
-
---- State object pooling for better memory management
--- @return table A recycled or new state object
-function PredictionAPI:GetStateObject()
-    self.statePool = self.statePool or {}
-    return tremove(self.statePool) or {}
-end
-
---- Recycle a state object back to the pool
--- @param state table The state object to recycle
-function PredictionAPI:RecycleStateObject(state)
-    if not state then return end
-
-    self.statePool = self.statePool or {}
-
-    -- Clear all state data
-    wipe(state)
-
-    -- Add to pool
-    tinsert(self.statePool, state)
-end
-
---- Creates a new state object with proper initialization
--- @return table A properly initialized state object
-function PredictionAPI:CreateStateObject()
-    local state = self:GetStateObject()
-
-    -- Initialize key state tables
-    state.resources = state.resources or {}
-    state.buffs = state.buffs or {player = {}, target = {}}
-    state.debuffs = state.debuffs or {player = {}, target = {}}
-    state.cooldowns = state.cooldowns or {}
-    state.runes = state.runes or {}
-
-    return state
-end
-
--- Initialize state pool
-PredictionAPI.statePool = {}

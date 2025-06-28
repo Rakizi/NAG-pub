@@ -107,7 +107,7 @@ local defaults = {
         debugMode = false,
     },
     char = {
-        enabled = true,
+        enabled = true, -- Enabled by default for testing
         trackResources = true,
         trackBuffs = true,
         trackDebuffs = true,
@@ -132,9 +132,11 @@ local defaults = {
 
 --- @class SpellLearnerStateManager: ModuleBase
 local SpellLearnerStateManager = NAG:CreateModule("SpellLearnerStateManager", defaults, {
-    optionsCategory = ns.MODULE_CATEGORIES.DEBUG, -- Category in options UI
-    optionsOrder = 20,                           -- Order within category
-    childGroups = "tree",                        -- Options group structure
+    moduleType = ns.MODULE_TYPES.FEATURE,
+    optionsCategory = ns.MODULE_CATEGORIES.FEATURE,
+    optionsOrder = 35,
+    childGroups = "tab", -- Ensure tab grouping
+    skipAutoOptions = true,
 
     -- Event handlers using eventHandlers table
     eventHandlers = {
@@ -259,7 +261,7 @@ do -- Ace3 lifecyle methods
         -- Create state update timer
         self:CreateStateUpdateTimer()
 
-        -- Register slash command
+        -- Register slash commands
         self:RegisterChatCommand("nagstates", function(input)
             if input and input ~= "" then
                 -- Try to convert input to number for spell ID
@@ -274,28 +276,33 @@ do -- Ace3 lifecyle methods
                 self:InspectStoredChanges()
             end
         end)
+        
+        -- Add debug command to check buff tracking
+        self:RegisterChatCommand("nagbuffs", function()
+            self:DebugBuffTracking()
+        end)
 
             self:Debug("Module initialized with debug mode: " .. tostring(self:GetGlobal().debugMode))
 end
 
     --- Enable the module
     function SpellLearnerStateManager:ModuleEnable()
-        self:Debug("Enabling SpellLearnerStateManager")
+        self:Debug("Enabling SpellLearnerStateManager (debug test)")
+        -- Check if module is enabled
+        if not self:GetChar().enabled then
+            self:Debug("SpellLearnerStateManager is disabled, skipping initialization")
+            return
+        end
+        
         -- Start tracking state changes
         self:UpdatePlayerBuffs()
         self:UpdateTargetDebuffs()
         self:UpdateCooldowns()
 
-        -- Register events with debug prints
-        self:RegisterEvent("UNIT_SPELLCAST_SENT", "OnSpellCastSent")
-        self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", "OnSpellCastSucceeded")
-        self:RegisterEvent("UNIT_POWER_UPDATE", "OnPowerUpdate")
-        self:RegisterEvent("UNIT_AURA", "OnAuraUpdate")
-        self:RegisterEvent("SPELL_UPDATE_COOLDOWN", "OnCooldownUpdate")
-        self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEnteringWorld")
-        self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN", "OnActionBarUpdateCooldown")
-
-        self:Debug("Events registered successfully")
+        -- CRITICAL FIX: Don't re-register events here - they are already registered in OnInitialize
+        -- This was causing double registrations which could interfere with buff tracking
+        
+        self:Debug("Module enabled - events already registered in OnInitialize")
     end
 
     --- Disable the module
@@ -527,6 +534,13 @@ function SpellLearnerStateManager:CaptureCurrentState()
         end
     end
 
+    -- CRITICAL FIX: Force refresh aura cache before capturing state
+    -- This ensures we have the most up-to-date buff/debuff information
+    self:UpdateAuraCache("player")
+    if UnitExists("target") then
+        self:UpdateAuraCache("target")
+    end
+
     -- Acquire tables from pools
     local state = AcquireTable(statePool.states)
     state.timestamp = currentTime
@@ -561,14 +575,15 @@ function SpellLearnerStateManager:CaptureCurrentState()
             }
 
             if self:GetGlobal().debugMode then
-                local typeStr = rune.type == CONSTANTS.RUNE_TYPE.BLOOD and "Blood"
-                    or rune.type == CONSTANTS.RUNE_TYPE.FROST and "Frost"
-                    or rune.type == CONSTANTS.RUNE_TYPE.UNHOLY and "Unholy"
-                    or rune.type == CONSTANTS.RUNE_TYPE.DEATH and "Death"
+                local currentRune = state.runes[i]
+                local typeStr = currentRune.type == CONSTANTS.RUNE_TYPE.BLOOD and "Blood"
+                    or currentRune.type == CONSTANTS.RUNE_TYPE.FROST and "Frost"
+                    or currentRune.type == CONSTANTS.RUNE_TYPE.UNHOLY and "Unholy"
+                    or currentRune.type == CONSTANTS.RUNE_TYPE.DEATH and "Death"
                     or "Unknown"
                 self:Debug(format("Rune %d: Type=%s, Ready=%s, TimeLeft=%.1f, WillRefresh=%s",
-                    i, typeStr, tostring(state.runes[i].ready), timeLeft,
-                    tostring(state.runes[i].willRefresh)))
+                    i, typeStr, tostring(currentRune.ready), timeLeft,
+                    tostring(currentRune.willRefresh)))
             end
         end
     end
@@ -598,6 +613,19 @@ function SpellLearnerStateManager:CaptureCurrentState()
     state.debuffs = AcquireTable(statePool.debuffs)
     state.debuffs.player = AcquireTable(statePool.debuffs)
     state.debuffs.target = AcquireTable(statePool.debuffs)
+
+    -- DEBUG: Log aura cache contents before copying
+    if self:GetGlobal().debugMode then
+        local playerBuffCount = 0
+        for spellId, auraInfo in pairs(self.auraCache.player) do
+            if auraInfo.isHelpful then
+                playerBuffCount = playerBuffCount + 1
+                self:Debug(format("Player aura cache BUFF: %s (ID: %d) - Helpful: %s", 
+                    auraInfo.name, spellId, tostring(auraInfo.isHelpful)))
+            end
+        end
+        self:Debug(format("Aura cache has %d player buffs before copying to state", playerBuffCount))
+    end
 
     -- Use aura cache for player buffs/debuffs
     for spellId, auraInfo in pairs(self.auraCache.player) do
@@ -645,13 +673,31 @@ function SpellLearnerStateManager:CaptureCurrentState()
         end
     end
 
+    -- DEBUG: Show captured buff counts and specifically look for Blood Shield
     if self:GetGlobal().debugMode then
+        local capturedBuffCount = ns.tCount(state.buffs.player)
         self:Debug(format("Captured state at %.3f with %d player buffs, %d player debuffs, %d target buffs, %d target debuffs",
             currentTime,
-            ns.tCount(state.buffs.player),
+            capturedBuffCount,
             ns.tCount(state.debuffs.player),
             ns.tCount(state.buffs.target),
             ns.tCount(state.debuffs.target)))
+        
+        -- Specifically check for Blood Shield (spell ID 77535)
+        if state.buffs.player[77535] then
+            local bloodShield = state.buffs.player[77535]
+            self:Debug(format("✅ FOUND Blood Shield in captured state: %s (ID: 77535), Count: %d, Duration: %.1f",
+                bloodShield.name, bloodShield.count or 1, bloodShield.duration or 0))
+        else
+            self:Debug("❌ Blood Shield (ID: 77535) NOT found in captured player buffs")
+            -- Debug: Show what buffs we DID capture
+            if capturedBuffCount > 0 then
+                self:Debug("Captured buffs instead:")
+                for spellId, buff in pairs(state.buffs.player) do
+                    self:Debug(format("  - %s (ID: %d)", buff.name, spellId))
+                end
+            end
+        end
     end
 
     return state
@@ -775,6 +821,11 @@ end
 
 --- Event handler for UNIT_SPELLCAST_SENT
 function SpellLearnerStateManager:OnSpellCastSent(event, unit, target, castGUID, spellID)
+    -- Check if module is enabled
+    if not self:GetChar().enabled then
+        return
+    end
+    
     if unit ~= "player" then return end
 
     local currentTime = GetTime()
@@ -1223,6 +1274,11 @@ end
 
 -- Enhance CompareCastStates with improved rune detection
 function SpellLearnerStateManager:CompareCastStates(preState, postState, spellID)
+    -- Check if module is enabled
+    if not self:GetChar().enabled then
+        return
+    end
+    
     if not preState or not postState then
         self:Debug("|cFFFF0000Cannot compare states - missing pre or post state|r")
         return
@@ -1663,6 +1719,24 @@ function SpellLearnerStateManager:CompareCastStates(preState, postState, spellID
 
     -- Store the state changes for analysis
     self:StoreStateChanges(spellID, stateChanges)
+    
+    -- 🔍 SPELL LEARNING PIPELINE: Send message to PredictionManager
+    -- Only trigger if player is in combat and within 12 yards of target
+    if self:ShouldTriggerSpellLearning() then
+        self:Debug("|cFF00FF00[SPELL LEARNING] Triggering NAG_SPELL_LEARNED for spell " .. spellID .. "|r")
+        
+        -- Get the pre and post states from the active cast data
+        local castData = self.state.activeCasts[self.state.lastCastGUID]
+        if castData and castData.preState and castData.postState then
+            -- Send the message to PredictionManager
+            NAG:SendMessage("NAG_SPELL_LEARNED", spellID, castData.preState, castData.postState)
+            self:Debug("|cFF00FF00[SPELL LEARNING] Message sent successfully|r")
+        else
+            self:Debug("|cFFFF0000[SPELL LEARNING] Missing pre/post state data for spell " .. spellID .. "|r")
+        end
+    else
+        self:Debug("|cFFFFFF00[SPELL LEARNING] Skipping - conditions not met for spell " .. spellID .. "|r")
+    end
 
     return stateChanges
 end
@@ -1694,6 +1768,12 @@ function SpellLearnerStateManager:UpdateAuraCache(unit)
         return
     end
 
+    -- Ensure unit exists
+    if not UnitExists(unit) then
+        self:Debug("Unit does not exist: " .. tostring(unit))
+        return
+    end
+
     -- For target, verify GUID hasn't changed
     if unit == "target" then
         local currentTargetGUID = UnitGUID("target")
@@ -1709,25 +1789,46 @@ function SpellLearnerStateManager:UpdateAuraCache(unit)
     -- Helper function to scan auras with a specific filter
     local function scanAuras(filter)
         local i = 1
+        local foundAuras = {}
         while true do
             local name, _, count, debuffType, duration, expirationTime, sourceUnit, isStealable, shouldConsolidate, spellId = UnitAura(unit, i, filter)
             if not name then break end
 
-            cache[spellId] = {
-                name = name,
-                count = count or 1,
-                debuffType = debuffType,
-                duration = duration or 0,
-                expirationTime = expirationTime or 0,
-                sourceUnit = sourceUnit,
-                isStealable = isStealable and 1 or 0,
-                shouldConsolidate = shouldConsolidate and 1 or 0,
-                isHelpful = filter == "HELPFUL",
-                lastUpdate = GetTime()
-            }
+            -- Only store if we have a valid spell ID
+            if spellId and spellId > 0 then
+                cache[spellId] = {
+                    name = name,
+                    count = count or 1,
+                    debuffType = debuffType,
+                    duration = duration or 0,
+                    expirationTime = expirationTime or 0,
+                    sourceUnit = sourceUnit,
+                    isStealable = isStealable and 1 or 0,
+                    shouldConsolidate = shouldConsolidate and 1 or 0,
+                    isHelpful = filter == "HELPFUL",
+                    lastUpdate = GetTime()
+                }
+                
+                -- Store for debug output
+                foundAuras[spellId] = name
+            end
 
             i = i + 1
         end
+        
+        -- Debug output for important auras
+        if unit == "player" and filter == "HELPFUL" and self:GetGlobal().debugMode then
+            -- Specifically check for Blood Shield
+            if cache[77535] then
+                self:Debug(format("✅ UpdateAuraCache: Found Blood Shield (77535) in player buffs"))
+            end
+            
+            self:Debug(format("UpdateAuraCache: %s has %d %s auras", unit, i - 1, filter:lower()))
+            for spellId, name in pairs(foundAuras) do
+                self:Debug(format("  - %s (ID: %d)", name, spellId))
+            end
+        end
+        
         return i - 1
     end
 
@@ -1740,8 +1841,10 @@ function SpellLearnerStateManager:UpdateAuraCache(unit)
         self.auraCache.lastTargetGUID = UnitGUID("target")
     end
 
-    --self:Debug(string.format("Updated aura cache for %s with %d buffs and %d debuffs",
-    --    unit, buffCount, debuffCount))
+    if self:GetGlobal().debugMode then
+        self:Debug(format("Updated aura cache for %s with %d buffs and %d debuffs",
+            unit, buffCount, debuffCount))
+    end
 end
 
 
@@ -1857,6 +1960,72 @@ function SpellLearnerStateManager:GetRuneTypeName(runeType)
         or runeType == CONSTANTS.RUNE_TYPE.UNHOLY and "Unholy"
         or runeType == CONSTANTS.RUNE_TYPE.DEATH and "Death"
         or "Unknown"
+end
+
+--- Debug function to check buff tracking status
+function SpellLearnerStateManager:DebugBuffTracking()
+    self:Debug("=== BUFF TRACKING DEBUG ===")
+    
+    -- 1. Check if aura cache is initialized
+    if not self.auraCache then
+        self:Debug("❌ CRITICAL: auraCache is not initialized!")
+        return
+    end
+    
+    if not self.auraCache.player then
+        self:Debug("❌ CRITICAL: auraCache.player is not initialized!")
+        return
+    end
+    
+    self:Debug("✅ auraCache is properly initialized")
+    
+    -- 2. Force refresh aura cache and show contents
+    self:Debug("Forcing aura cache refresh...")
+    self:UpdateAuraCache("player")
+    
+    -- 3. Show current player buffs in cache
+    local cacheBuffCount = 0
+    self:Debug("Current player buffs in aura cache:")
+    for spellId, auraInfo in pairs(self.auraCache.player) do
+        if auraInfo.isHelpful then
+            cacheBuffCount = cacheBuffCount + 1
+            local timeLeft = auraInfo.expirationTime > 0 and (auraInfo.expirationTime - GetTime()) or -1
+            self:Debug(format("  - %s (ID: %d) - Duration: %.1f, Time Left: %.1f, Source: %s",
+                auraInfo.name, spellId, auraInfo.duration or 0, timeLeft,
+                auraInfo.sourceUnit or "unknown"))
+        end
+    end
+    
+    if cacheBuffCount == 0 then
+        self:Debug("❌ No player buffs found in aura cache")
+    else
+        self:Debug(format("✅ Found %d player buffs in aura cache", cacheBuffCount))
+    end
+    
+    -- 4. Specifically check for Blood Shield
+    if self.auraCache.player[77535] then
+        local bloodShield = self.auraCache.player[77535]
+        self:Debug(format("✅ Blood Shield (77535) found: %s - Count: %d, Duration: %.1f",
+            bloodShield.name, bloodShield.count or 1, bloodShield.duration or 0))
+    else
+        self:Debug("❌ Blood Shield (77535) not found in aura cache")
+    end
+    
+    -- 5. Test state capture
+    self:Debug("Testing state capture...")
+    local testState = self:CaptureCurrentState()
+    
+    local stateBuffCount = ns.tCount(testState.buffs.player)
+    if stateBuffCount == 0 then
+        self:Debug("❌ No player buffs captured in test state")
+    else
+        self:Debug(format("✅ Captured %d player buffs in test state", stateBuffCount))
+    end
+    
+    -- Clean up test state
+    self:ReleaseStateObject(testState)
+    
+    self:Debug("=== BUFF TRACKING DEBUG COMPLETE ===")
 end
 
 --- Initialize improved spell cost and effect tracking
@@ -2930,6 +3099,11 @@ end
 -- by making it more tolerant of timing issues
 
 function SpellLearnerStateManager:OnSpellCastSucceeded(event, unit, castGUID, spellID)
+    -- Check if module is enabled
+    if not self:GetChar().enabled then
+        return
+    end
+    
     if unit ~= "player" then return end
 
     local currentTime = GetTime()
@@ -2965,6 +3139,10 @@ function SpellLearnerStateManager:OnSpellCastSucceeded(event, unit, castGUID, sp
             return
         end
     end
+
+    -- 🔍 SPELL LEARNING: Store the cast GUID for later reference
+    self.state.lastCastGUID = castGUID
+    self:Debug("|cFF00FF00[SPELL LEARNING] Stored cast GUID: " .. tostring(castGUID) .. " for spell " .. spellID .. "|r")
 
     -- IMPROVEMENT: For Death Knights, always use a fixed delay that's optimized for rune detection
     local delay = CONSTANTS.POST_CAST_DELAY
@@ -3005,6 +3183,11 @@ function SpellLearnerStateManager:OnSpellCastSucceeded(event, unit, castGUID, sp
             postState = postState,
             distanceBasedDelay = delay
         }
+
+        -- 🔍 SPELL LEARNING: Debug output for state capture
+        self:Debug("|cFF00FF00[SPELL LEARNING] Captured post-state for spell " .. spellID .. "|r")
+        self:Debug("|cFF00FF00[SPELL LEARNING] Pre-state exists: " .. tostring(castData.preState ~= nil) .. "|r")
+        self:Debug("|cFF00FF00[SPELL LEARNING] Post-state exists: " .. tostring(postState ~= nil) .. "|r")
 
         -- Compare states if we have a valid pre-cast state
         if castData.preState then
@@ -4479,3 +4662,65 @@ function SpellLearnerStateManager:SafeGetSpecName(specID)
     end
     return "Spec " .. specID
 end
+
+-- Add this helper function to check if we should trigger spell learning
+function SpellLearnerStateManager:ShouldTriggerSpellLearning()
+    -- Check if player is in combat
+    if not UnitAffectingCombat("player") then 
+        self:Debug("|cFFFFFF00[SPELL LEARNING] Skipping - player not in combat|r")
+        return false 
+    end
+
+    -- Check if player has a target
+    if not UnitExists("target") then 
+        self:Debug("|cFFFFFF00[SPELL LEARNING] Skipping - no target|r")
+        return false 
+    end
+
+    -- Check if target is hostile
+    if not UnitCanAttack("player", "target") then 
+        self:Debug("|cFFFFFF00[SPELL LEARNING] Skipping - target not hostile|r")
+        return false 
+    end
+
+    -- Check distance using CheckInteractDistance (more reliable than map position)
+    -- CheckInteractDistance with index 2 (TRADE) is approximately 11.11 yards
+    -- We want within 12 yards, so this should work
+    if not CheckInteractDistance("target", 2) then 
+        self:Debug("|cFFFFFF00[SPELL LEARNING] Skipping - target too far (>12 yards)|r")
+        return false 
+    end
+
+    return true
+end
+
+-- Add helper function to get spellChanges database for testing (character-specific)
+function SpellLearnerStateManager:GetSpellChanges()
+    if self.db and self.db.char then
+        if not self.db.char.spellChanges then
+            self.db.char.spellChanges = {}
+        end
+        return self.db.char.spellChanges
+    end
+    return nil
+end
+
+--- Override Debug method to check debugMode instead of debug
+--- @param msg string The debug message
+--- @param ... any Additional arguments to format the message
+function SpellLearnerStateManager:Debug(msg, ...)
+    if self:GetGlobal().debugMode == true then
+        local args = {...}
+        local success, result = pcall(function()
+            return format("[%s] %s", self:GetName(), format(msg, unpack(args)))
+        end)
+        if success then
+            NAG:Debug(result)
+        else
+            -- If formatting fails, just print the raw message
+            NAG:Debug(format("[%s] %s", self:GetName(), tostring(msg)))
+        end
+    end
+end
+
+--- Initialize the module

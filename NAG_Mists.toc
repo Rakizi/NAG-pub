@@ -44,7 +44,7 @@ EntityBehaviors.lua
 modules.xml
 
 # Unit Testing
-Modules/Tests/tests.xml
+# Modules/Tests/tests.xml
 
 # APL System
 #APL\APL.xml

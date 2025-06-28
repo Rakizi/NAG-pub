@@ -63,7 +63,7 @@ local defaults = {
         resourceCapHistory = {} -- History of observed resource caps
     },
     char = {
-        enabled = true,
+        enabled = false, -- Disabled by default during development break
         lastProcessedTime = 0,  -- When we last processed spell data
         compiled = {},          -- Compiled spell knowledge
         processedHistory = {},  -- History of processed results
@@ -72,9 +72,9 @@ local defaults = {
 
 --- @class PredictionEngine: ModuleBase
 local PredictionEngine = NAG:CreateModule("PredictionEngine", defaults, {
-    optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
+    optionsCategory = ns.MODULE_CATEGORIES.FEATURE,
     optionsOrder = 20,
-    childGroups = "tree",
+    childGroups = "tab",
 })
 
 -- Add helper function to return the current character key (name-realm format)
@@ -82,10 +82,10 @@ function PredictionEngine:GetCurrentCharacterKey()
     local name = UnitName("player")
     local realm = GetRealmName()
 
-    if not name then
-        self:Debug("Warning: Unable to get character name")
-        return "Unknown-Unknown"
-    end
+            if not name then
+            --self:Debug("Warning: Unable to get character name")
+            return "Unknown-Unknown"
+        end
 
     -- Normalize realm name (remove spaces)
     realm = realm:gsub("%s+", "")
@@ -104,10 +104,18 @@ do -- Ace3 lifecycle methods
         -- Initialize references to other modules
         self.spellLearner = NAG:GetModule("SpellLearner")
         self.stateManager = NAG:GetModule("SpellLearnerStateManager")
+        self.spellAnalyzer = NAG:GetModule("SpellAnalyzer")
 
         if not self.spellLearner or not self.stateManager then
             self:Error("Failed to initialize required modules!")
             return
+        end
+        
+        -- SpellAnalyzer is optional - warn if not available but don't fail
+        if not self.spellAnalyzer then
+            self:Warn("SpellAnalyzer module not available - falling back to legacy analysis")
+        else
+            --self:Debug("SpellAnalyzer module initialized successfully")
         end
 
         -- Register prediction-specific commands
@@ -163,13 +171,19 @@ do -- Ace3 lifecycle methods
             end
         end)
 
-        self:Debug("Required modules initialized successfully")
+        --self:Debug("Required modules initialized successfully")
     end
 
     --- Enable the module
     function PredictionEngine:ModuleEnable()
-        self:Debug("Enabling PredictionEngine")
-
+        --self:Debug("Enabling PredictionEngine")
+        
+        -- Check if module is enabled
+        if not self:GetChar().enabled then
+            self:Debug("PredictionEngine is disabled, skipping initialization")
+            return
+        end
+        
         -- Initialize prediction state
         self.state = {
             predictions = {},
@@ -233,7 +247,7 @@ do -- Ace3 lifecycle methods
 
     --- Disable the module
     function PredictionEngine:ModuleDisable()
-        self:Debug("Disabling PredictionEngine")
+        --self:Debug("Disabling PredictionEngine")
 
         -- Clear prediction state if it exists
         if self.state and self.state.predictions then
@@ -253,11 +267,11 @@ end
 --- Force process data (testing command)
 function PredictionEngine:ForceProcessData(spellID)
     if not self:GetGlobal().testingMode then
-        self:Debug("Testing mode is disabled")
+        --self:Debug("Testing mode is disabled")
         return
     end
 
-    self:Debug("Forcing data processing...")
+    --self:Debug("Forcing data processing...")
     self:ProcessSpellData(true, spellID)  -- true = force processing, optional spellID
 end
 
@@ -268,7 +282,7 @@ function PredictionEngine:ProcessSpellDataIfAllowed()
 
     -- Check if enough time has passed
     if currentTime - lastProcessed < CONSTANTS.PROCESSING_COOLDOWN then
-        self:Debug("Not enough time has passed since last processing")
+        --self:Debug("Not enough time has passed since last processing")
         return
     end
 
@@ -283,27 +297,32 @@ end
 -- @param force boolean Whether to force processing regardless of sample size
 -- @param targetSpellID number Optional spell ID to process only that spell
 function PredictionEngine:ProcessSpellData(force, targetSpellID)
-    self:Debug("|cFF00FFFF========== Starting Spell Data Processing ==========|r")
+    -- Check if module is enabled
+    if not self:GetChar().enabled then
+        return
+    end
+    
+    --self:Debug("|cFF00FFFF========== Starting Spell Data Processing ==========|r")
 
     -- Enhanced debugging to understand data paths
-    self:Debug("Checking data paths:")
+    --self:Debug("Checking data paths:")
 
     -- Force learning for Death Knight spells if the class matches
     local _, playerClass = UnitClass("player")
     if playerClass == "DEATHKNIGHT" then
         -- If we're targeting Death Strike specifically, or if we're doing a general processing
         if not targetSpellID or targetSpellID == 49998 then
-            self:Debug("Death Knight detected - applying specialized rune knowledge")
+            --self:Debug("Death Knight detected - applying specialized rune knowledge")
             if self:ForceLearnDKRuneCosts() then
                 -- If we're only interested in Death Strike and we've successfully forced learning,
                 -- we can skip the regular processing
                 if targetSpellID == 49998 then
-                    self:Debug("Death Strike force-learned successfully, skipping regular processing")
+                    --self:Debug("Death Strike force-learned successfully, skipping regular processing")
 
                     -- Show the results immediately
                     self:InspectLearnedCosts(targetSpellID)
 
-                    self:Debug("|cFF00FFFF========== Spell Data Processing Complete ==========|r")
+                    --self:Debug("|cFF00FFFF========== Spell Data Processing Complete ==========|r")
                     return
                 end
             end
@@ -312,32 +331,32 @@ function PredictionEngine:ProcessSpellData(force, targetSpellID)
 
     -- Check stateManager exists
     if not self.stateManager then
-        self:Debug("|cFFFF0000Error: StateManager reference is nil!|r")
+        --self:Debug("|cFFFF0000Error: StateManager reference is nil!|r")
         return
     end
 
     -- Check DB structure is valid
     if not self.stateManager.db then
-        self:Debug("|cFFFF0000Error: StateManager.db is nil!|r")
+        --self:Debug("|cFFFF0000Error: StateManager.db is nil!|r")
         return
     end
 
     -- Debug the available data in the character and global DB
-    self:Debug("DB structure:")
-    for key, _ in pairs(self.stateManager.db) do
-        self:Debug("  - " .. key)
-    end
+    --self:Debug("DB structure:")
+    --for key, _ in pairs(self.stateManager.db) do
+    --    self:Debug("  - " .. key)
+    --end
 
     -- Check for char structure
     if not self.stateManager.db.char then
-        self:Debug("|cFFFF0000Error: StateManager.db.char is nil!|r")
+        --self:Debug("|cFFFF0000Error: StateManager.db.char is nil!|r")
         -- Try global as fallback
         if not self.stateManager.db.global then
-            self:Debug("|cFFFF0000Error: Neither char nor global structure found!|r")
+            --self:Debug("|cFFFF0000Error: Neither char nor global structure found!|r")
             return
         end
 
-        self:Debug("Falling back to global structure")
+        --self:Debug("Falling back to global structure")
     end
 
     -- Check for data in different possible locations
@@ -354,7 +373,7 @@ function PredictionEngine:ProcessSpellData(force, targetSpellID)
     if not spellData and self.stateManager.db.char then
         -- Get the current character name
         local currentChar = self:GetCurrentCharacterKey()
-        self:Debug("Current character: " .. (currentChar or "Unknown"))
+        --self:Debug("Current character: " .. (currentChar or "Unknown"))
 
         -- Try to traverse the char structure
         if currentChar and self.stateManager.db.char[currentChar] and type(self.stateManager.db.char[currentChar]) == "table" then
@@ -363,7 +382,7 @@ function PredictionEngine:ProcessSpellData(force, targetSpellID)
             -- Try specStorage first
             if type(self.stateManager.db.char[currentChar].specStorage) == "table" then
                 local specID = SpecializationCompat:GetActiveSpecialization() and SpecializationCompat:GetSpecializationInfo(SpecializationCompat:GetActiveSpecialization()) or 0
-                self:Debug("Current spec ID: " .. specID)
+                --self:Debug("Current spec ID: " .. specID)
 
                 if type(self.stateManager.db.char[currentChar].specStorage[specID]) == "table" then
                     -- Look for various data structures
@@ -372,7 +391,7 @@ function PredictionEngine:ProcessSpellData(force, targetSpellID)
                         dataLocation = "char." .. currentChar .. ".specStorage." .. specID .. ".spellChanges"
                     elseif type(self.stateManager.db.char[currentChar].specStorage[specID].runeCosts) == "table" then
                         -- Found rune costs - look closer at this structure
-                        self:Debug("Found runeCosts structure, inspecting...")
+                        --self:Debug("Found runeCosts structure, inspecting...")
                         local runeCostsData = {}
 
                         -- Convert runeCosts structure to our expected format
@@ -1558,44 +1577,227 @@ function PredictionEngine:ProcessContextGroup(spellID, contextKey, entries)
     self:PrintContextSummary(spellID, contextKey, summary)
 end
 
+--- Analyze spell effects using SpellAnalyzer if available, otherwise use legacy analysis
+--- @param entry table Entry containing preState, postState, and/or changes
+--- @return table Analysis results in standardized format
+function PredictionEngine:AnalyzeSpellEffects(entry)
+    -- If we have both preState and postState and SpellAnalyzer is available, use it
+    if self.spellAnalyzer and entry.preState and entry.postState then
+        self:Debug("Using SpellAnalyzer for state comparison")
+        return self.spellAnalyzer:Analyze(entry.preState, entry.postState)
+    end
+    
+    -- Otherwise, convert existing changes format to SpellAnalyzer format for consistency
+    if entry.changes then
+        self:Debug("Converting legacy changes format to analysis format")
+        return self:ConvertLegacyChangesToAnalysis(entry.changes)
+    end
+    
+    -- No analysis possible
+    self:Debug("No state data available for analysis")
+    return nil
+end
+
+--- Convert legacy changes format to SpellAnalyzer format for consistency
+--- @param changes table Legacy changes data
+--- @return table Analysis results in SpellAnalyzer format
+function PredictionEngine:ConvertLegacyChangesToAnalysis(changes)
+    local analysis = {
+        cost = { resources = {}, secondary = {} },
+        generates = { resources = {}, secondary = {} },
+        applies = { buffs = {}, debuffs = {} },
+        consumes = { buffs = {}, debuffs = {} },
+        cooldowns = { triggered = {}, reset = {} }
+    }
+    
+    -- Convert resource changes
+    if changes.resources then
+        if changes.resources.power then
+            local delta = changes.resources.power.delta
+            local powerType = changes.resources.power.powerType
+            local resourceName = "power_" .. tostring(powerType)
+            
+            if delta < 0 then
+                analysis.cost.resources[resourceName] = math.abs(delta)
+            elseif delta > 0 then
+                analysis.generates.resources[resourceName] = delta
+            end
+        end
+        
+        if changes.resources.secondary then
+            local delta = changes.resources.secondary.delta
+            local powerType = changes.resources.secondary.powerType
+            local resourceName = "secondary_" .. tostring(powerType)
+            
+            if delta < 0 then
+                analysis.cost.secondary[resourceName] = math.abs(delta)
+            elseif delta > 0 then
+                analysis.generates.secondary[resourceName] = delta
+            end
+        end
+    end
+    
+    -- Convert rune changes to resource format
+    if changes.runes and changes.runes.spent then
+        local runesCost = 0
+        for runeId, data in pairs(changes.runes.spent) do
+            runesCost = runesCost + 1
+        end
+        if runesCost > 0 then
+            analysis.cost.resources["runes"] = runesCost
+        end
+    end
+    
+    -- Convert buff changes
+    if changes.buffs then
+        if changes.buffs.gained then
+            for buffId, buffData in pairs(changes.buffs.gained) do
+                analysis.applies.buffs[buffId] = {
+                    stacks = buffData.stacks or 1,
+                    duration = buffData.duration or 0
+                }
+            end
+        end
+        if changes.buffs.lost then
+            for buffId, buffData in pairs(changes.buffs.lost) do
+                analysis.consumes.buffs[buffId] = {
+                    stacks = buffData.stacks or 1
+                }
+            end
+        end
+    end
+    
+    return analysis
+end
+
+--- Convert SpellAnalyzer results back to legacy format for existing processing logic
+--- @param analysis table SpellAnalyzer format results
+--- @param entry table Original entry for context
+--- @return table Legacy changes format
+function PredictionEngine:ConvertAnalysisToLegacyFormat(analysis, entry)
+    local changes = {
+        resources = {},
+        runes = {},
+        buffs = {},
+        activePlayerBuffs = entry.changes and entry.changes.activePlayerBuffs or {}
+    }
+    
+    -- Convert resource costs and generations back to power/secondary format
+    for resourceName, amount in pairs(analysis.cost.resources) do
+        if resourceName:match("^power_") then
+            local powerType = tonumber(resourceName:match("^power_(%d+)"))
+            if powerType then
+                changes.resources.power = {
+                    delta = -amount,
+                    powerType = powerType
+                }
+            end
+        elseif resourceName == "runes" then
+            -- Rune data will be handled separately
+        end
+    end
+    
+    for resourceName, amount in pairs(analysis.generates.resources) do
+        if resourceName:match("^power_") then
+            local powerType = tonumber(resourceName:match("^power_(%d+)"))
+            if powerType then
+                changes.resources.power = {
+                    delta = amount,
+                    powerType = powerType
+                }
+            end
+        end
+    end
+    
+    for resourceName, amount in pairs(analysis.cost.secondary) do
+        if resourceName:match("^secondary_") then
+            local powerType = tonumber(resourceName:match("^secondary_(%d+)"))
+            if powerType then
+                changes.resources.secondary = {
+                    delta = -amount,
+                    powerType = powerType
+                }
+            end
+        end
+    end
+    
+    for resourceName, amount in pairs(analysis.generates.secondary) do
+        if resourceName:match("^secondary_") then
+            local powerType = tonumber(resourceName:match("^secondary_(%d+)"))
+            if powerType then
+                changes.resources.secondary = {
+                    delta = amount,
+                    powerType = powerType
+                }
+            end
+        end
+    end
+    
+    -- Convert buff changes
+    if next(analysis.applies.buffs) then
+        changes.buffs.gained = analysis.applies.buffs
+    end
+    if next(analysis.consumes.buffs) then
+        changes.buffs.lost = analysis.consumes.buffs
+    end
+    
+    -- If we had original rune data, preserve it
+    if entry.changes and entry.changes.runes then
+        changes.runes = entry.changes.runes
+    end
+    
+    return changes
+end
+
 --- Process a single entry into the summary
 function PredictionEngine:ProcessEntry(summary, entry)
     -- Track resource caps if state is available
     if entry.state then
         self:UpdateResourceCaps(entry.state)
     end
-
-    -- Process resource changes
-    if entry.changes and entry.changes.resources then
+    
+    -- Use new analysis method instead of direct changes processing
+    local analysis = self:AnalyzeSpellEffects(entry)
+    if not analysis then
+        self:Debug("No analysis results available for entry")
+        return
+    end
+    
+    -- Convert analysis results back to the format expected by the rest of the function
+    -- This maintains compatibility with existing confidence scoring and data storage
+    local compatibleChanges = self:ConvertAnalysisToLegacyFormat(analysis, entry)
+    
+    -- Process resource changes using converted format
+    if compatibleChanges and compatibleChanges.resources then
         -- Primary resource
-        if entry.changes.resources.power then
-            local delta = entry.changes.resources.power.delta
+        if compatibleChanges.resources.power then
+            local delta = compatibleChanges.resources.power.delta
             if delta < 0 then
                 -- Store individual cost values for median calculation
                 if not summary.costSamples then summary.costSamples = {} end
-                if not summary.costSamples[entry.changes.resources.power.powerType] then
-                    summary.costSamples[entry.changes.resources.power.powerType] = {}
+                if not summary.costSamples[compatibleChanges.resources.power.powerType] then
+                    summary.costSamples[compatibleChanges.resources.power.powerType] = {}
                 end
-                tinsert(summary.costSamples[entry.changes.resources.power.powerType], {
+                tinsert(summary.costSamples[compatibleChanges.resources.power.powerType], {
                     value = math.abs(delta),
-                    resourceType = entry.changes.resources.power.powerType,
-                    context = entry.changes.activePlayerBuffs,
-                    runes = entry.changes.runes,
-                    eclipse = entry.changes.eclipse,
+                    resourceType = compatibleChanges.resources.power.powerType,
+                    context = compatibleChanges.activePlayerBuffs,
+                    runes = compatibleChanges.runes,
+                    eclipse = compatibleChanges.eclipse,
                     state = entry.state -- Include full state for analysis
                 })
             elseif delta > 0 then
                 -- Store individual generation values for median calculation
                 if not summary.generatesSamples then summary.generatesSamples = {} end
-                if not summary.generatesSamples[entry.changes.resources.power.powerType] then
-                    summary.generatesSamples[entry.changes.resources.power.powerType] = {}
+                if not summary.generatesSamples[compatibleChanges.resources.power.powerType] then
+                    summary.generatesSamples[compatibleChanges.resources.power.powerType] = {}
                 end
-                tinsert(summary.generatesSamples[entry.changes.resources.power.powerType], {
+                tinsert(summary.generatesSamples[compatibleChanges.resources.power.powerType], {
                     value = delta,
-                    resourceType = entry.changes.resources.power.powerType,
-                    context = entry.changes.activePlayerBuffs,
-                    runes = entry.changes.runes,
-                    eclipse = entry.changes.eclipse,
+                    resourceType = compatibleChanges.resources.power.powerType,
+                    context = compatibleChanges.activePlayerBuffs,
+                    runes = compatibleChanges.runes,
+                    eclipse = compatibleChanges.eclipse,
                     state = entry.state -- Include full state for analysis
                 })
 
@@ -1605,14 +1807,14 @@ function PredictionEngine:ProcessEntry(summary, entry)
                     summary.resourceGeneration = {}
                 end
 
-                if not summary.resourceGeneration[entry.changes.resources.power.powerType] then
-                    summary.resourceGeneration[entry.changes.resources.power.powerType] = {
+                if not summary.resourceGeneration[compatibleChanges.resources.power.powerType] then
+                    summary.resourceGeneration[compatibleChanges.resources.power.powerType] = {
                         observations = {},
                         valueFrequency = {}
                     }
                 end
 
-                local resourceGen = summary.resourceGeneration[entry.changes.resources.power.powerType]
+                local resourceGen = summary.resourceGeneration[compatibleChanges.resources.power.powerType]
                 -- Track this specific observation
                 table.insert(resourceGen.observations, {
                     amount = delta,
@@ -1625,19 +1827,19 @@ function PredictionEngine:ProcessEntry(summary, entry)
         end
 
         -- Secondary resource
-        if entry.changes.resources.secondary then
-            local delta = entry.changes.resources.secondary.delta
+        if compatibleChanges.resources.secondary then
+            local delta = compatibleChanges.resources.secondary.delta
             if delta < 0 then
                 if not summary.costSamples then summary.costSamples = {} end
-                if not summary.costSamples[entry.changes.resources.secondary.powerType] then
-                    summary.costSamples[entry.changes.resources.secondary.powerType] = {}
+                if not summary.costSamples[compatibleChanges.resources.secondary.powerType] then
+                    summary.costSamples[compatibleChanges.resources.secondary.powerType] = {}
                 end
-                tinsert(summary.costSamples[entry.changes.resources.secondary.powerType], {
+                tinsert(summary.costSamples[compatibleChanges.resources.secondary.powerType], {
                     value = math.abs(delta),
-                    resourceType = entry.changes.resources.secondary.powerType,
-                    context = entry.changes.activePlayerBuffs,
-                    runes = entry.changes.runes,
-                    eclipse = entry.changes.eclipse,
+                    resourceType = compatibleChanges.resources.secondary.powerType,
+                    context = compatibleChanges.activePlayerBuffs,
+                    runes = compatibleChanges.runes,
+                    eclipse = compatibleChanges.eclipse,
                     state = entry.state -- Include full state for analysis
                 })
             elseif delta > 0 then
@@ -1659,14 +1861,14 @@ function PredictionEngine:ProcessEntry(summary, entry)
                     summary.resourceGeneration = {}
                 end
 
-                if not summary.resourceGeneration[entry.changes.resources.secondary.powerType] then
-                    summary.resourceGeneration[entry.changes.resources.secondary.powerType] = {
+                if not summary.resourceGeneration[compatibleChanges.resources.secondary.powerType] then
+                    summary.resourceGeneration[compatibleChanges.resources.secondary.powerType] = {
                         observations = {},
                         valueFrequency = {}
                     }
                 end
 
-                local resourceGen = summary.resourceGeneration[entry.changes.resources.secondary.powerType]
+                local resourceGen = summary.resourceGeneration[compatibleChanges.resources.secondary.powerType]
                 -- Track this specific observation
                 table.insert(resourceGen.observations, {
                     amount = delta,
@@ -2447,53 +2649,51 @@ end
 --- @return table The options table for AceConfig
 function PredictionEngine:GetOptions()
     return {
-        general = {
-            type = "group",
-            name = L["general"],
-            order = 1,
-            args = {
-                debugMode = {
-                    type = "toggle",
-                    name = L["debugMode"],
-                    desc = L["debugModeDesc"],
-                    order = 1,
-                    get = function() return self:GetGlobal().debugMode end,
-                    set = function(_, value)
-                        self:GetGlobal().debugMode = value
-                        LibStub("AceConfigRegistry-3.0"):NotifyChange("NAG")
-                    end,
-                },
-                enabled = {
-                    type = "toggle",
-                    name = L["enabled"],
-                    desc = L["enabledDesc"],
-                    order = 2,
-                    get = function() return self:GetChar().enabled end,
-                    set = function(_, value)
-                        self:GetChar().enabled = value
-                        if value then
-                            self:Enable()
-                        else
-                            self:Disable()
-                        end
-                        LibStub("AceConfigRegistry-3.0"):NotifyChange("NAG")
-                    end,
-                },
-                predictionDepth = {
-                    type = "range",
-                    name = L["predictionDepth"],
-                    desc = L["predictionDepthDesc"],
-                    order = 3,
-                    min = 1,
-                    max = 5,
-                    step = 1,
-                    get = function() return self:GetGlobal().predictionDepth end,
-                    set = function(_, value)
-                        self:GetGlobal().predictionDepth = value
-                        LibStub("AceConfigRegistry-3.0"):NotifyChange("NAG")
-                    end,
-                },
-            }
+        type = "group",
+        name = "PredictionEngine",
+        order = 1,
+        args = {
+            debugMode = {
+                type = "toggle",
+                name = L["debugMode"] or "Debug Mode",
+                desc = L["debugModeDesc"] or "Enable debug output for the PredictionEngine module",
+                order = 1,
+                get = function() return self:GetGlobal().debugMode end,
+                set = function(_, value)
+                    self:GetGlobal().debugMode = value
+                    LibStub("AceConfigRegistry-3.0"):NotifyChange("NAG")
+                end,
+            },
+            enabled = {
+                type = "toggle",
+                name = L["enabled"] or "Enabled",
+                desc = L["enabledDesc"] or "Enable the PredictionEngine module",
+                order = 2,
+                get = function() return self:GetChar().enabled end,
+                set = function(_, value)
+                    self:GetChar().enabled = value
+                    if value then
+                        self:Enable()
+                    else
+                        self:Disable()
+                    end
+                    LibStub("AceConfigRegistry-3.0"):NotifyChange("NAG")
+                end,
+            },
+            predictionDepth = {
+                type = "range",
+                name = L["predictionDepth"] or "Prediction Depth",
+                desc = L["predictionDepthDesc"] or "Number of spells to predict ahead",
+                order = 3,
+                min = 1,
+                max = 5,
+                step = 1,
+                get = function() return self:GetGlobal().predictionDepth end,
+                set = function(_, value)
+                    self:GetGlobal().predictionDepth = value
+                    LibStub("AceConfigRegistry-3.0"):NotifyChange("NAG")
+                end,
+            },
         }
     }
 end
