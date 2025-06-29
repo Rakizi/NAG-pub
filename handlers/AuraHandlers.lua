@@ -266,21 +266,28 @@ NAG.AuraICDIsReadyWithReactionTime = NAG.AuraICDIsReady
 local AURA_CACHE_TIME = 0.2 -- Only cache the final result, not all auras
 local auraCache = setmetatable({}, { __mode = "v" })
 
---- Finds an aura on a unit by spell ID or spell name. Returns detailed aura information if found, or false if not found. Handles auto-registration of new auras in DataManager.
+--- Finds an aura on a unit by spell ID or spell name. Returns all 17 values from UnitAura in order if found, or false if not found. Handles auto-registration of new auras in DataManager.
 --- @param unit string The unit to check.
 --- @param spellId number The spell ID of the aura.
 --- @param isGlobal? boolean Whether to check global auras (optional).
---- @return boolean|string name False if not found, or name of the aura if found.
---- @return string|nil icon The icon of the aura.
---- @return number|nil count The number of stacks of the aura (defaults to 1).
---- @return string|number|nil dispelType The dispel type of the aura (0 if none).
---- @return number|nil duration The duration of the aura (0 if none).
---- @return number|nil expirationTime The expiration time of the aura (0 if none).
---- @return string|nil sourceUnit The source unit of the aura.
---- @return number|nil isStealable 1 if stealable, 0 if not.
---- @return number|nil shouldConsolidate 1 if should consolidate, 0 if not.
---- @return number|nil auraSpellId The spell ID of the aura.
---- @usage local name, icon, count = NAG:FindAura("player", 12345)
+--- @return string|boolean name Name of the aura, or false if not found.
+--- @return string|nil icon Path to the icon texture.
+--- @return number|nil count Number of stacks.
+--- @return string|nil debuffType Type of debuff (e.g., "Magic", "Poison"), or nil for buffs.
+--- @return number|nil duration Duration in seconds.
+--- @return number|nil expirationTime Time when the aura expires (GetTime() value).
+--- @return string|nil unitCaster Unit that cast the aura.
+--- @return boolean|nil isStealable Whether the aura is stealable.
+--- @return boolean|nil shouldConsolidate Whether the aura should be consolidated.
+--- @return number|nil spellId Spell ID of the aura.
+--- @return boolean|nil canApplyAura Whether the player can apply the aura.
+--- @return boolean|nil isBossDebuff Whether the aura is a boss debuff.
+--- @return boolean|nil castByPlayer Whether the aura was cast by a player.
+--- @return boolean|nil nameplateShowPersonal Whether to show on personal nameplate.
+--- @return number|nil timeMod Time modifier for the aura.
+--- @return number|nil value1 Custom value (used for some auras).
+--- @return number|nil value2 Custom value (used for some auras, e.g., Monk Stagger amount).
+--- @usage local name, icon, count, debuffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowPersonal, timeMod, value1, value2 = NAG:FindAura("player", 124275)
 function NAG:FindAura(unit, spellId, isGlobal)
     if not unit or not spellId then
         self:Debug("FindAura: Invalid input - unit: " .. tostring(unit) .. ", spellId: " .. tostring(spellId))
@@ -417,7 +424,9 @@ function NAG:FindAura(unit, spellId, isGlobal)
             local i = 1
             while true do
                 local name, icon, count, debuffType, duration, expirationTime,
-                unitCaster, isStealable, shouldConsolidate, auraSpellId = UnitAura(unit, i, filter)
+                unitCaster, isStealable, shouldConsolidate, auraSpellId,
+                canApplyAura, isBossDebuff, castByPlayer, nameplateShowPersonal,
+                timeMod, value1, value2 = UnitAura(unit, i, filter)
 
                 if spellId == 1943 then
                 end
@@ -426,10 +435,10 @@ function NAG:FindAura(unit, spellId, isGlobal)
                 end
                 -- TODO: @rakizi @fonsas check if this will break anything that requires name == spellName
                 if auraSpellId == spellId or (not(skipNameMatch) and name == spellName) then
-                    local result = { name, icon, count or 1, debuffType or 0,
-                        duration or 0, expirationTime or 0, unitCaster,
-                        isStealable and 1 or 0, shouldConsolidate and 1 or 0,
-                        auraSpellId or spellId }
+                    local result = { name, icon, count, debuffType, duration, expirationTime,
+                        unitCaster, isStealable, shouldConsolidate, auraSpellId,
+                        canApplyAura, isBossDebuff, castByPlayer, nameplateShowPersonal,
+                        timeMod, value1, value2 }
                     auraCache[cacheKey] = {
                         data = result,
                         nextUpdate = currentTime + AURA_CACHE_TIME

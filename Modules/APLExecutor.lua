@@ -222,6 +222,13 @@ function APLExecutor:EvaluateConst(valueNode)
         self:Trace("Const number: %s", tostring(val))
         return val
     elseif type(val) == "string" then
+        -- Handle symbolic execute phase thresholds like 'E35'
+        local execNum = val:match("^E(%d+)$")
+        if execNum then
+            local num = tonumber(execNum)
+            self:Trace("Const symbolic execute threshold: %s -> %d", val, num)
+            return num
+        end
         local num = tonumber(val)
         if num then self:Trace("Const string->number: %s", tostring(num)); return num end
         local s = val:match("^(%-?%d+%.?%d*)s$")
@@ -1282,10 +1289,10 @@ end
 --- @param valueNode table The AST node (unused, present for signature consistency)
 --- @return number The current Chi value for the player (0 if not a Monk or unavailable)
 function APLExecutor:EvaluateMonkCurrentChi(valueNode)
-    if NAG.GetCurrentChi then
-        return NAG:GetCurrentChi()
+    if NAG.MonkCurrentChi then
+        return NAG:MonkCurrentChi()
     else
-        self:Warn("EvaluateMonkCurrentChi: NAG:GetCurrentChi() not implemented, returning 0.")
+        self:Warn("EvaluateMonkCurrentChi: NAG:MonkCurrentChi() not implemented, returning 0.")
         return 0
     end
 end
@@ -1295,10 +1302,10 @@ end
 --- @param valueNode table The AST node (unused, present for signature consistency)
 --- @return number The maximum Chi value for the player (0 if not a Monk or unavailable)
 function APLExecutor:EvaluateMonkMaxChi(valueNode)
-    if NAG.GetMaxChi then
-        return NAG:GetMaxChi()
+    if NAG.MonkMaxChi then
+        return NAG:MonkMaxChi()
     else
-        self:Warn("EvaluateMonkMaxChi: NAG:GetMaxChi() not implemented, returning 0.")
+        self:Warn("EvaluateMonkMaxChi: NAG:MonkMaxChi() not implemented, returning 0.")
         return 0
     end
 end
@@ -1409,10 +1416,10 @@ end
 --- @param valueNode table The AST node (unused, present for signature consistency)
 --- @return number The amount of damage taken in the last 1.5s (0 if unavailable)
 function APLExecutor:EvaluateProtectionPaladinDamageTakenLastGlobal(valueNode)
-    if NAG.GetProtectionPaladinDamageTakenLastGlobal then
-        return NAG:GetProtectionPaladinDamageTakenLastGlobal()
+    if NAG.ProtectionPaladinDamageTakenLastGlobal then
+        return NAG:ProtectionPaladinDamageTakenLastGlobal()
     else
-        self:Warn("EvaluateProtectionPaladinDamageTakenLastGlobal: NAG:GetProtectionPaladinDamageTakenLastGlobal() not implemented, returning 0.")
+        self:Warn("EvaluateProtectionPaladinDamageTakenLastGlobal: NAG:ProtectionPaladinDamageTakenLastGlobal() not implemented, returning 0.")
         return 0
     end
 end
@@ -2780,6 +2787,41 @@ function APLExecutor:ExecutePaladinCastWithMacro(node)
     else
         self:Error("NAG:PaladinCastWithMacro not implemented.")
         return false
+    end
+end
+
+---
+--- Evaluates a math operation (add, sub, mul, div) on two values.
+--- @param valueNode table The value node containing op, lhs, rhs
+--- @return number The result of the math operation
+function APLExecutor:EvaluateMath(valueNode)
+    self:Debug("EvaluateMath entry")
+    self:Trace("EvaluateMath: %s", self:SerializeNode(valueNode))
+    if not valueNode or not valueNode.op or not valueNode.lhs or not valueNode.rhs then
+        self:Error("EvaluateMath: Invalid value node (missing op/lhs/rhs)")
+        return 0
+    end
+    -- Map proto op to Lua symbol
+    local opMap = {
+        OpAdd = "+",
+        OpSub = "-",
+        OpMul = "*",
+        OpDiv = "/",
+    }
+    local op = opMap[valueNode.op] or valueNode.op
+    local lhs = self:EvaluateCondition(valueNode.lhs)
+    local rhs = self:EvaluateCondition(valueNode.rhs)
+    if type(lhs) ~= "number" or type(rhs) ~= "number" then
+        self:Error("EvaluateMath: Non-numeric operands (lhs=%s [%s], rhs=%s [%s])", tostring(lhs), type(lhs), tostring(rhs), type(rhs))
+        return 0
+    end
+    if NAG.Math then
+        local result = NAG:Math(lhs, op, rhs)
+        self:Trace("NAG:Math(%s, %s, %s) => %s", tostring(lhs), tostring(op), tostring(rhs), tostring(result))
+        return result
+    else
+        self:Error("NAG:Math not implemented.")
+        return 0
     end
 end
 

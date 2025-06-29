@@ -182,8 +182,20 @@ end
 --- @usage NAG:BrewmasterMonkCurrentStaggerPercent()
 --- @return number Always returns 0 (not implemented).
 function NAG:BrewmasterMonkCurrentStaggerPercent()
-    self:Print("Warning: BrewmasterMonkCurrentStaggerPercent is not yet fully implemented.")
-    return 0
+    -- Monk Stagger debuff spell IDs
+    local LIGHT_STAGGER = 124275
+    local MODERATE_STAGGER = 124274
+    local HEAVY_STAGGER = 124273
+    local _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, light = self:FindAura("player", LIGHT_STAGGER, 'HARMFUL')
+    local _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, moderate = self:FindAura("player", MODERATE_STAGGER, 'HARMFUL')
+    local _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, heavy = self:FindAura("player", HEAVY_STAGGER, 'HARMFUL')
+    local maxhp = UnitHealthMax("player")
+    local current = max(light or 0, moderate or 0, heavy or 0)
+    if maxhp and maxhp > 0 then
+        return current / maxhp
+    else
+        return 0
+    end
 end
 
 -- Fire Elemental spell IDs
