@@ -502,8 +502,8 @@ function NAG:SpellCanCast(spellId, tolerance)
                 end
             end
             if spellId == 123693 then --TODO: plague leech hardcodede bcs blizzard cant control it their end -- 123693
-                if NAG:DotIsActive(59921) and NAG:DotIsActive(57601) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) >= 1 or NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) >= 1 or NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) >= 1) then    
-                    return true
+                if NAG:DotIsActive(59921) and NAG:DotIsActive(57601) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0 or NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0 or NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 0) then    
+                    return self:IsReadySpell(spellId, tolerance)
                 else
                     return false
                 end

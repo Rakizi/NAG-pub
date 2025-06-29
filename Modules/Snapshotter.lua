@@ -26,17 +26,19 @@
 ---
 ---    To query percentage differences:
 ---    NAG:SnapshotPercent(spellID, stat1, stat2, ...)
----    - spellID: number of the spell to check (required)
+---    - spellID: number of the spell to check (required) - will also search by spell name if no direct match
 ---    - stat1, stat2, ...: stat names to compare
 ---    - Returns: percentage difference as decimal (0.2 = 20% increase, -0.1 = 10% decrease)
 ---      * Formula: (current_total / snapshot_total) - 1
 ---      * Returns 0 if no snapshot exists or snapshot total is 0
+---      * If spellID not found, searches snapshots by matching spell names
 ---
 ---    To query DoT damage increase based on attack power:
 ---    NAG:DotDamageIncreasePercent(spellID)
----    - spellID: number of the DoT spell to check (required)
+---    - spellID: number of the DoT spell to check (required) - will also search by spell name if no direct match
 ---    - Returns: attack power percentage difference (0.15 = 15% damage increase)
 ---      * Specialized function for DoT effects that snapshot attack power
+---      * Works with any spell ID that has the same name as the applied DoT
 ---
 ---    EXAMPLES:
 ---    - NAG:Snapshot("str", 45477) - Compare strength snapshot vs current for spell 45477
@@ -45,10 +47,17 @@
 ---    - NAG:SnapshotPercent(59879, "ap") - Get AP percentage change for spell 59879
 ---    - NAG:SnapshotPercent(12345, "crit", "haste") - Get combined crit+haste percentage change
 ---    - NAG:DotDamageIncreasePercent(1079) - Get damage increase for Rip DoT based on AP change
+---    - NAG:DotDamageIncreasePercent(59879) - Works even if 59879 applies "Blood Plague" but 55078 is the actual debuff
 ---
 ---    DEBUG COMMANDS:
 ---    - /nagsnapshot - List all stored spellIDs with spell names and active buffs/debuffs
 ---    - /nagsnapshot <spellID> - Show detailed stored stats for specific spellID
+---    - /nagsnapshot debug on - Enable debug output for snapshotter events
+---    - /nagsnapshot debug off - Disable debug output for snapshotter events
+---    
+---    DEBUG CONTROL:
+---    Debug output is controlled by Snapshotter.enableDebugOutput (default: false)
+---    Change this manually or use the debug commands above to toggle debug logging
 
 -- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
@@ -150,6 +159,16 @@ local Snapshotter = NAG:CreateModule("Snapshotter", defaults, {
     },
 })
 
+-- Debug control - set to true to enable debug output, false to disable
+Snapshotter.enableDebugOutput = false
+
+--- Conditional debug output - only prints if debug is enabled
+function Snapshotter:DebugPrint(message, ...)
+    if self.enableDebugOutput then
+        self:Debug(message, ...)
+    end
+end
+
 do -- Ace3 lifecyle methods
 
     --- Initialize the module
@@ -162,33 +181,41 @@ do -- Ace3 lifecyle methods
         -- Register slash command for debugging
         self:RegisterChatCommand("nagsnapshot", function(input)
             if input and input ~= "" then
-                -- Try to convert input to number for spell ID
-                local spellID = tonumber(input)
-                if spellID then
-                    -- self:DebugSnapshot(spellID)
+                if input == "debug on" then
+                    self.enableDebugOutput = true
+                    self:Info("Snapshotter debug output enabled")
+                elseif input == "debug off" then
+                    self.enableDebugOutput = false
+                    self:Info("Snapshotter debug output disabled")
                 else
-                    -- self:Debug("Please provide a valid spell ID")
+                    -- Try to convert input to number for spell ID
+                    local spellID = tonumber(input)
+                    if spellID then
+                        self:DebugSnapshot(spellID)
+                    else
+                        self:Info("Please provide a valid spell ID, 'debug on', or 'debug off'")
+                    end
                 end
             else
                 -- Show summary of all snapshots and active buffs
-                -- self:DebugSnapshotSummary()
-                -- self:DebugActiveBuffs()
+                self:DebugSnapshotSummary()
+                self:DebugActiveBuffs()
             end
         end)
 
-        -- self:Debug("Module initialized")
+        self:DebugPrint("Module initialized")
     end
 
     --- Enable the module
     function Snapshotter:ModuleEnable()
-        -- self:Debug("Enabling Snapshotter")
+        self:DebugPrint("Enabling Snapshotter")
         -- Clear any existing snapshots when enabling
         self:ClearAllSnapshots()
     end
 
     --- Disable the module
     function Snapshotter:ModuleDisable()
-        -- self:Debug("Disabling Snapshotter")
+        self:DebugPrint("Disabling Snapshotter")
         -- Clear snapshots when disabling
         self:ClearAllSnapshots()
     end
@@ -198,7 +225,7 @@ end
 function Snapshotter:OnSpellCastSucceeded(event, unit, castGUID, spellID)
     if unit ~= "player" then return end
 
-    -- self:Debug(format("Spell cast succeeded: %s (ID: %d)", GetSpellInfo(spellID) or "Unknown", spellID))
+    self:DebugPrint(format("Spell cast succeeded: %s (ID: %d)", GetSpellInfo(spellID) or "Unknown", spellID))
 
     -- Automatically capture snapshot for this spell
     self:CaptureSnapshot(spellID, "spell cast")
@@ -216,11 +243,18 @@ function Snapshotter:OnCombatLogEvent(event)
     -- Process aura events including refresh
     if eventType ~= "SPELL_AURA_APPLIED" and eventType ~= "SPELL_AURA_REFRESH" and eventType ~= "SPELL_AURA_REMOVED" then return end
 
-    -- Only process events where player is the source (for buffs) or target (for debuffs)
+    -- Only process events where player is the source (for debuffs) or target (for buffs)
     local isPlayerSource = sourceName == UnitName("player")
     local isPlayerTarget = destName == UnitName("player")
 
-    if not isPlayerSource and not isPlayerTarget then return end
+    -- Skip events that don't involve the player
+    if not isPlayerSource and not isPlayerTarget then 
+        return 
+    end
+
+    -- Debug only player-involved events
+    self:DebugPrint(format("Player Combat Log Event: %s | Source: %s | Dest: %s | Spell: %s (ID: %d) | Type: %s", 
+        eventType, sourceName or "nil", destName or "nil", spellName or "Unknown", spellID or 0, auraType or "nil"))
 
     if eventType == "SPELL_AURA_APPLIED" or eventType == "SPELL_AURA_REFRESH" then
         -- Track buffs applied to player or debuffs applied by player to target
@@ -228,22 +262,26 @@ function Snapshotter:OnCombatLogEvent(event)
             -- Always update the snapshot when an aura is applied/reapplied/refreshed
             self.state.activeBuffs[spellID] = true
             local actionType = eventType == "SPELL_AURA_REFRESH" and "refreshed" or "applied/reapplied"
-            -- self:Debug(format("Aura %s: %s (ID: %d) - Type: %s", actionType, spellName or "Unknown", spellID, auraType))
+            self:DebugPrint(format("Aura %s: %s (ID: %d) - Type: %s | PlayerSource: %s | PlayerTarget: %s", 
+                actionType, spellName or "Unknown", spellID, auraType, tostring(isPlayerSource), tostring(isPlayerTarget)))
             -- Capture/update snapshot for this aura
             self:CaptureSnapshot(spellID, format("%s %s", auraType:lower(), actionType))
+        else
+            self:DebugPrint(format("Skipping aura - not tracking this combination: %s on %s (PlayerSource: %s, PlayerTarget: %s)", 
+                auraType, isPlayerTarget and "player" or destName or "unknown", tostring(isPlayerSource), tostring(isPlayerTarget)))
         end
     elseif eventType == "SPELL_AURA_REMOVED" then
         -- Remove from active tracking when aura expires
         if self.state.activeBuffs[spellID] then
             self.state.activeBuffs[spellID] = nil
-            -- self:Debug(format("Aura removed: %s (ID: %d) - Type: %s", spellName or "Unknown", spellID, auraType))
+            self:DebugPrint(format("Aura removed: %s (ID: %d) - Type: %s", spellName or "Unknown", spellID, auraType))
         end
     end
 end
 
 --- Event handler for PLAYER_REGEN_ENABLED (combat end)
 function Snapshotter:OnCombatEnd()
-    -- self:Debug("Combat ended - clearing all snapshots")
+    self:DebugPrint("Combat ended - clearing all snapshots")
     self:ClearAllSnapshots()
 end
 
@@ -251,7 +289,7 @@ end
 function Snapshotter:ClearAllSnapshots()
     wipe(self.state.snapshots)
     wipe(self.state.activeBuffs)
-    -- self:Debug("All snapshots and active buffs cleared")
+    self:DebugPrint("All snapshots and active buffs cleared")
 end
 
 --- Capture a complete snapshot of all supported stats
@@ -280,15 +318,15 @@ function Snapshotter:CaptureSnapshot(spellID, reason)
     self.state.snapshots[spellID] = snapshot
 
     local spellName = GetSpellInfo(spellID) or "Unknown"
-    -- self:Debug(format("Captured snapshot for %s (ID: %d) - Reason: %s", spellName, spellID, reason))
-    -- self:Debug(format("  Stats: str=%d, agi=%d, int=%d, crit=%.1f, haste=%.1f, mastery=%.1f, ap=%d",
-    --    snapshot.str, snapshot.agi, snapshot.int, snapshot.crit, snapshot.haste, snapshot.mastery, snapshot.ap))
+    self:DebugPrint(format("Captured snapshot for %s (ID: %d) - Reason: %s", spellName, spellID, reason))
+    self:DebugPrint(format("  Stats: str=%d, agi=%d, int=%d, crit=%.1f, haste=%.1f, mastery=%.1f, ap=%d",
+       snapshot.str, snapshot.agi, snapshot.int, snapshot.crit, snapshot.haste, snapshot.mastery, snapshot.ap))
 end
 
 --- Validate stat arguments
 function Snapshotter:ValidateStatArgs(arguments)
     if not arguments then
-        -- self:Debug("No arguments provided")
+        self:DebugPrint("No arguments provided to ValidateStatArgs")
         return {}
     end
 
@@ -303,7 +341,7 @@ function Snapshotter:ValidateStatArgs(arguments)
             end
         end
     else
-        -- self:Debug("Invalid arguments type: " .. type(arguments))
+        self:DebugPrint("Invalid arguments type: " .. type(arguments))
         return {}
     end
 
@@ -313,10 +351,11 @@ function Snapshotter:ValidateStatArgs(arguments)
         if CONSTANTS.VALID_STATS[stat] then
             tinsert(validStats, stat)
         else
-            -- self:Debug(format("Invalid stat: %s", stat))
+            self:DebugPrint(format("Invalid stat: %s", stat))
         end
     end
 
+    self:DebugPrint(format("ValidateStatArgs: %d valid stats found", #validStats))
     return validStats
 end
 
@@ -357,18 +396,18 @@ end
 function Snapshotter:DebugSnapshot(spellID)
     local snapshot = self.state.snapshots[spellID]
     if not snapshot then
-        -- self:Debug(format("No snapshot found for spell %d", spellID))
+        self:DebugPrint(format("No snapshot found for spell %d", spellID))
         return
     end
 
     local spellName = GetSpellInfo(spellID) or "Unknown"
-    -- self:Debug(format("=== Snapshot for %s (ID: %d) ===", spellName, spellID))
+    self:DebugPrint(format("=== Snapshot for %s (ID: %d) ===", spellName, spellID))
 
     for statName, value in pairs(snapshot) do
-        -- self:Debug(format("  %s: %d", statName, value))
+        self:DebugPrint(format("  %s: %d", statName, value))
     end
 
-    -- self:Debug("========================")
+    self:DebugPrint("========================")
 end
 
 --- Debug function to show summary of all snapshots
@@ -379,11 +418,11 @@ function Snapshotter:DebugSnapshotSummary()
     end
 
     if count == 0 then
-        -- self:Debug("No snapshots stored")
+        self:DebugPrint("No snapshots stored")
         return
     end
 
-    -- self:Debug(format("=== Snapshot Summary (%d spells) ===", count))
+    self:DebugPrint(format("=== Snapshot Summary (%d spells) ===", count))
 
     for spellID, snapshot in pairs(self.state.snapshots) do
         local spellName = GetSpellInfo(spellID) or "Unknown"
@@ -391,10 +430,10 @@ function Snapshotter:DebugSnapshotSummary()
         for _ in pairs(snapshot) do
             statCount = statCount + 1
         end
-        -- self:Debug(format("  %s (ID: %d): %d stats", spellName, spellID, statCount))
+        self:DebugPrint(format("  %s (ID: %d): %d stats", spellName, spellID, statCount))
     end
 
-    -- self:Debug("================================")
+    self:DebugPrint("================================")
 end
 
 --- Debug function to show active buffs/debuffs
@@ -405,18 +444,18 @@ function Snapshotter:DebugActiveBuffs()
     end
 
     if count == 0 then
-        -- self:Debug("No active buffs/debuffs tracked")
+        self:DebugPrint("No active buffs/debuffs tracked")
         return
     end
 
-    -- self:Debug(format("=== Active Buffs/Debuffs (%d) ===", count))
+    self:DebugPrint(format("=== Active Buffs/Debuffs (%d) ===", count))
 
     for spellID, _ in pairs(self.state.activeBuffs) do
         local spellName = GetSpellInfo(spellID) or "Unknown"
-        -- self:Debug(format("  %s (ID: %d)", spellName, spellID))
+        self:DebugPrint(format("  %s (ID: %d)", spellName, spellID))
     end
 
-    -- self:Debug("================================")
+    self:DebugPrint("================================")
 end
 
 --- Get current live stat value for a given stat name
@@ -513,7 +552,7 @@ do
         -- Validate stat names
         local validStats = Snapshotter:ValidateStatArgs(statNames)
         if #validStats == 0 then
-            Snapshotter:Debug("No valid stat arguments provided")
+            Snapshotter:DebugPrint("No valid stat arguments provided")
             return 0
         end
 
@@ -524,7 +563,7 @@ do
                 local value = Snapshotter:GetCurrentStat(statName)
                 total = total + value
             end
-            Snapshotter:Debug(format("Live stat sum: %d", total))
+            Snapshotter:DebugPrint(format("Live stat sum: %d", total))
             return total
         end
 
@@ -535,9 +574,9 @@ do
             return 0
         end
 
-        -- Check if this is a buff/debuff and if it's still active
-        local isAuraActive = Snapshotter:IsAuraActive(spellID)
-        local spellName = GetSpellInfo(spellID) or "Unknown"
+        -- Check if this is a buff/debuff and if it's still active (use actualSpellID)
+        local isAuraActive = Snapshotter:IsAuraActive(actualSpellID)
+        local spellName = GetSpellInfo(actualSpellID) or "Unknown"
 
         if isAuraActive then
             -- Buff/debuff is still active - return difference (current - snapshot)
@@ -547,10 +586,10 @@ do
                 local currentValue = Snapshotter:GetCurrentStat(statName)
                 local difference = currentValue - snapshotValue
                 total = total + difference
-                Snapshotter:Debug(format("Stat %s: snapshot=%d, current=%d, diff=%d",
+                Snapshotter:DebugPrint(format("Stat %s: snapshot=%d, current=%d, diff=%d",
                     statName, snapshotValue, currentValue, difference))
             end
-            Snapshotter:Debug(format("Active aura comparison for %s (ID: %d): %d", spellName, spellID, total))
+            Snapshotter:DebugPrint(format("Active aura comparison for %s (ID: %d): %d", spellName, actualSpellID, total))
             return total
         else
             -- Buff/debuff has expired - return current live values
@@ -558,9 +597,9 @@ do
             for _, statName in ipairs(validStats) do
                 local currentValue = Snapshotter:GetCurrentStat(statName)
                 total = total + currentValue
-                Snapshotter:Debug(format("Expired aura - stat %s: current=%d", statName, currentValue))
+                Snapshotter:DebugPrint(format("Expired aura - stat %s: current=%d", statName, currentValue))
             end
-            Snapshotter:Debug(format("Expired aura %s (ID: %d) - returning current values: %d", spellName, spellID, total))
+            Snapshotter:DebugPrint(format("Expired aura %s (ID: %d) - returning current values: %d", spellName, actualSpellID, total))
             return total
         end
     end
@@ -595,7 +634,7 @@ do
 
         -- Validate spellID
         if not spellID or type(spellID) ~= "number" then
-            Snapshotter:Debug("Invalid spellID provided to SnapshotPercent")
+            Snapshotter:DebugPrint("Invalid spellID provided to SnapshotPercent")
             return 0
         end
 
@@ -611,14 +650,36 @@ do
         -- Validate stat names
         local validStats = Snapshotter:ValidateStatArgs(statNames)
         if #validStats == 0 then
-            Snapshotter:Debug("No valid stat arguments provided to SnapshotPercent")
+            Snapshotter:DebugPrint("No valid stat arguments provided to SnapshotPercent")
             return 0
         end
 
         -- Check if snapshot exists for this spellID
         local snapshot = Snapshotter.state.snapshots[spellID]
+        local actualSpellID = spellID
+        
+        -- If no direct match, try to find by spell name
         if not snapshot then
-            Snapshotter:Debug(format("No snapshot found for spellID %d in SnapshotPercent", spellID))
+            local requestedSpellName = GetSpellInfo(spellID)
+            if requestedSpellName then
+                Snapshotter:DebugPrint(format("No direct snapshot for spellID %d (%s), searching by name...", spellID, requestedSpellName))
+                
+                -- Search through all snapshots for matching spell name
+                for storedSpellID, storedSnapshot in pairs(Snapshotter.state.snapshots) do
+                    local storedSpellName = GetSpellInfo(storedSpellID)
+                    if storedSpellName and storedSpellName == requestedSpellName then
+                        Snapshotter:DebugPrint(format("Found name match: %s (requested ID: %d -> stored ID: %d)", requestedSpellName, spellID, storedSpellID))
+                        snapshot = storedSnapshot
+                        actualSpellID = storedSpellID
+                        break
+                    end
+                end
+            end
+        end
+        
+        -- If still no snapshot found after name search
+        if not snapshot then
+            Snapshotter:DebugPrint(format("No snapshot found for spellID %d (%s) even after name search", spellID, GetSpellInfo(spellID) or "Unknown"))
             return 0
         end
 
@@ -631,7 +692,7 @@ do
 
         -- Avoid division by zero
         if snapshotTotal == 0 then
-            Snapshotter:Debug(format("Snapshot total is 0 for spellID %d, cannot calculate percentage", spellID))
+            Snapshotter:DebugPrint(format("Snapshot total is 0 for spellID %d (actual: %d), cannot calculate percentage", spellID, actualSpellID))
             return 0
         end
 
@@ -645,9 +706,9 @@ do
         -- Calculate percentage difference: (current / snapshot) - 1
         local percentDiff = (currentTotal / snapshotTotal) - 1
         
-        local spellName = GetSpellInfo(spellID) or "Unknown"
-        Snapshotter:Debug(format("SnapshotPercent for %s (ID: %d): current=%d, snapshot=%d, diff=%.3f (%.1f%%)", 
-            spellName, spellID, currentTotal, snapshotTotal, percentDiff, percentDiff * 100))
+        local spellName = GetSpellInfo(actualSpellID) or "Unknown"
+        Snapshotter:DebugPrint(format("SnapshotPercent for %s (ID: %d): current=%d, snapshot=%d, diff=%.3f (%.1f%%)", 
+            spellName, actualSpellID, currentTotal, snapshotTotal, percentDiff, percentDiff * 100))
 
         return percentDiff
     end
@@ -671,8 +732,13 @@ do
     --- -- Example usage in conditions:
     --- -- if NAG:DotDamageIncreasePercent(rip_spellid) > 0.2 then  -- If damage increased by 20%+
     --- --     -- Consider refreshing the DoT for higher damage
-    --- -- end
+    --- -- end --NAG:DotDamageIncreasePercent(59879)
     function NAG:DotDamageIncreasePercent(spellID)
+        local Snapshotter = NAG:GetModule("Snapshotter")
+        if Snapshotter then
+            Snapshotter:DebugPrint(format("DotDamageIncreasePercent called for spellID: %d (%s)", 
+                spellID, GetSpellInfo(spellID) or "Unknown"))
+        end
         -- Simply call SnapshotPercent with "ap" only
         return NAG:SnapshotPercent(spellID, "ap")
     end
