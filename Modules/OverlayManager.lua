@@ -25,11 +25,12 @@ local defaults = {
                 texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_7",
                 blendMode = "ADD",
                 size = .5,
+                textureScale = 0.5, -- Scale the X texture to 60% of the overlay size
                 point = "TOPRIGHT",
                 relativePoint = "BOTTOMLEFT",
                 xOffset = 0,
                 yOffset = 0,
-                alpha = .75,
+                alpha = 1,
                 showSpellIcon = true
             },
             startattack = {
@@ -305,17 +306,34 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     if (config.showSpellIcon and customConfig and customConfig.spellIcon) then
         if not overlay.spellIcon then
             overlay.spellIcon = overlay:CreateTexture(nil, "ARTWORK")
-            overlay.spellIcon:SetAllPoints()
             self:Debug("ShowOverlay: Created spell icon texture")
         end
         overlay.spellIcon:SetTexture(customConfig.spellIcon)
         overlay.spellIcon:SetAlpha(1.0)
+        
+        -- Apply spell icon zoom if specified
+        if config.spellIconZoom then
+            local iconSize = size * config.spellIconZoom
+            overlay.spellIcon:SetSize(iconSize, iconSize)
+            overlay.spellIcon:ClearAllPoints()
+            overlay.spellIcon:SetPoint("CENTER", overlay, "CENTER", 0, 0)
+            self:Debug(format("ShowOverlay: Zoomed spell icon to %.0f%% (size: %d)", config.spellIconZoom * 100, iconSize))
+        else
+            overlay.spellIcon:SetAllPoints()
+        end
+        
+        -- Apply desaturation if specified
+        if config.spellIconDesaturated then
+            overlay.spellIcon:SetDesaturated(true)
+            self:Debug("ShowOverlay: Desaturated spell icon")
+        else
+            overlay.spellIcon:SetDesaturated(false)
+        end
     end
 
     -- Create and setup the overlay texture
     if not overlay.texture then
         overlay.texture = overlay:CreateTexture(nil, "OVERLAY")
-        overlay.texture:SetAllPoints()
         self:Debug("ShowOverlay: Created overlay texture")
     end
 
@@ -323,9 +341,24 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     if config.texture then
         overlay.texture:SetTexture(config.texture)
         overlay.texture:SetBlendMode(config.blendMode)
-        overlay.texture:SetAlpha(config.alpha)
+        
+        -- Use textureAlpha if specified, otherwise use general alpha
+        local textureAlpha = config.textureAlpha or config.alpha
+        overlay.texture:SetAlpha(textureAlpha)
+        
+        -- Apply texture scaling if specified (for smaller X overlays)
+        if config.textureScale then
+            local textureSize = size * config.textureScale
+            overlay.texture:SetSize(textureSize, textureSize)
+            overlay.texture:ClearAllPoints()
+            overlay.texture:SetPoint("CENTER", overlay, "CENTER", 0, 0)
+            self:Debug(format("ShowOverlay: Scaled texture to %.1f%% (size: %d)", config.textureScale * 100, textureSize))
+        else
+            overlay.texture:SetAllPoints()
+        end
+        
         self:Debug(format("ShowOverlay: Set texture properties - Blend: %s, Alpha: %.2f",
-            config.blendMode, config.alpha))
+            config.blendMode, textureAlpha))
     end
 
     -- Position overlay using config
