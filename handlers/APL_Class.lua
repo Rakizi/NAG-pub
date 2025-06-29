@@ -178,9 +178,11 @@ function NAG:MageCurrentCombustionDotEstimate()
     return 0
 end
 
---- Returns the current stagger percentage for a Brewmaster Monk (not yet implemented).
---- @usage NAG:BrewmasterMonkCurrentStaggerPercent()
---- @return number Always returns 0 (not implemented).
+--- Returns the current stagger percentage for a Brewmaster Monk.
+--- Calculates the percentage of maximum health currently being staggered by checking
+--- Light, Moderate and Heavy stagger debuffs.
+--- @usage local staggerPct = NAG:BrewmasterMonkCurrentStaggerPercent()
+--- @return number The current stagger amount as a percentage of max health (0-100)
 function NAG:BrewmasterMonkCurrentStaggerPercent()
     -- Monk Stagger debuff spell IDs
     local LIGHT_STAGGER = 124275
