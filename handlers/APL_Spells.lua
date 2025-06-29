@@ -571,7 +571,7 @@ function NAG:SpellCanCast(spellId, tolerance)
             local targetHealth = UnitHealth("target")
             
             -- Target must have equal or less health than player
-            return targetHealth <= playerHealth
+            return targetHealth <= playerHealth and self:IsReadySpell(spellId, tolerance)
         end
     elseif self.CLASS == "ROGUE" then
         -- Removed for 3/6 to account for pooling issues. But still showing when pooling energy.
@@ -585,6 +585,7 @@ function NAG:SpellCanCast(spellId, tolerance)
         if not self:HasComboPoints(spellId) then
             return false
         end
+        
     elseif self.CLASS == "WARLOCK" then
         if not self:HasMana(spellId) or not self:HasSoulShards(spellId) then
             return false

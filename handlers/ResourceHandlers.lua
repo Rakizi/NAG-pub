@@ -1364,7 +1364,7 @@ function NAG:LevelThreshold(maxValue, maxLevel)
     end
 
     local level = self:PlayerLevel()
-    local minLevel = 40
+    local minLevel = 50  -- Updated from 40 to create sharper curve
   
     -- Determine maxLevel based on game version
     if not maxLevel then
@@ -1387,10 +1387,48 @@ function NAG:LevelThreshold(maxValue, maxLevel)
     -- If at or above maxLevel, return full value
     if level >= maxLevel then return maxValue end
   
-    -- Exponential growth from minLevel to maxLevel
+    -- Sharp exponential growth from minLevel to maxLevel
     local progress = (level - minLevel) / (maxLevel - minLevel)
     progress = math.min(math.max(progress, 0), 1) -- clamp in [0,1]
-    local scaled = (2^progress - 1) / (2 - 1)     -- normalized exponential scale (0 to 1)
+    
+    -- Apply sharp exponential curve: base^(progress^power)
+    local base = 20
+    local power = 7.0
+    local adjusted = progress ^ power
+    local scaled = (base ^ adjusted - 1) / (base - 1)
+    
+    return math.floor(scaled * maxValue)
+end
+
+--- Calculates an item level-scaled threshold value using exponential growth.
+--- Provides smooth scaling from minimum item level to maxItemLevel with exponential curve.
+--- @param maxValue number The maximum value to scale to at max item level
+--- @param maxItemLevel number The maximum item level to scale to (required)
+--- @return number The scaled threshold value based on player's average item level
+--- @usage NAG:ItemLevelThreshold(50000, 400) -- Scale to 50k at item level 400
+function NAG:ItemLevelThreshold(maxValue, maxItemLevel)
+    if not maxValue or maxValue <= 0 then
+        self:Warn("ItemLevelThreshold: Invalid maxValue provided")
+        return 0
+    end
+
+    local _, itemLevel = GetAverageItemLevel()
+    local minItemLevel = 1
+
+    -- Require an explicit maxItemLevel to keep logic clean and consistent
+    if not maxItemLevel then return 0 end
+    if itemLevel < minItemLevel then return 0 end
+    if itemLevel >= maxItemLevel then return maxValue end
+
+    local progress = (itemLevel - minItemLevel) / (maxItemLevel - minItemLevel)
+    progress = math.min(math.max(progress, 0), 1)
+
+    -- Apply sharp exponential curve: base^(progress^power)
+    local base = 15
+    local power = 4.0
+    local adjusted = progress ^ power
+    local scaled = (base ^ adjusted - 1) / (base - 1)
+
     return math.floor(scaled * maxValue)
 end
 

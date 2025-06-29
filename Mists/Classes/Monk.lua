@@ -126,7 +126,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.BREWMASTER, "Monk Brewmaster", {
     rotationString = [[
 (NAG:AuraNumStacks(128938) >= 6 and NAG:AuraIsInactiveWithReactionTime(115308)) and NAG:Cast(115308)
    or ((NAG:CurrentChi() == 0) or ((NAG:CurrentChi() <= 1) and (NAG:SpellTimeToReady(121253) >= 1.5))) and NAG:Cast(115399)
-   or ((NAG:AuraRemainingTime(115307) > 2) and (NAG:CurrentChi() >= 3) and NAG:AuraIsActive(118636) and ((NAG:AuraNumStacks(120267) >= (NAG:PlayerLevel() < 70 and 0 or 50000)) or NAG:CurrentHealthPercent() < 65)) and NAG:Cast(115295))
+   or ((NAG:AuraRemainingTime(115307) > 2) and (NAG:CurrentChi() >= 3) and NAG:AuraIsActive(118636) and ((NAG:AuraNumStacks(120267) >= (NAG:ItemLevelThreshold(50000, 520) ) or NAG:CurrentHealthPercent() < 65)) and NAG:Cast(115295))
    or ((NAG:SpellTimeToReady(121253) <= 1.5) and (NAG:CurrentChi() >= (NAG:MaxChi() - 1))) and NAG:Cast(100784)
    or NAG:Cast(121253)
    or NAG:Cast(116847)
@@ -236,7 +236,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.WINDWALKER, "Monk Windwalker - DP
     or (NAG:AuraIsActive(2825) or NAG:AuraIsActive(123904) or (((NAG:SpellTimeToReady(123904) + 30) > NAG:RemainingTime()) and (NAG:AuraRemainingTime(1247275) > 12.0)) or (NAG:AuraIsActive(1247275) and NAG:AuraIsActive(138228) and (NAG:AuraNumStacks(138228) == math.min((NAG:NumberTargets() - 1), 2)))) and NAG:Cast(76089)
     or ((NAG:CurrentChi() < NAG:MaxChi()) and NAG:AuraIsActiveWithReactionTime(121286) and NAG:AuraIsInactiveWithReactionTime(129914)) and NAG:Cast(121283)
     or (((NAG:CurrentChi() <= (NAG:MaxChi() - 2)) and NAG:AuraIsActive(1247275) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4)) or ((NAG:CurrentChi() <= (NAG:MaxChi() - 2)) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4))) and NAG:Cast(115399)
-    or ((not NAG:AuraIsActive(1247275)) and ((NAG:AuraNumStacks(1247279) >= 18) or ((NAG:CurrentChi() >= 2) and ((NAG:AuraNumStacks(1247279) >= 13) or (NAG:RemainingTime() < 30.0) or ((NAG:AuraNumStacks(1247279) >= 10)) or ((NAG:CurrentTime() < 10) and (NAG:AuraNumStacks(1247279) >= 7)))))) and NAG:Cast(1247275)
+    or (((NAG:AuraNumStacks(1247279) >= 18) or ((NAG:CurrentChi() >= 2) and ((NAG:AuraNumStacks(1247279) >= 13) or (NAG:RemainingTime() < 30.0) or ((NAG:AuraNumStacks(1247279) >= 10)) or ((NAG:CurrentTime() < 10) and (NAG:AuraNumStacks(1247279) >= 7)))))) and NAG:Cast(1247275)
     or (NAG:AuraIsInactiveWithReactionTime(2825) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 5.0)) and NAG:Cast(115288)
     or NAG:Cast(123904)
     or NAG:AutocastOtherCooldowns()
