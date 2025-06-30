@@ -73,12 +73,19 @@ local tonumber = tonumber
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 --- Handles multi-dot logic for applying a DoT to multiple targets, considering overlap and notifications.
+--- Uses proper target counting that only tracks your own debuffs/dots, not other players'.
+--- Shows "TAB" indicator when you should swap targets to apply more dots or refresh expiring ones.
+--- Uses optimized NumberTargets() and NumberTargetsWithDebuff() for consistent range calculations.
 --- @param spellId number The ID of the spell.
 --- @param maxDots number The maximum number of DoTs allowed.
 --- @param maxOverlap number The maximum allowed overlap time in seconds.
+--- @param position? string Optional position for the spell display ("RIGHT", "LEFT", "DOWN", "UP", "AOE", etc.).
+--- @param range? number Optional additional range beyond target distance (defaults to dynamic calculation).
 --- @return boolean True if the spell was cast, false otherwise.
---- @usage NAG:Multidot(73643, 3, 2)
-function NAG:Multidot(spellId, maxDots, maxOverlap)
+--- @usage NAG:Multidot(8050, 2, 1.5) -- Uses dynamic range (targetDistance + 5 for ranged, 7 or targetDistance + 5 for melee)
+--- @usage NAG:Multidot(8050, 2, 1.5, "RIGHT") -- With position, dynamic range
+--- @usage NAG:Multidot(8050, 2, 1.5, "AOE", 10) -- With position and targetDistance + 10 yard range
+function NAG:Multidot(spellId, maxDots, maxOverlap, position, range)
     -- Parameter checks
     if not spellId then
         self:Error(format("Multidot: No spellId provided"))
@@ -99,63 +106,56 @@ function NAG:Multidot(spellId, maxDots, maxOverlap)
     local targetGUID = UnitGUID("target")
     if not targetGUID then return false end
 
-    -- Count active dots using SpellTracker (GetActiveDotCount handles registration)
-    local activeDots = ns.SpellTracker:GetActiveDotCount(spellId)
+    -- Count targets and targets with our debuff using consistent range logic
+    -- If range is provided, both functions will use targetDistance + range
+    -- If range is nil, both functions will use their dynamic range calculations
+    local totalTargets = self:NumberTargets(range)
+    local targetsWithDebuff = self:NumberTargetsWithDebuff(spellId, range)
+    local effectiveMaxDots = min(maxDots, totalTargets)
 
-    -- Check if we can cast on current target
+    --self:Debug(format("Multidot: Spell %d - Total targets: %d, Targets with debuff: %d, Max dots: %d, Effective max: %d", 
+     --   spellId, totalTargets, targetsWithDebuff, maxDots, effectiveMaxDots))
+
+    -- Check current target's debuff status for casting decisions
+    local targetHasDebuff, targetDebuffExpiring = false, false
+    local targetDebuffRemaining = self:DotRemainingTime(spellId, "target")
+    
+    if targetDebuffRemaining > 0 then
+        targetHasDebuff = true
+        targetDebuffExpiring = targetDebuffRemaining < maxOverlap
+    end
+
+    -- Determine if we should cast or suggest the spell
     local canCast = false
-    if activeDots < maxDots then
-        -- Check current target's dot status using WoW's API
-        local name, _, _, _, _, expirationTime = self:FindAura("target", spellId, true)
-        local shouldCast = false
-
-        if not name then
-            -- No dot on target, should cast
-            shouldCast = true
-        else
-            -- Check if dot is about to expire using native duration
-            local remainingTime = expirationTime - GetTime()
-            if remainingTime < maxOverlap then
-                shouldCast = true
-            end
-        end
-
-        if shouldCast and self:SpellCanCast(spellId) then
-            self:CastSpell(spellId)
-            canCast = true
-        end
+    local shouldCast = false
+    local shouldSuggest = false
+    
+    if not targetHasDebuff then
+        -- No dot on target and we haven't reached the limit
+        shouldCast = targetsWithDebuff < effectiveMaxDots
+        shouldSuggest = shouldCast
+    elseif targetDebuffExpiring then
+        -- Dot is about to expire, refresh it
+        shouldCast = true
+        shouldSuggest = true
+    else
+        -- Current target has the debuff and it's not expiring, 
+        -- but check if other targets still need it
+        shouldSuggest = targetsWithDebuff < effectiveMaxDots
     end
 
-    -- Only show notifications if we're actually multi-dotting (maxDots > 1)
-    if maxDots > 1 then
-        -- Show notification for current target if needed
-        if not canCast and activeDots < maxDots then
-            OverlayManager:ShowNotification(NAG.Frame.iconFrames["primary"], spellId, 0, 0, function()
-                return (ns.SpellTracker:GetActiveDotCount(spellId) >= maxDots)
-            end)
-        end
-
-        -- Check other targets for expiring dots (GetPeriodicEffectInfo handles registration)
-        local effect = ns.SpellTracker:GetPeriodicEffectInfo(spellId)
-        if effect then
-            for guid in pairs(effect.targets) do
-                if guid ~= targetGUID then
-                    local name, _, _, _, _, expirationTime = self:FindAura(guid, spellId, true)
-                    if name then
-                        local remainingTime = expirationTime - GetTime()
-                        if remainingTime < maxOverlap then
-                            OverlayManager:ShowNotification(NAG.Frame.iconFrames["primary"], spellId, 0, 0, function()
-                                return (ns.SpellTracker:GetActiveDotCount(spellId) >= maxDots)
-                            end)
-                            break
-                        end
-                    end
-                end
-            end
-        end
+    if shouldCast and self:SpellCanCast(spellId) then
+        self:Cast(spellId, position)
+        canCast = true
     end
 
-    return canCast
+    -- If we should suggest the spell for tab targeting, show it even if we don't cast it
+    if shouldSuggest and not canCast and self:SpellCanCast(spellId) then
+        self:Cast(spellId, position)
+    end
+
+    -- Return true if we should suggest the spell (either cast it or show it for tab targeting)
+    return shouldSuggest
 end
 
 NAG.MultiDot = NAG.Multidot
@@ -164,12 +164,14 @@ NAG.MultiDot = NAG.Multidot
 --- @param spellId number The spell ID of the DoT.
 --- @param maxDots number The maximum number of DoTs allowed.
 --- @param maxOverlap number The maximum allowed overlap time in seconds.
+--- @param position? string Optional position for the spell display.
+--- @param range? number Optional range for target counting.
 --- @return boolean True if the action was successful.
 --- @usage NAG:StrictMultidot(73643, 3, 2)
-function NAG:StrictMultidot(spellId, maxDots, maxOverlap)
+function NAG:StrictMultidot(spellId, maxDots, maxOverlap, position, range)
     -- TODO: Implement logic for strict multi-dotting.
     self:Print("Warning: StrictMultidot is not yet fully implemented.")
-    return self:Multidot(spellId, maxDots, maxOverlap)
+    return self:Multidot(spellId, maxDots, maxOverlap, position, range)
 end
 
 --- Gets the number of stacks of a specific debuff on the player.
@@ -578,14 +580,32 @@ function NAG:SpellCanCast(spellId, tolerance)
         if not self:HasEnergy(spellId) then
             self.isPooling = true
             NAG:Pooling()
+            
+            if spellId == 8676 then 
+                return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
+                or self:AuraIsActive(58984) or self:AuraIsActive(11327)
+                or self:AuraIsActive(145211) or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
+            elseif spellId == 14183  then 
+                    return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
+                    or self:AuraIsActive(58984) or self:AuraIsActive(11327)
+                    or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
+                end
             return true
         elseif self.isPooling then
-            self.isPooling = false
+            self:StopPooling()
         end
         if not self:HasComboPoints(spellId) then
             return false
         end
-        
+        if spellId == 8676 then 
+            return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
+            or self:AuraIsActive(58984) or self:AuraIsActive(11327)
+            or self:AuraIsActive(145211) or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
+        elseif spellId == 14183  then 
+                return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
+                or self:AuraIsActive(58984) or self:AuraIsActive(11327)
+                or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
+            end
     elseif self.CLASS == "WARLOCK" then
         if not self:HasMana(spellId) or not self:HasSoulShards(spellId) then
             return false
@@ -913,4 +933,64 @@ function NAG:DotPercentIncrease(spellId, targetUnit)
     end
     local percentIncrease = (newMultiplier - currentEffect.snapshot.damageMultiplier) / currentEffect.snapshot.damageMultiplier
     return percentIncrease
+end
+
+--- Determines if a spell should be used for multidotting without casting it.
+--- @param spellId number The ID of the spell.
+--- @param maxDots number The maximum number of DoTs allowed.
+--- @param maxOverlap number The maximum allowed overlap time in seconds.
+--- @param range? number Optional range for target counting.
+--- @return boolean True if the spell should be used for multidotting, false otherwise.
+--- @usage NAG:ShouldMultidot(8050, 3, 3)
+function NAG:ShouldMultidot(spellId, maxDots, maxOverlap, range)
+    -- Parameter checks
+    if not spellId then
+        self:Error(format("ShouldMultidot: No spellId provided"))
+        return false
+    end
+
+    local spell = DataManager:Get(spellId, DataManager.EntityTypes.SPELL)
+    if not spell then
+        self:Error(format("ShouldMultidot: SpellId %s not found in Spell table", tostring(spellId)))
+        return false
+    end
+
+    if not self:IsKnownSpell(spellId) then
+        return false
+    end
+
+    -- Get current target info
+    local targetGUID = UnitGUID("target")
+    if not targetGUID then return false end
+
+    -- Count targets and targets with our debuff using consistent range logic
+    local totalTargets = self:NumberTargets(range)
+    local targetsWithDebuff = self:NumberTargetsWithDebuff(spellId, range)
+    local effectiveMaxDots = min(maxDots, totalTargets)
+
+    -- Check current target's debuff status for casting decisions
+    local targetHasDebuff, targetDebuffExpiring = false, false
+    local targetDebuffRemaining = self:DotRemainingTime(spellId, "target")
+    
+    if targetDebuffRemaining > 0 then
+        targetHasDebuff = true
+        targetDebuffExpiring = targetDebuffRemaining < maxOverlap
+    end
+
+    -- Determine if we should suggest the spell
+    local shouldSuggest = false
+    
+    if not targetHasDebuff then
+        -- No dot on target and we haven't reached the limit
+        shouldSuggest = targetsWithDebuff < effectiveMaxDots
+    elseif targetDebuffExpiring then
+        -- Dot is about to expire, refresh it
+        shouldSuggest = true
+    else
+        -- Current target has the debuff and it's not expiring, 
+        -- but check if other targets still need it
+        shouldSuggest = targetsWithDebuff < effectiveMaxDots
+    end
+
+    return shouldSuggest
 end

@@ -191,6 +191,40 @@ function RotationManager:PLAYER_REGEN_ENABLED()
 end
 
 -- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
+function RotationManager:GetAutoRotationEnabled()
+    local StateManager = NAG:GetModule("StateManager")
+    if not StateManager then
+        return false
+    end
+    
+    -- Check if either Elemental Shaman or Frost DK auto rotation is enabled
+    local elementalEnabled = StateManager:GetChar().enableElementalShamanAutoRotation
+    local frostDKEnabled = StateManager:GetChar().enableFrostDKAutoRotation
+    
+    return elementalEnabled or frostDKEnabled
+end
+
+function RotationManager:SetAutoRotationEnabled(enabled)
+    local StateManager = NAG:GetModule("StateManager")
+    if not StateManager then
+        return
+    end
+    
+    -- Set both Elemental Shaman and Frost DK auto rotation to the same value
+    StateManager:GetChar().enableElementalShamanAutoRotation = enabled
+    StateManager:GetChar().enableFrostDKAutoRotation = enabled
+    
+    -- Restart Elemental Shaman timer if needed
+    if enabled then
+        StateManager:StartElementalShamanRotationCheck()
+    else
+        if StateManager.elementalShamanTimer then
+            StateManager:CancelTimer(StateManager.elementalShamanTimer)
+            StateManager.elementalShamanTimer = nil
+        end
+    end
+end
+
 function RotationManager:Toggle()
     self:Debug("Toggle: Starting")
     if not self.frame then
@@ -483,9 +517,31 @@ function RotationManager:ShowSettingsMenu()
     end)
     menu:AddChild(sizeSlider)
 
+    -- Option: Automatic Rotation Switching
+    local autoRotationToggle = AceGUI:Create("CheckBox")
+    autoRotationToggle:SetLabel(L["autoRotationSwitching"] or "Automatic Rotation Switching")
+    autoRotationToggle:SetDescription(L["autoRotationSwitchingDesc"] or "Automatically switch rotations for Elemental Shamans and Frost DKs based on targets/weapons")
+    autoRotationToggle:SetValue(self:GetAutoRotationEnabled())
+    autoRotationToggle:SetFullWidth(true)
+    autoRotationToggle:SetCallback("OnValueChanged", function(_, _, value)
+        self:SetAutoRotationEnabled(value)
+    end)
+    menu:AddChild(autoRotationToggle)
+
     -- Sizing and Positioning
+    local isSpecial = false
+    local class = select(2, UnitClass("player"))
+    if class == "SHAMAN" or class == "DEATHKNIGHT" then
+        local StateManager = NAG:GetModule("StateManager")
+        if StateManager then
+            local currentSpec = StateManager.state and StateManager.state.player and StateManager.state.player.specInfo and StateManager.state.player.specInfo.id
+            if (class == "SHAMAN" and currentSpec == 262) or (class == "DEATHKNIGHT" and currentSpec == 251) then
+                isSpecial = true
+            end
+        end
+    end
     menu:SetWidth(220)
-    menu:SetHeight(180)
+    menu:SetHeight(isSpecial and 270 or 220)
     local x, y = GetCursorPosition()
     local scale = UIParent:GetEffectiveScale()
     menu:ClearAllPoints()

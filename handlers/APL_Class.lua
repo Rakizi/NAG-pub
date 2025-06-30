@@ -334,14 +334,42 @@ function NAG:InputDelay()
     return self:GetGlobal().inputDelay or 0.2
 end
 
---- Triggers pooling for rogues via WeakAuras.
+--- Triggers pooling visual overlay and WeakAuras event.
 --- @usage NAG:Pooling()
 --- @return boolean Always returns false.
 function NAG:Pooling()
+    -- Show pooling overlay on primary frame
+    if self.Frame and self.Frame.iconFrames and self.Frame.iconFrames["primary"] then
+        local primaryFrame = self.Frame.iconFrames["primary"]
+        
+        -- Show pooling overlay with check function to monitor NAG.isPooling state
+        self.OM:ShowPooling(primaryFrame, function()
+            return self.isPooling == true
+        end)
+        
+        self:Debug("Pooling: Visual overlay shown on primary frame")
+    end
+    
+    -- Also trigger WeakAuras event for compatibility
     if _G["WeakAuras"] and _G["WeakAuras"].ScanEvents then
         _G["WeakAuras"].ScanEvents("fonsas_rogue_pooling_cata", true)
     end
+    
     return false
+end
+
+--- Hides the pooling visual overlay.
+--- @usage NAG:StopPooling()
+function NAG:StopPooling()
+    -- Hide pooling overlay from primary frame
+    if self.Frame and self.Frame.iconFrames and self.Frame.iconFrames["primary"] then
+        local primaryFrame = self.Frame.iconFrames["primary"]
+        self.OM:HidePooling(primaryFrame)
+        self:Debug("StopPooling: Visual overlay hidden from primary frame")
+    end
+    
+    -- Clear pooling state
+    self.isPooling = false
 end
 --- Triggers pooling for rogues via WeakAuras (Honor Among Thieves).
 --- @usage NAG:RogueHaT()

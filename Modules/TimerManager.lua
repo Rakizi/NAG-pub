@@ -93,7 +93,7 @@ function TimerManager:Create(category, name, callback, interval, repeating, args
     end
 
     if self.timers[category][name] then
-        self:Debug(format("Timer already exists: %s in category %s", name, category))
+        -- Don't spam debug for duplicate timers - just return existing
         return self.timers[category][name]
     end
 
@@ -133,7 +133,6 @@ function TimerManager:Cancel(category, name)
         return
     end
 
-    self:Debug(format("Cancelling timer: %s in category %s", name, category))
     -- Call parent AceTimer-3.0 CancelTimer method
     self:CancelTimer(self.timers[category][name])
     self.timers[category][name] = nil

@@ -22,16 +22,16 @@ defaults.class.specSpellLocations = {
     [CLASS_SPECS.ELEMENTAL] = {
         [CLASS_SPECS.ELEMENTAL] = {
             ABOVE = {2062},
-            BELOW = { 8071, 3599, 5394, 3738, 8190 },
-            RIGHT = {3599},
-            LEFT = { 16166, 2894, 33697, 79206, 2825, 26297 },
+            BELOW = { 8071, 3599, 5394, 3738, 8190 , 135825},
+            RIGHT = {},
+            LEFT = { 16166, 2894, 33697, 79206, 2825, 26297 , 114049},
             AOE = { 421, 61882 }
         },
         [CLASS_SPECS.ENHANCEMENT] = {
-            ABOVE = {403, 401, 8024, 8232},
-            BELOW = { 3599, 8075, 8512, 5394, 324 },
-            RIGHT = {3599},
-            LEFT = { 2062,2825, 51533, 33697, 30823 },
+            ABOVE = {8024, 8232},
+            BELOW = { 3599, 8075, 8512, 5394, 324 , 135825},
+            RIGHT = {},
+            LEFT = { 2062,2825, 51533, 33697, 30823, 114049 },
             AOE = { 1535 }
         },
         [CLASS_SPECS.RESTORATION] = {
@@ -50,7 +50,27 @@ defaults.class.specSpellLocations = {
 if UnitClassBase('player') ~= "SHAMAN" then return end
 
 -- START OF GENERATED_ROTATIONS
+--[[
 
+
+            NAG:AutocastOtherCooldowns()
+    or ((not NAG:DotIsActive(3599)) and (not NAG:AuraIsActive(2894))) and NAG:Cast(3599)
+    or (NAG:CanWeave(117014)) and NAG:Cast(117014) 
+    or (NAG:CanWeave(403)) and NAG:Cast(403)
+    or ((not NAG:DotIsActive(8050))) and NAG:Cast(73680)
+    or ((not NAG:DotIsActive(8050)) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
+    or ((NAG:SpellTimeToReady(17364) >= 4.0)) and NAG:Cast(114049)
+    or NAG:Cast(115356)
+    or NAG:Cast(17364)
+    or NAG:Cast(60103)
+    or ((not NAG:SpellIsReady(2894))) and NAG:Cast(2062)
+    or NAG:Cast(73680)
+    or ((NAG:DotRemainingTime(8050) <= 15.0) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
+    or (NAG:CanWeave(421)) and NAG:Cast(421)
+    or NAG:Cast(51533)
+    or NAG:Cast(8042) --117014, 403, 421
+
+]]
 ns.AddRotationToDefaults(defaults,
     SpecializationCompat:GetSpecID("Shaman", "Enhancement"),
     "Shaman Enhancement - Default by APLParser",
@@ -58,27 +78,52 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = true,
+        experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(51533), -1600 }
         },
         rotationString = [[
-    NAG:AutocastOtherCooldowns()
-        or ((not NAG:DotIsActive(3599)) and (not NAG:AuraIsActive(2894))) and NAG:Cast(3599)
-        or NAG:Cast(117014)
-        or NAG:Cast(115356)
-        or NAG:Cast(17364)
-        or NAG:Cast(60103)
-        or (((NAG:InputDelay() + NAG:SpellCastTime(403)) < NAG:AutoTimeToNext()) and (NAG:AuraNumStacks(51530) >= 3)) and NAG:Cast(403)
-        or (NAG:CurrentTime() <= 7) and NAG:Cast(2062)
-        or ((not NAG:DotIsActive(8050)) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
-        or NAG:Cast(73680)
-        or (((NAG:InputDelay() + NAG:SpellCastTime(421)) < NAG:AutoTimeToNext()) and (NAG:AuraNumStacks(51530) >= 1)) and NAG:Cast(421)
-        or ((NAG:DotRemainingTime(8050) <= 9.0) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
-        or NAG:Cast(8042)
-        or NAG:Cast(51533)
-        or (NAG:DotRemainingTime(3599) < 15.0) and NAG:Cast(3599)
+            NAG:AutocastOtherCooldowns()
+    or ((not NAG:DotIsActive(3599)) and (not NAG:AuraIsActive(2894))) and NAG:Cast(3599, "DOWN")
+    or not(NAG:CanWeave(117014)) and NAG:Cast(117014, "RIGHT")
+    or (NAG:CanWeave(117014)) and NAG:Cast(117014) 
+    or NAG:CanWeave(403) and NAG:Cast(403)
+    or not(NAG:CanWeave(403)) and NAG:Cast(403, "RIGHT")
+    or ((not NAG:DotIsActive(8050))) and NAG:Cast(73680)
+    or ((not NAG:DotIsActive(8050)) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
+    or ((NAG:SpellTimeToReady(17364) >= 4.0)) and NAG:Cast(114049, "LEFT")
+    or NAG:Cast(115356)
+    or NAG:Cast(17364)
+    or NAG:Cast(60103)
+    or ((not NAG:SpellIsReady(2894))) and NAG:Cast(2062)
+    or NAG:Cast(73680)
+    or ((NAG:DotRemainingTime(8050) <= 15.0) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
+    or not(NAG:CanWeave(421)) and NAG:Cast(421, "RIGHT")
+    or NAG:CanWeave(421) and NAG:Cast(421)
+    or NAG:Cast(51533, "LEFT")
+    or NAG:Cast(8042)
+    or (
+    NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(60103)
+    and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(73680)
+    and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(115356)
+    and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(8050)
+) and NAG:Cast(17364, 10)
+or (
+    NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(73680)
+    and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(115356)
+    and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(8050)
+) and NAG:Cast(60103, 10)
+or (
+    NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(115356)
+    and NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(8050)
+) and NAG:Cast(73680, 10)
+or (
+    NAG:SpellTimeToReady(115356) <= NAG:SpellTimeToReady(8050)
+) and NAG:Cast(115356, 10)
+or (
+    (NAG:DotRemainingTime(8050) <= NAG:SpellTimeToReady(8050))
+) and NAG:Cast(8050, 10)
         ]],
 
         -- New action-based format
@@ -94,65 +139,59 @@ ns.AddRotationToDefaults(defaults,
         -- Optional metadata
         glyphs = {71155, 41533, 41530},
         lastModified = "06/19/2025",
-        author = "APLParser"
+        author = "Jeb and Fonsas"
     }
 )
 
+--[[               NAG:NumberTargets() > 3 and NAG:Cast(114074, "RIGHT")
+        or NAG:NumberTargets() > 3 and NAG:Cast(421, "RIGHT")
+            or ((NAG:NumberTargets() >= 2 and NAG:CurrentManaPercent() <= 0.7)) and NAG:Cast(30823, "LEFT")
+    or (NAG:AuraIsKnown(117012) and NAG:AuraIsActive(77762)) and NAG:Cast(73680)
+        or (NAG:NumberTargets() >= 2 and NAG:DotRemainingTime(8050) > NAG:SpellCastTime(51505)) and NAG:Cast(51505, "RIGHT")
+        or NAG:NumberTargets() >= 2 and NAG:DotIsActive(8050) and NAG:ShouldMultidot(8050, 2, 2.0) and NAG:Cast(8050, "RIGHT")
+        or (NAG:NumberTargets() >= 2 and NAG:AuraNumStacks(324) == 7) and NAG:Cast(8042, "RIGHT")
+        or NAG:NumberTargets() >= 2 and NAG:Cast(114074, "RIGHT")
+        or NAG:NumberTargets() >= 2 and NAG:Cast(421, "RIGHT")
+            or NAG:NumberTargets() >= 2 and NAG:Cast(421, "RIGHT")
+    or NAG:Cast(120668, 'LEFT')
+    or (NAG:CurrentTime() < 5) and NAG:Cast(16166)
+    or ((NAG:RemainingTime() <= 26) or (NAG:AuraIsActive(16166) and (NAG:RemainingTime() <= 105)) or (NAG:AuraIsActive(16166) and (NAG:SpellTimeToReady(114049) <= 10)) or (NAG:AuraIsActive(16166) and NAG:AuraIsActive(114049)) or NAG:AuraIsActive(114049)) and NAG:Cast(76093)
+    or ((NAG:SpellTimeToReady(114049) >= 85.0) or (NAG:SpellTimeToReady(114049) <= 4)) and NAG:Cast(16166)
+    or (NAG:DotRemainingTime(8050) > NAG:SpellCastTime(51505)) and NAG:Cast(51505)
+    or (NAG:DotRemainingTime(8050) > 15) and NAG:Cast(114049, 'LEFT')
+    or (NAG:DotRemainingTime(8050) < 2) and NAG:Cast(8050)
+    or NAG:SpellIsKnown(117014) and NAG:Cast(117014)
+    or ((not NAG:AuraIsActive(2894)) and (not NAG:DotIsActive(3599))) and NAG:Cast(3599, "DOWN")
+    or (NAG:AuraNumStacks(324) >= 7) and NAG:Cast(8042)
+    or (((not NAG:AuraIsActive(2894)) and (NAG:RemainingTime() >= 5) and (NAG:SpellTimeToReady(114049) <= 20)) or (NAG:RemainingTime() <= 62)) and NAG:Cast(2062, 'LEFT')
+    or NAG:Cast(403)
+    ]]
+
 ns.AddRotationToDefaults(defaults,
     SpecializationCompat:GetSpecID("Shaman", "Elemental"),
-    "Shaman Elemental - AOE4plus by APLParser",
+    "Single Target - Ele",
     {
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = true,
-        gameType = Version.GAME_TYPES.CLASSIC_MISTS,
-        prePull = {
-            { NAG:Cast(76093), -2500 }, { NAG:Cast(2894), -2500 }, { NAG:Cast(421), -1000 }
-        },
-        rotationString = [[
-    NAG:AutocastOtherCooldowns()
-        or NAG:Cast(114074)
-        or NAG:Cast(421)
-        ]],
-
-        -- New action-based format
-        --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 2894}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 421}}}, doAtValue = {const = {val = "-1s"}}}},
-        --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {castSpell = {spellId = {spellId = 114074}}}}, {action = {castSpell = {spellId = {spellId = 421}}}}},
-
-        -- Tracked IDs for optimization
-        spells = {421, 114074},
-        items = {},
-        auras = {},
-        runes = {},
-
-        -- Optional metadata
-        glyphs = {41539, 41518},
-        lastModified = "06/19/2025",
-        author = "APLParser"
-    }
-)
-
-ns.AddRotationToDefaults(defaults,
-    SpecializationCompat:GetSpecID("Shaman", "Elemental"),
-    "Shaman Elemental - Default by APLParser",
-    {
-        -- Required parameters
-        default = true,
-        enabled = true,
-        experimental = true,
+        experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(76093), -2500 }, { NAG:Cast(2894), -2500 }, { NAG:Cast(403), -1000 }
         },
         rotationString = [[
-    NAG:Cast(73680)
-        or NAG:AutocastOtherCooldowns()
-        or (NAG:DotRemainingTime(8050) > NAG:SpellCastTime(51505)) and NAG:Cast(51505)
-        or NAG:Multidot(8050, 1, 2.0)
-        or ((not NAG:AuraIsActive(2894)) and (not NAG:DotIsActive(3599))) and NAG:Cast(3599)
-        or (NAG:AuraNumStacks(324) == 7) and NAG:Cast(8042)
-        or NAG:Cast(403)
+    NAG:Cast(120668, 'LEFT')
+    or (NAG:CurrentTime() < 5) and NAG:Cast(16166)
+    or ((NAG:RemainingTime() <= 26) or (NAG:AuraIsActive(16166) and (NAG:RemainingTime() <= 105)) or (NAG:AuraIsActive(16166) and (NAG:SpellTimeToReady(114049) <= 10)) or (NAG:AuraIsActive(16166) and NAG:AuraIsActive(114049)) or NAG:AuraIsActive(114049)) and NAG:Cast(76093)
+    or ((NAG:SpellTimeToReady(114049) >= 85.0) or (NAG:SpellTimeToReady(114049) <= 4)) and NAG:Cast(16166)
+    or (NAG:DotRemainingTime(8050) > NAG:SpellCastTime(51505)) and NAG:Cast(51505)
+    or (NAG:DotRemainingTime(8050) > 15) and NAG:Cast(114049, 'LEFT')
+    or (NAG:DotRemainingTime(8050) < 2) and NAG:Cast(8050)
+    or NAG:SpellIsKnown(117014) and NAG:Cast(117014)
+    or ((not NAG:AuraIsActive(2894)) and (not NAG:DotIsActive(3599))) and NAG:Cast(3599, "DOWN")
+    or (NAG:AuraNumStacks(324) >= 7) and NAG:Cast(8042)
+    or (((not NAG:AuraIsActive(2894)) and (NAG:RemainingTime() >= 5) and (NAG:SpellTimeToReady(114049) <= 20)) or (NAG:RemainingTime() <= 62)) and NAG:Cast(2062, 'LEFT')
+    or NAG:Cast(403)
         ]],
 
         -- New action-based format
@@ -168,38 +207,43 @@ ns.AddRotationToDefaults(defaults,
         -- Optional metadata
         glyphs = {41539},
         lastModified = "06/19/2025",
-        author = "APLParser"
+        author = "Fonsas"
     }
-)
+)   
+
 
 ns.AddRotationToDefaults(defaults,
     SpecializationCompat:GetSpecID("Shaman", "Elemental"),
-    "Shaman Elemental - Cleave by APLParser",
+    "AOE - Ele",
     {
         -- Required parameters
-        default = true,
+        default = false,
         enabled = true,
-        experimental = true,
+        experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
-            { NAG:Cast(76093), -2500 }, { NAG:Cast(2894), -2500 }, { NAG:Cast(421), -1000 }
+            { NAG:Cast(76093), -2500 }, { NAG:Cast(2894), -2500 }, { NAG:Cast(403), -1000 }
         },
         rotationString = [[
-    NAG:AutocastOtherCooldowns()
+        (NAG:NumberTargets() > 3) and NAG:Cast(114074)
+        or (NAG:NumberTargets() > 3) and NAG:Cast(421)
+            or (NAG:CurrentManaPercent() <= 0.7) and NAG:Cast(30823, "LEFT")
+    or (NAG:AuraIsKnown(117012) and NAG:AuraIsActive(77762)) and NAG:Cast(73680)
         or (NAG:DotRemainingTime(8050) > NAG:SpellCastTime(51505)) and NAG:Cast(51505)
-        or NAG:Multidot(8050, 2, 2.0)
+        or (NAG:DotIsActive(8050) and NAG:ShouldMultidot(8050, 2, 2.0)) and NAG:Cast(8050, "RIGHT")
+        or (NAG:ShouldMultidot(8050, 2, 2.0)) and NAG:Cast(8050)
         or (NAG:AuraNumStacks(324) == 7) and NAG:Cast(8042)
-        or ((not NAG:AuraIsActive(2894)) and (not NAG:DotIsActive(3599))) and NAG:Cast(3599)
         or NAG:Cast(114074)
         or NAG:Cast(421)
+            or NAG:Cast(421)
         ]],
 
         -- New action-based format
-        --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 2894}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 421}}}, doAtValue = {const = {val = "-1s"}}}},
-        --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {condition = {cmp = {op = "OpGt", lhs = {dotRemainingTime = {spellId = {spellId = 8050}}}, rhs = {spellCastTime = {spellId = {spellId = 51505}}}}}, castSpell = {spellId = {spellId = 51505}}}}, {action = {multidot = {spellId = {spellId = 8050}, maxDots = 2, maxOverlap = {const = {val = "2s"}}}}}, {action = {condition = {cmp = {op = "OpEq", lhs = {auraNumStacks = {auraId = {spellId = 324}}}, rhs = {const = {val = "7"}}}}, castSpell = {spellId = {spellId = 8042}}}}, {action = {condition = {and = {vals = {{not = {val = {auraIsActive = {auraId = {spellId = 2894}}}}}, {not = {val = {dotIsActive = {spellId = {spellId = 3599}}}}}}}}, castSpell = {spellId = {spellId = 3599}}}}, {action = {castSpell = {spellId = {spellId = 114074}}}}, {action = {castSpell = {spellId = {spellId = 421}}}}},
+        --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 2894}}}, doAtValue = {const = {val = "-2.5s"}}}, {action = {castSpell = {spellId = {spellId = 403}}}, doAtValue = {const = {val = "-1s"}}}},
+        --aplActions = {{action = {castSpell = {spellId = {spellId = 73680}}}}, {action = {autocastOtherCooldowns = {}}}, {action = {condition = {cmp = {op = "OpGt", lhs = {dotRemainingTime = {spellId = {spellId = 8050}}}, rhs = {spellCastTime = {spellId = {spellId = 51505}}}}}, castSpell = {spellId = {spellId = 51505}}}}, {action = {multidot = {spellId = {spellId = 8050}, maxDots = 1, maxOverlap = {const = {val = "2s"}}}}}, {action = {condition = {and = {vals = {{not = {val = {auraIsActive = {auraId = {spellId = 2894}}}}}, {not = {val = {dotIsActive = {spellId = {spellId = 3599}}}}}}}}, castSpell = {spellId = {spellId = 3599}}}}, {action = {condition = {cmp = {op = "OpEq", lhs = {auraNumStacks = {auraId = {spellId = 324}}}, rhs = {const = {val = "7"}}}}, castSpell = {spellId = {spellId = 8042}}}}, {action = {castSpell = {spellId = {spellId = 403}}}}},
 
         -- Tracked IDs for optimization
-        spells = {324, 421, 2894, 3599, 8042, 8050, 51505, 114074},
+        spells = {324, 403, 2894, 3599, 8042, 8050, 51505, 73680},
         items = {},
         auras = {},
         runes = {},
@@ -207,9 +251,11 @@ ns.AddRotationToDefaults(defaults,
         -- Optional metadata
         glyphs = {41539},
         lastModified = "06/19/2025",
-        author = "APLParser"
+        author = "Fonsas"
     }
-)
+) 
+
+
 -- CLASSIC ROTATION CONFIG START
 -- CLASSIC ROTATION CONFIG END
 

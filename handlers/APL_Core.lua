@@ -253,9 +253,12 @@ function NAG:Cast(id, toleranceOrPosition, position)
     
     -- Delay position restoration to allow visual update to complete
     if overridePosition then
+        local timerName = "restorePosition_" .. id
+        -- Cancel any existing timer for this spell before creating a new one
+        Timer:Cancel(Timer.Categories.UI_NOTIFICATION, timerName)
         Timer:Create(
             Timer.Categories.UI_NOTIFICATION,
-            "restorePosition_" .. id,
+            timerName,
             restorePosition,
             0.1, -- Small delay to let UpdateIcons process
             false -- Don't repeat

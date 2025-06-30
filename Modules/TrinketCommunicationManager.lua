@@ -12,7 +12,7 @@ local AceSerializer = LibStub("AceSerializer-3.0")
 local GetItemInfo = ns.GetItemInfoUnified
 -- Constants
 local ADDON_PREFIX = "NAGTrinket"
-local REQUEST_TIMEOUT = 3.0  -- Wait 2 seconds for responses
+local REQUEST_TIMEOUT = 3.0  -- Wait 3 seconds for responses
 local MESSAGE_TYPES = {
     REQUEST = "REQUEST",
     RESPONSE = "RESPONSE"
@@ -35,10 +35,11 @@ local defaults = {
 local TrinketCommunicationManager = NAG:CreateModule("TrinketCommunicationManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     defaultState = {
-        pendingRequests = {}, -- Store pending trinket requests
+        pendingRequests = {}, -- Store pending trinket requests with request IDs
         responseData = {},    -- Store received responses
         pendingValidations = {}, -- Store validations pending due to combat
-        activeWindow = nil -- Track if any registration window is currently open
+        activeWindow = nil, -- Track if any registration window is currently open
+        nextRequestId = 1 -- Counter for generating unique request IDs
     },
     -- Event handlers
     eventHandlers = {
@@ -63,6 +64,14 @@ function TrinketCommunicationManager:ModuleDisable()
     wipe(self.state.pendingRequests)
     wipe(self.state.responseData)
     self.state.activeWindow = nil
+end
+
+--- Generate a unique request ID
+--- @return string A unique request ID
+function TrinketCommunicationManager:GenerateRequestId()
+    local requestId = string.format("%s_%d_%d", UnitName("player"), GetTime(), self.state.nextRequestId)
+    self.state.nextRequestId = self.state.nextRequestId + 1
+    return requestId
 end
 
 --- Request trinket data from other players
@@ -93,17 +102,21 @@ function TrinketCommunicationManager:RequestTrinketData(itemId)
         end
     end
 
-    local message = string.format("%s:%d", MESSAGE_TYPES.REQUEST, itemId)
+    -- Generate a unique request ID for this request
+    local requestId = self:GenerateRequestId()
+    local message = string.format("%s:%d:%s", MESSAGE_TYPES.REQUEST, itemId, requestId)
     local requestTime = GetTime()
 
-    -- Store the request
+    -- Store the request with the request ID
     self.state.pendingRequests[itemId] = {
+        requestId = requestId,
         time = requestTime,
-        responses = {}
+        responses = {},
+        userInitiated = true -- Mark this as a user-initiated request
     }
 
     -- Debug print for request start
-    self:Debug("Starting trinket data request for itemId: %d at time: %.2f", itemId, requestTime)
+    self:Debug("Starting trinket data request for itemId: %d with requestId: %s at time: %.2f", itemId, requestId, requestTime)
 
     -- Clear any old response data
     self.state.responseData[itemId] = nil
@@ -199,10 +212,11 @@ function TrinketCommunicationManager:CHAT_MSG_ADDON(event, prefix, message, chan
         end
 
         -- Handle trinket data request
-        local itemId = tonumber(rest)
+        local itemId, requestId = strsplit(":", rest, 2)
+        itemId = tonumber(itemId)
         if not itemId then return end
 
-        self:Debug("Received trinket request from %s for itemId: %d", sender, itemId)
+        self:Debug("Received trinket request from %s for itemId: %d with requestId: %s", sender, itemId, requestId or "none")
 
         -- Get required modules
         local TrinketRegistrationManager = NAG:GetModule("TrinketRegistrationManager")
@@ -253,19 +267,19 @@ function TrinketCommunicationManager:CHAT_MSG_ADDON(event, prefix, message, chan
         end
 
         if trinketData and self:GetChar().shareRegistrations then
-            -- Send response with our data
-            self:SendResponse(itemId, trinketData, channel)
+            -- Send response with our data directly to the requester
+            self:SendResponse(itemId, trinketData, sender, requestId)
         else
             self:Debug("No data available or sharing disabled for itemId: %d", itemId)
         end
 
     elseif messageType == MESSAGE_TYPES.RESPONSE then
         -- Handle trinket data response
-        local itemId, serializedData = strsplit(":", rest, 2)
+        local itemId, requestId, serializedData = strsplit(":", rest, 3)
         itemId = tonumber(itemId)
         if not itemId then return end
 
-        self:Debug("Received trinket data response from %s for itemId: %d", sender, itemId)
+        self:Debug("Received trinket data response from %s for itemId: %d with requestId: %s", sender, itemId, requestId or "none")
 
         -- Parse the trinket data from the response
         self:Debug("Attempting to deserialize data: %s", serializedData)
@@ -276,9 +290,16 @@ function TrinketCommunicationManager:CHAT_MSG_ADDON(event, prefix, message, chan
         end
         self:Debug("Successfully deserialized trinket data: buffId=%d, duration=%.1f", trinketData.buffId, trinketData.duration)
 
-        -- Check if we already have a response for this trinket
-        if self.state.responseData[itemId] then
-            self:Debug("Already have a response for itemId: %d, ignoring additional response", itemId)
+        -- Check if we have a pending request for this itemId and requestId
+        local request = self.state.pendingRequests[itemId]
+        if not request or request.requestId ~= requestId then
+            self:Debug("No matching request found for itemId: %d with requestId: %s, ignoring response", itemId, requestId or "none")
+            return
+        end
+
+        -- Check if we already have a response for this request
+        if request.responses[sender] then
+            self:Debug("Already have a response from %s for this request, ignoring duplicate", sender)
             return
         end
 
@@ -291,32 +312,34 @@ function TrinketCommunicationManager:CHAT_MSG_ADDON(event, prefix, message, chan
             type = trinketData.type,
             buffType = trinketData.buffType
         }
-        self:Debug("Stored first response data for itemId: %d from %s", itemId, sender)
+        self:Debug("Stored response data for itemId: %d from %s", itemId, sender)
 
-        -- Check if this was a pending request
-        local request = self.state.pendingRequests[itemId]
-        if request then
-            request.responses[sender] = trinketData
-            self:Debug("Added response to pending request for itemId: %d", itemId)
-        end
+        -- Add response to pending request
+        request.responses[sender] = trinketData
+        self:Debug("Added response to pending request for itemId: %d", itemId)
 
-        -- Don't show validation window if in combat
-        if UnitAffectingCombat("player") then
-            self:Debug("Delaying trinket validation window - player is in combat")
-            -- Store the data to show after combat
-            if not self.state.pendingValidations then
-                self.state.pendingValidations = {}
+        -- Only show validation window if this was a user-initiated request
+        if request.userInitiated then
+            -- Don't show validation window if in combat
+            if UnitAffectingCombat("player") then
+                self:Debug("Delaying trinket validation window - player is in combat")
+                -- Store the data to show after combat
+                if not self.state.pendingValidations then
+                    self.state.pendingValidations = {}
+                end
+                self.state.pendingValidations[itemId] = {
+                    trinketData = trinketData,
+                    sender = sender,
+                    time = GetTime()
+                }
+                return
             end
-            self.state.pendingValidations[itemId] = {
-                trinketData = trinketData,
-                sender = sender,
-                time = GetTime()
-            }
-            return
-        end
 
-        -- Show validation window with the received data
-        self:ShowValidationWindow(itemId, trinketData, sender)
+            -- Show validation window with the received data
+            self:ShowValidationWindow(itemId, trinketData, sender)
+        else
+            self:Debug("Response received for non-user-initiated request, not showing validation window")
+        end
     end
 end
 
@@ -623,12 +646,14 @@ function TrinketCommunicationManager:DeserializeTrinketData(serializedData)
     return data
 end
 
---- Send a response with trinket data
+--- Send a response with trinket data directly to a specific player
 --- @param itemId number The ID of the trinket
 --- @param data table The trinket data to send
---- @param channel string The channel to send the response on
-function TrinketCommunicationManager:SendResponse(itemId, data, channel)
-    if not (itemId and data) then return false end
+--- @param targetPlayer string The player to send the response to
+--- @param requestId string The request ID to include in the response
+--- @return boolean Whether the response was sent successfully
+function TrinketCommunicationManager:SendResponse(itemId, data, targetPlayer, requestId)
+    if not (itemId and data and targetPlayer) then return false end
 
     -- Format the data for transmission
     local responseData = {
@@ -642,7 +667,7 @@ function TrinketCommunicationManager:SendResponse(itemId, data, channel)
     }
 
     -- Debug print the response data
-    self:Debug("Sending trinket data:")
+    self:Debug("Sending trinket data to %s:", targetPlayer)
     self:Debug("  Type: %s", responseData.type)
     self:Debug("  BuffID: %d", responseData.buffId)
     self:Debug("  Duration: %.1f seconds", responseData.duration)
@@ -665,16 +690,19 @@ function TrinketCommunicationManager:SendResponse(itemId, data, channel)
         return false
     end
 
-    -- Format the response message
-    local message = string.format("%s:%d:%s",
+    -- Format the response message with request ID
+    local message = string.format("%s:%d:%s:%s",
         MESSAGE_TYPES.RESPONSE,
         itemId,
+        requestId or "",
         serializedData
     )
 
-    -- Send the response through the same channel
-    self:Debug("Sending response for itemId: %d through channel: %s", itemId, channel)
-    C_ChatInfo.SendAddonMessage(ADDON_PREFIX, message, channel)
+    -- Send the response directly to the target player using whisper
+    self:Debug("Sending response for itemId: %d to %s with requestId: %s", itemId, targetPlayer, requestId or "none")
+    
+    -- Use whisper to send directly to the player
+    C_ChatInfo.SendAddonMessage(ADDON_PREFIX, message, "WHISPER", targetPlayer)
     return true
 end
 

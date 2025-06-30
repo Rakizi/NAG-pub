@@ -941,6 +941,18 @@ if L then
         L["editModeDesc"] = "Aktivieren, um den Hintergrund zu verschieben und zu skalieren. Mit dem Mausrad skalieren."
         L["lockBG"] = "An Hauptfenster anheften"
         L["lockBGDesc"] = "Wenn angeheftet, folgt der Hintergrund der Position, Skalierung und Sichtbarkeit des NAG-Hauptfensters. Zum unabhängigen Bearbeiten lösen."
+        L["stateManager"] = "Status-Manager"
+        L["stateManagerDesc"] = "Verwalte Spielstatus und Bedingungen"
+        L["elementalShaman"] = "Elementar-Schamane"
+        L["enableElementalShamanAutoRotation"] = "Automatische Rotationsumschaltung aktivieren"
+        L["enableElementalShamanAutoRotationDesc"] = "Automatisch zwischen Einzelziel- und AoE-Rotationen basierend auf der Anzahl der Ziele wechseln (3+ Ziele = AoE-Rotation)"
+        L["elementalShamanAOEThreshold"] = "AoE-Schwelle"
+        L["elementalShamanAOEThresholdDesc"] = "Anzahl der Ziele, die erforderlich sind, um die AoE-Rotation auszulösen"
+        L["frostDK"] = "Frost-Todesritter"
+        L["enableFrostDKAutoRotation"] = "Automatische Rotationsumschaltung aktivieren"
+        L["enableFrostDKAutoRotationDesc"] = "Automatisch zwischen Zweihand- und Doppelhand-Rotationen basierend auf ausgerüsteten Waffen wechseln"
+        L["autoRotationSwitching"] = "Automatische Rotationsumschaltung"
+        L["autoRotationSwitchingDesc"] = "Automatisch Rotationen für Elementar-Schamanen und Frost-Todesritter basierend auf Zielen/Waffen wechseln"
     end
 
     do -- non-sorted messages

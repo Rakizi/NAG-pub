@@ -161,6 +161,11 @@ local defaults = {
     global = {
         debug = false,
     },
+    char = {
+        enableElementalShamanAutoRotation = true, -- Enable automatic rotation switching for Elemental Shamans
+        elementalShamanAOEThreshold = 3, -- Number of targets to trigger AOE rotation
+        enableFrostDKAutoRotation = true, -- Enable automatic rotation switching for Frost DKs
+    },
 }
 
 
@@ -251,9 +256,17 @@ end
 function StateManager:ModuleEnable()
     -- Initialize state
     self:ResetState()
+    
+    -- Start periodic checks for Elemental Shaman rotation switching
+    self:StartElementalShamanRotationCheck()
 end
 
 function StateManager:ModuleDisable()
+    -- Cancel the Elemental Shaman rotation check timer
+    if self.elementalShamanTimer then
+        self:CancelTimer(self.elementalShamanTimer)
+        self.elementalShamanTimer = nil
+    end
 end
 
 -- Core state update methods
@@ -990,6 +1003,60 @@ do -- ~~~~~~~~~~ Talent Management
         -- Get spell ID for current rank from talent data
         return talent["rank" .. currentRank]
     end
+
+    --- Checks and switches Elemental Shaman rotation based on target count
+    --- @param self StateManager
+    function StateManager:CheckElementalShamanRotationSwitch()
+        -- Check if automatic rotation switching is enabled
+        if not self:GetChar().enableElementalShamanAutoRotation then
+            return
+        end
+        
+        if not NAG.Class then return end
+        
+        local classModule = NAG.Class
+        local currentSpec = SpecializationCompat:GetActiveSpecialization()
+        if not currentSpec then return end
+        
+        local specID = SpecializationCompat:GetSpecializationInfo(currentSpec)
+        if not specID then return end
+        
+        -- Get current rotation selection
+        local currentRotation, selectedRotation = classModule:GetCurrentRotation()
+        if not currentRotation then return end
+        
+        -- Get number of targets (using a reasonable range for AOE detection)
+        local numTargets = NAG:NumberTargets(10) or 0
+        
+        -- Get the configurable threshold for AOE detection
+        local aoeThreshold = self:GetChar().elementalShamanAOEThreshold or 3
+        
+        -- Determine which rotation to use based on target count
+        local targetRotation = nil
+        if numTargets > aoeThreshold then
+            -- AOE situation - use AOE rotation
+            targetRotation = "AOE - Ele"
+        else
+            -- Single target situation - use single target rotation
+            targetRotation = "Single Target - Ele"
+        end
+        
+        -- Only switch if the target rotation is different from current
+        if selectedRotation ~= targetRotation then
+            self:Debug(format("Elemental Shaman: Switching from '%s' to '%s' (targets: %d, threshold: %d)", 
+                selectedRotation or "Unknown", targetRotation, numTargets, aoeThreshold))
+            
+            -- Select the appropriate rotation
+            local success = classModule:SelectRotation(specID, targetRotation)
+            if success then
+                -- Refresh the rotation setup
+                classModule:SetupRotation()
+                self:Debug(format("Elemental Shaman: Successfully switched to '%s' rotation", targetRotation))
+            else
+                self:Warn(format("Elemental Shaman: Failed to switch to '%s' rotation", targetRotation))
+            end
+        end
+    end
 end
 
 do -- ~~~~~~~~~~ Event Handlers
@@ -1023,6 +1090,18 @@ do -- ~~~~~~~~~~ Event Handlers
         if self.state.player.classInfo.name == "ROGUE" then
             --NAG:UpdateComboPointsAndTarget()
         end
+
+        -- Handle Elemental Shaman automatic rotation switching based on target count
+        if UnitClassBase('player') == "SHAMAN" then
+            local currentSpec = SpecializationCompat:GetActiveSpecialization()
+            if currentSpec then
+                local specID = SpecializationCompat:GetSpecializationInfo(currentSpec)
+                -- Check if we're in Elemental spec (ID 262 in MoP)
+                if specID == 262 and self:GetChar().enableElementalShamanAutoRotation then
+                    self:CheckElementalShamanRotationSwitch()
+                end
+            end
+        end
     end
 
     function StateManager:PLAYER_EQUIPMENT_CHANGED(event, equipmentSlot, hasCurrent)
@@ -1041,9 +1120,11 @@ do -- ~~~~~~~~~~ Event Handlers
             self:UpdateEquipmentState()
         end
 
-        --TODO: Maybe we dont want to force select rotation here?
         -- Handle Death Knight Frost spec weapon configuration detection
         if equipmentSlot == 17 and UnitClassBase('player') == "DEATHKNIGHT" then
+            if not self:GetChar().enableFrostDKAutoRotation then
+                return
+            end
             local currentSpec = SpecializationCompat:GetActiveSpecialization()
             if currentSpec then
                 local specID = SpecializationCompat:GetSpecializationInfo(currentSpec)
@@ -1051,15 +1132,14 @@ do -- ~~~~~~~~~~ Event Handlers
                 if specID == 251 then
                     local offhandItem = GetInventoryItemLink("player", 17)
                     local classModule = NAG.Class
-
                     if offhandItem then
                         -- Dual-wielding - use MasterFrost
-                        classModule:SelectRotation(specID, "Death Knight MasterFrost")
-                        self:Debug("Equipped offhand detected - switching to MasterFrost rotation")
+                        classModule:SelectRotation(specID, "Masterfrost by Darkfrog")
+                        self:Debug("Equipped offhand detected - switching to Masterfrost by Darkfrog rotation")
                     else
                         -- 2H weapon - use Frost 2H
-                        classModule:SelectRotation(specID, "Death Knight Frost 2H")
-                        self:Debug("No offhand detected - switching to 2H Frost rotation")
+                        classModule:SelectRotation(specID, "Frost 2H by Darkfrog")
+                        self:Debug("No offhand detected - switching to Frost 2H by Darkfrog rotation")
                     end
                     -- Refresh the rotation setup
                     classModule:SetupRotation()
@@ -1188,5 +1268,74 @@ do -- ~~~~~~~~~~ Event Handlers
     end
 end
 
+--- Starts periodic checking for Elemental Shaman rotation switching
+--- @param self StateManager
+function StateManager:StartElementalShamanRotationCheck()
+    -- No longer needed: do not start a timer
+    if self.elementalShamanTimer then
+        self:CancelTimer(self.elementalShamanTimer)
+        self.elementalShamanTimer = nil
+    end
+end
+
+--- Get options for the StateManager module
+--- @return table Options table for AceConfig
+function StateManager:GetOptions()
+    return {
+        type = "group",
+        name = L["stateManager"] or "State Manager",
+        order = 20,
+        args = {
+            elementalShaman = {
+                type = "group",
+                name = L["elementalShaman"] or "Elemental Shaman",
+                order = 1,
+                args = {
+                    enableElementalShamanAutoRotation = {
+                        type = "toggle",
+                        name = L["enableElementalShamanAutoRotation"] or "Enable Automatic Rotation Switching",
+                        desc = L["enableElementalShamanAutoRotationDesc"] or "Automatically switch between Single Target and AOE rotations based on the number of targets (3+ targets = AOE rotation)",
+                        order = 1,
+                        get = function() return self:GetChar().enableElementalShamanAutoRotation end,
+                        set = function(_, value)
+                            self:GetChar().enableElementalShamanAutoRotation = value
+                        end
+                    },
+                    elementalShamanAOEThreshold = {
+                        type = "range",
+                        name = L["elementalShamanAOEThreshold"] or "AOE Threshold",
+                        desc = L["elementalShamanAOEThresholdDesc"] or "Number of targets required to trigger AOE rotation",
+                        order = 2,
+                        min = 2,
+                        max = 6,
+                        step = 1,
+                        get = function() return self:GetChar().elementalShamanAOEThreshold end,
+                        set = function(_, value)
+                            self:GetChar().elementalShamanAOEThreshold = value
+                        end,
+                        disabled = function() return not self:GetChar().enableElementalShamanAutoRotation end
+                    }
+                }
+            },
+            frostDK = {
+                type = "group",
+                name = L["frostDK"] or "Frost Death Knight",
+                order = 2,
+                args = {
+                    enableFrostDKAutoRotation = {
+                        type = "toggle",
+                        name = L["enableFrostDKAutoRotation"] or "Enable Automatic Rotation Switching",
+                        desc = L["enableFrostDKAutoRotationDesc"] or "Automatically switch between Dual Wield and 2H weapon rotations based on equipped weapons",
+                        order = 1,
+                        get = function() return self:GetChar().enableFrostDKAutoRotation end,
+                        set = function(_, value)
+                            self:GetChar().enableFrostDKAutoRotation = value
+                        end
+                    }
+                }
+            }
+        }
+    }
+end
 
 ns.StateManager = StateManager

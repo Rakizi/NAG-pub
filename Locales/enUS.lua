@@ -630,6 +630,16 @@ if L then
         L["stackFontSizeDesc"] = "Set the size of stack count text"
         L["stateManager"] = "State Manager"
         L["stateManagerDesc"] = "Manage game state and conditions"
+        L["elementalShaman"] = "Elemental Shaman"
+        L["enableElementalShamanAutoRotation"] = "Enable Automatic Rotation Switching"
+        L["enableElementalShamanAutoRotationDesc"] = "Automatically switch between Single Target and AOE rotations based on the number of targets (3+ targets = AOE rotation)"
+        L["elementalShamanAOEThreshold"] = "AOE Threshold"
+        L["elementalShamanAOEThresholdDesc"] = "Number of targets required to trigger AOE rotation"
+        L["frostDK"] = "Frost Death Knight"
+        L["enableFrostDKAutoRotation"] = "Enable Automatic Rotation Switching"
+        L["enableFrostDKAutoRotationDesc"] = "Automatically switch between Dual Wield and 2H weapon rotations based on equipped weapons"
+        L["autoRotationSwitching"] = "Automatic Rotation Switching"
+        L["autoRotationSwitchingDesc"] = "Automatically switch rotations for Elemental Shamans and Frost DKs based on targets/weapons"
         L["suggestionSettings"] = "Suggestion Settings"
         L["suggestionSettingsDesc"] = "Configure which abilities should be suggested during combat"
         L["suggestions"] = "Suggestions"
@@ -724,6 +734,13 @@ if L then
         -- OverlayManager
         L["overlayManager"] = "Overlay Manager"
         L["overlayTypes"] = "Overlay Types"
+        L["poolingOverlay"] = "Pooling Overlay"
+        L["enablePoolingOverlay"] = "Enable Pooling Overlay"
+        L["enablePoolingOverlayDesc"] = "Show visual overlay when energy pooling"
+        L["testPooling"] = "Test Pooling"
+        L["testPoolingDesc"] = "Show pooling overlay for 3 seconds to test appearance"
+        L["text"] = "Text"
+        L["textDesc"] = "Text to display on the overlay"
         L["texture"] = "Texture"
         L["textureDesc"] =
         "Path to the texture file or @atlas-name for WoW's built-in textures (e.g. @transmog-icon-remove)"
@@ -755,6 +772,13 @@ if L then
         L["pulseStrength"] = "Pulse Strength"
         L["pulseSpeed"] = "Pulse Speed"
         L["resetToDefault"] = "Reset to Default"
+        L["font"] = "Font"
+        L["fontSize"] = "Font Size"
+        L["fontFlags"] = "Font Flags"
+        L["fontColor"] = "Font Color"
+        L["outline"] = "Outline"
+        L["thickoutline"] = "Thick Outline"
+        L["monochrome"] = "Monochrome"
 
         -- Overlay Types
         L["cancel"] = "Cancel"
@@ -762,6 +786,7 @@ if L then
         L["multidot"] = "Multi-DoT"
         L["startattack"] = "Start Attack"
         L["stopattack"] = "Stop Attack"
+        L["tab"] = "Tab Target"
 
         -- Reset Options
         L["reset"] = "Reset"
@@ -1122,6 +1147,16 @@ if L then
         L["hideSelector"] = "Hide Selector"
         L["icon"] = "Icon"
         L["iconSettings"] = "Icon Settings"
+        L["elementalShaman"] = "Elemental Shaman"
+        L["enableElementalShamanAutoRotation"] = "Enable Automatic Rotation Switching"
+        L["enableElementalShamanAutoRotationDesc"] = "Automatically switch between Single Target and AOE rotations based on the number of targets (3+ targets = AOE rotation)"
+        L["elementalShamanAOEThreshold"] = "AOE Threshold"
+        L["elementalShamanAOEThresholdDesc"] = "Number of targets required to trigger AOE rotation"
+        L["frostDK"] = "Frost Death Knight"
+        L["enableFrostDKAutoRotation"] = "Enable Automatic Rotation Switching"
+        L["enableFrostDKAutoRotationDesc"] = "Automatically switch between Dual Wield and 2H weapon rotations based on equipped weapons"
+        L["autoRotationSwitching"] = "Automatic Rotation Switching"
+        L["autoRotationSwitchingDesc"] = "Automatically switch rotations for Elemental Shamans and Frost DKs based on targets/weapons"
     end
 
     do -- non-sorted messages

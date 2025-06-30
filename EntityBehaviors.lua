@@ -293,7 +293,7 @@ ns.EntityBehaviors = {
                     NAG:Pooling()
                     return true
                 elseif NAG.isPooling then
-                    NAG.isPooling = false
+                    NAG:StopPooling()
                 end
                 if not NAG:HasComboPoints(spellId) then
                     return false
