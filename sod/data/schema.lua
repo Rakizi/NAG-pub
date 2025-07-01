@@ -1,4 +1,4 @@
--- Generated schema for sod on 2025-06-29 10:19:23
+-- Generated schema for sod on 2025-07-01 02:18:35
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['sod'] = {
@@ -19985,6 +19985,17 @@ ns.protoSchema['sod'] = {
           },
           label = "Coup"
         },
+        ApplyRegicideWarriorEffect_Regicide = {
+          sourceFile = "extern/wowsims-sod/sim/warrior/items.go",
+          registrationType = "RegisterAura",
+          functionName = "ApplyRegicideWarriorEffect",
+          spellId = 1231436,
+          auraDuration = {
+            raw = "time.Second * 10",
+            seconds = 10
+          },
+          label = "Regicide"
+        },
         ApplyMercyWarriorEffect_MercybyFire = {
           sourceFile = "extern/wowsims-sod/sim/warrior/items.go",
           registrationType = "RegisterAura",
@@ -24674,8 +24685,8 @@ ns.protoSchema['sod'] = {
     go_diagnostic = {
       files_scanned = 563,
       functions_scanned = 3091,
-      registrations_found = 888,
-      registrations_parsed = 493,
+      registrations_found = 889,
+      registrations_parsed = 494,
       registrations_missed = {
         {
           file = "sim/rogue/sinister_strike.go",

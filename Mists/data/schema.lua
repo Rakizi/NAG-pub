@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-06-29 10:19:19
+-- Generated schema for mop on 2025-07-01 02:18:32
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -1638,6 +1638,11 @@ ns.protoSchema['mists'] = {
             type = "int32",
             label = "optional"
           },
+          disabled_at_start = {
+            id = 101,
+            type = "bool",
+            label = "optional"
+          },
           target_inputs = {
             id = 18,
             type = "message",
@@ -1664,6 +1669,7 @@ ns.protoSchema['mists'] = {
           "spell_school",
           "tank_index",
           "second_tank_index",
+          "disabled_at_start",
           "target_inputs"
         }
       },
@@ -15096,14 +15102,11 @@ ns.protoSchema['mists'] = {
       },
       RaidFilterOption = {
         RaidUnknown = 0,
-        RaidIcecrownCitadel = 1,
-        RaidRubySanctum = 2,
-        RaidBlackwingDescent = 3,
-        RaidTheBastionOfTwilight = 4,
-        RaidBaradinHold = 5,
-        RaidThroneOfTheFourWinds = 6,
-        RaidFirelands = 7,
-        RaidDragonSoul = 8
+        RaidMogushanVaults = 1,
+        RaidHeartOfFear = 2,
+        RaidTerraceOfEndlessSpring = 3,
+        RaidThroneOfThunder = 4,
+        RaidSiegeOfOrgrimmar = 5
       },
       StatCapType = {
         TypeUnknown = 0,
@@ -16639,7 +16642,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Second * 30",
             seconds = 30
           },
-          Flags = "core.SpellFlagAoE | core.SpellFlagAPL",
+          Flags = "core.SpellFlagAoE | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellDeathAndDecay",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskEmpty",
@@ -16660,7 +16663,7 @@ ns.protoSchema['mists'] = {
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellPlagueStrike",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -16715,7 +16718,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Minute * 5",
             seconds = 300
           },
-          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagNoOnCastComplete | core.SpellFlagReadinessTrinket"
+          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagNoOnCastComplete | core.SpellFlagReadinessTrinket | core.SpellFlagEncounterOnly"
         },
         registerPestilence_1 = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/pestilence.go",
@@ -16727,7 +16730,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagAPL",
+          Flags = "core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellPestilence",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskSpellDamage",
@@ -16809,7 +16812,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Minute * 3",
             seconds = 180
           },
-          Flags = "core.SpellFlagNoOnCastComplete | core.SpellFlagAPL | core.SpellFlagReadinessTrinket",
+          Flags = "core.SpellFlagNoOnCastComplete | core.SpellFlagAPL | core.SpellFlagReadinessTrinket | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellIceboundFortitude",
           RelatedSelfBuff = "iceBoundFortituteAura"
         },
@@ -16842,7 +16845,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellDeathStrike",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -16944,7 +16947,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagAPL",
+          Flags = "core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellIcyTouch",
           SpellSchool = "core.SpellSchoolFrost",
           ProcMask = "core.ProcMaskSpellDamage",
@@ -17069,25 +17072,6 @@ ns.protoSchema['mists'] = {
           CritMultiplier = "dk.DefaultCritMultiplier()",
           ThreatMultiplier = "1"
         },
-        registerDeathCoilHeal_1 = {
-          sourceFile = "extern/wowsims-mop/sim/death_knight/death_coil.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDeathCoilHeal",
-          spellId = 47541,
-          tag = 2,
-          cast = [[{
-			DefaultCast: core.Cast{
-				GCD: core.GCDMin,
-			},
-		}]],
-          Flags = "core.SpellFlagAPL | core.SpellFlagPrepullOnly | core.SpellFlagNoMetrics | core.SpellFlagHelpful",
-          ClassSpellMask = "DeathKnightSpellDeathCoilHeal",
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskSpellHealing",
-          DamageMultiplier = "3.5",
-          CritMultiplier = "dk.DefaultCritMultiplier()",
-          ThreatMultiplier = "1.0"
-        },
         registerDrwDeathCoil_1 = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/death_coil.go",
           registrationType = "RegisterSpell",
@@ -17101,7 +17085,7 @@ ns.protoSchema['mists'] = {
           registrationType = "RegisterSpell",
           functionName = "registerOutbreak",
           spellId = 77575,
-          Flags = "core.SpellFlagAPL | core.SpellFlagReadinessTrinket",
+          Flags = "core.SpellFlagAPL | core.SpellFlagReadinessTrinket | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellOutbreak",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskSpellDamage"
@@ -17180,7 +17164,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagAoE | core.SpellFlagAPL",
+          Flags = "core.SpellFlagAoE | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellBloodBoil",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskSpellDamage",
@@ -17262,7 +17246,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Second * 6",
             seconds = 6
           },
-          Flags = "core.SpellFlagAPL | core.SpellFlagMeleeMetrics",
+          Flags = "core.SpellFlagAPL | core.SpellFlagMeleeMetrics | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellSoulReaper",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -17307,7 +17291,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Second * 25",
             seconds = 25
           },
-          Flags = "core.SpellFlagAPL",
+          Flags = "core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellPlagueLeech",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskEmpty"
@@ -17339,7 +17323,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Second * 90",
             seconds = 90
           },
-          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful",
+          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellUnholyBlight",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskEmpty",
@@ -17363,7 +17347,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Minute * 2",
             seconds = 120
           },
-          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful",
+          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellLichborne",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskEmpty",
@@ -17472,7 +17456,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Minute * 2",
             seconds = 120
           },
-          Flags = "core.SpellFlagAPL | core.SpellFlagNoOnCastComplete | core.SpellFlagHelpful",
+          Flags = "core.SpellFlagAPL | core.SpellFlagNoOnCastComplete | core.SpellFlagHelpful | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellDeathPact",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskSpellHealing",
@@ -17500,7 +17484,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagAPL",
+          Flags = "core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellDeathSiphon",
           SpellSchool = "core.SpellSchoolShadowFrost",
           ProcMask = "core.ProcMaskSpellDamage",
@@ -17549,7 +17533,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful",
+          Flags = "core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellConversion",
           SpellSchool = "core.SpellSchoolShadow",
           ProcMask = "core.ProcMaskEmpty",
@@ -17571,7 +17555,7 @@ ns.protoSchema['mists'] = {
           registrationType = "RegisterSpell",
           functionName = "registerBloodTap",
           spellId = 45529,
-          Flags = "core.SpellFlagAPL",
+          Flags = "core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "DeathKnightSpellBloodTap"
         },
         registerRunicEmpowerment_RunicEmpowerement = {
@@ -17622,7 +17606,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagAoE | core.SpellFlagAPL",
+          Flags = "core.SpellFlagAoE | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellHowlingBlast",
           SpellSchool = "core.SpellSchoolFrost",
           ProcMask = "core.ProcMaskSpellDamage",
@@ -17702,7 +17686,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellFrostStrike",
           SpellSchool = "core.SpellSchoolFrost",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -17800,7 +17784,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellObliterate",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -18022,17 +18006,6 @@ ns.protoSchema['mists'] = {
           functionName = "registerHotfixPassive",
           label = "Hotfix Passive"
         },
-        registerDancingRuneWeapon_FlamingRuneWeapon = {
-          sourceFile = "extern/wowsims-mop/sim/death_knight/blood/dancing_rune_weapon.go",
-          registrationType = "RegisterAura",
-          functionName = "registerDancingRuneWeapon",
-          spellId = 101162,
-          auraDuration = {
-            raw = "duration",
-            seconds = nil
-          },
-          label = "Flaming Rune Weapon"
-        },
         registerDancingRuneWeapon_DancingRuneWeapon = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/blood/dancing_rune_weapon.go",
           registrationType = "RegisterAura",
@@ -18044,7 +18017,7 @@ ns.protoSchema['mists'] = {
           },
           label = "Dancing Rune Weapon"
         },
-        registerDancingRuneWeapon_3 = {
+        registerDancingRuneWeapon_2 = {
           sourceFile = "extern/wowsims-mop/sim/death_knight/blood/dancing_rune_weapon.go",
           registrationType = "RegisterSpell",
           functionName = "registerDancingRuneWeapon",
@@ -18190,7 +18163,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellHeartStrike",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -18239,7 +18212,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellRuneStrike",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMH",
@@ -18274,7 +18247,7 @@ ns.protoSchema['mists'] = {
             raw = "time.Second * 30",
             seconds = 30
           },
-          Flags = "core.SpellFlagAPL | core.SpellFlagNoOnCastComplete | core.SpellFlagHelpful",
+          Flags = "core.SpellFlagAPL | core.SpellFlagNoOnCastComplete | core.SpellFlagHelpful | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellRuneTap",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskSpellHealing",
@@ -18319,7 +18292,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellBloodStrike",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -18349,7 +18322,7 @@ ns.protoSchema['mists'] = {
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagAPL",
+          Flags = "core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellDarkTransformation",
           SpellSchool = "core.SpellSchoolShadow",
           IgnoreHaste = "true"
@@ -18379,7 +18352,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellFesteringStrike",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -18477,7 +18450,7 @@ ns.protoSchema['mists'] = {
 				GCD: core.GCDMin,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL",
+          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagEncounterOnly",
           ClassSpellMask = "death_knight.DeathKnightSpellScourgeStrike",
           SpellSchool = "core.SpellSchoolPhysical",
           ProcMask = "core.ProcMaskMeleeMHSpecial",
@@ -27178,7 +27151,7 @@ ns.protoSchema['mists'] = {
           cast = [[{
 			DefaultCast: core.Cast{
 				GCD:      core.GCDDefault,
-				CastTime: time.Millisecond * 2500,
+				CastTime: time.Millisecond * 2000,
 			},
 		}]],
           Flags = "core.SpellFlagAPL",
@@ -29415,10 +29388,10 @@ ns.protoSchema['mists'] = {
       }
     },
     go_diagnostic = {
-      files_scanned = 736,
-      functions_scanned = 3445,
-      registrations_found = 894,
-      registrations_parsed = 869,
+      files_scanned = 735,
+      functions_scanned = 3474,
+      registrations_found = 892,
+      registrations_parsed = 867,
       registrations_missed = {
         {
           file = "sim/death_knight/ghoul_pet.go",

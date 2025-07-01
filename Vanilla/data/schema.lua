@@ -1,4 +1,4 @@
--- Generated schema for classic on 2025-06-29 10:19:17
+-- Generated schema for classic on 2025-07-01 02:18:30
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['vanilla'] = {
