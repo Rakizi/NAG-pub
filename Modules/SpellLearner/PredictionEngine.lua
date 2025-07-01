@@ -32,6 +32,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
 local SpecializationCompat = ns.SpecializationCompat
 
+local GetSpellInfo = ns.GetSpellInfoUnified
+local GetSpecializationInfo = ns.GetSpecializationInfoUnified
+local GetSpecialization = ns.GetSpecializationUnified
+
 -- Constants
 local CONSTANTS = {
     PROCESSING_COOLDOWN = 300,  -- 5 minutes between processing

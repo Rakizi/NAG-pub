@@ -50,6 +50,7 @@ local DataManager = NAG:GetModule("DataManager")
 local GetSpellInfo = ns.GetSpellInfoUnified
 local GetItemInfo = ns.GetItemInfoUnified
 local GetItemSpell = ns.GetItemSpellUnified
+local UnitAura = ns.UnitAuraUnified
 
 -- Lua APIs (using WoW's optimized versions where available)
 local format = format or string.format -- WoW's optimized version if available

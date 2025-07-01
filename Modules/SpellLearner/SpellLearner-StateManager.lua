@@ -39,7 +39,7 @@ local TimerManager = NAG:GetModule("TimerManager", true) -- Make it optional
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
 local SpecializationCompat = ns.SpecializationCompat
-
+local GetNumSpellTabs = ns.GetNumSpellTabsUnified
 --Libs
 local LSM = LibStub("LibSharedMedia-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")

@@ -69,6 +69,7 @@ local C_SpecializationInfo = _G.C_SpecializationInfo
 local GetItemInfo = ns.GetItemInfoUnified
 local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
 local UnitClass = _G.UnitClass
+
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Module level variables
 local spellNames = {}

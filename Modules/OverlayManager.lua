@@ -15,6 +15,8 @@ local Timer = NAG:GetModule("TimerManager")
 local DataManager = NAG:GetModule("DataManager")
 local LSM = LibStub("LibSharedMedia-3.0")
 
+local GetSpellTexture = ns.GetSpellTextureUnified
+
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {

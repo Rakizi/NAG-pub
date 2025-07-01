@@ -70,11 +70,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local GetTime = GetTime
 local UnitStat = UnitStat
 local UnitAttackPower = UnitAttackPower
-local GetSpellInfo = GetSpellInfo
 local UnitName = UnitName
 local UnitExists = UnitExists
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
-
+local GetSpellInfo = ns.GetSpellInfoUnified
 -- Compatibility functions for stats that might not exist in all versions
 local function GetCritChanceCompat()
     if GetCritChance then

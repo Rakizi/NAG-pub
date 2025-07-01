@@ -25,6 +25,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local RC = LibStub("LibRangeCheck-3.0")
 
 -- WoW API (Unified wrappers)
+local GetItemCooldown = ns.GetItemCooldownUnified
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
 local UnitBuff = ns.UnitBuffUnified

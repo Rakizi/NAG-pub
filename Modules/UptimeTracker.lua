@@ -113,10 +113,9 @@ local GetSpellInfo = ns.GetSpellInfoUnified
 local GetItemInfo = ns.GetItemInfoUnified
 local C_Item_GetItemInfo = C_Item and C_Item.GetItemInfo
 local C_Item_GetItemSpell = C_Item and C_Item.GetItemSpell
-local UnitAura = UnitAura
+local UnitAura = ns.UnitAuraUnified
 local CreateFrame = CreateFrame
 local ReloadUI = ReloadUI
-
 -- Default settings
 local defaults = {
     profile = {

@@ -23,6 +23,8 @@ if playerClass ~= "SHAMAN" then
     -- Return early to prevent any code from executing for non-Shaman classes
     return
 end
+local GetSpecializationInfo = ns.GetSpecializationInfoUnified
+local GetSpellInfo = ns.GetSpellInfoUnified
 
 -- Initialize swing timer library
 local swingTimerLib = LibStub("LibClassicSwingTimerAPI")

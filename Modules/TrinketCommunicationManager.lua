@@ -9,7 +9,10 @@ local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceSerializer = LibStub("AceSerializer-3.0")
+
 local GetItemInfo = ns.GetItemInfoUnified
+local GetSpellInfo = ns.GetSpellInfoUnified
+
 -- Constants
 local ADDON_PREFIX = "NAGTrinket"
 local REQUEST_TIMEOUT = 3.0  -- Wait 3 seconds for responses

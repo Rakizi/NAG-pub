@@ -28,6 +28,8 @@ local strtrim = string.trim
 
 -- WoW API
 local GetAddOnMetadata = ns.GetAddOnMetadataUnified
+local GetSpellInfo = ns.GetSpellInfoUnified
+local GetSpecializationInfo = ns.GetSpecializationInfoUnified
 
 -- Table operations (WoW's optimized versions)
 local EXPERIMENTAL_FEATURES = true

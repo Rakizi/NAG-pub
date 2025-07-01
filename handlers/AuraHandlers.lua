@@ -40,6 +40,8 @@ local IsUsableItem = ns.IsUsableItemUnified
 local GetItemSpell = ns.GetItemSpellUnified
 local GetTalentInfo = ns.GetTalentInfoUnified
 local GetItemInfo = ns.GetItemInfoUnified
+local GetPlayerAuraBySpellID = ns.GetPlayerAuraBySpellIDUnified
+local UnitAura = ns.UnitAuraUnified
 
 -- Lua APIs (WoW optimized where available)
 -- Math operations (WoW optimized)

@@ -19,6 +19,8 @@ local _, ns = ...
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
+local GetSpellInfo = ns.GetSpellInfoUnified
+
 -- Lua APIs (WoW optimized versions)
 local format = format or string.format
 local floor = floor or math.floor
