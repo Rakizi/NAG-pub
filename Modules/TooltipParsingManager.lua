@@ -81,9 +81,6 @@ local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
-    global = {
-        debug = false,
-    },
 }
 
 --- @class TooltipParsingManager: ModuleBase

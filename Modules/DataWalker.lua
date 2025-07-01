@@ -41,11 +41,7 @@ local concat = table.concat
 local unpack = unpack
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+
 --- @class DataWalker: ModuleBase, AceConsole-3.0
 local DataWalker = NAG:CreateModule("DataWalker", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,

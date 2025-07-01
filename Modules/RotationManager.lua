@@ -86,9 +86,6 @@ end
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         framePosition = {
             point = "CENTER",

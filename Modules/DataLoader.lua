@@ -90,12 +90,6 @@ local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
-
 
 ---@class DataLoader : ModuleBase
 local DataLoader = NAG:CreateModule("DataLoader", defaults)

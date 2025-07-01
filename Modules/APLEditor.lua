@@ -51,11 +51,7 @@ local next = next
 local APL = nil      -- Will be set in ModuleInitialize
 local APLSchema = nil -- Will be set in ModuleInitialize
 
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+local defaults = {}
 
 --- @class APLEditor: ModuleBase
 local APLEditor = NAG:CreateModule("APLEditor", defaults, {

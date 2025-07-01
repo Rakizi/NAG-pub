@@ -75,7 +75,6 @@ end
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         testCasesPerRun = 5, -- Number of test cases to run per cycle
         randomizedTesting = false, -- Whether to use randomized input values
         recordResults = true, -- Whether to record test results

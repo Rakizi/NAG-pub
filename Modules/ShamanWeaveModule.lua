@@ -50,9 +50,6 @@ local ENHANCEMENT_SPEC_ID = 263 -- Enhancement spec ID for Cataclysm
 
 -- Default settings
 local defaults = {
-    global = {
-        debug = false,
-    },
     profile = {
         enabled = true,
         enablePetSync = true,

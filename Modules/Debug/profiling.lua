@@ -41,9 +41,6 @@ local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
-    global = {
-        debug = false,
-    },
 }
 
 ---@class ProfilingUtility : ModuleBase, AceTimer-3.0

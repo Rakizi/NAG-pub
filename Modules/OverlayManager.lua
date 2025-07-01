@@ -19,7 +19,6 @@ local LSM = LibStub("LibSharedMedia-3.0")
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         overlayConfigs = {
             cancel = {
                 texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_7",

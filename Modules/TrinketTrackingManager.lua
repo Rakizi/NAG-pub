@@ -46,9 +46,6 @@ local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
-    global = {
-        debug = false,
-    },
 }
 --- @class TrinketTrackingManager: ModuleBase, AceTimer-3.0
 local TrinketTrackingManager = NAG:CreateModule("TrinketTrackingManager", defaults, {

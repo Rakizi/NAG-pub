@@ -59,7 +59,6 @@ local DisplayMode = {
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         displayMode = DisplayMode.SIMPLE,
         updateInterval = 0.1,
         maxConditions = 100,

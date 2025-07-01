@@ -46,11 +46,7 @@ local next = next
 local APLSchema = nil -- Will be set in ModuleInitialize
 local Types = nil     -- Will be set in ModuleInitialize
 
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+local defaults = {}
 
 --- @class APL : AceModule
 APLModule = NAG:CreateModule("APL", defaults, {

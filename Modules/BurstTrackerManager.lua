@@ -59,9 +59,6 @@ local concat = table.concat
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         enabled = false,
         useRotationBurstTrackers = true,

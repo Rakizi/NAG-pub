@@ -48,17 +48,15 @@ local concat = table.concat
 -- Constants
 local DEBUG_LEVELS = {
     NONE = 0,
-    FATAL = 1,
-    ERROR = 2,
-    WARN = 3,
-    INFO = 4,
-    DEBUG = 5,
-    TRACE = 6,
+    ERROR = 1,
+    WARN = 2,
+    INFO = 3,
+    DEBUG = 4,
+    TRACE = 5,
 }
 
 local DEBUG_COLORS = {
-    [DEBUG_LEVELS.FATAL] = '|cffff0000', -- Red
-    [DEBUG_LEVELS.ERROR] = '|cffff4500', -- Orange Red
+    [DEBUG_LEVELS.ERROR] = '|cffff0000', -- Red
     [DEBUG_LEVELS.WARN]  = '|cffffff00', -- Yellow
     [DEBUG_LEVELS.INFO]  = '|cff00ff00', -- Green
     [DEBUG_LEVELS.DEBUG] = '|cff00bfff', -- Deep Sky Blue
@@ -155,8 +153,8 @@ end
 function DebugManager:ShouldLog(severity)
     if not isInitialized then return true end -- Allow all messages during early logging
 
-    -- Always show FATAL and ERROR regardless of debug settings
-    if severity == "FATAL" or severity == "ERROR" then
+    -- Always show ERROR regardless of debug settings
+    if severity == "ERROR" then
         return true
     end
 
@@ -293,15 +291,6 @@ function DebugManager:Error(msg, ...)
     self:Log(formatted, "ERROR", printTrace)
 end
 
-function DebugManager:Fatal(msg, ...)
-    local args = {...}
-    local printTrace = false
-    if #args > 0 and type(args[#args]) == "boolean" then
-        printTrace = table.remove(args)
-    end
-    local formatted = (#args > 0) and format(msg, unpack(args)) or tostring(msg)
-    self:Log(formatted, "FATAL", printTrace)
-end
 
 -- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (No explicit event handlers outside Ace3 lifecycle in this module)
@@ -358,12 +347,11 @@ do
         }
         local debugLevelValues = {
             [0] = "NONE",
-            [1] = "FATAL",
-            [2] = "ERROR",
-            [3] = "WARN",
-            [4] = "INFO",
-            [5] = "DEBUG",
-            [6] = "TRACE",
+            [1] = "ERROR",
+            [2] = "WARN",
+            [3] = "INFO",
+            [4] = "DEBUG",
+            [5] = "TRACE",
         }
         for lvl, lvlName in pairs(debugLevelValues) do
             options.args.toggleAll.args["all_lvl_" .. lvl] = {
@@ -512,7 +500,7 @@ SlashCmdList["NAGDEBUGLEVEL"] = function(msg)
     else
         print(format("Current debug level: %d", NAG:GetGlobal().debugLevel))
         print("Usage: /nagdebuglevel [0-6]")
-        print("0: None, 1: Fatal, 2: Error, 3: Warn, 4: Info, 5: Debug, 6: Trace")
+        print("0: None, 1: Error, 2: Warn, 3: Info, 4: Debug, 5: Trace")
     end
 end
 

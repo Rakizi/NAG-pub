@@ -58,11 +58,7 @@ local sort = table.sort
 local concat = table.concat
 
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+local defaults = {}
 
 --- @class SpellTrackingManager: ModuleBase, AceEvent-3.0, AceTimer-3.0
 local SpellTrackingManager = NAG:CreateModule("SpellTrackingManager", defaults, {

@@ -50,11 +50,7 @@ local concat = table.concat
 -- Core Modules
 local APL = nil -- Will be set in ModuleInitialize
 
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+local defaults = {}
 
 --- @class APLSchema: ModuleBase
 local APLSchema = NAG:CreateModule("APLSchema", defaults, {

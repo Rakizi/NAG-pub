@@ -90,9 +90,6 @@ local COLORS = {
 }
 
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         enabled = false,
         useRotationResourceBar = true,

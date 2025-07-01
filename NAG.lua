@@ -1031,8 +1031,8 @@ do --== DebugManager wrappers
         if lvl < 4 then return end
         DebugManager:Info(message, printTrace)
     end
-
     NAG.Info = NAG.PrintInfo
+    
     --- Prints a debug level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
@@ -1049,8 +1049,8 @@ do --== DebugManager wrappers
         if lvl < 5 then return end
         DebugManager:Debug(message, printTrace)
     end
-
     NAG.Debug = NAG.PrintDebug
+
     --- Prints a warning level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
@@ -1067,8 +1067,8 @@ do --== DebugManager wrappers
         if lvl < 3 then return end
         DebugManager:Warn(message, printTrace)
     end
-
     NAG.Warn = NAG.PrintWarn
+
     --- Prints an error level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
@@ -1087,19 +1087,7 @@ do --== DebugManager wrappers
     end
 
     NAG.Error = NAG.PrintError
-    --- Prints a fatal level message if debug level is sufficient
-    --- @param self NAG The NAG addon object
-    --- @param message string The message to print
-    --- @param printTrace? boolean If true, print stack trace
-    function NAG:PrintFatal(message, printTrace)
-        if not DebugManager then
-            DebugManager = self:GetModule("DebugManager")
-        end
-        -- Always log fatal
-        DebugManager:Fatal(message, printTrace)
-    end
 
-    NAG.Fatal = NAG.PrintFatal
     --- Prints a trace level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
@@ -1116,8 +1104,8 @@ do --== DebugManager wrappers
         if lvl < 6 then return end
         DebugManager:Trace(message, printTrace)
     end
-
     NAG.Trace = NAG.PrintTrace
+
 end
 
 do --== WeakAuras Integration API ==--

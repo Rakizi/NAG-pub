@@ -336,7 +336,7 @@ do --== Frame Creation Functions ==--
     function NAG:CreateIconFrame(name, parent, width, height, texCoord, point, relativeTo, relativePoint, offsetX,
                                  offsetY)
         if not name or not parent then
-            self:Fatal("CreateIconFrame: Missing required parameters name or parent")
+            self:Error("CreateIconFrame: Missing required parameters name or parent")
             return nil
         end
 

@@ -48,7 +48,6 @@ local concat = table.concat
 local defaults = {
     global = {
         -- Global settings shared across all characters
-        debug = false,
         enableKeybinds = true,
         enableKeybindsPrimaryOnly = false,
         keybindTextColor = { 1, 1, 1, 1 },

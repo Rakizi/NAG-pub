@@ -49,7 +49,6 @@ local concat = table.concat
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         filters = {
             excludeCommon = true,
             excludedEvents = {

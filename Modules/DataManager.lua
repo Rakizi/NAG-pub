@@ -68,12 +68,6 @@ local SpellProcessorV2
 local TierSetProcessorV2
 local ProcessorsV2 = {}
 
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
-
 --- @class DataManager: ModuleBase, AceConsole-3.0, AceTimer-3.0
 local DataManager = NAG:CreateModule("DataManager", defaults, {
     -- No defaults needed

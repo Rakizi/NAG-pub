@@ -45,7 +45,6 @@ local concat = table.concat
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         id = 603,             -- Default test ID (Curse of Doom)
         idType = "spell",     -- Default entity type
         printWidth = 40,      -- Width for formatting output

@@ -932,7 +932,7 @@ end
 function ModuleBase:GetDebugLevel()
     local lvl = self:GetGlobal() and self:GetGlobal().debugLevel
     if lvl == nil then
-        return ns.DEBUG_LEVELS.ERROR -- or FATAL if you prefer
+        return ns.DEBUG_LEVELS.ERROR
     end
     return lvl
 end
@@ -1033,23 +1033,6 @@ function ModuleBase:Error(msg, ...)
     end
 end
 
-function ModuleBase:Fatal(msg, ...)
-    if self:ShouldLog(ns.DEBUG_LEVELS.NONE + 1) then -- FATAL is always logged
-        local args = {...}
-        local printTrace = false
-        if #args > 0 and type(args[#args]) == "boolean" then
-            printTrace = table.remove(args)
-        end
-        local success, result = pcall(function()
-            return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
-        end)
-        if success then
-            NAG:Log("FATAL", result, printTrace)
-        else
-            NAG:Log("FATAL", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
-        end
-    end
-end
 
 --[[ ~~~~~~~~~~ EXAMPLE USAGE ~~~~~~~~~~
 -- Example of a typical core module that manages some game functionality

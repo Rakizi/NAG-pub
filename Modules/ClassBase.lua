@@ -163,7 +163,6 @@ local ClassBase = {
     optionsCategory = ns.MODULE_CATEGORIES.CLASS,
     optionsOrder = 100,
     childGroups = "tree",
-    debug = false
 }
 
 --- Creates a new class module that inherits from ModuleBase and ClassBase

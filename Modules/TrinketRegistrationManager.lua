@@ -84,7 +84,6 @@ local defaults = {
     },
     global = {
         -- Global settings
-        debug = false,
         customTrinkets = {}, -- User-registered trinket data
         registrationInProgress = nil, -- Current registration session
     },

@@ -158,9 +158,6 @@ local function CreateDefaultState()
 end
 
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         enableElementalShamanAutoRotation = true, -- Enable automatic rotation switching for Elemental Shamans
         elementalShamanAOEThreshold = 3, -- Number of targets to trigger AOE rotation

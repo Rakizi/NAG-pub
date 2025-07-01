@@ -20,9 +20,6 @@ local MESSAGE_TYPES = {
 
 -- Default settings
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         -- Character-specific settings
         enabled = true,
