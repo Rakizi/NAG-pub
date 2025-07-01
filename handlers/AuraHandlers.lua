@@ -22,6 +22,9 @@ local OverlayManager = NAG:GetModule("OverlayManager")
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
+--- @type SpellTrackingManager|AceModule|ModuleBase
+local SpellTrackingManager = NAG:GetModule("SpellTrackingManager")
+
 -- Libraries
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local RC = LibStub("LibRangeCheck-3.0")
@@ -238,8 +241,8 @@ function NAG:AuraRemainingICD(spellId, sourceUnit)
         return 0
     end
 
-    -- Get remaining ICD from SpellTracker (handles trinket procs)
-    return SpellTracker:GetICDInfo(spellId, sourceUnit) or 0
+    -- Get remaining ICD from SpellTrackingManager (handles trinket procs)
+    return SpellTrackingManager:GetICDInfo(spellId, sourceUnit) or 0
 end
 
 NAG.AuraInternalCooldown = NAG.AuraRemainingICD
