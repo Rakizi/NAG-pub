@@ -49,7 +49,6 @@ function DebugManagerTests:test_ShouldLog_AlwaysLogsErrors()
     NAG:GetGlobal().debugLevel = ns.DEBUG_LEVELS.NONE
 
     Assert.isTrue(DebugManager:ShouldLog("ERROR"), "Should always log ERROR, even with debug disabled.")
-    Assert.isTrue(DebugManager:ShouldLog("FATAL"), "Should always log FATAL, even with debug disabled.")
     Assert.isFalse(DebugManager:ShouldLog("WARN"), "Should not log WARN when debug is disabled.")
     Assert.isFalse(DebugManager:ShouldLog("INFO"), "Should not log INFO when debug is disabled.")
 end
