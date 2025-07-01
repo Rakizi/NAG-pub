@@ -22,6 +22,7 @@ local OverlayManager = NAG:GetModule("OverlayManager")
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
+local Version = ns.Version
 -- Libraries
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local RC = LibStub("LibRangeCheck-3.0")
@@ -431,8 +432,8 @@ function NAG:IsKnownSpell(spellId)
     if not spellId then return false end
     if not (tostring(type(tonumber(spellId))) == "number") then return false end
 
-    -- Special case for Sunfire
-    if tonumber(spellId) == 93402 then
+    -- Special case for Sunfire in cata
+    if ns.Version:IsCata() and tonumber(spellId) == 93402 then
         local currRank = select(5, GetTalentInfo(1, 20))
         return currRank >= 1 and UnitPower("player", Enum.PowerType.Balance) > 0
     end
@@ -639,7 +640,7 @@ function NAG:IsReadySpell(spellId, tolerance)
         self:Debug("IsReadySpell: spellId is nil")
         return false
     end
-    if ns.Version:IsMoP() then
+    if Version:IsMoP() then
         local spellName = GetSpellInfo(spellId)
         local _,_,_,_,_,_,id = GetSpellInfo(spellName)
         spellId = id

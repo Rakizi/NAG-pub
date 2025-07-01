@@ -19,6 +19,8 @@ local Timer = NAG:GetModule("TimerManager")
 --- @type ShamanWeaveModule|ModuleBase|AceModule
 local ShamanWeaveModule = NAG:GetModule("ShamanWeaveModule", true)
 
+local GetSpellCooldown = ns.GetSpellCooldownUnified
+
 -- Check if player is a Shaman
 local _, playerClass = UnitClass("player")
 if playerClass ~= "SHAMAN" then

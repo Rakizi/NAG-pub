@@ -224,8 +224,11 @@ end
 -- Retrieves spell cooldown information across both Retail and Classic.
 --- @param spellID number The ID of the spell to check the cooldown for.
 --- @return number startTime, number duration, boolean|number isEnabled, number modRate
--- TODO WARNING: this is changing the regular return order
 function ns.GetSpellCooldownUnified(spellID)
+    if type(spellID) == "table" then
+        for k,v in pairs(spellID) do print("  key:", k, "val:", v) end
+        error("GetSpellCooldownUnified received a table!")
+    end
     if not spellID then return 0, 0, 1, 1 end
     if C_Spell and C_Spell.GetSpellCooldown then
         -- Retail: Use C_Spell.GetSpellCooldown

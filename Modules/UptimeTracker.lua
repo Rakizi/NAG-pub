@@ -108,9 +108,9 @@ local EntityTypes = DataManager and DataManager.EntityTypes
 -- WoW API & NAG Helpers
 local GetTime = GetTime
 local UnitAffectingCombat = UnitAffectingCombat
-local GetSpellCooldown = GetSpellCooldown
-local GetSpellInfo = GetSpellInfo
-local GetItemInfo = GetItemInfo -- Fallback for older clients
+local GetSpellCooldown = ns.GetSpellCooldownUnified
+local GetSpellInfo = ns.GetSpellInfoUnified
+local GetItemInfo = ns.GetItemInfoUnified
 local C_Item_GetItemInfo = C_Item and C_Item.GetItemInfo
 local C_Item_GetItemSpell = C_Item and C_Item.GetItemSpell
 local UnitAura = UnitAura

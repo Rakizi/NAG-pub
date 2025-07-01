@@ -519,8 +519,9 @@ end
 --- @usage NAG:SequenceIsReady("sequenceName", 73643, 12345)
 function NAG:SequenceIsReady(name, ...)
     if not name then return false end
+    if select('#', ...) == 0 then return false end -- No spells provided, not ready
     local sequence = { ... }
-    return self:SequenceTimeToReady(name, sequence) == 0
+    return self:SequenceTimeToReady(name, unpack(sequence)) == 0
 end
 
 --- Checks if a strict sequence is ready to be executed (all spells off cooldown).
@@ -541,8 +542,11 @@ function NAG:SequenceTimeToReady(sequenceName, ...)
     local sequence = { ... }
     local maxttr = 0
     for i = 1, #sequence do
-        local ttr = self:SpellTimeToReady(sequence[i])
-        if ttr > maxttr then ttr = maxttr end
+        if type(sequence[i]) == "number" then
+            local ttr = self:SpellTimeToReady(sequence[i])
+            if ttr > maxttr then maxttr = ttr end
+        end
+        -- skip non-number entries
     end
     return maxttr
 end
