@@ -502,3 +502,30 @@ function NAG:IsTargetMobType(mobType)
     return self.Types:GetType("MobType")[creatureType] == mobType
 end
 NAG.TargetMobType = NAG.IsTargetMobType
+
+--- Checks if the current target's cast or channel is interruptible.
+--- This function robustly checks both casting and channeling states, handling version differences in the WoW API.
+--- In modern clients, uses the 'notInterruptible' (8th return value) from both UnitCastingInfo and UnitChannelInfo.
+--- In Classic, these fields may be nil, so the function returns false (not interruptible) if the info is unavailable.
+--- @return boolean True if the target is currently casting or channeling and is interruptible, false otherwise.
+--- @usage if NAG:IsTargetInterruptible() then NAG:CastSpell(interruptSpellId) end
+function NAG:IsTargetInterruptible()
+    if not UnitExists("target") then return false end
+
+    -- Check if target is casting a spell
+    local _, _, _, _, _, _, _, notInterruptible = UnitCastingInfo("target")
+    if notInterruptible ~= nil then
+        -- Retail and Wrath+ API: 'notInterruptible' is true if NOT interruptible
+        return not notInterruptible
+    end
+
+    -- Check if target is channeling a spell
+    -- Retail: 'notInterruptible' is true if NOT interruptible
+    local _, _, _, _, _, _, notInterruptible = UnitChannelInfo("target")
+    if notInterruptible ~= nil then
+        return not notInterruptible
+    end
+
+    -- If neither field is available (Classic), assume not interruptible
+    return false
+end
