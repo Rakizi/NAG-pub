@@ -622,11 +622,21 @@ local function GetSecondaryResourceType()
     return nil
 end
 
---- Gets the current amount of the spec's secondary resource (Soul Shards, Demonic Fury, Holy Power, etc.)
+--- Gets the 'unmodified' current amount of the spec's secondary resource (Soul Shards, Demonic Fury, Holy Power, etc.)
+--- @function NAG:CurrentGenericResource
+--- @return number The current amount of the spec's secondary resource(unmodified)
+--- @usage NAG:CurrentGenericResource() >= x
+function NAG:CurrentGenericResource()
+    local resourceType = GetSecondaryResourceType()
+    if not resourceType then return 0 end
+    return UnitPower("player", resourceType, true) or 0
+end
+
+--- Gets the 'modified' current amount of the spec's secondary resource (Soul Shards, Demonic Fury, Holy Power, etc.)
 --- @function NAG:CurrentGenericResource
 --- @return number The current amount of the spec's secondary resource
 --- @usage NAG:CurrentGenericResource() >= x
-function NAG:CurrentGenericResource()
+function NAG:CurrentGenericResourceModified()
     local resourceType = GetSecondaryResourceType()
     if not resourceType then return 0 end
     return UnitPower("player", resourceType) or 0
