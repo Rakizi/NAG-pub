@@ -855,11 +855,12 @@ end
 do -- ~~~~~~~~~~ Form/Stance Processing
     function StateManager:UpdateFormsState()
         local state = self.state.player.shapeshiftForm
-        local formID = GetShapeshiftFormID()
+        local formIndex = GetShapeshiftForm()
+        local formID = GetShapeshiftFormID() -- May be nil for Paladins
 
-        if formID then
-            local _, active, _, spellID = GetShapeshiftFormInfo(GetShapeshiftForm())
-            state.id = formID
+        if formIndex and formIndex > 0 then
+            local _, active, _, spellID = GetShapeshiftFormInfo(formIndex)
+            state.id = formID or formIndex -- Use formIndex as fallback if formID is nil
             state.spellId = spellID
             state.active = active
         else

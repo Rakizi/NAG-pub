@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-07-01 02:18:32
+-- Generated schema for mop on 2025-07-01 11:07:22
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -28417,8 +28417,6 @@ ns.protoSchema['mists'] = {
     },
     consumables = {
       ConjuredDarkRune = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12662
@@ -28433,8 +28431,6 @@ ns.protoSchema['mists'] = {
         }
       },
       ConjuredHealthstone = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5512
@@ -28449,8 +28445,6 @@ ns.protoSchema['mists'] = {
         }
       },
       ConjuredRogueThistleTea = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             7676
@@ -28468,8 +28462,6 @@ ns.protoSchema['mists'] = {
         }
       },
       ExplosiveBigDaddy = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             63396
@@ -28485,8 +28477,6 @@ ns.protoSchema['mists'] = {
         }
       },
       HighpoweredBoltGun = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             60223
@@ -28504,8 +28494,6 @@ ns.protoSchema['mists'] = {
     },
     buffs_debuffs = {
       StatsBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1126,
@@ -28524,8 +28512,6 @@ ns.protoSchema['mists'] = {
         }
       },
       AttackPowerBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6673,
@@ -28542,8 +28528,6 @@ ns.protoSchema['mists'] = {
         }
       },
       AttackSpeedBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             30809,
@@ -28562,8 +28546,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SpellPowerBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1459,
@@ -28580,8 +28562,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SpellHasteBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24907,
@@ -28597,8 +28577,6 @@ ns.protoSchema['mists'] = {
         }
       },
       CritBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1459,
@@ -28617,8 +28595,6 @@ ns.protoSchema['mists'] = {
         }
       },
       MasteryBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19740,
@@ -28635,8 +28611,6 @@ ns.protoSchema['mists'] = {
         }
       },
       StaminaBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             469,
@@ -28653,8 +28627,6 @@ ns.protoSchema['mists'] = {
         }
       },
       MajorHasteBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             2825
@@ -28668,8 +28640,6 @@ ns.protoSchema['mists'] = {
         }
       },
       DefensiveCooldownBuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6940,
@@ -28687,8 +28657,6 @@ ns.protoSchema['mists'] = {
         }
       },
       CastSpeedDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             5761,
@@ -28707,8 +28675,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SpellDamageDebuff = {
-        source = "icon_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1490,
@@ -28727,8 +28693,6 @@ ns.protoSchema['mists'] = {
         }
       },
       Skullbanner = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             114207
@@ -28744,8 +28708,6 @@ ns.protoSchema['mists'] = {
         }
       },
       StormLashTotem = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             120668
@@ -28761,8 +28723,6 @@ ns.protoSchema['mists'] = {
         }
       },
       ManaTideTotem = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16190
@@ -28777,8 +28737,6 @@ ns.protoSchema['mists'] = {
         countField = "ManaTideTotemCount"
       },
       TricksOfTheTrade = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             45767
@@ -28794,8 +28752,6 @@ ns.protoSchema['mists'] = {
         }
       },
       UnholyFrenzy = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             49016
@@ -28811,8 +28767,6 @@ ns.protoSchema['mists'] = {
         countField = "UnholyFrenzyCount"
       },
       ShatteringThrow = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             64382
@@ -28828,8 +28782,6 @@ ns.protoSchema['mists'] = {
         countField = "ShatteringThrowCount"
       },
       MajorArmorDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             113746
@@ -28844,8 +28796,6 @@ ns.protoSchema['mists'] = {
         }
       },
       PhysicalDamageDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             81326
@@ -28860,8 +28810,6 @@ ns.protoSchema['mists'] = {
         }
       },
       DamageReduction = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             115798
@@ -28875,8 +28823,6 @@ ns.protoSchema['mists'] = {
         }
       },
       BlessingOfKings = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20217
@@ -28884,8 +28830,6 @@ ns.protoSchema['mists'] = {
         }
       },
       MarkOfTheWild = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1126
@@ -28893,8 +28837,6 @@ ns.protoSchema['mists'] = {
         }
       },
       EmbraceOfTheShaleSpider = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             90363
@@ -28902,8 +28844,6 @@ ns.protoSchema['mists'] = {
         }
       },
       LegacyOfTheEmperor = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             115921
@@ -28911,8 +28851,6 @@ ns.protoSchema['mists'] = {
         }
       },
       TrueshotAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19506
@@ -28920,8 +28858,6 @@ ns.protoSchema['mists'] = {
         }
       },
       HornOfWinter = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             57330
@@ -28929,8 +28865,6 @@ ns.protoSchema['mists'] = {
         }
       },
       BattleShout = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6673
@@ -28938,8 +28872,6 @@ ns.protoSchema['mists'] = {
         }
       },
       UnholyAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             55610
@@ -28947,8 +28879,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SerpentsSwiftness = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             128433
@@ -28956,8 +28886,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SwiftbladesCunning = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             113742
@@ -28965,8 +28893,6 @@ ns.protoSchema['mists'] = {
         }
       },
       UnleashedRage = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             30809
@@ -28974,8 +28900,6 @@ ns.protoSchema['mists'] = {
         }
       },
       CacklingHowl = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             128432
@@ -28983,8 +28907,6 @@ ns.protoSchema['mists'] = {
         }
       },
       ArcaneBrilliance = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1459
@@ -28992,8 +28914,6 @@ ns.protoSchema['mists'] = {
         }
       },
       StillWater = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             126309
@@ -29001,8 +28921,6 @@ ns.protoSchema['mists'] = {
         }
       },
       BurningWrath = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             77747
@@ -29010,8 +28928,6 @@ ns.protoSchema['mists'] = {
         }
       },
       DarkIntent = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             109773
@@ -29019,8 +28935,6 @@ ns.protoSchema['mists'] = {
         }
       },
       MoonkinAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24907
@@ -29028,8 +28942,6 @@ ns.protoSchema['mists'] = {
         }
       },
       MindQuickening = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             49868
@@ -29037,8 +28949,6 @@ ns.protoSchema['mists'] = {
         }
       },
       ElementalOath = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             51470
@@ -29046,8 +28956,6 @@ ns.protoSchema['mists'] = {
         }
       },
       LeaderOfThePack = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17007
@@ -29055,8 +28963,6 @@ ns.protoSchema['mists'] = {
         }
       },
       FuriousHowl = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24604
@@ -29064,8 +28970,6 @@ ns.protoSchema['mists'] = {
         }
       },
       TerrifyingRoar = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             90309
@@ -29073,8 +28977,6 @@ ns.protoSchema['mists'] = {
         }
       },
       LegacyOfTheWhiteTiger = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             116781
@@ -29082,8 +28984,6 @@ ns.protoSchema['mists'] = {
         }
       },
       BlessingOfMight = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19740
@@ -29091,8 +28991,6 @@ ns.protoSchema['mists'] = {
         }
       },
       RoarOfCourage = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             93435
@@ -29100,8 +28998,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SpiritBeastBlessing = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             128997
@@ -29109,8 +29005,6 @@ ns.protoSchema['mists'] = {
         }
       },
       GraceOfAir = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             116956
@@ -29118,8 +29012,6 @@ ns.protoSchema['mists'] = {
         }
       },
       CommandingShout = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             469
@@ -29127,8 +29019,6 @@ ns.protoSchema['mists'] = {
         }
       },
       PowerWordFortitude = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             21562
@@ -29136,8 +29026,6 @@ ns.protoSchema['mists'] = {
         }
       },
       QirajiFortitude = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             90364
@@ -29145,8 +29033,6 @@ ns.protoSchema['mists'] = {
         }
       },
       Bloodlust = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             2825
@@ -29154,8 +29040,6 @@ ns.protoSchema['mists'] = {
         }
       },
       HandOfSacrificeCount = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6940
@@ -29163,8 +29047,6 @@ ns.protoSchema['mists'] = {
         }
       },
       DevotionAuraCount = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31821
@@ -29172,8 +29054,6 @@ ns.protoSchema['mists'] = {
         }
       },
       PainSuppressionCount = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             33206
@@ -29181,8 +29061,6 @@ ns.protoSchema['mists'] = {
         }
       },
       GuardianSpirits = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             47788
@@ -29190,8 +29068,6 @@ ns.protoSchema['mists'] = {
         }
       },
       RallyingCryCount = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             97462
@@ -29199,8 +29075,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SkullBannerCount = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             114207
@@ -29208,8 +29082,6 @@ ns.protoSchema['mists'] = {
         }
       },
       StormlashTotemCount = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             120668
@@ -29217,8 +29089,6 @@ ns.protoSchema['mists'] = {
         }
       },
       WeakenedArmor = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             113746
@@ -29226,8 +29096,6 @@ ns.protoSchema['mists'] = {
         }
       },
       WeakenedBlows = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             115798
@@ -29235,8 +29103,6 @@ ns.protoSchema['mists'] = {
         }
       },
       NecroticStrike = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             73975
@@ -29244,8 +29110,6 @@ ns.protoSchema['mists'] = {
         }
       },
       LavaBreath = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58604
@@ -29253,8 +29117,6 @@ ns.protoSchema['mists'] = {
         }
       },
       SporeCloud = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             50274
@@ -29262,8 +29124,6 @@ ns.protoSchema['mists'] = {
         }
       },
       MindNumbingPoison = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             5761
@@ -29271,8 +29131,6 @@ ns.protoSchema['mists'] = {
         }
       },
       Slow = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             31589
@@ -29280,8 +29138,6 @@ ns.protoSchema['mists'] = {
         }
       },
       CurseOfEnfeeblement = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             109466
@@ -29289,8 +29145,6 @@ ns.protoSchema['mists'] = {
         }
       },
       PhysicalVulnerability = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             81326
@@ -29298,8 +29152,6 @@ ns.protoSchema['mists'] = {
         }
       },
       LightningBreath = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24844
@@ -29307,8 +29159,6 @@ ns.protoSchema['mists'] = {
         }
       },
       CurseOfElements = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             1490
@@ -29316,8 +29166,6 @@ ns.protoSchema['mists'] = {
         }
       },
       MasterPoisoner = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             58410
@@ -29325,8 +29173,6 @@ ns.protoSchema['mists'] = {
         }
       },
       FireBreath = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             34889
@@ -29336,263 +29182,5 @@ ns.protoSchema['mists'] = {
     },
     consumables_unparsed = {
 
-    },
-    diagnostic = {
-      actions = {
-        total_found = 25,
-        matched = 25,
-        missing = {
-
-        },
-        missing_attributes = {
-          uiLabel = 0,
-          shortDescription = 0,
-          fields = 0
-        },
-        missing_attr_items = {
-          uiLabel = {
-
-          },
-          shortDescription = {
-
-          },
-          fields = {
-
-          }
-        }
-      },
-      values = {
-        total_found = 98,
-        matched = 98,
-        missing = {
-
-        },
-        missing_attributes = {
-          uiLabel = 0,
-          shortDescription = 3,
-          fields = 0
-        },
-        missing_attr_items = {
-          uiLabel = {
-
-          },
-          shortDescription = {
-            "boss_spell_is_casting",
-            "boss_spell_time_to_ready",
-            "unit_is_moving"
-          },
-          fields = {
-
-          }
-        }
-      }
-    },
-    go_diagnostic = {
-      files_scanned = 735,
-      functions_scanned = 3474,
-      registrations_found = 892,
-      registrations_parsed = 867,
-      registrations_missed = {
-        {
-          file = "sim/death_knight/ghoul_pet.go",
-          ["function"] = "registerClaw",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       core.ActionID{SpellID: ghoulPet.clawSpellID}, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSp..."
-        },
-        {
-          file = "sim/common/mop/cloaks_phase_4_54.go",
-          ["function"] = "newXuenCloakEffect",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = "{ 				Label:    label, 				Duration: core.NeverExpires, 			}..."
-        },
-        {
-          file = "sim/encounters/firelands/bethtilac_ai.go",
-          ["function"] = "registerEmberFlameSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:         core.ActionID{SpellID: emberFlameSpellID}, 		SpellSchool:      core.SpellSchoolFire, 		ProcMask:         core.ProcMaskSpellDamag..."
-        },
-        {
-          file = "sim/monk/healing_sphere.go",
-          ["function"] = "registerHealingSphere",
-          registration_index = 2,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 			Label:    fmt.Sprintf("Healing Sphere #%v %v", i, monk.Label), 			ActionID: healingSphereActionID, 			Duration: duration, 		}...]]
-        },
-        {
-          file = "sim/monk/stances.go",
-          ["function"] = "makeStanceSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: aura.ActionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer..."
-        },
-        {
-          file = "sim/monk/ww_rising_sun_kick.go",
-          ["function"] = "registerRisingSunKick",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 			Label:    fmt.Sprintf("Rising Sun Kick %s", target.Label), 			ActionID: risingSunKickActionID, 			Duration: time.Second * 15, 		}...]]
-        },
-        {
-          file = "sim/monk/ww_rising_sun_kick.go",
-          ["function"] = "registerSEFRisingSunKick",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 			Label:    fmt.Sprintf("Rising Sun Kick - Clone %s", target.Label), 			ActionID: risingSunKickActionID.WithTag(SEFSpellID), 			Duration: time.Seco...]]
-        },
-        {
-          file = "sim/monk/windwalker/passives.go",
-          ["function"] = "registerComboBreaker",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 			Label:    fmt.Sprintf("Combo Breaker: %s %s", labelSuffix, ww.Label), 			ActionID: core.ActionID{SpellID: spellID}, 			Duration: time.Second * 20...]]
-        },
-        {
-          file = "sim/monk/brewmaster/guard.go",
-          ["function"] = "registerGuard",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       actionID, 		Flags:          monk.SpellFlagSpender | core.SpellFlagAPL | core.SpellFlagReadinessTrinket, 		ClassSpellMask: monk.Mon..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newPetDebuff",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: config.SpellID}, 		SpellSchool: config.School, // Adjust the spell school as needed 		ProcMask:    core.ProcMa..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newFocusDump",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       core.ActionID{SpellID: spellID}, 		SpellSchool:    core.SpellSchoolPhysical, 		ProcMask:       core.ProcMaskMeleeMHSpecial, 		Clas..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newSpecialAbility",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: config.SpellID}, 		SpellSchool: config.School, 		ProcMask:    procMask, 		Flags:       flags,  		DamageMultipl..."
-        },
-        {
-          file = "sim/hunter/aspects.go",
-          ["function"] = "registerAspectSpell",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		Label:      label, 		ActionID:   actionID, 		Duration:   core.NeverExpires, 		BuildPhase: core.CharacterBuildPhaseBase, 		OnGain: func(a *core.Aur..."
-        },
-        {
-          file = "sim/hunter/aspects.go",
-          ["function"] = "registerAspectSpell",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagAPL, 		ApplyEffects: func(sim *core.Simulation, _ *core.Unit, _ *core.Spell) { 			aura.Activate(sim)..."
-        },
-        {
-          file = "sim/priest/shadow/shadowy_recall.go",
-          ["function"] = "buildSingleTickSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:         core.ActionID{SpellID: spellId}.WithTag(77486), 		SpellSchool:      core.SpellSchoolShadow, 		Flags:            core.SpellFlagNo..."
-        },
-        {
-          file = "sim/warlock/talents.go",
-          ["function"] = "BuildAndRegisterSummonSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: id}, 		SpellSchool: core.SpellSchoolShadow, 		Flags:       core.SpellFlagAPL, 		ProcMask:    core.ProcMaskEmpt..."
-        },
-        {
-          file = "sim/warlock/affliction/malefic_effect.go",
-          ["function"] = "registerMaleficEffect",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:       core.ActionID{SpellID: id}.WithTag(1), 			Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagNoSpellMods | core.Spell..."
-        },
-        {
-          file = "sim/paladin/devotion_aura.go",
-          ["function"] = "registerDevotionAura",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       core.DevotionAuraActionID, 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful | core.SpellFlagReadinessTrinket, 		ClassSp..."
-        },
-        {
-          file = "sim/paladin/talents.go",
-          ["function"] = "registerSacredShield",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    actionID, 		Flags:       core.SpellFlagAPL | core.SpellFlagHelpful, 		ProcMask:    core.ProcMaskSpellHealing, 		SpellSchool: core.Spe..."
-        },
-        {
-          file = "sim/paladin/talents.go",
-          ["function"] = "divinePurposeFactory",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		Label:    label + paladin.Label, 		ActionID: core.ActionID{SpellID: spellID}, 		Duration: duration, 	}..."
-        },
-        {
-          file = "sim/warrior/rallying_cry.go",
-          ["function"] = "registerRallyingCry",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       core.RallyingCryActionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskRallyingCry,  		Cast: core.CastConfig{..."
-        },
-        {
-          file = "sim/warrior/shouts.go",
-          ["function"] = "MakeShoutSpellHelper",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       actionID, 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful, 		ClassSpellMask: spellMask,  		Cast: core.CastConfig{ 			D..."
-        },
-        {
-          file = "sim/warrior/banners.go",
-          ["function"] = "registerSkullBanner",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       core.SkullBannerActionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskSkullBanner,  		Cast: core.CastConfig{..."
-        },
-        {
-          file = "sim/warrior/banners.go",
-          ["function"] = "registerDemoralizingBanner",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:       core.SkullBannerActionID, 		Flags:          core.SpellFlagAPL, 		ClassSpellMask: SpellMaskDemoralizingBanner,  		Cast: core.CastCo..."
-        },
-        {
-          file = "sim/warrior/stances.go",
-          ["function"] = "makeStanceSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer:..."
-        }
-      }
     }
   }

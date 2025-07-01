@@ -138,7 +138,7 @@ NAG.defaults = {
         keysMigrated = false,
 
         -- Debug settings
-        enableDebug = false,             -- Enable debug mode
+        enableDevMode = false,             -- Enable dev mode
         debugLevel = 2,                  -- Debug level (0-6)
         enableFakeExecute = false,       -- Enable fake execute
         fakeExecuteHealth = 20,          -- Fake execute health
@@ -828,13 +828,13 @@ do -- Rando helper functions
 
     --- Checks if dev mode is enabled.
     --- @param self NAG The addon object
-    --- @return boolean True if debug mode is enabled, false otherwise
+    --- @return boolean True if dev mode is enabled, false otherwise
     function NAG:IsDevModeEnabled()
         -- During initial loading, before DB is initialized, use the default value
         if not self.db then
             return false
         end
-        return self:GetGlobal().enableDebug
+        return self:GetGlobal().enableDevMode
     end
 
     --- Checks if any displays should be shown based on combat state and settings
@@ -1021,9 +1021,14 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintInfo(message, printTrace)
         if not DebugManager then
-            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Info(message, printTrace)
+            return
+        end
+        if lvl < 4 then return end
         DebugManager:Info(message, printTrace)
     end
 
@@ -1034,9 +1039,14 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintDebug(message, printTrace)
         if not DebugManager then
-            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Debug(message, printTrace)
+            return
+        end
+        if lvl < 5 then return end
         DebugManager:Debug(message, printTrace)
     end
 
@@ -1047,9 +1057,14 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintWarn(message, printTrace)
         if not DebugManager then
-            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Warn(message, printTrace)
+            return
+        end
+        if lvl < 3 then return end
         DebugManager:Warn(message, printTrace)
     end
 
@@ -1060,9 +1075,14 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintError(message, printTrace)
         if not DebugManager then
-            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Error(message, printTrace)
+            return
+        end
+        if lvl < 2 then return end
         DebugManager:Error(message, printTrace)
     end
 
@@ -1073,9 +1093,9 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintFatal(message, printTrace)
         if not DebugManager then
-            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        -- Always log fatal
         DebugManager:Fatal(message, printTrace)
     end
 
@@ -1086,9 +1106,14 @@ do --== DebugManager wrappers
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintTrace(message, printTrace)
         if not DebugManager then
-            --- @type DebugManager|AceModule|ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Trace(message, printTrace)
+            return
+        end
+        if lvl < 6 then return end
         DebugManager:Trace(message, printTrace)
     end
 
@@ -1431,4 +1456,11 @@ do --== Addon Compartment Functions ==--
     function NAG_OnAddonCompartmentLeave(frame)
         GameTooltip:Hide()
     end
+end
+
+function NAG:Log(level, message, printTrace)
+    if not DebugManager then
+        DebugManager = self:GetModule("DebugManager")
+    end
+    DebugManager:Log(message, level, printTrace)
 end

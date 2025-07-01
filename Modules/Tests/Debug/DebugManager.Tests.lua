@@ -27,7 +27,6 @@ end
 
 function DebugManagerTests:teardown()
     -- Restore original debug settings
-    NAG:GetGlobal().enableDebug = self.originalDebugEnabled
     NAG:GetGlobal().debugLevel = self.originalDebugLevel
 end
 
@@ -36,8 +35,6 @@ end
 ----------------------------------------------------------------------
 
 function DebugManagerTests:test_ShouldLog_RespectsDebugLevel()
-    NAG:GetGlobal().enableDebug = true
-
     NAG:GetGlobal().debugLevel = ns.DEBUG_LEVELS.INFO
     Assert.isTrue(DebugManager:ShouldLog("INFO"), "Should log INFO at INFO level")
     Assert.isTrue(DebugManager:ShouldLog("WARN"), "Should log WARN at INFO level")
@@ -49,7 +46,6 @@ function DebugManagerTests:test_ShouldLog_RespectsDebugLevel()
 end
 
 function DebugManagerTests:test_ShouldLog_AlwaysLogsErrors()
-    NAG:GetGlobal().enableDebug = false -- Debug mode is off
     NAG:GetGlobal().debugLevel = ns.DEBUG_LEVELS.NONE
 
     Assert.isTrue(DebugManager:ShouldLog("ERROR"), "Should always log ERROR, even with debug disabled.")
@@ -59,7 +55,6 @@ function DebugManagerTests:test_ShouldLog_AlwaysLogsErrors()
 end
 
 function DebugManagerTests:test_ShouldLog_DisabledMode()
-    NAG:GetGlobal().enableDebug = false
     NAG:GetGlobal().debugLevel = ns.DEBUG_LEVELS.TRACE -- Max level
 
     Assert.isFalse(DebugManager:ShouldLog("DEBUG"), "Should not log DEBUG when debug mode is off.")

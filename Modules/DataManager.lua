@@ -2073,6 +2073,67 @@ do -- ~~~~~~~~~~~~~~~~~~~~ byFlag public methods(HasFlag, GetFlags, GetAllByFlag
 
         return result
     end
+
+    --- Adds a flag to an entity
+    --- @param self DataManager
+    --- @param id number The entity ID
+    --- @param entityType string The entity type
+    --- @param flag string The flag to add
+    --- @return boolean True if the flag was added, false otherwise
+    function DataManager:AddFlag(id, entityType, flag)
+        local entity = self:Get(id, entityType)
+        if not entity or not flag then return false end
+        if entity.flags[flag] then return true end -- Already present
+        entity.flags[flag] = true
+        -- Update flag index
+        self.storage.byFlag[flag] = self.storage.byFlag[flag] or {}
+        table.insert(self.storage.byFlag[flag], entity)
+        return true
+    end
+
+    --- Removes a flag from an entity
+    --- @param self DataManager
+    --- @param id number The entity ID
+    --- @param entityType string The entity type
+    --- @param flag string The flag to remove
+    --- @return boolean True if the flag was removed, false otherwise
+    function DataManager:RemoveFlag(id, entityType, flag)
+        local entity = self:Get(id, entityType)
+        if not entity or not flag then return false end
+        if not entity.flags[flag] then return true end -- Already absent
+        entity.flags[flag] = nil
+        -- Remove from flag index
+        local flagList = self.storage.byFlag[flag]
+        if flagList then
+            for i = #flagList, 1, -1 do
+                if flagList[i] == entity then
+                    table.remove(flagList, i)
+                end
+            end
+            if #flagList == 0 then self.storage.byFlag[flag] = nil end
+        end
+        return true
+    end
+
+    --- Sets the full flag set for an entity (replaces all flags)
+    --- @param self DataManager
+    --- @param id number The entity ID
+    --- @param entityType string The entity type
+    --- @param flags table Table of flags to set (keys = flag names, values = true)
+    --- @return boolean True if the flags were set, false otherwise
+    function DataManager:SetFlags(id, entityType, flags)
+        local entity = self:Get(id, entityType)
+        if not entity or type(flags) ~= "table" then return false end
+        -- Remove all current flags from index
+        for flag in pairs(entity.flags) do
+            self:RemoveFlag(id, entityType, flag)
+        end
+        -- Add new flags
+        for flag, value in pairs(flags) do
+            if value then self:AddFlag(id, entityType, flag) end
+        end
+        return true
+    end
 end
 
 do -- ~~~~~~~~~~~~~~~~~~~~ byType public methods(HasType, GetTypes, GetAllByType)
@@ -2596,4 +2657,233 @@ ns.DataManager = DataManager
 function DataManager:RegisterStaticData(sourceName, dataTables)
     self.staticData = self.staticData or {}
     self.staticData[sourceName] = dataTables
+end
+
+--- Deletes an entity from all storage and indices
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @return boolean True if deleted, false otherwise
+function DataManager:Delete(id, entityType)
+    local entity = self:Get(id, entityType)
+    if not entity then return false end
+    -- Remove from main storage
+    local storage = self.storage.entities[entityType]
+    if storage then storage[id] = nil end
+    -- Remove from byName
+    if entity.name and self.storage.byName[entity.name] then
+        for i = #self.storage.byName[entity.name], 1, -1 do
+            if self.storage.byName[entity.name][i] == entity then
+                table.remove(self.storage.byName[entity.name], i)
+            end
+        end
+        if #self.storage.byName[entity.name] == 0 then self.storage.byName[entity.name] = nil end
+    end
+    -- Remove from byFlag
+    for flag in pairs(entity.flags or {}) do
+        self:RemoveFlag(id, entityType, flag)
+    end
+    -- Remove from byType
+    for category, value in pairs(entity.types or {}) do
+        if type(value) == "table" then
+            for _, v in ipairs(value) do
+                self:RemoveType(id, entityType, category, v)
+            end
+        else
+            self:RemoveType(id, entityType, category, value)
+        end
+    end
+    -- Remove all relationships
+    for targetType, targets in pairs(entity.relationships or {}) do
+        for targetId in pairs(targets) do
+            self:RemoveRelationship(id, entityType, targetId, targetType)
+        end
+    end
+    -- Remove reverse relationships
+    for relationType, rels in pairs(self.storage.relationships) do
+        if rels[id] then
+            for targetId, target in pairs(rels[id]) do
+                self:RemoveRelationship(id, entityType, targetId, target.entryType)
+            end
+            rels[id] = nil
+        end
+    end
+    return true
+end
+
+--- Updates an entity's fields (shallow merge, does not create if missing)
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param data table Table of fields to update
+--- @return boolean True if updated, false otherwise
+function DataManager:Update(id, entityType, data)
+    local entity = self:Get(id, entityType)
+    if not entity or type(data) ~= "table" then return false end
+    for k, v in pairs(data) do
+        entity[k] = v
+    end
+    return true
+end
+
+--- Adds a type value to an entity
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param category string The type category
+--- @param value any The type value
+--- @return boolean True if added, false otherwise
+function DataManager:AddType(id, entityType, category, value)
+    local entity = self:Get(id, entityType)
+    if not entity or not category or value == nil then return false end
+    entity.types = entity.types or {}
+    local typeRegistry = Types:GetType(category)
+    if not typeRegistry then return false end
+    self.storage.byType[category] = self.storage.byType[category] or {}
+    self.storage.byType[category][value] = self.storage.byType[category][value] or {}
+    if typeRegistry._allowMultiple then
+        entity.types[category] = entity.types[category] or {}
+        for _, v in ipairs(entity.types[category]) do if v == value then return true end end
+        table.insert(entity.types[category], value)
+    else
+        if entity.types[category] == value then return true end
+        entity.types[category] = value
+    end
+    self.storage.byType[category][value][id] = entity
+    return true
+end
+
+--- Removes a type value from an entity
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param category string The type category
+--- @param value any The type value
+--- @return boolean True if removed, false otherwise
+function DataManager:RemoveType(id, entityType, category, value)
+    local entity = self:Get(id, entityType)
+    if not entity or not category or value == nil then return false end
+    local typeRegistry = Types:GetType(category)
+    if not typeRegistry then return false end
+    if typeRegistry._allowMultiple and entity.types[category] then
+        for i = #entity.types[category], 1, -1 do
+            if entity.types[category][i] == value then
+                table.remove(entity.types[category], i)
+            end
+        end
+        if #entity.types[category] == 0 then entity.types[category] = nil end
+    elseif entity.types[category] == value then
+        entity.types[category] = nil
+    end
+    if self.storage.byType[category] and self.storage.byType[category][value] then
+        self.storage.byType[category][value][id] = nil
+        if next(self.storage.byType[category][value]) == nil then
+            self.storage.byType[category][value] = nil
+        end
+    end
+    return true
+end
+
+--- Sets all types for an entity (replaces all types)
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param types table Table of types (category -> value(s))
+--- @return boolean True if set, false otherwise
+function DataManager:SetTypes(id, entityType, types)
+    local entity = self:Get(id, entityType)
+    if not entity or type(types) ~= "table" then return false end
+    -- Remove all current types
+    for category, value in pairs(entity.types or {}) do
+        if type(value) == "table" then
+            for _, v in ipairs(value) do
+                self:RemoveType(id, entityType, category, v)
+            end
+        else
+            self:RemoveType(id, entityType, category, value)
+        end
+    end
+    -- Add new types
+    for category, value in pairs(types) do
+        if type(value) == "table" then
+            for _, v in ipairs(value) do
+                self:AddType(id, entityType, category, v)
+            end
+        else
+            self:AddType(id, entityType, category, value)
+        end
+    end
+    return true
+end
+
+--- Adds a relationship between two entities
+--- @param self DataManager
+--- @param sourceId number The source entity ID
+--- @param sourceType string The source entity type
+--- @param targetId number The target entity ID
+--- @param targetType string The target entity type
+--- @return boolean True if added, false otherwise
+function DataManager:AddRelationship(sourceId, sourceType, targetId, targetType)
+    local source = self:Get(sourceId, sourceType)
+    local target = self:Get(targetId, targetType)
+    if not source or not target then return false end
+    local relationType = getRelationshipType(sourceType, targetType)
+    self.storage.relationships[relationType] = self.storage.relationships[relationType] or {}
+    self.storage.relationships[relationType][sourceId] = self.storage.relationships[relationType][sourceId] or {}
+    if self.storage.relationships[relationType][sourceId][targetId] then return true end
+    self.storage.relationships[relationType][sourceId][targetId] = target
+    -- Add to source entity
+    source.relationships = source.relationships or {}
+    source.relationships[targetType] = source.relationships[targetType] or {}
+    source.relationships[targetType][targetId] = true
+    -- Add reverse
+    local reverseType = getRelationshipType(targetType, sourceType)
+    self.storage.relationships[reverseType] = self.storage.relationships[reverseType] or {}
+    self.storage.relationships[reverseType][targetId] = self.storage.relationships[reverseType][targetId] or {}
+    self.storage.relationships[reverseType][targetId][sourceId] = source
+    target.relationships = target.relationships or {}
+    target.relationships[sourceType] = target.relationships[sourceType] or {}
+    target.relationships[sourceType][sourceId] = true
+    return true
+end
+
+--- Removes a relationship between two entities
+--- @param self DataManager
+--- @param sourceId number The source entity ID
+--- @param sourceType string The source entity type
+--- @param targetId number The target entity ID
+--- @param targetType string The target entity type
+--- @return boolean True if removed, false otherwise
+function DataManager:RemoveRelationship(sourceId, sourceType, targetId, targetType)
+    local source = self:Get(sourceId, sourceType)
+    local target = self:Get(targetId, targetType)
+    if not source or not target then return false end
+    local relationType = getRelationshipType(sourceType, targetType)
+    if self.storage.relationships[relationType] and self.storage.relationships[relationType][sourceId] then
+        self.storage.relationships[relationType][sourceId][targetId] = nil
+        if next(self.storage.relationships[relationType][sourceId]) == nil then
+            self.storage.relationships[relationType][sourceId] = nil
+        end
+    end
+    if source.relationships and source.relationships[targetType] then
+        source.relationships[targetType][targetId] = nil
+        if next(source.relationships[targetType]) == nil then
+            source.relationships[targetType] = nil
+        end
+    end
+    -- Remove reverse
+    local reverseType = getRelationshipType(targetType, sourceType)
+    if self.storage.relationships[reverseType] and self.storage.relationships[reverseType][targetId] then
+        self.storage.relationships[reverseType][targetId][sourceId] = nil
+        if next(self.storage.relationships[reverseType][targetId]) == nil then
+            self.storage.relationships[reverseType][targetId] = nil
+        end
+    end
+    if target.relationships and target.relationships[sourceType] then
+        target.relationships[sourceType][sourceId] = nil
+        if next(target.relationships[sourceType]) == nil then
+            target.relationships[sourceType] = nil
+        end
+    end
+    return true
 end

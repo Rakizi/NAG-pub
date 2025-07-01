@@ -151,7 +151,7 @@ if L then
         L["debugLoggingDesc"] = "Enable debug logging for this module"
         L["debugFrameToggle"] = "Toggle Debug"
         L["debugLevel"] = "Debug Level"
-        L["debugLevelDesc"] = "Set the level of debug information displayed"
+        L["debugLevelDesc"] = "Set the level of legacy(non-module) debug output"
         L["debugManager"] = "Debug Manager"
         L["debugManagerDesc"] = "Core debugging and logging functionality"
         L["debugModeDisabled"] = "Debug mode disabled"
@@ -1157,6 +1157,7 @@ if L then
         L["enableFrostDKAutoRotationDesc"] = "Automatically switch between Dual Wield and 2H weapon rotations based on equipped weapons"
         L["autoRotationSwitching"] = "Automatic Rotation Switching"
         L["autoRotationSwitchingDesc"] = "Automatically switch rotations for Elemental Shamans and Frost DKs based on targets/weapons"
+        L["enableDevModeDesc"] = "Enable developer mode (unlocks developer features and UI, does NOT affect logging output)"
     end
 
     do -- non-sorted messages

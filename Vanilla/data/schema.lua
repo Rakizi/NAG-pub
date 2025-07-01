@@ -1,4 +1,4 @@
--- Generated schema for classic on 2025-07-01 02:18:30
+-- Generated schema for classic on 2025-07-01 11:07:21
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['vanilla'] = {
@@ -15483,8 +15483,6 @@ ns.protoSchema['vanilla'] = {
     },
     consumables = {
       ConjuredHealthstone = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5509
@@ -15499,8 +15497,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ConjuredGreaterHealthstone = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5510
@@ -15515,8 +15511,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ConjuredMajorHealthstone = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9421
@@ -15531,8 +15525,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ConjuredMinorRecombobulator = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             4381
@@ -15551,8 +15543,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ConjuredDemonicRune = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12662
@@ -15567,8 +15557,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ConjuredRogueThistleTea = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             7676
@@ -15586,8 +15574,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SapperGoblinSapper = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             10646
@@ -15603,8 +15589,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ExplosiveSolidDynamite = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             10507
@@ -15620,8 +15604,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ExplosiveGoblinLandMine = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             4395
@@ -15637,8 +15619,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ExplosiveDenseDynamite = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             18641
@@ -15654,8 +15634,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ExplosiveThoriumGrenade = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             15993
@@ -15671,8 +15649,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FlaskOfTheTitans = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13510
@@ -15684,8 +15660,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FlaskOfDistilledWisdom = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13511
@@ -15700,8 +15674,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FlaskOfSupremePower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13512
@@ -15718,8 +15690,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FlaskOfChromaticResistance = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13513
@@ -15731,8 +15701,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       DirgesKickChimaerokChops = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             21023
@@ -15747,8 +15715,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GrilledSquid = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13928
@@ -15763,8 +15729,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SmokedDesertDumpling = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             20452
@@ -15779,8 +15743,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RunnTumTuberSurprise = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             18254
@@ -15795,8 +15757,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BlessSunfruit = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13810
@@ -15811,8 +15771,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BlessedSunfruitJuice = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13813
@@ -15827,8 +15785,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       NightfinSoup = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13931
@@ -15843,8 +15799,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       TenderWolfSteak = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             18045
@@ -15860,8 +15814,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SagefishDelight = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             21217
@@ -15876,8 +15828,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       HotWolfRibs = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13851
@@ -15892,8 +15842,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SmokedSagefish = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             21072
@@ -15908,8 +15856,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RumseyRumBlackLabel = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             21151
@@ -15924,8 +15870,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GordokGreenGrog = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             18269
@@ -15940,8 +15884,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RumseyRumDark = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             21114
@@ -15956,8 +15898,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RumseyRumLight = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             20709
@@ -15972,8 +15912,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       KreegsStoutBeatdown = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             18284
@@ -15988,8 +15926,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfSuperiorDefense = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13445
@@ -16004,8 +15940,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfGreaterDefense = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             8951
@@ -16020,8 +15954,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfDefense = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             3389
@@ -16036,8 +15968,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfMinorDefense = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5997
@@ -16052,8 +15982,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ScrollOfProtection = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             10305
@@ -16068,8 +15996,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfFortitude = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             3825
@@ -16084,8 +16010,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfMinorFortitude = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             2458
@@ -16100,8 +16024,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JujuMight = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12460
@@ -16116,8 +16038,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       WinterfallFirewater = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12820
@@ -16132,8 +16052,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfTheMongoose = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13452
@@ -16149,8 +16067,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfGreaterAgility = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9187
@@ -16165,8 +16081,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfAgility = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             8949
@@ -16181,8 +16095,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfLesserAgility = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             3390
@@ -16197,8 +16109,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ScrollOfAgility = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             10309
@@ -16213,8 +16123,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JujuPower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12451
@@ -16229,8 +16137,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfGiants = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9206
@@ -16245,8 +16151,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfOgresStrength = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             3391
@@ -16261,8 +16165,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ScrollOfStrength = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             10310
@@ -16277,8 +16179,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ROIDS = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             8410
@@ -16293,8 +16193,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GroundScorpokAssay = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             8412
@@ -16309,8 +16207,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       LungJuiceCocktail = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             8411
@@ -16325,8 +16221,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       CerebralCortexCompound = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             8423
@@ -16341,8 +16235,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GizzardGum = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             8424
@@ -16357,8 +16249,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpiritOfZanza = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             20079
@@ -16374,8 +16264,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GreaterHealingPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             1710
@@ -16390,8 +16278,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SuperiorHealingPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             3928
@@ -16406,8 +16292,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MajorHealingPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13446
@@ -16422,8 +16306,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ManaPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             3827
@@ -16438,8 +16320,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GreaterManaPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             6149
@@ -16454,8 +16334,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SuperiorManaPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13443
@@ -16470,8 +16348,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MajorManaPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13444
@@ -16486,8 +16362,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MightRagePotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13442
@@ -16505,8 +16379,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GreatRagePotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5633
@@ -16524,8 +16396,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RagePotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5631
@@ -16543,8 +16413,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MagicResistancePotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9036
@@ -16556,8 +16424,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GreaterStoneshieldPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13455
@@ -16572,8 +16438,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       LesserStoneshieldPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             4623
@@ -16588,8 +16452,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GreaterArcaneElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             13454
@@ -16605,8 +16467,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ArcaneElixir = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9155
@@ -16622,8 +16482,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfGreaterFirepower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             21546
@@ -16638,8 +16496,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfFirepower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             6373
@@ -16654,8 +16510,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfFrostPower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             17708
@@ -16670,8 +16524,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ElixirOfShadowPower = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             9264
@@ -16686,8 +16538,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MagebloodPotion = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           item = {
             20007
@@ -16702,8 +16552,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Windfury = {
-        source = "generic_object",
-        source_file = "consumables.ts",
         ids = {
           spell = {
             10614
@@ -16720,8 +16568,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JujuFlurry = {
-        source = "config_array",
-        source_file = "consumables.ts",
         ids = {
           item = {
             21151
@@ -16735,8 +16581,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RaptorPunch = {
-        source = "config_array",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5342
@@ -16750,8 +16594,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BoglingRoot = {
-        source = "config_array",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5206
@@ -16765,8 +16607,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JujuEmber = {
-        source = "config_array",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12455
@@ -16777,8 +16617,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JujuChill = {
-        source = "config_array",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12457
@@ -16789,8 +16627,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JujuEscape = {
-        source = "config_array",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12459
@@ -16804,8 +16640,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       StoneskinTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             10408
@@ -16814,8 +16648,6 @@ ns.protoSchema['vanilla'] = {
         value = "EarthTotem.StoneskinTotem"
       },
       StrengthOfEarthTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             25361
@@ -16824,8 +16656,6 @@ ns.protoSchema['vanilla'] = {
         value = "EarthTotem.StrengthOfEarthTotem"
       },
       TremorTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             8143
@@ -16834,8 +16664,6 @@ ns.protoSchema['vanilla'] = {
         value = "EarthTotem.TremorTotem"
       },
       SearingTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             10438
@@ -16844,8 +16672,6 @@ ns.protoSchema['vanilla'] = {
         value = "FireTotem.SearingTotem"
       },
       FireNovaTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             11315
@@ -16854,8 +16680,6 @@ ns.protoSchema['vanilla'] = {
         value = "FireTotem.FireNovaTotem"
       },
       MagmaTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             10587
@@ -16864,8 +16688,6 @@ ns.protoSchema['vanilla'] = {
         value = "FireTotem.FireNovaTotem"
       },
       HealingStreamTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             10463
@@ -16874,8 +16696,6 @@ ns.protoSchema['vanilla'] = {
         value = "WaterTotem.HealingStreamTotem"
       },
       ManaSpringTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             10497
@@ -16894,8 +16714,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       WindfuryTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             25359
@@ -16904,8 +16722,6 @@ ns.protoSchema['vanilla'] = {
         value = "AirTotem.WindfuryTotem"
       },
       GraceOfAirTotem = {
-        source = "generic_object",
-        source_file = "totem_inputs.ts",
         ids = {
           spell = {
             25359
@@ -16914,8 +16730,6 @@ ns.protoSchema['vanilla'] = {
         value = "AirTotem.GraceOfAirTotem"
       },
       InstantPoisonWeaponImbue = {
-        source = "generic_object",
-        source_file = "rogue_imbues.ts",
         ids = {
           item = {
             8928
@@ -16930,8 +16744,6 @@ ns.protoSchema['vanilla'] = {
         value = "WeaponImbue.InstantPoison"
       },
       DeadlyPoisonWeaponImbue = {
-        source = "generic_object",
-        source_file = "rogue_imbues.ts",
         ids = {
           item = {
             8985
@@ -16946,8 +16758,6 @@ ns.protoSchema['vanilla'] = {
         value = "WeaponImbue.DeadlyPoison"
       },
       WoundPoisonWeaponImbue = {
-        source = "generic_object",
-        source_file = "rogue_imbues.ts",
         ids = {
           item = {
             10922
@@ -16964,8 +16774,6 @@ ns.protoSchema['vanilla'] = {
     },
     buffs_debuffs = {
       SaygesDamage = {
-        source = "generic_object",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23768
@@ -16977,8 +16785,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SaygesAgility = {
-        source = "generic_object",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23736
@@ -16993,8 +16799,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SaygesIntellect = {
-        source = "generic_object",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23766
@@ -17009,8 +16813,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SaygesSpirit = {
-        source = "generic_object",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23738
@@ -17026,8 +16828,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SaygesStamina = {
-        source = "generic_object",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23737
@@ -17042,8 +16842,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ResistanceBuff = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         stats = {
           "Stat.StatFireResistance",
           "Stat.StatFrostResistance",
@@ -17055,15 +16853,11 @@ ns.protoSchema['vanilla'] = {
         }
       },
       StaminaBuff = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         configs = {
           "RAID_BUFFS_CONFIG"
         }
       },
       IntellectBuff = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         stats = {
           "Stat.StatIntellect"
         },
@@ -17072,8 +16866,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpiritBuff = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         stats = {
           "Stat.StatSpirit"
         },
@@ -17082,8 +16874,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MajorArmorDebuff = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         stats = {
           "Stat.StatAttackPower"
         },
@@ -17092,8 +16882,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       AttackPowerDebuff = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         stats = {
           "Stat.StatArmor"
         },
@@ -17102,8 +16890,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MeleeAttackSpeedDebuff = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         stats = {
           "Stat.StatArmor"
         },
@@ -17112,8 +16898,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       WarlockCursesConfig = {
-        source = "multi_icon",
-        source_file = "buffs_debuffs.ts",
         values = {
           "CurseOfElements",
           "CurseOfShadow"
@@ -17127,8 +16911,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       AllStatsBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             9885,
@@ -17140,8 +16922,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BlessingOfKings = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20217
@@ -17156,8 +16936,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BloodPactBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11767,
@@ -17169,8 +16947,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ArmorBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10293,
@@ -17189,8 +16965,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PhysDamReductionBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10408,
@@ -17209,8 +16983,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BlessingOfMight = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             25291
@@ -17230,8 +17002,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       StrengthBuffHorde = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16295,
@@ -17250,8 +17020,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BattleShoutBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12861,
@@ -17266,8 +17034,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GraceOfAir = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16295,
@@ -17286,8 +17052,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       TrueshotAuraBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20906
@@ -17302,8 +17066,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MeleeCritBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24932
@@ -17317,8 +17079,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpellCritBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24907
@@ -17332,8 +17092,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BlessingOfWisdom = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             25290
@@ -17351,8 +17109,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Thorns = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             9910
@@ -17366,8 +17122,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RetributionAura = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10301
@@ -17385,8 +17139,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SanctityAura = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20218
@@ -17404,8 +17156,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Innervate = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29166
@@ -17419,8 +17169,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PowerInfusion = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10060
@@ -17436,8 +17184,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BattleSquawkBuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23060
@@ -17451,8 +17197,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       RallyingCryOfTheDragonslayer = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             22888
@@ -17468,8 +17212,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SongflowerSerenade = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             15366
@@ -17480,8 +17222,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpiritOfZandalar = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24425
@@ -17492,8 +17232,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       WarchiefsBlessing = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             16609
@@ -17508,8 +17246,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FengusFerocity = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23768
@@ -17523,8 +17259,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MoldarsMoxie = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             22818
@@ -17538,8 +17272,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SlipKiksSavvy = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             22820
@@ -17553,8 +17285,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       CurseOfRecklessness = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11717
@@ -17568,8 +17298,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FaerieFire = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             9907
@@ -17583,8 +17311,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BleedDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             409828
@@ -17599,8 +17325,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JudgementOfTheCrusader = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20303
@@ -17618,8 +17342,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpellISBDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17803
@@ -17633,8 +17355,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpellScorchDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12873
@@ -17648,8 +17368,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpellWintersChillDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             28595
@@ -17663,8 +17381,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpellStormstrikeDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17364
@@ -17678,8 +17394,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SpellShadowWeavingDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             15334
@@ -17693,8 +17407,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MeleeHitDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24977
@@ -17708,8 +17420,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       HuntersMark = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             14325
@@ -17723,8 +17433,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JudgementOfWisdom = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20355
@@ -17743,8 +17451,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GiftOfArthas = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11374
@@ -17759,8 +17465,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       CrystalYield = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             15235
@@ -17775,8 +17479,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       JudgementOfLight = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20346
@@ -17794,8 +17496,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       DragonBreathChili = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             5509
@@ -17803,8 +17503,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PetAttackPowerConsumable = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12460
@@ -17812,8 +17510,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PetAgilityConsumable = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             10309
@@ -17821,8 +17517,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PetStrengthConsumable = {
-        source = "buff_input",
-        source_file = "consumables.ts",
         ids = {
           item = {
             12451
@@ -17830,8 +17524,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Stance = {
-        source = "buff_input",
-        source_file = "warrior_inputs.ts",
         ids = {
           spell = {
             6673
@@ -17839,8 +17531,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       WeaponImbue = {
-        source = "buff_input",
-        source_file = "warlock_inputs.ts",
         ids = {
           spell = {
             11735
@@ -17848,8 +17538,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Summon = {
-        source = "buff_input",
-        source_file = "warlock_inputs.ts",
         ids = {
           spell = {
             13701
@@ -17857,8 +17545,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MaxFireboltRank = {
-        source = "buff_input",
-        source_file = "warlock_inputs.ts",
         ids = {
           spell = {
             688
@@ -17866,8 +17552,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PetPoolMana = {
-        source = "buff_input",
-        source_file = "warlock_inputs.ts",
         ids = {
           spell = {
             3110
@@ -17875,8 +17559,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       GiftOfTheWild = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             9885
@@ -17884,8 +17566,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       DevotionAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10293
@@ -17893,8 +17573,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ShadowProtection = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10958
@@ -17902,8 +17580,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ShadowResistanceAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19896
@@ -17911,8 +17587,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       NatureResistanceTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10601
@@ -17920,8 +17594,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       AspectOfTheWild = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20190
@@ -17929,8 +17601,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FireResistanceAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19900
@@ -17938,8 +17608,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FireResistanceTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10538
@@ -17947,8 +17615,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FrostResistanceAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             19898
@@ -17956,8 +17622,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       FrostResistanceTotem = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10479
@@ -17965,8 +17629,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PowerWordFortitude = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10938
@@ -17974,8 +17636,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ScrollOfStamina = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             10307
@@ -17983,8 +17643,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BloodPact = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11767
@@ -17992,8 +17650,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ArcaneBrilliance = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10157
@@ -18001,8 +17657,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ScrollOfIntellect = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             10308
@@ -18010,8 +17664,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       DivineSpirit = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             27841
@@ -18019,8 +17671,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ScrollOfSpirit = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           item = {
             10306
@@ -18028,8 +17678,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BattleShout = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             25289
@@ -18037,8 +17685,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       TrueshotAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             20906
@@ -18046,8 +17692,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       LeaderOfThePack = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24932
@@ -18055,8 +17699,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       MoonkinAura = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24907
@@ -18064,8 +17706,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Innervates = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             29166
@@ -18073,8 +17713,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       PowerInfusions = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             10060
@@ -18082,8 +17720,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       BattleSquawk = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             23060
@@ -18091,8 +17727,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SlipkiksSavvy = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             22820
@@ -18100,8 +17734,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       SunderArmor = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11597
@@ -18109,8 +17741,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ExposeArmor = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11198
@@ -18118,8 +17748,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       CurseOfWeakness = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11708
@@ -18127,8 +17755,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       DemoralizingShout = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11556
@@ -18136,8 +17762,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       DemoralizingRoar = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             9898
@@ -18145,8 +17769,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Mangle = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             409828
@@ -18154,8 +17776,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ThunderClap = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             6343
@@ -18163,8 +17783,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Thunderfury = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             21992
@@ -18172,8 +17790,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       InsectSwarm = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             24977
@@ -18181,8 +17797,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ImprovedShadowBolt = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17803
@@ -18190,8 +17804,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ImprovedScorch = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             12873
@@ -18199,8 +17811,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       WintersChill = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             28595
@@ -18208,8 +17818,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       Stormstrike = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17364
@@ -18217,8 +17825,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       ShadowWeaving = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             15334
@@ -18226,8 +17832,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       CurseOfElements = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11722
@@ -18235,8 +17839,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       CurseOfShadow = {
-        source = "buff_input",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             17937
@@ -18244,8 +17846,6 @@ ns.protoSchema['vanilla'] = {
         }
       },
       CurseOfWeaknessDebuff = {
-        source = "config_array",
-        source_file = "buffs_debuffs.ts",
         ids = {
           spell = {
             11708,
@@ -18262,597 +17862,5 @@ ns.protoSchema['vanilla'] = {
     },
     consumables_unparsed = {
 
-    },
-    diagnostic = {
-      actions = {
-        total_found = 22,
-        matched = 22,
-        missing = {
-
-        },
-        missing_attributes = {
-          uiLabel = 0,
-          shortDescription = 0,
-          fields = 0
-        },
-        missing_attr_items = {
-          uiLabel = {
-
-          },
-          shortDescription = {
-
-          },
-          fields = {
-
-          }
-        }
-      },
-      values = {
-        total_found = 65,
-        matched = 65,
-        missing = {
-
-        },
-        missing_attributes = {
-          uiLabel = 0,
-          shortDescription = 0,
-          fields = 0
-        },
-        missing_attr_items = {
-          uiLabel = {
-
-          },
-          shortDescription = {
-
-          },
-          fields = {
-
-          }
-        }
-      }
-    },
-    go_diagnostic = {
-      files_scanned = 380,
-      functions_scanned = 2151,
-      registrations_found = 253,
-      registrations_parsed = 186,
-      registrations_missed = {
-        {
-          file = "sim/rogue/sinister_strike.go",
-          ["function"] = "registerSinisterStrikeSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_RogueSinisterStrike, 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType..."
-        },
-        {
-          file = "sim/rogue/slice_and_dice.go",
-          ["function"] = "registerSliceAndDice",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:    SpellCode_RogueSliceandDice, 		ActionID:     actionID, 		Flags:        core.SpellFlagAPL, 		MetricSplits: 6,  		EnergyCost: core.Ene..."
-        },
-        {
-          file = "sim/rogue/backstab.go",
-          ["function"] = "registerBackstabSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_RogueBackstab, 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: core..."
-        },
-        {
-          file = "sim/rogue/ghostly_strike.go",
-          ["function"] = "registerGhostlyStrikeSpell",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_RogueGhostlyStrike, 		ActionID:    ghostlyStrikeAura.ActionID, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: core..."
-        },
-        {
-          file = "sim/rogue/garrote.go",
-          ["function"] = "registerGarrote",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_RogueGarrote, 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: core...."
-        },
-        {
-          file = "sim/rogue/expose_armor.go",
-          ["function"] = "registerExposeArmorSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:    SpellCode_RogueExposeArmor, 		ActionID:     core.ActionID{SpellID: spellID}, 		SpellSchool:  core.SpellSchoolPhysical, 		DefenseType..."
-        },
-        {
-          file = "sim/rogue/hemorrhage.go",
-          ["function"] = "registerHemorrhageSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_RogueHemorrhage, 		ActionID:    actionID, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: core.DefenseTypeMelee,..."
-        },
-        {
-          file = "sim/rogue/poisons.go",
-          ["function"] = "registerDeadlyPoisonSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID, Tag: 100}, 		SpellSchool: core.SpellSchoolNature, 		DefenseType: core.DefenseTypeMagic, 		ProcMask:..."
-        },
-        {
-          file = "sim/rogue/poisons.go",
-          ["function"] = "makeInstantPoison",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolNature, 		DefenseType: core.DefenseTypeMagic, 		ProcMask:    core.Pro..."
-        },
-        {
-          file = "sim/rogue/poisons.go",
-          ["function"] = "makeDeadlyPoison",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: core.ActionID{SpellID: rogue.deadlyPoisonTick.SpellID}, 		Flags:    core.SpellFlagPoison | core.SpellFlagPassiveSpell | SpellFlagRoguePo..."
-        },
-        {
-          file = "sim/rogue/rupture.go",
-          ["function"] = "registerRupture",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:    SpellCode_RogueRupture, 		ActionID:     core.ActionID{SpellID: spellID}, 		SpellSchool:  core.SpellSchoolPhysical, 		DefenseType:  c..."
-        },
-        {
-          file = "sim/rogue/eviscerate.go",
-          ["function"] = "registerEviscerate",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:    SpellCode_RogueEviscerate, 		ActionID:     core.ActionID{SpellID: spellID}, 		SpellSchool:  core.SpellSchoolPhysical, 		DefenseType:..."
-        },
-        {
-          file = "sim/rogue/ambush.go",
-          ["function"] = "registerAmbushSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_RogueAmbush, 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: core.D..."
-        },
-        {
-          file = "sim/shaman/water_totems.go",
-          ["function"] = "newHealingStreamTotemSpellConfig",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: healId}, 		SpellSchool: core.SpellSchoolNature, 		ProcMask:    core.ProcMaskSpellHealing, 		Flags:       core...."
-        },
-        {
-          file = "sim/shaman/fire_totems.go",
-          ["function"] = "newSearingTotemSpellConfig",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: SearingTotemAttackSpellId[rank]}, 		SpellSchool: core.SpellSchoolFire, 		DefenseType: core.DefenseTypeMagic,..."
-        },
-        {
-          file = "sim/shaman/fire_totems.go",
-          ["function"] = "newMagmaTotemSpellConfig",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_ShamanMagmaTotem, 		ActionID:    core.ActionID{SpellID: MagmaTotemAoeSpellId[rank]}, 		SpellSchool: core.SpellSchoolFire,..."
-        },
-        {
-          file = "sim/shaman/fire_totems.go",
-          ["function"] = "newFireNovaTotemSpellConfig",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_ShamanFireNovaTotem, 		ActionID:    core.ActionID{SpellID: FireNovaTotemAoeSpellId[rank]}, 		SpellSchool: core.SpellSchoolF..."
-        },
-        {
-          file = "sim/shaman/frostbrand_weapon.go",
-          ["function"] = "newFrostbrandImbueSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellId}, 		SpellSchool: core.SpellSchoolFrost, 		DefenseType: core.DefenseTypeMagic, 		ProcMask:    core.Proc..."
-        },
-        {
-          file = "sim/shaman/flametongue_weapon.go",
-          ["function"] = "newFlametongueImbueSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolFire, 		DefenseType: core.DefenseTypeMagic, 		ProcMask:    core.ProcM..."
-        },
-        {
-          file = "sim/shaman/air_totems.go",
-          ["function"] = "newWindfuryTotemSpellConfig",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		ActionID: core.ActionID{SpellID: WindfuryBuffAuraId[rank]}, 		Label:    fmt.Sprintf("Windfury (Rank %d)", rank), 		Duration: time.Second * 10, 	}...]]
-        },
-        {
-          file = "sim/shaman/air_totems.go",
-          ["function"] = "newWindfuryTotemSpellConfig",
-          registration_index = 2,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		Label:    fmt.Sprintf("Windfury Trigger Dummy (Rank %d)", rank), 		Duration: time.Minute * 2, 		OnGain: func(_ *core.Aura, sim *core.Simulation) {...]]
-        },
-        {
-          file = "sim/shaman/lightning_shield.go",
-          ["function"] = "registerNewLightningShieldSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: procSpellId}, 		SpellSchool: core.SpellSchoolNature, 		DefenseType: core.DefenseTypeMagic, 		ProcMask:    core..."
-        },
-        {
-          file = "sim/shaman/lightning_shield.go",
-          ["function"] = "registerNewLightningShieldSpell",
-          registration_index = 2,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		Label:     fmt.Sprintf("Lightning Shield (Rank %d)", rank), 		ActionID:  core.ActionID{SpellID: spellId}, 		Duration:  time.Minute * 10, 		MaxStac...]]
-        },
-        {
-          file = "sim/shaman/lightning_shield.go",
-          ["function"] = "registerNewLightningShieldSpell",
-          registration_index = 3,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:  core.ActionID{SpellID: spellId}, 		SpellCode: SpellCode_ShamanLightningShield, 		ProcMask:  core.ProcMaskEmpty, 		Flags:     core.Spell..."
-        },
-        {
-          file = "sim/shaman/talents.go",
-          ["function"] = "makeFlurryAura",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		Label:     fmt.Sprintf("Flurry Proc (%d)", spellID), 		ActionID:  core.ActionID{SpellID: spellID}, 		Duration:  core.NeverExpires, 		MaxStacks: 3,...]]
-        },
-        {
-          file = "sim/shaman/talents.go",
-          ["function"] = "makeFlurryConsumptionTrigger",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		Label: fmt.Sprintf("Flurry Consume Trigger - %d", flurryAura.ActionID.SpellID), 		OnSpellHitDealt: func(_ *core.Aura, sim *core.Simulation, spell...]]
-        },
-        {
-          file = "sim/shaman/talents.go",
-          ["function"] = "registerManaTideTotemCD",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ // 		ActionID: core.ManaTideTotemActionID, // 		Flags:    core.SpellFlagNoOnCastComplete, // 		Cast: core.CastConfig{ // 			DefaultCast: core.Cast{..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newClaw",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellCode:   SpellCode_HunterPetClaw, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: core..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newBite",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellCode:   SpellCode_HunterPetBite, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: core..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newLightningBreath",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellCode:   SpellCode_HunterPetLightningBreath, 		SpellSchool: core.SpellSchoolNature, 		DefenseT..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newScreech",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellCode:   SpellCode_HunterPetScreech, 		SpellSchool: core.SpellSchoolPhysical, 		DefenseType: c..."
-        },
-        {
-          file = "sim/hunter/pet_abilities.go",
-          ["function"] = "newScorpidPoison",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellCode:   SpellCode_HunterPetScorpidPoison, 		SpellSchool: core.SpellSchoolNature, 		DefenseTyp..."
-        },
-        {
-          file = "sim/hunter/aspects.go",
-          ["function"] = "createImprovedHawkAura",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		Label:    auraLabel, 		ActionID: actionID, 		Duration: time.Second * 12, 		OnGain: func(aura *core.Aura, sim *core.Simulation) { 			aura.Unit.Mult..."
-        },
-        {
-          file = "sim/hunter/raptor_strike.go",
-          ["function"] = "newRaptorStrikeHitSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:   SpellCode_HunterRaptorStrikeHit, 		ActionID:    core.ActionID{SpellID: spellID}.WithTag(1), 		SpellSchool: core.SpellSchoolPhysical,..."
-        },
-        {
-          file = "sim/hunter/raptor_strike.go",
-          ["function"] = "makeQueueSpellsAndAura",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode: SpellCode_HunterRaptorStrike, 		ActionID:  hunter.RaptorStrike.WithTag(3), 		Flags:     core.SpellFlagMeleeMetrics | core.SpellFlagAPL,..."
-        },
-        {
-          file = "sim/priest/talents.go",
-          ["function"] = "applyShadowWeaving",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: core.ShadowWeavingSpellIDs[int(priest.Talents.ShadowWeaving)]}, 		Flags:       core.SpellFlagNoOnCastComplete..."
-        },
-        {
-          file = "sim/warlock/drain_life.go",
-          ["function"] = "getDrainLifeBaseConfig",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    actionID.WithTag(1), 		SpellSchool: core.SpellSchoolPhysical, 		ProcMask:    core.ProcMaskSpellHealing, 		Flags:       core.SpellFlag..."
-        },
-        {
-          file = "sim/warlock/curses.go",
-          ["function"] = "registerCurseOfRecklessnessSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolShadow, 		ProcMask:    core.ProcMaskEmpty, 		Flags:       core.SpellF..."
-        },
-        {
-          file = "sim/warlock/curses.go",
-          ["function"] = "registerCurseOfElementsSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolShadow, 		ProcMask:    core.ProcMaskEmpty, 		Flags:       core.SpellF..."
-        },
-        {
-          file = "sim/warlock/curses.go",
-          ["function"] = "registerCurseOfShadowSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellID}, 		SpellSchool: core.SpellSchoolShadow, 		ProcMask:    core.ProcMaskEmpty, 		Flags:       core.SpellF..."
-        },
-        {
-          file = "sim/warlock/death_coil.go",
-          ["function"] = "getDeathCoilBaseConfig",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    core.ActionID{SpellID: spellId}.WithTag(1), 		SpellSchool: core.SpellSchoolPhysical, 		ProcMask:    core.ProcMaskSpellHealing, 		Flag..."
-        },
-        {
-          file = "sim/warlock/talents.go",
-          ["function"] = "applyFirestone",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: spellId}, 			SpellSchool: core.SpellSchoolFire, 			DefenseType: core.DefenseTypeMagic, 			ProcMask:    core.P..."
-        },
-        {
-          file = "sim/warlock/imp.go",
-          ["function"] = "registerImpFireboltSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:      core.ActionID{SpellID: spellId}, 		SpellSchool:   core.SpellSchoolFire, 		DefenseType:   core.DefenseTypeMagic, 		ProcMask:      co..."
-        },
-        {
-          file = "sim/warlock/succubus.go",
-          ["function"] = "registerSuccubusLashOfPainSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:      core.ActionID{SpellID: spellId}, 		SpellSchool:   core.SpellSchoolShadow, 		DefenseType:   core.DefenseTypeMagic, 		ProcMask:..."
-        },
-        {
-          file = "sim/paladin/lay_on_hands.go",
-          ["function"] = "registerLayOnHands",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID:    actionID, 		ProcMask:    core.ProcMaskSpellHealing, 		Flags:       core.SpellFlagAPL | core.SpellFlagMCD, 		SpellSchool: core.SpellSc..."
-        },
-        {
-          file = "sim/paladin/hammer_of_wrath.go",
-          ["function"] = "registerHammerOfWrath",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: rank.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseType: core.DefenseTypeRanged, 			ProcMask:..."
-        },
-        {
-          file = "sim/paladin/consecration.go",
-          ["function"] = "registerConsecration",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: rank.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseType: core.DefenseTypeMagic, 			ProcMask:    c..."
-        },
-        {
-          file = "sim/paladin/sotc.go",
-          ["function"] = "registerSealOfTheCrusader",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: rank.judge.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseType: core.DefenseTypeMagic, 			ProcMask..."
-        },
-        {
-          file = "sim/paladin/sotc.go",
-          ["function"] = "registerSealOfTheCrusader",
-          registration_index = 3,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    aura.ActionID, 			SpellSchool: core.SpellSchoolHoly, 			Flags:       core.SpellFlagAPL,  			RequiredLevel: int(rank.level), 			Rank:..."
-        },
-        {
-          file = "sim/paladin/holy_wrath.go",
-          ["function"] = "registerHolyWrath",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			SpellCode:   SpellCode_PaladinHolyWrath, 			ActionID:    core.ActionID{SpellID: rank.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseTy..."
-        },
-        {
-          file = "sim/paladin/holy_shock.go",
-          ["function"] = "registerHolyShock",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: rank.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseType: core.DefenseTypeMagic, 			ProcMask:    c..."
-        },
-        {
-          file = "sim/paladin/divine_favor.go",
-          ["function"] = "registerDivineFavor",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		ActionID: aura.ActionID, 		Flags:    core.SpellFlagNoOnCastComplete, 		Cast: core.CastConfig{ 			CD: cd, 		}, 		ApplyEffects: func(sim *core.Simul..."
-        },
-        {
-          file = "sim/paladin/exorcism.go",
-          ["function"] = "registerExorcism",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: rank.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseType: core.DefenseTypeMagic, 			ProcMask:    c..."
-        },
-        {
-          file = "sim/paladin/soc.go",
-          ["function"] = "registerSealOfCommand",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			SpellCode:   SpellCode_PaladinJudgementOfCommand, // used in judgement.go 			ActionID:    core.ActionID{SpellID: rank.judge.spellID}, 			SpellSch..."
-        },
-        {
-          file = "sim/paladin/soc.go",
-          ["function"] = "registerSealOfCommand",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: rank.proc.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseType: core.DefenseTypeMelee, 			ProcMask:..."
-        },
-        {
-          file = "sim/paladin/soc.go",
-          ["function"] = "registerSealOfCommand",
-          registration_index = 4,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    aura.ActionID, 			SpellSchool: core.SpellSchoolHoly, 			Flags:       core.SpellFlagAPL,  			RequiredLevel: int(rank.level), 			Rank:..."
-        },
-        {
-          file = "sim/paladin/holy_shield.go",
-          ["function"] = "registerHolyShield",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: procID}, 			SpellCode:   SpellCode_PaladinHolyShieldProc, 			SpellSchool: core.SpellSchoolHoly, 			DefenseTyp..."
-        },
-        {
-          file = "sim/paladin/holy_shield.go",
-          ["function"] = "registerHolyShield",
-          registration_index = 3,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:      core.ActionID{SpellID: spellID}, 			SpellCode:     SpellCode_PaladinHolyShield, 			Flags:         core.SpellFlagAPL, 			RequiredLe..."
-        },
-        {
-          file = "sim/paladin/sor.go",
-          ["function"] = "registerSealOfRighteousness",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			SpellCode:   SpellCode_PaladinJudgementOfRighteousness, 			ActionID:    core.ActionID{SpellID: rank.judge.spellID}, 			SpellSchool: core.SpellSch..."
-        },
-        {
-          file = "sim/paladin/sor.go",
-          ["function"] = "registerSealOfRighteousness",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    core.ActionID{SpellID: rank.proc.spellID}, 			SpellSchool: core.SpellSchoolHoly, 			DefenseType: core.DefenseTypeMelee, 			ProcMask:..."
-        },
-        {
-          file = "sim/paladin/sor.go",
-          ["function"] = "registerSealOfRighteousness",
-          registration_index = 4,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID:    aura.ActionID, 			SpellSchool: core.SpellSchoolHoly, 			Flags:       core.SpellFlagAPL,  			RequiredLevel: int(rank.level), 			Rank:..."
-        },
-        {
-          file = "sim/paladin/blessing_of_sanctuary.go",
-          ["function"] = "registerBlessingOfSanctuary",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 				ActionID:    actionID, 				SpellSchool: core.SpellSchoolHoly, 				DefenseType: core.DefenseTypeMagic, 				ProcMask:    core.ProcMaskSpellDamage,..."
-        },
-        {
-          file = "sim/mage/arcane_missiles.go",
-          ["function"] = "getArcaneMissilesTickSpell",
-          registration_index = 1,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 		SpellCode:    SpellCode_MageArcaneMissilesTick, 		ActionID:     core.ActionID{SpellID: spellId}.WithTag(1), 		SpellSchool:  core.SpellSchoolArcane..."
-        },
-        {
-          file = "sim/mage/blizzard.go",
-          ["function"] = "newBlizzardSpellConfig",
-          registration_index = 2,
-          registration_type = "RegisterSpell",
-          reason = "Could not extract spellId",
-          block_preview = "{ 			ActionID: core.ActionID{SpellID: impId}, 			ProcMask: core.ProcMaskSpellProc, 			Flags:    SpellFlagMage | core.SpellFlagNoLogs | SpellFlagChillS..."
-        },
-        {
-          file = "sim/mage/ice_barrier.go",
-          ["function"] = "newIceBarrierSpellConfig",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		ActionID: core.ActionID{SpellID: spellID}, 		Label:    fmt.Sprintf("Ice Barrier (Rank %d)", rank), 		Duration: time.Minute, 		OnGain: func(aura *c...]]
-        },
-        {
-          file = "sim/warrior/talents.go",
-          ["function"] = "makeFlurryAura",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		Label:     fmt.Sprintf("Flurry Proc (%d)", spellID), 		ActionID:  core.ActionID{SpellID: spellID}, 		Duration:  core.NeverExpires, 		MaxStacks: 3,...]]
-        },
-        {
-          file = "sim/warrior/talents.go",
-          ["function"] = "makeFlurryConsumptionTrigger",
-          registration_index = 1,
-          registration_type = "RegisterAura",
-          reason = "Could not extract spellId",
-          block_preview = [[{ 		Label: fmt.Sprintf("Flurry Consume Trigger - %d", flurryAura.ActionID.SpellID), 		OnSpellHitDealt: func(_ *core.Aura, sim *core.Simulation, spell...]]
-        }
-      }
     }
   }
