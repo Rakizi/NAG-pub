@@ -240,7 +240,7 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.WINDWALKER, "Monk Windwalker - DP
     or (NAG:CurrentHealth()*1.2 >= NAG:CurrentHealth("target")) and NAG:Cast(126456)
     or ((NAG:NumberTargets() == 2) and (NAG:AuraNumStacks(138228) < 1)) and NAG:Cast(138228)
     or ((NAG:NumberTargets() > 2) and (NAG:AuraNumStacks(138228) < 2)) and NAG:Cast(138228)
-    or (NAG:AuraIsActive(2825) or NAG:AuraIsActive(123904) or (((NAG:SpellTimeToReady(123904) + 30) > NAG:RemainingTime()) and (NAG:AuraRemainingTime(1247275) > 12.0)) or (NAG:AuraIsActive(1247275) and NAG:AuraIsActive(138228) and (NAG:AuraNumStacks(138228) == math.min((NAG:NumberTargets() - 1), 2)))) and NAG:Cast(76089)
+    or (NAG:AuraIsActive(2825) or NAG:AuraIsActive(123904) or (((NAG:SpellTimeToReady(123904) + 30) > NAG:RemainingTime()) and (NAG:AuraRemainingTime(1247275) > 12.0)) or (NAG:AuraIsActive(1247275) and NAG:AuraIsActive(138228) and (NAG:AuraNumStacks(138228) == math.min((NAG:NumberTargets() - 1), 2)))) and NAG:GetBattlePotion() and NAG:Cast(NAG:GetBattlePotion())
     or ((NAG:CurrentChi() < NAG:MaxChi()) and NAG:AuraIsActiveWithReactionTime(121286) and NAG:AuraIsInactiveWithReactionTime(129914)) and NAG:Cast(121283)
     or (((NAG:CurrentChi() <= (NAG:MaxChi() - 2)) and NAG:AuraIsActive(1247275) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4)) or ((NAG:CurrentChi() <= (NAG:MaxChi() - 2)) and (NAG:EnergyTimeToTarget(NAG:MaxEnergy()) > 4))) and NAG:Cast(115399)
     or (((NAG:AuraNumStacks(1247279) >= 18) or ((NAG:CurrentChi() >= 2) and ((NAG:AuraNumStacks(1247279) >= 13) or (NAG:RemainingTime() < 30.0) or ((NAG:AuraNumStacks(1247279) >= 10)) or ((NAG:CurrentTime() < 10) and (NAG:AuraNumStacks(1247279) >= 7)))))) and NAG:Cast(1247275)
