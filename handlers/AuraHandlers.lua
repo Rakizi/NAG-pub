@@ -424,8 +424,8 @@ function NAG:FindAura(unit, spellId, isGlobal)
         -- Classic API - direct lookup by name
         local spellName = spell.name
         if spellName then
-            -- TODO: handling the case where monks have two buffs with the same name: Tigereye brew / Elusive brew
-            local skipNameMatch = (ns.Version:IsMoP() and (spellId == 116740 or spellId == 125195 or spellId == 115308 or spellId == 128939))
+            -- TODO: handling the case where monks have two buffs with the same name: Tigereye brew / Elusive brew 1247279 1247275
+            local skipNameMatch = (ns.Version:IsMoP() and (spellId == 116740 or spellId == 125195 or spellId == 115308 or spellId == 128939 or spellId == 1247279 or spellId == 1247275))
             local i = 1
             while true do
                 local name, icon, count, debuffType, duration, expirationTime,
