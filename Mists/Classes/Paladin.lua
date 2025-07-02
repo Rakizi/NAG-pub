@@ -127,35 +127,39 @@ ns.AddRotationToDefaults(defaults,
             { NAG:Cast(76095), -100 }
         },
         rotationString = [[
-    (NAG:AuraIsActiveWithReactionTime(2825) or (NAG:RemainingTime() <= 40.0) or (NAG:AuraIsActive(86700) and NAG:AuraIsActive(31884))) and NAG:Cast(76095)
+    ((not NAG:AuraIsActive(31801)) and (NAG:NumberTargets() <= 3)) and NAG:Cast(31801)
+        or ((not NAG:AuraIsActive(20154)) and (NAG:NumberTargets() >= 4)) and NAG:Cast(20154)
+        or ((not NAG:AuraIsActive(20154)) and (not NAG:AuraIsActive(31801))) and NAG:Cast(31801)
+        or (NAG:AuraIsActiveWithReactionTime(2825) or (NAG:RemainingTime() <= 40.0) or (NAG:AuraIsActive(86700) and NAG:AuraIsActive(31884))) and NAG:Cast(76095)
         or (((not NAG:AuraIsActive(84963)) or (NAG:AuraRemainingTime(84963) <= 2.0)) and ((NAG:CurrentGenericResource() >= 3) or (NAG:RemainingTime() < (NAG:CurrentGenericResource() * 20)))) and NAG:Cast(84963)
         or NAG:AuraIsActive(84963) and NAG:Cast(31884)
         or NAG:AuraIsActive(31884) and NAG:Cast(86698)
-        or (NAG:AuraIsActive(84963) and (NAG:CurrentGenericResource() <= 2)) and NAG:Cast(105809)
+        or (NAG:AuraIsActive(84963) and (NAG:CurrentGenericResource() <= 2) and NAG:SpellIsKnown(105809)) and NAG:Cast(105809)
         or (NAG:AuraIsActive(84963) and ((not NAG:AuraIsActive(86700)) or (NAG:AuraNumStacks(86700) == 12))) and NAG:Cast(82174)
         or NAG:AutocastOtherCooldowns()
-        or (NAG:AuraIsActive(84963) and ((not NAG:AuraIsActive(86700)) or (NAG:AuraNumStacks(86700) == 12))) and NAG:Cast(114916)
-        or (NAG:AuraIsActive(84963) and ((not NAG:AuraIsActive(86700)) or (NAG:AuraNumStacks(86700) == 12))) and NAG:Cast(114158)
+        or (NAG:SpellIsKnown(28730) and (NAG:CurrentManaPercent() < 90)) and NAG:Cast(28730)
+        or (NAG:AuraIsActive(84963) and ((not NAG:AuraIsActive(86700)) or (NAG:AuraNumStacks(86700) == 12)) and NAG:SpellIsKnown(114916)) and NAG:Cast(114916)
+        or (NAG:AuraIsActive(84963) and ((not NAG:AuraIsActive(86700)) or (NAG:AuraNumStacks(86700) == 12)) and NAG:SpellIsKnown(114158)) and NAG:Cast(114158)
         or (((NAG:NumberTargets() >= 2) and ((NAG:CurrentGenericResource() == 5) or (NAG:AuraIsKnown(105809) and NAG:AuraIsActive(105809) and (NAG:CurrentGenericResource() >= 3)))) or (NAG:AuraIsKnown(144593) and NAG:AuraIsActive(144595) and (NAG:CurrentGenericResource() == 5))) and NAG:Cast(53385)
         or ((NAG:CurrentGenericResource() == 5) or (NAG:AuraIsKnown(105809) and NAG:AuraIsActive(105809) and (NAG:CurrentGenericResource() >= 3)) or (NAG:AuraIsKnown(90174) and NAG:AuraIsActive(90174) and (NAG:AuraRemainingTime(90174) < 4.0))) and NAG:Cast(85256)
-        or (NAG:IsExecutePhase(20) and NAG:Cast(24275))
-        or ((NAG:SpellTimeToReady(24275) > 0) and (NAG:SpellTimeToReady(24275) <= 0.2)) and NAG:Wait(NAG:SpellTimeToReady(24275))
+        or (NAG:IsExecutePhase(20) or NAG:AuraIsActive(31884)) and NAG:Cast(24275)
         or (NAG:AuraIsKnown(144593) and NAG:AuraIsActive(31884) and NAG:AuraIsActive(144595)) and NAG:Cast(53385)
         or NAG:AuraIsActive(31884) and NAG:Cast(85256)
         or (NAG:NumberTargets() >= 4) and NAG:Cast(53595)
+        or NAG:AuraIsActive(31884) and NAG:Cast(20271)
         or NAG:Cast(35395)
-        or ((NAG:SpellTimeToReady(35395) > 0) and (NAG:SpellTimeToReady(35395) <= 0.2)) and NAG:Wait(NAG:SpellTimeToReady(35395))
         or (NAG:AuraIsKnown(138159) and NAG:AuraIsKnown(122028) and (NAG:NumberTargets() >= 2) and (NAG:NumberTargets() <= 4)) and NAG:Cast(879)
-        or NAG:Cast(20271)
-        or ((NAG:SpellTimeToReady(20271) > 0) and (NAG:SpellTimeToReady(20271) <= 0.2)) and NAG:Wait(NAG:SpellTimeToReady(20271))
+        or (NAG:AuraIsActive(31801) or NAG:AuraIsActive(20154)) and NAG:Cast(20271)
         or (NAG:AuraIsKnown(144593) and NAG:AuraIsActive(144595)) and NAG:Cast(53385)
         or (NAG:AuraIsKnown(90174) and NAG:AuraIsActive(90174)) and NAG:Cast(85256)
-        or NAG:Cast(879)
-        or ((NAG:SpellTimeToReady(879) > 0) and (NAG:SpellTimeToReady(879) <= 0.2)) and NAG:Wait(NAG:SpellTimeToReady(879))
+        or NAG:SpellIsReady(879) and NAG:Cast(879)
         or (NAG:AuraIsKnown(138164) and NAG:AuraIsActive(138169) and (NAG:NumberTargets() >= 2)) and NAG:Cast(85256)
         or ((NAG:NumberTargets() >= 2) and (NAG:AuraRemainingTime(84963) > 4.0)) and NAG:Cast(53385)
         or (NAG:AuraRemainingTime(84963) > 4.0) and NAG:Cast(85256)
-        or NAG:Cast(114852)
+        or NAG:SpellIsKnown(114852) and NAG:Cast(114852)
+        or ((NAG:SpellTimeToReady(53595) <= NAG:SpellTimeToReady(879)) and (NAG:SpellTimeToReady(53595) <= NAG:SpellTimeToReady(20271)) and ((NAG:IsExecutePhase(20) or NAG:AuraIsActive(31884)) and (NAG:SpellTimeToReady(53595) <= NAG:SpellTimeToReady(24275))) and (NAG:NumberTargets() >= 4) and (NAG:CurrentGenericResource() < 3)) and NAG:Cast(53595)
+        or ((NAG:SpellTimeToReady(35395) <= NAG:SpellTimeToReady(879)) and (NAG:SpellTimeToReady(35395) <= NAG:SpellTimeToReady(20271)) and ((NAG:IsExecutePhase(20) or NAG:AuraIsActive(31884)) and (NAG:SpellTimeToReady(35395) <= NAG:SpellTimeToReady(24275))) and (NAG:NumberTargets() <= 3) and (NAG:CurrentGenericResource() < 3)) and NAG:Cast(35395)
+        or ((NAG:SpellTimeToReady(20271) < NAG:SpellTimeToReady(35395)) and (NAG:SpellTimeToReady(20271) < NAG:SpellTimeToReady(879)) and ((NAG:IsExecutePhase(20) or NAG:AuraIsActive(31884)) and (NAG:SpellTimeToReady(35395) < NAG:SpellTimeToReady(24275))) and (NAG:CurrentGenericResource() < 3)) and NAG:Cast(20271)
         ]],
 
         -- New action-based format
@@ -170,8 +174,8 @@ ns.AddRotationToDefaults(defaults,
 
         -- Optional metadata
         glyphs = {41097, 41092, 83107},
-        lastModified = "06/19/2025",
-        author = "APLParser"
+        lastModified = "07/01/2025",
+        author = "@Surveillant"
     }
 )
 
