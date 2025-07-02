@@ -74,6 +74,8 @@ local type = type
 local tostring = tostring
 local tonumber = tonumber
 
+local DRUID_SOLAR_ECLIPSE_SPELL_ID = 48517
+local DRUID_LUNAR_ECLIPSE_SPELL_ID = 48518
 -- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 --- Determine the current Eclipse phase for a Balance Druid.
@@ -81,25 +83,27 @@ local tonumber = tonumber
 --- @usage NAG:CurrentEclipsePhase() == "SolarPhase"
 --- @return string The current Eclipse phase ("SolarPhase", "LunarPhase", or "NeutralPhase").
 function NAG:DruidCurrentEclipsePhase()
-    -- Verify these spells exist in our table
-    local spell1 = DataManager:Get(48517, DataManager.EntityTypes.SPELL)
-    local spell2 = DataManager:Get(48518, DataManager.EntityTypes.SPELL)
-    if not spell1 or not spell2 then
-        self:Info("Missing required Eclipse spells in spell table")
-        return self.lastEclipsePhase or "NeutralPhase"
-    end
+    local ECLIPSE_POWER_TYPE = Enum.PowerType.Balance or 26
+    local power = UnitPower("player", ECLIPSE_POWER_TYPE)
+    -- Use your actual spell IDs for Solar/Lunar Eclipse buffs
+    local hasSolar = self:IsActiveAura(DRUID_SOLAR_ECLIPSE_SPELL_ID)
+    local hasLunar = self:IsActiveAura(DRUID_LUNAR_ECLIPSE_SPELL_ID)
 
-    if self:IsActiveAura(48517) then
-        self.lastEclipsePhase = "SolarPhase"
+    if hasSolar and power > 0 then
         return "SolarPhase"
-    elseif self:IsActiveAura(48518) then
-        self.lastEclipsePhase = "LunarPhase"
+    elseif hasLunar and power < 0 then
         return "LunarPhase"
-    elseif self.lastEclipsePhase == "NeutralPhase" then
+    elseif power == 0 then
         return "NeutralPhase"
     else
-        --self:Debug(format("Returning last known Eclipse phase: %s", self.lastEclipsePhase))
-        return self.lastEclipsePhase
+        -- Fallback: use buff presence if power is not exactly 0
+        if hasSolar then
+            return "SolarPhase"
+        elseif hasLunar then
+            return "LunarPhase"
+        else
+            return "NeutralPhase"
+        end
     end
 end
 NAG.CurrentEclipsePhase = NAG.DruidCurrentEclipsePhase

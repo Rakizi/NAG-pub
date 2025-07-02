@@ -914,7 +914,8 @@ NAG.WarlockCurrentSoulShards = NAG.CurrentSoulShards
 --- @usage (NAG:CurrentLunarEnergy() >= x)
 --- @return number The current lunar energy of the player
 function NAG:CurrentLunarEnergy()
-    return abs(UnitPower("player", Enum.PowerType.Balance))
+    local power = UnitPower("player", Enum.PowerType.Balance or 8)
+    return power < 0 and -power or 0
 end
 
 --- Get the current solar energy of the player
@@ -922,7 +923,8 @@ end
 --- @usage (NAG:CurrentSolarEnergy() >= x)
 --- @return number The current solar energy of the player
 function NAG:CurrentSolarEnergy()
-    return abs(UnitPower("player", Enum.PowerType.Balance))
+    local power = UnitPower("player", Enum.PowerType.Balance or 8)
+    return power > 0 and power or 0
 end
 
 --- Get the current holy power of the player
