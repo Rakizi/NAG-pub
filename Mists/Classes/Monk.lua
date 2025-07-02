@@ -23,12 +23,13 @@ defaults.class.specSpellLocations = {
     [CLASS_SPECS.BREWMASTER] = {
         ABOVE = {
             115203, -- Fortifying Brew
+            115308,  -- Elusive Brew
+            119582,  -- Purifying Brew
             115176, -- Zen Meditation
             115213, -- Avert Harm
             115295, -- Guard
             122278, -- Dampen Harm
             122783, -- Diffuse Magic
-            115308  -- Elusive Brew
         },
         BELOW = {
             123986, -- Chi Burst
@@ -46,7 +47,6 @@ defaults.class.specSpellLocations = {
             123986, -- Chi Burst
             138228, 137639,
             115181,  -- Breath of Fire
-            115072,
         },
         LEFT = {
             101643, -- Transcendence
@@ -68,7 +68,8 @@ defaults.class.specSpellLocations = {
             115078  -- Paralysis
         },
         AOE = {
-            101546
+            101546,
+            116847
         }
     },
     [CLASS_SPECS.MISTWEAVER] = {
@@ -103,7 +104,8 @@ defaults.class.specSpellLocations = {
 
         },
         AOE = {
-            101546
+            101546,
+            116847
         }
     }
 }
@@ -124,26 +126,30 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.BREWMASTER, "Monk Brewmaster", {
         { NAG:GetBattlePotion(), 1.5 }
     },
     rotationString = [[
-(NAG:AuraNumStacks(128938) >= 6 and NAG:AuraIsInactiveWithReactionTime(115308)) and NAG:Cast(115308)
-   or ((NAG:CurrentChi() == 0) or ((NAG:CurrentChi() <= 1) and (NAG:SpellTimeToReady(121253) >= 1.5))) and NAG:Cast(115399)
-   or ((NAG:AuraRemainingTime(115307) > 2) and (NAG:CurrentChi() >= 3) and NAG:AuraIsActive(118636) and ((NAG:AuraNumStacks(120267) >= (NAG:ItemLevelThreshold(50000, 520) ) or NAG:CurrentHealthPercent() < 65)) and NAG:Cast(115295))
-   or ((NAG:SpellTimeToReady(121253) <= 1.5) and (NAG:CurrentChi() >= (NAG:MaxChi() - 1))) and NAG:Cast(100784)
-   or NAG:Cast(121253)
-   or NAG:Cast(116847)
-   or ((NAG:AuraRemainingTime(115307) <= 2) and (NAG:CurrentChi() <= 1)) and NAG:Cast(115072)
-   or ((NAG:AuraRemainingTime(115307) <= 2) and (NAG:CurrentChi() <= 1)) and NAG:Cast(100780)
-   or ((NAG:AuraRemainingTime(115307) <= 1.5) or ((NAG:SpellTimeToReady(121253) <= 2) and (NAG:CurrentChi() >= (NAG:MaxChi() - 1)))) and NAG:Cast(100784)
-   or NAG:Cast(123904)
-   or (NAG:AuraNumStacks(124255) >= 150000) and NAG:Cast(119582)
-   or (NAG:CurrentEnergy() >= 80) and NAG:Cast(115072)
-   or (NAG:CurrentEnergy() >= 80) and NAG:Cast(100780)
-   or (NAG:AuraRemainingTime(125359) <= 1.5) and NAG:Cast(100787)
-   or (NAG:CurrentChi() >= 3) and NAG:Cast(100784)
-   or NAG:Cast(115098)
-   or NAG:Cast(123986)
-   or (NAG:AuraNumStacks(124081) < 2) and NAG:Cast(124081)
-   or NAG:Cast(100787)
-    ]],
+NAG:AutocastOtherCooldowns()
+    or ((NAG:SpellTimeToReady(123904) >= 30) or (not NAG:SpellIsKnown(123904))) and NAG:Cast(126734)
+    or (not NAG:SpellIsKnown(123904)) and NAG:Cast(76089)
+    or ((NAG:AuraNumStacks(128938) >= 6) and (not NAG:AuraIsActive(115308))) and NAG:Cast(115308)
+    or (((NAG:MonkCurrentChi() <= 2) and (NAG:SpellTimeToReady(121253) >= 2.0) and (NAG:CurrentEnergy() <= (NAG:MaxEnergy() - (NAG:EnergyRegenPerSecond() * 2)))) or (NAG:MonkCurrentChi() == 0)) and NAG:Cast(115399)
+    or ((NAG:AuraRemainingTime(115307) > 2.0) and NAG:AuraIsActive(118636)) and NAG:Cast(115295)
+    or ((NAG:SpellTimeToReady(121253) <= 1.5) and (NAG:MonkCurrentChi() >= (NAG:MonkMaxChi() - 1))) and NAG:Cast(100784)
+    or NAG:Cast(121253)
+    or ((NAG:AuraRemainingTime(115307) <= 2.0) and (NAG:MonkCurrentChi() <= 1) and (NAG:NumberTargets() >= 3)) and NAG:Cast(116847)
+    or ((NAG:AuraRemainingTime(115307) <= 2.0) and (NAG:MonkCurrentChi() <= 1) and (NAG:CurrentHealthPercent() < 0.85)) and NAG:Cast(115072)
+    or ((NAG:AuraRemainingTime(115307) <= 2.0) and (NAG:MonkCurrentChi() <= 1)) and NAG:Cast(100780)
+    or ((NAG:AuraRemainingTime(115307) <= 1.5) or ((NAG:SpellTimeToReady(121253) <= 2.0) and (NAG:MonkCurrentChi() >= (NAG:MonkMaxChi() - 1)))) and NAG:Cast(100784)
+    or (NAG:SpellIsReady(123904) or NAG:AuraIsActive(76089) or NAG:AuraIsActive(126734)) and NAG:Cast(123904)
+    or ((NAG:BrewmasterMonkCurrentStaggerPercent() >= 0.1) and (NAG:AuraRemainingTime(124255) >= 5.0)) and NAG:Cast(119582)
+    or ((NAG:CurrentEnergy() >= (NAG:MaxEnergy() - (2.5 * NAG:EnergyRegenPerSecond()))) and (NAG:NumberTargets() >= 3)) and NAG:Cast(116847)
+    or ((NAG:CurrentEnergy() >= (NAG:MaxEnergy() - (2.5 * NAG:EnergyRegenPerSecond()))) and (NAG:CurrentHealthPercent() < 0.85)) and NAG:Cast(115072)
+    or ((NAG:CurrentEnergy() >= (NAG:MaxEnergy() - (2.5 * NAG:EnergyRegenPerSecond()))) and (NAG:NumberTargets() >= 3)) and NAG:Cast(101546)
+    or (NAG:CurrentEnergy() >= (NAG:MaxEnergy() - (2.5 * NAG:EnergyRegenPerSecond()))) and NAG:Cast(100780)
+    or (NAG:AuraRemainingTime(125359) <= 1.5) and NAG:Cast(100787)
+    or NAG:Cast(115098)
+    or NAG:Cast(123986)
+    or NAG:Cast(124081)
+    or (NAG:MonkCurrentChi() >= (NAG:MonkMaxChi() - 1)) and NAG:Cast(100784)
+    or NAG:Cast(100787)    ]],
 
     -- MoP talents structure (one per tier)
     talents = {
@@ -172,7 +178,8 @@ ns.AddRotationToDefaults(defaults, CLASS_SPECS.BREWMASTER, "Monk Brewmaster", {
             123904, -- Glyph of Zen Flight
             123986  -- Glyph of Zen Meditation
         }
-    }
+    },
+    author = "@Mantipper"
 })
 
 -- Mistweaver Healer Rotation

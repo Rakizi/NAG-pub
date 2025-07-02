@@ -714,3 +714,17 @@ function NAG:ActivateAllStatBuffProcAuras()
 end
 
 NAG.ActivateAura = NAG.Cast
+
+--- Checks if the player is currently in a raid group.
+--- @return boolean True if the player is in a raid, false otherwise.
+--- @usage NAG:PlayerIsInRaid()
+function NAG:PlayerIsInRaid()
+    return UnitInRaid("player") or false
+end
+
+--- Checks if the player is currently in a party (non-raid) group.
+--- @return boolean True if the player is in a party, false otherwise.
+--- @usage NAG:PlayerIsInGroup()
+function NAG:PlayerIsInGroup()
+    return UnitInParty("player") or false
+end

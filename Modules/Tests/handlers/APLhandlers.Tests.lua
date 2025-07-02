@@ -26,6 +26,8 @@ function APLHandlersTests:setup()
     self.originalIsUsableSpell = _G.IsUsableSpell
     self.originalCLASS = NAG.CLASS
     self.originalUnitExists = _G.UnitExists
+    self.original_UnitInRaid = UnitInRaid
+    self.original_UnitInParty = UnitInParty
 end
 
 function APLHandlersTests:teardown()
@@ -36,6 +38,8 @@ function APLHandlersTests:teardown()
     _G.IsUsableSpell = self.originalIsUsableSpell
     NAG.CLASS = self.originalCLASS
     _G.UnitExists = self.originalUnitExists
+    _G.UnitInRaid = self.original_UnitInRaid
+    _G.UnitInParty = self.original_UnitInParty
 end
 
 ----------------------------------------------------------------------
@@ -156,6 +160,26 @@ function APLHandlersTests:test_SpellCanCast_ReturnsTrueForUsableAndReadySpells()
 
     -- Cleanup
     NAG.HasFocus = originalHasFocus
+end
+
+function APLHandlersTests:test_PlayerIsInRaid_ReturnsTrueIfInRaid()
+    _G.UnitInRaid = function(unit) return unit == "player" and true or false end
+    Assert.isTrue(NAG:PlayerIsInRaid(), "Should return true if player is in raid")
+end
+
+function APLHandlersTests:test_PlayerIsInRaid_ReturnsFalseIfNotInRaid()
+    _G.UnitInRaid = function(unit) return false end
+    Assert.isFalse(NAG:PlayerIsInRaid(), "Should return false if player is not in raid")
+end
+
+function APLHandlersTests:test_PlayerIsInGroup_ReturnsTrueIfInParty()
+    _G.UnitInParty = function(unit) return unit == "player" and true or false end
+    Assert.isTrue(NAG:PlayerIsInGroup(), "Should return true if player is in party")
+end
+
+function APLHandlersTests:test_PlayerIsInGroup_ReturnsFalseIfNotInParty()
+    _G.UnitInParty = function(unit) return false end
+    Assert.isFalse(NAG:PlayerIsInGroup(), "Should return false if player is not in party")
 end
 
 ----------------------------------------------------------------------
