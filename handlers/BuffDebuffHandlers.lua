@@ -21,6 +21,9 @@ local APL = NAG:GetModule("APL")
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
+--- @type Types|AceModule|ModuleBase
+local Types = NAG:GetModule("Types")
+
 -- ======= WoW API =======
 local UnitAura = ns.UnitAuraUnified
 local GetSpellCooldown = ns.GetSpellCooldownUnified
