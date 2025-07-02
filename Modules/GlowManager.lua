@@ -1,17 +1,12 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Manages custom glow effects for UI frames using LibCustomGlow-1.0
-    STATUS: Initial implementation
-    TODO: Add more glow types and configuration options
-]]
+--- @module "GlowManager"
+--- Manages custom glow effects for UI frames using LibCustomGlow-1.0
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
----@diagnostic disable: undefined-global, undefined-field
-
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -28,25 +23,25 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Constants
 local GLOW_TYPES = {
@@ -97,9 +92,10 @@ local GlowManager = NAG:CreateModule("GlowManager", defaults, {
 -- Module variables
 GlowManager.activeGlows = {}
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     --- Cleans up all active glow effects
+
     --- @param self GlowManager
     function GlowManager:ModuleInitialize()
         -- Initialize module state
@@ -113,9 +109,10 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     --- Event handler for PLAYER_ENTERING_WORLD
+
     --- @param self GlowManager
     function GlowManager:PLAYER_ENTERING_WORLD()
         -- Cleanup any lingering glows
@@ -130,7 +127,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 --- Determines the best glow type for a frame
 --- @param frame Frame The frame to check

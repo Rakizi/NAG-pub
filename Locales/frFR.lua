@@ -63,6 +63,8 @@ if L then
         L["bothOutput"] = "Débogage et chat"
         L["btk"] = "BTK"
         L["btkDesc"] = "Fonctionnalités du module Bent The Knee"
+        L["btkDisableEmotes"] = "Désactiver les émotes Plier le Genou"
+        L["btkDisableEmotesDesc"] = "Désactiver la fonctionnalité d'émote automatique qui fait s'agenouiller ou saluer les autres joueurs quand les utilisateurs godtier gagnent/perdent des buffs (Godtier uniquement)"
         L["buffCheckInterval"] = "Intervalle de vérification des buffs"
         L["buffCheckIntervalDesc"] = "Fréquence de vérification des buffs de raid manquants (en secondes)"
         L["buffSuggestionThreshold"] = "Seuil de suggestion de buff"
@@ -761,7 +763,7 @@ if L then
         L["resetClassDesc"] = "Réinitialiser les paramètres de classe à leurs valeurs par défaut"
         L["resetToDefault"] = "Réinitialiser par Défaut"
         L["resetConfirmation"] = "Êtes-vous sûr de vouloir réinitialiser '%s' aux paramètres par défaut ?\nCette action ne peut pas être annulée."
-        
+
         -- Types.lua Stats
         L["strength"] = "Force"
         L["agility"] = "Agilité"
@@ -790,14 +792,14 @@ if L then
         L["health"] = "Santé"
         L["mana"] = "Mana"
         L["mp5"] = "Mana toutes les 5 secondes"
-        
+
         -- Types.lua Categories
         L["character"] = "Personnage"
         L["buffs"] = "Améliorations"
         L["debuffs"] = "Affaiblissements"
         L["combat"] = "Combat"
         L["class"] = "Classe"
-        
+
         -- Types.lua Buff Types
         L["stats"] = "Statistiques"
         L["spell_resistance"] = "Résistance aux Sorts"
@@ -814,7 +816,7 @@ if L then
         L["major_mana"] = "Mana Majeure"
         L["armor"] = "Armure"
         L["heroism"] = "Héroïsme"
-        
+
         -- Types.lua Debuff Types
         L["spell_damage"] = "Dégâts des Sorts"
         L["spell_crit"] = "Critique des Sorts"
@@ -824,7 +826,7 @@ if L then
         L["physical_damage_reduction"] = "Réduction des Dégâts Physiques"
         L["attack_speed"] = "Vitesse d'Attaque"
         L["healing_reduction"] = "Réduction des Soins"
-        
+
         -- Types.lua Combat Types
         L["unknown"] = "Inconnu"
         L["any"] = "Tous"
@@ -832,7 +834,7 @@ if L then
         L["main_hand"] = "Main Principale"
         L["off_hand"] = "Main Gauche"
         L["ranged"] = "À Distance"
-        
+
         -- Types.lua Class Types
         L["humanoid"] = "Humanoïde"
         L["ghost_wolf"] = "Loup Fantôme"
@@ -849,14 +851,14 @@ if L then
         L["blood"] = "Sang"
         L["frost"] = "Givre"
         L["unholy"] = "Impie"
-        
+
         -- Types.lua Rune Types
         L["rune_unknown"] = "Rune Inconnue"
         L["rune_blood"] = "Rune de Sang"
         L["rune_frost"] = "Rune de Givre"
         L["rune_unholy"] = "Rune Impie"
         L["rune_death"] = "Rune de Mort"
-        
+
         -- Types.lua Rune Slots
         L["slot_unknown"] = "Emplacement Inconnu"
         L["slot_left_blood"] = "Rune de Sang Gauche"
@@ -865,18 +867,18 @@ if L then
         L["slot_right_frost"] = "Rune de Givre Droite"
         L["slot_left_unholy"] = "Rune Impie Gauche"
         L["slot_right_unholy"] = "Rune Impie Droite"
-        
+
         -- Types.lua Eclipse Phases
         L["unknown_phase"] = "Phase Inconnue"
         L["neutral_phase"] = "Phase Neutre"
         L["solar_phase"] = "Phase Solaire"
         L["lunar_phase"] = "Phase Lunaire"
-        
+
         -- Types.lua Swap Sets
         L["swap_set_unknown"] = "Ensemble d'Échange Inconnu"
         L["swap_set_main"] = "Ensemble d'Échange Principal"
         L["swap_set_swap1"] = "Ensemble d'Échange 1"
-        
+
         -- Types.lua Mob Types
         L["none"] = "Aucun"
         L["aberration"] = "Aberration"
@@ -1031,9 +1033,7 @@ if L then
     end
 end
 
---===================================================================================================
--- DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE
---===================================================================================================
+-- ~~~~~~~~~~ DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE ~~~~~~~~~~
 
 if L then
     do --== Class Names/Specializations - These should match ingame class/specialization localized names ==--

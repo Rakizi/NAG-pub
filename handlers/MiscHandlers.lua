@@ -1,1076 +1,756 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "APL_Handlers"
+--- Miscellaneous handlers for the NAG addon.
+---
+--- This module includes handlers for various game events, player states,
+--- and other conditions that don't fit into more specific categories.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: Rakizi, Fonsas
+--- Discord: https://discord.gg/ebonhold
+---
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-      liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-      made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your
-      use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS:good
-
-]]
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
-
--- luacheck: ignore GetSpellInfo
---- ======= LOCALIZE =======
---Addon
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 
----@class NAG
-local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
-local Version = ns.Version
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class StateManager : ModuleBase
+
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
----@class Types : ModuleBase
+--- @type Version
+local Version = ns.Version
+--- @type APL|AceModule|ModuleBase
+local APL = NAG:GetModule("APL")
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
+--- @type TrinketTrackingManager|AceModule|ModuleBase
+local TrinketTrackingManager = NAG:GetModule("TrinketTrackingManager")
+--- @type NAG|AceAddon
+local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+
+-- ======= WoW API =======
+local GetTime = GetTime
+
 
 local swingTimerLib = LibStub("LibClassicSwingTimerAPI")
 
---WoW API
+-- WoW API (unified wrappers)
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellInfo = ns.GetSpellInfoUnified
+local GetSpellCharges = ns.GetSpellChargesUnified
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+-- Math operations (WoW optimized)
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
--- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+-- String operations (WoW optimized)
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+-- Table operations (WoW optimized)
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
-
+local sort = table.sort
+local concat = table.concat
 local setmetatable = setmetatable
 local next = next
 
---File
-
--- Add tinkers/trinkets/items to generic functions
+-- WoW API direct
 local C_GetItemCooldown = _G.C_Container.GetItemCooldown
---local GetItemSpell = C_Item.GetItemSpell
 
---- ======= GLOBALIZE =======
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
---- ============================ CONTENT ============================
----
-do -- ================================= Timing functions =========================================== --
-    --- Schedules an action after a specified delay.
-    --- @param self NAG
-    --- @param time number Delay in seconds.
-    --- @param action function The function to execute after the delay.
-    --- @usage NAG:Schedule(5, function() print("Action performed") end)
-    --- @return boolean True if the action was scheduled successfully.
-    function NAG:Schedule(time, action)
-        -- Input validation
-        if type(time) ~= "number" or type(action) ~= "function" then
-            self:Error("Schedule: Invalid parameters - time: " .. tostring(time) .. ", action: " .. tostring(action))
-            return false
-        end
-
-        -- Create unique timer name based on time and current timestamp
-        local timerName = "scheduled_" .. tostring(time) .. "_" .. tostring(GetTime())
-
-        -- Create timer using TimerManager
-        Timer:Create(
-            Timer.Categories.COMBAT,
-            timerName,
-            function()
-                self:Debug("Schedule: Executing scheduled action")
-                local success, err = pcall(action)
-                if not success then
-                    self:Error("Schedule: Error in scheduled action: " .. tostring(err))
-                end
-            end,
-            time,
-            false -- Not repeating
-        )
-
-        self:Debug("Schedule: Action scheduled to run in " .. tostring(time) .. " seconds")
-        return true
+--- Gets the auto swing time for the specified weapon type.
+--- @function NAG:AutoSwingTime
+--- @param weaponType? string "MainHand", "OffHand", or "Ranged". Defaults to MainHand if not provided.
+--- @return number The swing time in seconds, or 0 if invalid.
+--- @usage NAG:AutoSwingTime("MainHand")
+function NAG:AutoSwingTime(weaponType)
+    if not weaponType then
+        weaponType = Types:GetType("SwingType").MainHand
     end
 
-    --- Waits until a specified condition is met.
-    --- @param self NAG
-    --- @param func function The function to evaluate the condition.
-    --- @return boolean True if the wait is still in progress, false otherwise.
-    --- @usage (NAG:WaitUntil(func))
-    function NAG:WaitUntil(func)
-        if not self.waitInProgress then
-            self.waitInProgress = true -- Set waitInProgress flag
-        end
-        if func() then
-            self.waitInProgress = false -- Reset waitInProgress flag
-            return false
-        end
-        return true
+    local swingTime
+    if weaponType == Types:GetType("SwingType").MainHand then
+        swingTime = UnitAttackSpeed("player")
+    elseif weaponType == Types:GetType("SwingType").OffHand then
+        _, swingTime = UnitAttackSpeed("player")
+    elseif weaponType == Types:GetType("SwingType").Ranged then
+        swingTime = UnitRangedDamage("player")
+    else
+        self:Warn("AutoSwingTime: Invalid weapon type: " .. tostring(weaponType))
     end
+    return swingTime or 0
+end
 
-    --- Waits for a specified duration.
-    --- @param self NAG
-    --- @param duration number The duration to wait in seconds.
-    --- @return boolean True if the wait is still in progress, false if it has completed.
-    --- @usage NAG:Wait(5)
-    --- @see NAG:WaitUntil
-    function NAG:Wait(duration)
-        if not self.waitInProgress then
-            self.waitUntilTime = GetTime() + duration
-            self.waitInProgress = true -- Set waitInProgress flag
-            return true
-        end
-        if GetTime() >= self.waitUntilTime then
-            self.waitUntilTime = nil
-            self.waitInProgress = false -- Reset waitInProgress flag
-            self:SpellCastSucceeded(0)  -- Simulate a successful "spell cast" with ID 0 for the wait completion
-            return false
-        end
-        return true
-    end
+--- Checks if a spell is currently in flight.
+--- @function NAG:SpellInFlight
+--- @param spellId number The spell ID to check.
+--- @return boolean True if the spell is in flight, false otherwise.
+--- @usage NAG:SpellInFlight(12345)
+function NAG:SpellInFlight(spellId)
+    --- @type SpellTrackingManager | AceModule
+    local SpellTracker = self:GetModule("SpellTrackingManager")
+    if not SpellTracker then return false end
+    return SpellTracker:IsSpellInFlight(spellId)
+end
 
-    --- Initializes a strict sequence of actions.
-    --- @param self NAG
-    --- @param name string The name of the sequence.
-    --- @param ... any The actions to be performed in sequence.
-    --- @return boolean True if the sequence is initialized successfully.
-    --- @usage NAG:StrictSequence("sequenceName", action1, action2, ...)
-    --- @see NAG:SpellCastSequence
-    function NAG:StrictSequence(name, ...)
-        if not name or type(name) ~= "string" then
-            self:Error("StrictSequence: Invalid sequence name")
-            return false
-        end
+-- GCD values
+--- Checks if the global cooldown (GCD) is ready.
+--- @function NAG:GCDIsReady
+--- @return boolean True if the GCD is ready, false otherwise.
+--- @usage NAG:GCDIsReady()
+function NAG:GCDIsReady()
+    return self:GCDTimeToReady() == 0
+end
 
-        -- Validate actions
-        local actions = { ... }
-        for i, action in ipairs(actions) do
-            if type(action) == "number" then
-                local entity = DataManager:Get(action, DataManager.EntityTypes.SPELL) or
-                    DataManager:Get(action, DataManager.EntityTypes.ITEM)
-                if not entity then
-                    self:Error(format("StrictSequence: Invalid action ID at position %d", i))
-                    return false
-                end
-            elseif type(action) == "string" then
-                if not action:match("^NAG:Wait%((%d+%.?%d*)%)$") then
-                    self:Error(format("StrictSequence: Invalid wait command at position %d", i))
-                    return false
-                end
-            end
-        end
+--- Returns the time until the global cooldown (GCD) is ready.
+--- @function NAG:GCDTimeToReady
+--- @return number The time until the GCD is ready.
+--- @usage NAG:GCDTimeToReady() <= x
+function NAG:GCDTimeToReady()
+    local start = 0
+    local duration = 0
 
-        if not self.strictSequenceSpells[name] then
-            self.strictSequenceSpells[name] = actions
-            self.strictSequencePosition[name] = 1
-        end
-        self.isSequenceActive = true
-        return true
-    end
-
-    --- Executes the next action in the spell cast sequence.
-    --- @param self NAG
-    --- @return boolean True if the sequence is still active, false if it has completed or encountered an error.
-    --- @usage NAG:SpellCastSequence()
-    --- @see NAG:StrictSequence
-    function NAG:SpellCastSequence()
-        if not self.isSequenceActive then return false end
-        if self.waitInProgress then return true end
-
-        for name, actions in pairs(self.strictSequenceSpells) do
-            local index = self.strictSequencePosition[name]
-            local nextAction = actions[index]
-            self:Trace("SpellCastSequence: nextAction: " .. tostring(nextAction))
-            if type(nextAction) == "string" and nextAction:match("^NAG:Wait%((%d+%.?%d*)%)$") then
-                local duration = tonumber(nextAction:match("%d+%.?%d*")) or 0
-                self:Trace(format("SpellCastSequence: Calling Wait with duration: %s", tostring(duration)))
-                self:Wait(duration)
-                return true -- Return true while wait is in progress
-            elseif type(nextAction) == "number" then
-                self:Trace(format("SpellCastSequence: nextSpell: %s", tostring(nextAction)))
-                if self:IsSecondarySpell(nextAction) then
-                    self:AddSecondarySpell(nextAction)
-                    return false
-                else
-                    return self:CastSpell(nextAction)
-                end
-            elseif nextAction == nil then
-                self:Debug(format("SpellCastSequence: End of sequence reached for '%s'", name))
-                self.strictSequencePosition[name] = 1 -- Reset the sequence
-                self.isSequenceActive = false         -- Reset the flag when the sequence ends
-                return false
-            elseif type(nextAction) == "number" and nextAction ~= StateManager:GetLastCastId() then
-                self:ResetStrictSequence(name)
-                self:Warn(
-                    format("SpellCastSequence: Resetting sequence %s due to unexpected spell ID: %s", name, nextAction))
-                self.isSequenceActive = false -- Reset the flag when the sequence ends
-                return false
-            else
-                self:Error(format("SpellCastSequence: Unexpected nextAction type: %s", type(nextAction)))
-                self.isSequenceActive = false
-                self:ResetStrictSequence(name)
-                return false
-            end
-        end
-
-        return false
-    end
-
-    --- Executes a strict sequence of functions.
-    --- @param self NAG
-    --- @param ... function The functions to be executed in sequence.
-    --- @return boolean True if the sequence is still active, false if it has completed or encountered an error.
-    --- @usage NAG:StrictSequenceByFunc(func1, func2, ...)
-    --- @see NAG:StrictSequenceById
-    function NAG:StrictSequenceByFunc(...)
-        local tolerance = 0
-        local funcNames = { ... }
-        local spells = {}
-        for x, funcName in ipairs(funcNames) do
-            local id = strmatch(tostring(funcName), "%((%d+)%)")
-
-            if (id) then
-                -- Convert id to number
-                id = tonumber(id)
-                local entity = DataManager:Get(id, DataManager.EntityTypes.SPELL) or
-                    DataManager:Get(id, DataManager.EntityTypes.ITEM)
-                -- Check if it's a spell or item
-                if entity and self:SpellCanCast(id, tolerance) then
-                    if self:IsSecondarySpell(id) or StateManager:GetLastCastId() == spells[#spells - 1] then
-                        self:Debug(format("StrictByFunc() Added: %d of %d to SecondarySpells", id, #spells))
-                        self:AddSecondarySpell(id)
-                    elseif StateManager:GetLastCastId() == spells[#spells - 1] then
-                        self:Debug(format("StrictByFunc() Added: %d of %d to nextSpell", id, #spells))
-                        self:CastSpell(id)
-                    end
-                end
-            else
-                local status = funcName()
-                if status then
-                    return false
-                end
-            end
-        end
-        return true
-    end
-
-    --- Executes a strict sequence of spells by their IDs.
-    --- @param self NAG
-    --- @param sequenceName string The name of the sequence.
-    --- @param ... number The spell IDs to be executed in sequence.
-    --- @return boolean True if the sequence is still active, false if it has completed or encountered an error.
-    --- @usage NAG:StrictSequenceById("sequenceName", spellId1, spellId2, ...)
-    --- @see NAG:StrictSequenceByFunc
-    function NAG:StrictSequenceById(sequenceName, ...)
-        if type(sequenceName) ~= "string" then return false end
-        local spells = { ... }
-        local firstSpell = spells[1]
-        local currentIndex = self.strictSequencePosition[sequenceName] or 0
-        local numSpells = #spells
-        local tolerance = 0 -- Ensure tolerance is defined
-
-        if not self:StrictSequenceIsReady(spells) then
-            return false
-        end
-
-        for x = 1, numSpells do
-            self:Debug(format("%d%d%d", x, currentIndex, numSpells))
-            local spellId = spells[x]
-            local previousSpell = spells[self.strictSequenceIndex - 1] or 0
-
-            if self:SpellCanCast(spellId, tolerance) then
-                self:Debug(
-                    format("StrictById(%d) Checking: %d of %d Previous: %d", x, spellId, numSpells, previousSpell))
-
-                if spellId == firstSpell then
-                    self:Info(format("StrictById(%d) Started: %d of %d", x, spellId, numSpells))
-                    if self:IsSecondarySpell(spellId) then
-                        self:AddSecondarySpell(spellId)
-                    else
-                        self:CastSpell(spellId)
-                    end
-                    self.strictSequencePosition[sequenceName] = nil
-                    self.strictSequenceSpells[sequenceName] = nil
-
-                    self.strictSequenceIndex = x + 1
-                    self.strictSequenceActive = true
-                elseif previousSpell == StateManager:GetLastCastId() or self.strictSequenceActive then
-                    self:Info(format("StrictById(%d) Added: %d of %d", x, spellId, numSpells))
-                    if self:IsSecondarySpell(spellId) then
-                        self:AddSecondarySpell(spellId)
-                    else
-                        self:CastSpell(spellId)
-                    end
-                    self.strictSequenceIndex = x + 1
-                end
-            end
-        end
-
-        if self.strictSequenceIndex > numSpells then
-            self.strictSequenceIndex = 0
-            self.strictSequenceActive = false
-            return false
-        end
-
-        return false
-    end
-
-    --- Handles the completion of a spell cast.
-    --- @param self NAG
-    --- @param spellId number The ID of the spell that was cast.
-    --- @return boolean True if the spell cast was handled successfully, false otherwise.
-    --- @usage NAG:SpellCastSucceeded(73643)
-    function NAG:SpellCastSucceeded(spellId)
-        if not spellId then return false end
-        if spellId == 20424 then return false end
-        for name, actions in pairs(self.sequenceSpells) do
-            local index = self.sequencePosition[name]
-            local nextAction = actions[index]
-            if type(nextAction) == "function" then
-                local nextSpell = strmatch(tostring(nextAction), "%((%d+)%)")
-                if spellId == tonumber(nextSpell) then
-                    self.sequencePosition[name] = self.sequencePosition[name] + 1
-                    if #actions < self.sequencePosition[name] then
-                        self:Info(format("Sequence %s completed", name))
-                        self.sequencePosition[name] = nil
-                        self.sequenceSpells[name] = nil
-                    else
-                        self:Info(format("SCC(): Advanced to next spell in sequence: %s", name))
-                    end
-                end
-            else
-                local nextSpell = tonumber(nextAction)
-                if spellId == nextSpell then
-                    self.sequencePosition[name] = self.sequencePosition[name] + 1
-                    if #actions < self.sequencePosition[name] then
-                        self:Info(format("Sequence %s completed", name))
-                        self.sequencePosition[name] = nil
-                        self.sequenceSpells[name] = nil
-                    else
-                        -- luacheck: ignore GetSpellInfo
-                        self:Info(
-                            format("SCC(): Advanced to next spell in sequence: %s %s -> %s", name,
-                                GetSpellInfo(nextSpell), GetSpellInfo(actions[self.sequencePosition[name]])))
-                    end
-                end
-            end
-        end
-
-        for name, actions in pairs(self.strictSequenceSpells) do
-            local index = self.strictSequencePosition[name]
-            local nextAction = actions[index]
-
-            -- Handle wait completion
-            if spellId == 0 then
-                if DEBUGSTRICT then self:Debug("SCC(): Wait completed, advancing to next action in StrictSequence.") end
-                self.strictSequencePosition[name] = self.strictSequencePosition[name] + 1
-                nextAction = actions[self.strictSequencePosition[name]]
-            end
-
-            if DEBUGSTRICT then
-                self:Debug(format("SCC(): NextAction: %s", tostring(nextAction)))
-            end
-
-            if type(nextAction) == "number" then
-                local nextSpell = nextAction
-                local lastSpell = StateManager:GetLastCastId()
-
-                -- Handle spell cast check
-                if spellId == nextSpell then
-                    if DEBUGSTRICT then
-                        self:Debug("SCC(): Spell succeeded.")
-                    end
-                    self.strictSequencePosition[name] = self.strictSequencePosition[name] + 1
-
-                    -- Check if sequence is completed
-                    if self.strictSequencePosition[name] > #actions then
-                        if DEBUGSTRICT then self:Debug(format("SCC(): StrictSequence %s completed", name)) end
-                        self.strictSequenceSpells[name] = nil
-                        self.strictSequencePosition[name] = nil
-                        self.isSequenceActive = false -- Reset the flag
-                    else
-                        if DEBUGSTRICT then self:Debug(
-                            format("SCC(): Advanced StrictSequence: %s -> %s", tostring(name),
-                                tostring(actions[self.strictSequencePosition[name]])))
-                        end
-                    end
-                else
-                    -- Attempt to check by name if spell ID does not match
-                    local nextSpellName = GetSpellInfo(nextSpell)
-                    local castSpellName = GetSpellInfo(spellId)
-
-                    if nextSpellName and castSpellName and nextSpellName == castSpellName then
-                        if DEBUGSTRICT then
-                            self:Debug("SCC(): Spell succeeded by name match.")
-                        end
-                        self.strictSequencePosition[name] = self.strictSequencePosition[name] + 1
-
-                        -- Check if sequence is completed
-                        if self.strictSequencePosition[name] > #actions then
-                            if DEBUGSTRICT then self:Debug(format("SCC(): StrictSequence %s completed", name)) end
-                            self.strictSequenceSpells[name] = nil
-                            self.strictSequencePosition[name] = nil
-                            self.isSequenceActive = false -- Reset the flag
-                        else
-                            self:Debug(
-                                format("SCC(): Advanced StrictSequence: %s -> %s", tostring(name),
-                                    tostring(actions[self.strictSequencePosition[name]])))
-                        end
-                    else
-                        self:Debug(
-                            format("SCC2(): Resetting sequence %s due to unexpected spell ID: %d", name, spellId))
-                        self:ResetStrictSequence(name)
-                        self.isSequenceActive = false
-                    end
-                end
-            elseif type(nextAction) == "string" and nextAction:match("^NAG:Wait%((%d+%.?%d*)%)$") then
-                local duration = tonumber(nextAction:match("%d+%.?%d*")) or 0
-                self:Debug(format("SCC(): Calling Wait with duration: %s", tostring(duration)))
-                self:Wait(duration)
-                return true -- Wait is in progress, return true to continue waiting
-            end
-        end
-
-        return false -- TODO added 10/25
-    end
-
-    --- Initializes a sequence of actions.
-    --- @param self NAG
-    --- @param name string The name of the sequence.
-    --- @param ... any The actions to be performed in sequence.
-    --- @usage NAG:Sequence("sequenceName", action1, action2, ...)
-    -- @return boolean True if the sequence is initialized successfully, false otherwise.
-    function NAG:Sequence(name, ...)
-        local index = self.sequencePosition[name] or 1
-        if select('#', ...) < index then
-            return false
-        end
-
-        if not self.sequenceSpells[name] then
-            self.sequenceSpells[name] = { ... }
-        end
-
-        self.sequencePosition[name] = index
-
-        local item = self.sequenceSpells[name][index]
-        return self:CastSpell(item)
-    end
-
-    --- Resets all sequences.
-    --- @param self NAG
-    --- @usage NAG:ResetSequences()
-    --- @return boolean True if the sequences are reset successfully.
-    function NAG:ResetSequences()
-        self.sequencePosition = {}
-        self.sequenceSpells = {}
-        return true
-    end
-
-    --- Resets all strict sequences.
-    --- @param self NAG
-    --- @usage NAG:ResetStrictSequences()
-    --- @return boolean True if the strict sequences are reset successfully.
-    function NAG:ResetStrictSequences()
-        self.strictSequencePosition = {}
-        self.strictSequenceSpells = {}
-        return true
-    end
-
-    --- Resets a specific sequence.
-    --- @param self NAG
-    --- @param name string The name of the sequence to reset.
-    --- @usage NAG:ResetSequence("sequenceName")
-    --- @return boolean True if the sequence is reset successfully.
-    function NAG:ResetSequence(name)
-        self.sequencePosition[name] = nil
-        self.sequenceSpells[name] = nil
-        return true
-    end
-
-    --- Resets a specific strict sequence.
-    --- @param self NAG
-    --- @param name string The name of the strict sequence to reset.
-    --- @usage NAG:ResetStrictSequence("strictSequenceName")
-    --- @return boolean True if the strict sequence is reset successfully.
-    function NAG:ResetStrictSequence(name)
-        self.strictSequencePosition[name] = nil
-        self.strictSequenceSpells[name] = nil
-        return true
-    end
-
-    --- Checks if a sequence is complete.
-    --- @function NAG:SequenceIsComplete
-    --- @param self NAG
-    --- @param name string The name of the sequence.
-    --- @return boolean True if the sequence is complete, false otherwise.
-    --- @usage (NAG:SequenceIsComplete("sequenceName"))
-    function NAG:SequenceIsComplete(name)
-        if not name then return false end
-        if self.sequenceSpells[name] and #self.sequenceSpells[name] >= self.sequencePosition[name] then
-            return false
-        end
-        return true
-    end
-
-    --- Checks if a sequence is ready.
-    --- @function NAG:SequenceIsReady
-    --- @param self NAG
-    --- @param name string The name of the sequence.
-    --- @param ... number The spells in the sequence.
-    --- @return boolean True if the sequence is ready, false otherwise.
-    --- @usage (NAG:SequenceIsReady("sequenceName", 73643, 12345))
-    function NAG:SequenceIsReady(name, ...)
-        if not name then return false end
-        local sequence = { ... }
-        return self:SequenceTimeToReady(name, sequence) == 0
-    end
-
-    --- Checks if a strict sequence is ready.
-    --- @function NAG:StrictSequenceIsReady
-    --- @param self NAG
-    --- @param sequence table The spells in the strict sequence.
-    --- @return boolean True if the strict sequence is ready, false otherwise.
-    --- @usage (NAG:StrictSequenceIsReady({73643, 12345}))
-    function NAG:StrictSequenceIsReady(sequence)
-        return self:StrictSequenceTimeToReady(sequence) == 0
-    end
-
-    --- Returns the time to ready for a sequence.
-    --- @function NAG:SequenceTimeToReady
-    --- @param self NAG
-    --- @param sequenceName string The name of the sequence.
-    --- @param ... number The spells in the sequence.
-    --- @return number The maximum time to ready for the sequence.
-    --- @usage (NAG:SequenceTimeToReady("sequenceName", 73643, 12345) <= x)
-    function NAG:SequenceTimeToReady(sequenceName, ...)
-        if not sequenceName then return 0 end
-        local sequence = { ... }
-        local maxttr = 0
-        for i = 1, #sequence do
-            local ttr = self:TimeToReadySpell(sequence[i])
-            if ttr > maxttr then ttr = maxttr end
-        end
-        return maxttr
-    end
-
-    --- Returns the time to ready for a strict sequence.
-    --- @function NAG:StrictSequenceTimeToReady
-    --- @param self NAG
-    --- @param sequence table The spells in the strict sequence.
-    --- @return number The maximum time to ready for the strict sequence.
-    --- @usage (NAG:StrictSequenceTimeToReady({73643, 12345}) <= x)
-    function NAG:StrictSequenceTimeToReady(sequence)
-        local maxttr = 0
-        for _, spellId in ipairs(sequence) do
-            local ttr = self:TimeToReadySpell(spellId)
-            if ttr > maxttr then
-                maxttr = ttr
-            end
-        end
-        return maxttr
+    if Version:IsClassicEra() then
+        start, duration = GetSpellCooldown(29515)
+        return max(0, min(duration, (start + duration - GetTime())))
+    else
+        start, duration = GetSpellCooldown(61304) --GCD
+        return max(0, min(duration, (start + duration - GetTime())))
     end
 end
 
+--- Checks if a spell can be safely weaved between auto attacks.
+--- For instant cast spells, always returns true since they can't clip auto attacks.
+--- For non-instant casts, verifies that the total cast time (input delay + cast time)
+--- is less than the time left until the next auto attack.
+--- @function NAG:CanWeave
+--- @param spellId number The spell ID to check.
+--- @return boolean True if the spell can be cast, false otherwise.
+--- @usage NAG:CanWeave(12345)
+function NAG:CanWeave(spellId)
+    local castTime = self:CastTime(spellId)
 
-do -- ================================= Time APLValue Functions ========================================== --
-    --- Get the current combat time.
-    --- @function NAG:TimeCurrent
-    --- @param self NAG The NAG object.
-    --- @usage NAG:TimeCurrent() >= 10
-    --- @return number The current combat time in seconds.
-    function NAG:TimeCurrent()
-        -- If NAG is not fully initialized, return 0
-        if not self or not self.GetModule then
-            return 0
-        end
-
-        -- If not in combat, return 0
-        if not UnitAffectingCombat("player") then
-            return 0
-        end
-
-        -- Ensure StateManager is initialized
-        if not StateManager then
-            ---@class StateManager : ModuleBase
-            StateManager = self:GetModule("StateManager")
-            if not StateManager then
-                return 0
-            end
-        end
-
-        -- Ensure StateManager is enabled
-        if not StateManager.IsEnabled or not StateManager:IsEnabled() then
-            return 0
-        end
-
-        -- Ensure state exists and is properly initialized
-        if not StateManager.state or 
-           not StateManager.state.combat or 
-           not StateManager.state.combat.startTime then
-            return 0
-        end
-
-        -- Calculate time since combat started
-        local currentTime = GetTime()
-        return max(0, currentTime - StateManager.state.combat.startTime)
-    end
-NAG.CurrentTime = NAG.TimeCurrent
-
-    --- Get the time spent on the current target.
-    --- @function NAG:TimeOnTarget
-    --- @param self NAG The NAG object.
-    --- @usage NAG:TimeOnTarget() >= 10
-    --- @return number The time spent on the current target in seconds.
-    function NAG:TimeOnTarget()
-        -- If not in combat or no target, return 0
-        if not UnitAffectingCombat("player") or not UnitExists("target") then
-            return 0
-        end
-
-        local targetStartTime = StateManager.state.target.startTime
-        -- If no start time recorded for this target, return 0
-        if not targetStartTime then
-            return 0
-        end
-
-        -- Calculate time spent on current target
-        return max(0, GetTime() - targetStartTime)
+    -- For instant cast spells, always return true since they can't clip auto attacks
+    if castTime == 0 then
+        return true
     end
 
-    --- Get the current time as a percentage of the total time.
-    --- @function NAG:TimeCurrentPercent
-    --- @param self NAG The NAG object.
-    --- @usage NAG:TimeCurrentPercent() >= 50
-    --- @return number The current time percentage.
-    function NAG:TimeCurrentPercent()
-        -- Get current time remaining
-        local remainingTime = self:TimeRemaining()
-        if remainingTime >= 7777 then
-            return 0 -- Return 0% if we don't have valid TTD
-        end
-
-        local elapsedTimeSec = self:TimeOnTarget()       -- Calculate how much time has passed on this target
-        local totalTime = elapsedTimeSec + remainingTime -- Calculate the total time duration for this target
-
-        -- Avoid division by zero
-        if totalTime <= 0 then
-            return 0
-        end
-
-        local currentPercent = (elapsedTimeSec / totalTime) * 100 -- Calculate the elapsed time as a percentage
-        -- Ensure the percentage is within valid range (0-100)
-        return max(0, min(100, currentPercent))
+    -- For non-instant casts, check total cast time against swing time
+    local gcdTimeToReady = self:GCDTimeToReady()
+    
+    -- Apply Maelstrom Weapon logic for input delay with latency awareness and fixed buffer
+    local userPing = self:GetNetStats() -- Use cached network stats
+    local baseInputDelay = self:InputDelay() or 0.050 -- fallback to 50ms
+    local staticPressBuffer = 0.200 -- 200ms flat buffer for press-to-cast
+    local maelstromStacks = self:AuraNumStacks(51530) -- Maelstrom Weapon spell ID
+    
+    -- Final delay: input + ping + 200ms fixed buffer
+    local adjustedInputDelay = baseInputDelay + userPing + staticPressBuffer
+    if maelstromStacks >= 5 then
+        adjustedInputDelay = 0 -- instant cast, ignore delay
+    else
+        adjustedInputDelay = math.min(adjustedInputDelay, 0.45) -- cap at 0.45s
     end
-    NAG.CurrentTimePercent = NAG.TimeCurrentPercent
-    --- Get the remaining time.
-    --- @function NAG:TimeRemaining
-    --- @param self NAG The NAG object.
-    --- @usage NAG:TimeRemaining()
-    --- @return number The remaining time.
-    function NAG:TimeRemaining()
-        local global = NAG:GetGlobal()
+    
+    local swingTimeLeft = self:AutoTimeToNext()
+    local totalCastTime = adjustedInputDelay + castTime
+    local weaponSpeed = self:AutoSwingTime(Types.SwingType.MainHand)
 
-        -- If encounter timer is enabled, use that value
-        if global.enableEncounterTimer then
-            return global.fakeTimeRemaining or global.encounterDuration
-        end
-
-        -- If fake time remaining is enabled, use that value directly for TTD
-        if global.enableFakeTimeRemaining then
-            return global.fakeTimeRemaining
-        end
-
-        -- Get the target's GUID
-        local targetGuid = UnitGUID("target")
-        if not targetGuid then
-            return 8888 -- No target, return default value
-        end
-
-        -- Get TTD from TTDManager directly
-        local TTDManager = self:GetModule("TTDManager")
-        if TTDManager then
-            local ttd = TTDManager:GetTTD(targetGuid, 3) -- Get TTD with minimum 3 samples
-            if ttd and ttd > 0 and ttd < 7777 then       -- Valid TTD value
-                StateManager.state.target.ttd = ttd      -- Update StateManager
-                return ttd
-            end
-        end
-
-        -- Fallback to StateManager's value if it exists and is reasonable
-        if StateManager.state.target.ttd and
-            StateManager.state.target.ttd > 0 and
-            StateManager.state.target.ttd < 7777 then
-            return StateManager.state.target.ttd
-        end
-
-        return 8888 -- Default fallback
-    end
-    NAG.RemainingTime = NAG.TimeRemaining
-    --- Get the remaining time as a percentage.
-    --- @function NAG:TimeRemainingPercent
-    --- @param self NAG The NAG object.
-    --- @usage NAG:TimeRemainingPercent()
-    --- @return number The remaining time percentage.
-    function NAG:TimeRemainingPercent()
-        -- Get current time remaining
-        local remainingTime = self:TimeRemaining()
-        if remainingTime >= 7777 then
-            return 100 -- Return 100% if we don't have valid TTD
-        end
-
-        local elapsedTimeSec = self:TimeCurrent()        -- Calculate how much time has passed since the fight started
-        local totalTime = elapsedTimeSec + remainingTime -- Calculate the total time duration of the fight
-
-        -- Avoid division by zero
-        if totalTime <= 0 then
-            return 100
-        end
-
-        local remainingPercent = (remainingTime / totalTime) * 100 -- Calculate the remaining time as a percentage
-        -- Ensure the percentage is within valid range (0-100)
-        return max(0, min(100, remainingPercent))
-    end
-    NAG.RemainingTimePercent = NAG.TimeRemainingPercent
+    return totalCastTime < swingTimeLeft
 end
 
-do -- ================================= GCD/Swing/Auto APLValue Functions =============================== --
-    --- Gets the auto swing time for the specified weapon type.
-    --- @function NAG:AutoSwingTime
-    --- @param self NAG
-    --- @param weaponType? string "MainHand", "OffHand", or "Ranged". Defaults to MainHand if not provided.
-    --- @return number The swing time in seconds, or 0 if invalid.
-    function NAG:AutoSwingTime(weaponType)
-        if not weaponType then
-            weaponType = Types:GetType("SwingType").MainHand
-        end
+--- Estimates the time until the next opportunity to weave a spell.
+--- Returns 0 for instant casts, math.huge if weaving is impossible, or the time until the next gap.
+--- @function NAG:TimeToNextWeaveGap
+--- @param spellId number The spell ID to check.
+--- @return number The estimated time in seconds until the next weave gap, or math.huge if weaving is impossible.
+--- @usage NAG:TimeToNextWeaveGap(12345)
+function NAG:TimeToNextWeaveGap(spellId)
+    local castTime = self:CastTime(spellId)
 
-        local swingTime
-        if weaponType == Types:GetType("SwingType").MainHand then
-            swingTime = UnitAttackSpeed("player")
-        elseif weaponType == Types:GetType("SwingType").OffHand then
-            _, swingTime = UnitAttackSpeed("player")
-        elseif weaponType == Types:GetType("SwingType").Ranged then
-            swingTime = UnitRangedDamage("player")
-        else
-            self:Warn("AutoSwingTime: Invalid weapon type: " .. tostring(weaponType))
-        end
-        return swingTime or 0
-    end
-
-    --- Checks if a spell is currently in flight
-    --- @function NAG:SpellInFlight
-    --- @param self NAG
-    --- @param spellId number The spell ID to check
-    --- @return boolean True if the spell is in flight, false otherwise
-    --- @usage NAG:SpellInFlight(12345)
-    function NAG:SpellInFlight(spellId)
-        ---@type SpellTrackingManager
-        local SpellTracker = self:GetModule("SpellTrackingManager")
-        if not SpellTracker then return false end
-        return SpellTracker:IsSpellInFlight(spellId)
-    end
-
-    -- GCD values
-    --- Checks if the global cooldown (GCD) is ready.
-    --- @function NAG:GCDIsReady
-    --- @param self NAG
-    --- @usage NAG:GCDIsReady()
-    --- @return boolean True if the GCD is ready, false otherwise.
-    function NAG:GCDIsReady()
-        return self:GCDTimeToReady() == 0
-    end
-
-    --- Returns the time until the global cooldown (GCD) is ready.
-    --- @function NAG:GCDTimeToReady
-    --- @param self NAG
-    --- @usage NAG:GCDTimeToReady() <= x
-    --- @return number The time until the GCD is ready.
-    function NAG:GCDTimeToReady()
-        local start = 0
-        local duration = 0
-
-        if Version:IsClassicEra() then
-            start, duration = GetSpellCooldown(29515)
-            return max(0, min(duration, (start + duration - GetTime())))
-        else
-            start, duration = GetSpellCooldown(61304) --GCD
-            return max(0, min(duration, (start + duration - GetTime())))
-        end
-    end
-
-    --- Checks if a spell can be safely weaved between auto attacks.
-    --- For instant cast spells, always returns true since they can't clip auto attacks.
-    --- For non-instant casts, it verifies that the total cast time (input delay + cast time + GCD time) 
-    --- is less than the time left until the next auto attack.
-    --- @param self NAG
-    --- @param spellId number The spell ID to check.
-    --- @return boolean True if the spell can be cast, false otherwise.
-    function NAG:CanWeave(spellId)
-        local castTime = self:CastTime(spellId)
-        
-        -- For instant cast spells, always return true since they can't clip auto attacks
-        if castTime == 0 then
-            return true
-        end
-        
-        -- For non-instant casts, check total cast time against swing time
-        local gcdTimeToReady = self:GCDTimeToReady()
-        local inputDelay = self:InputDelay()
-        local swingTimeLeft = self:AutoTimeToNext()
-        local totalCastTime = inputDelay + castTime
-        local weaponSpeed = self:AutoSwingTime(Types.SwingType.MainHand)
-
-
-        return totalCastTime < swingTimeLeft
-    end
-
-    --- Estimates the time until the next opportunity to weave a spell.
-    --- This is useful when CanWeave returns false, to know when to try weaving again.
-    --- @param self NAG
-    --- @param spellId number The spell ID to check.
-    --- @return number The estimated time in seconds until the next weave gap, or math.huge if weaving is impossible.
-    function NAG:TimeToNextWeaveGap(spellId)
-        local castTime = self:CastTime(spellId)
-        
-        -- For instant cast spells, return 0 since they can always be weaved
-        if castTime == 0 then
-            return 0
-        end
-        
-        -- Check if we're currently casting or channeling
-        local name, _, _, _, _, _, _, _, spellId = UnitCastingInfo("player")
-        if name or StateManager.state.casting then
-            return math.huge
-        end
-        
-        local inputDelay = self:InputDelay()
-        local totalCastTime = inputDelay + castTime
-        local weaponSpeed = self:AutoSwingTime(Types.SwingType.MainHand)
-        local currentSwingTime = self:AutoTimeToNext()
-        
-        -- If total cast time is greater than weapon speed, weaving is impossible
-        if totalCastTime >= weaponSpeed then
-            return math.huge
-        end
-        
-        -- If we can't weave now but it's theoretically possible (totalCastTime < weaponSpeed)
-        if totalCastTime >= currentSwingTime then
-            -- Return the actual remaining time before the next auto-attack
-            return currentSwingTime + NAG:GCDTimeToReady()
-        end
-        
-        -- If we can weave now, return 0
+    -- For instant cast spells, return 0 since they can always be weaved
+    if castTime == 0 then
         return 0
     end
 
-   
-    -- =========================================================================
-    -- Autoattack values
+    -- Check if we're currently casting or channeling
+    local name, _, _, _, _, _, _, _, spellId = UnitCastingInfo("player")
+    if name or StateManager.state.casting then
+        return math.huge
+    end
+    
+    -- Apply Maelstrom Weapon logic for input delay with latency awareness and fixed buffer
+    local userPing = self:GetNetStats() -- Use cached network stats
+    local baseInputDelay = self:InputDelay() or 0.050 -- fallback to 50ms
+    local staticPressBuffer = 0.200 -- 200ms flat buffer for press-to-cast
+    local maelstromStacks = self:AuraNumStacks(51530) -- Maelstrom Weapon spell ID
+    
+    -- Final delay: input + ping + 200ms fixed buffer
+    local adjustedInputDelay = baseInputDelay + userPing + staticPressBuffer
+    if maelstromStacks >= 5 then
+        adjustedInputDelay = 0 -- instant cast, ignore delay
+    else
+        adjustedInputDelay = math.min(adjustedInputDelay, 0.45) -- cap at 0.45s
+    end
+    
+    local totalCastTime = adjustedInputDelay + castTime
+    local weaponSpeed = self:AutoSwingTime(Types.SwingType.MainHand)
+    local currentSwingTime = self:AutoTimeToNext()
 
-    --- Returns the time until the next auto attack.
-    --- @function NAG:AutoTimeToNext
-    --- @param self NAG
-    --- @usage NAG:AutoTimeToNext() <= x
-    --- @return number The time until the next auto attack (GCD affected)
-    --- @return number The raw time until the next auto attack (not affected by GCD)
-    function NAG:AutoTimeToNext()
-        if not swingTimerLib then return 0, 0 end
-
-        if not self.swingTimerInitialized then
-            local f = CreateFrame("Frame")
-
-            local function SwingTimerEventHandler(event, ...)
-                if event == "UNIT_SWING_TIMER_DELTA" then
-                    local _, swingDelta = ...
-                    self.lastSwingDelta = swingDelta
-                end
-            end
-
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_INFO_INITIALIZED", SwingTimerEventHandler)
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_START", SwingTimerEventHandler)
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_UPDATE", SwingTimerEventHandler)
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_DELTA", SwingTimerEventHandler)
-
-            self.swingTimerFrame = f
-            self.swingTimerInitialized = true
-        end
-
-        -- Get swing timer info for both hands
-        local mhSpeed, mhExpiration = swingTimerLib:UnitSwingTimerInfo("player", "mainhand")
-        local ohSpeed, ohExpiration = swingTimerLib:UnitSwingTimerInfo("player", "offhand")
-        if not mhExpiration then return 0, 0 end -- No valid swing timer
-
-        local currentTime = NAG:NextTime()
-        local mhTimeToNext = mhExpiration - currentTime
-        local ohTimeToNext = ohExpiration and (ohExpiration - currentTime) or math.huge
-
-        -- Get the shorter time until next swing
-        local timeToNextSwing = min(mhTimeToNext, ohTimeToNext)
-        -- If negative, add weapon speed to get next window
-        local timeToNextSwingUpdated = timeToNextSwing
-        if timeToNextSwing < 0 then
-            timeToNextSwingUpdated = timeToNextSwing + mhSpeed
-        end
-        
-        -- Get GCD time
-        local gcd = NAG:GCDTimeToReady() or 0
-        
-        -- Return both GCD-affected and raw times
-        return max(0, timeToNextSwingUpdated), max(0, mhTimeToNext+currentTime-GetTime())
+    -- If total cast time is greater than weapon speed, weaving is impossible
+    if totalCastTime >= weaponSpeed then
+        return math.huge
     end
 
-    --- Calculates the difference between mainhand and offhand swing times.
-    --- @function NAG:SwingTimeDifference
-    --- @param self NAG
-    --- @return number The difference in swing times, and whether sync is recommended
-    --- @usage local diff = NAG:SwingTimeDifference()
-    function NAG:SwingTimeDifference()
-        if not swingTimerLib then return 0 end
-
-        -- Initialize swing timer tracking if not already done
-        if not self.swingTimerInitialized then
-            local f = CreateFrame("Frame")
-
-            local function SwingTimerEventHandler(event, ...)
-                if event == "UNIT_SWING_TIMER_DELTA" then
-                    local _, swingDelta = ...
-                    self.lastSwingDelta = abs(swingDelta) -- Ensure positive value
-                elseif event == "UNIT_SWING_TIMER_START" then
-                    local _, hand = ...
-                    if hand == "mainhand" then
-                        self.lastMainHandSwing = GetTime()
-                    end
-                end
-            end
-
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_INFO_INITIALIZED", SwingTimerEventHandler)
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_START", SwingTimerEventHandler)
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_UPDATE", SwingTimerEventHandler)
-            swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_DELTA", SwingTimerEventHandler)
-
-            self.swingTimerFrame = f
-            self.swingTimerInitialized = true
-        end
-
-        local mhSpeed, mhExpiration, mhLastSwing = swingTimerLib:UnitSwingTimerInfo("player", "mainhand")
-        local ohSpeed, ohExpiration, ohLastSwing = swingTimerLib:UnitSwingTimerInfo("player", "offhand")
-
-        if not mhSpeed or not ohSpeed then
-            self:Debug("SwingTimeDifference: Missing weapon speeds")
-            return 0
-        end
-
-        -- Calculate current swing positions
-        local currentTime = GetTime()
-        local mhPosition = mhExpiration and (mhExpiration - currentTime) or 0
-        local ohPosition = ohExpiration and (ohExpiration - currentTime) or 0
-
-        -- Calculate the phase difference between the swings
-        local difference = abs(mhPosition - ohPosition)
-
-        -- If the difference is more than half the swing time, adjust it
-        local minSwingTime = min(mhSpeed, ohSpeed)
-        if difference > (minSwingTime / 2) then
-            difference = minSwingTime - difference
-        end
-
-        -- Use cached delta if available
-        if self.lastSwingDelta then
-            difference = self.lastSwingDelta
-        end
-
-        return difference
+    -- If we can't weave now but it's theoretically possible (totalCastTime < weaponSpeed)
+    if totalCastTime >= currentSwingTime then
+        -- Return the actual remaining time before the next auto-attack
+        return currentSwingTime + NAG:GCDTimeToReady()
     end
 
-    --- Checks if the current target is of a specific mob type.
-    --- @param self NAG
-    --- @param mobType string The type of mob to check for
-    --- @return boolean True if the target is of the specified mob type, false otherwise
-    --- @usage NAG:IsTargetMobType(NAG.Types:GetType("MobType").Undead)
-    function NAG:IsTargetMobType(mobType)
-        if not mobType then return false end
-        if not UnitExists("target") then return false end
-
-        -- Get the creature type of the target
-        local creatureType = UnitCreatureType("target")
-        if not creatureType then return false end
-
-        -- Direct comparison with the mob type from Types
-        return self.Types:GetType("MobType")[creatureType] == mobType
-    end
-    NAG.TargetMobType = NAG.IsTargetMobType
-
-    function NAG:PLAYER_REGEN_ENABLED()
-        self:Debug("Exiting combat")
-        self.inCombat = false
-        self.lastMainHandSwing = 0
-        self.lastOffHandSwing = 0
-        self.lastSwingDelta = nil
-        self.lastSwingTime = 0
-        self.lastSwingTimestamp = 0
-        self.lastSwingTimeOH = 0
-        self.lastSwingTimestampOH = 0
-    end
+    -- If we can weave now, return 0
+    return 0
 end
 
---- Predicts the player's energy after a given duration (in seconds).
---- @function NAG:CatEnergyAfterDuration
---- @param self NAG
---- @param duration number The duration in seconds to predict energy for
---- @usage NAG:CatEnergyAfterDuration(3.5) >= 60
---- @return number The predicted energy after the given duration (capped at max)
-function NAG:CatEnergyAfterDuration(duration)
-    if not duration or type(duration) ~= "number" or duration <= 0 then
-        return self:CurrentEnergy()
-    end
-    local currentEnergy = self:CurrentEnergy()
-    local maxEnergy = self.MaxEnergy and self:MaxEnergy() or 100
-    local tickRate = 2.0 -- Energy ticks every 2 seconds
-    local energyPerTick = 10 -- 10 energy per tick
-    local timeToNextTick = self.TimeToEnergyTick and self:TimeToEnergyTick() or tickRate
 
-    -- How many full ticks fit in the duration (after the next tick)
-    local ticks = 0
-    if timeToNextTick < duration then
-        ticks = 1 + math.floor((duration - timeToNextTick) / tickRate)
+-- ~~~~~~~~~~~~~~~~~~~~
+-- Autoattack values
+
+--- Returns the time until the next auto attack for the player.
+--- @function NAG:AutoTimeToNext
+--- @return number The time until the next auto attack (GCD affected).
+--- @return number The raw time until the next auto attack (not affected by GCD).
+--- @usage NAG:AutoTimeToNext() <= x
+function NAG:AutoTimeToNext()
+    if not swingTimerLib then return 0, 0 end
+
+    if not self.swingTimerInitialized then
+        local f = CreateFrame("Frame")
+
+        local function SwingTimerEventHandler(event, ...)
+            if event == "UNIT_SWING_TIMER_DELTA" then
+                local _, swingDelta = ...
+                self.lastSwingDelta = swingDelta
+            end
+        end
+
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_INFO_INITIALIZED", SwingTimerEventHandler)
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_START", SwingTimerEventHandler)
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_UPDATE", SwingTimerEventHandler)
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_DELTA", SwingTimerEventHandler)
+
+        self.swingTimerFrame = f
+        self.swingTimerInitialized = true
     end
-    local predictedEnergy = currentEnergy + (ticks * energyPerTick)
-    return math.min(predictedEnergy, maxEnergy)
+
+    -- Get swing timer info for both hands
+    local mhSpeed, mhExpiration = swingTimerLib:UnitSwingTimerInfo("player", "mainhand")
+    local ohSpeed, ohExpiration = swingTimerLib:UnitSwingTimerInfo("player", "offhand")
+    if not mhExpiration then return 0, 0 end -- No valid swing timer
+
+    local currentTime = NAG:NextTime()
+    local mhTimeToNext = mhExpiration - currentTime
+    local ohTimeToNext = ohExpiration and (ohExpiration - currentTime) or math.huge
+
+    -- Get the shorter time until next swing
+    local timeToNextSwing = min(mhTimeToNext, ohTimeToNext)
+    -- If negative, add weapon speed to get next window
+    local timeToNextSwingUpdated = timeToNextSwing
+    if timeToNextSwing < 0 then
+        timeToNextSwingUpdated = timeToNextSwing + mhSpeed
+    end
+
+    -- Get GCD time
+    local gcd = NAG:GCDTimeToReady() or 0
+
+    -- Return both GCD-affected and raw times
+    return max(0, timeToNextSwingUpdated), max(0, mhTimeToNext+currentTime-GetTime())
 end
 
-function NAG:EnergyThreshold(threshold)
-    return self:CurrentEnergy() <= threshold
+--- Calculates the difference between mainhand and offhand swing times.
+--- Returns the phase difference in seconds, or 0 if unavailable.
+--- @function NAG:SwingTimeDifference
+--- @return number The difference in swing times.
+--- @usage local diff = NAG:SwingTimeDifference()
+function NAG:SwingTimeDifference()
+    if not swingTimerLib then return 0 end
+
+    -- Initialize swing timer tracking if not already done
+    if not self.swingTimerInitialized then
+        local f = CreateFrame("Frame")
+
+        local function SwingTimerEventHandler(event, ...)
+            if event == "UNIT_SWING_TIMER_DELTA" then
+                local _, swingDelta = ...
+                self.lastSwingDelta = abs(swingDelta) -- Ensure positive value
+            elseif event == "UNIT_SWING_TIMER_START" then
+                local _, hand = ...
+                if hand == "mainhand" then
+                    self.lastMainHandSwing = GetTime()
+                end
+            end
+        end
+
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_INFO_INITIALIZED", SwingTimerEventHandler)
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_START", SwingTimerEventHandler)
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_UPDATE", SwingTimerEventHandler)
+        swingTimerLib.RegisterCallback(f, "UNIT_SWING_TIMER_DELTA", SwingTimerEventHandler)
+
+        self.swingTimerFrame = f
+        self.swingTimerInitialized = true
+    end
+
+    local mhSpeed, mhExpiration, mhLastSwing = swingTimerLib:UnitSwingTimerInfo("player", "mainhand")
+    local ohSpeed, ohExpiration, ohLastSwing = swingTimerLib:UnitSwingTimerInfo("player", "offhand")
+
+    if not mhSpeed or not ohSpeed then
+        self:Debug("SwingTimeDifference: Missing weapon speeds")
+        return 0
+    end
+
+    -- Calculate current swing positions
+    local currentTime = GetTime()
+    local mhPosition = mhExpiration and (mhExpiration - currentTime) or 0
+    local ohPosition = ohExpiration and (ohExpiration - currentTime) or 0
+
+    -- Calculate the phase difference between the swings
+    local difference = abs(mhPosition - ohPosition)
+
+    -- If the difference is more than half the swing time, adjust it
+    local minSwingTime = min(mhSpeed, ohSpeed)
+    if difference > (minSwingTime / 2) then
+        difference = minSwingTime - difference
+    end
+
+    -- Use cached delta if available
+    if self.lastSwingDelta then
+        difference = self.lastSwingDelta
+    end
+
+    return difference
+end
+
+function NAG:PLAYER_REGEN_ENABLED()
+    self:Debug("Exiting combat")
+    self.inCombat = false
+    self.lastMainHandSwing = 0
+    self.lastOffHandSwing = 0
+    self.lastSwingDelta = nil
+    self.lastSwingTime = 0
+    self.lastSwingTimestamp = 0
+    self.lastSwingTimeOH = 0
+    self.lastSwingTimestampOH = 0
+end
+
+do -- ~~~~~~~~~~ Spell Position Checking Functions ~~~~~~~~~~
+
+    --- Check if a spell ID is displayed at a specific position.
+    --- @param spellId number The spell ID to check
+    --- @param position string The position to check (e.g., "primary", "left1", "right2")
+    --- @return boolean True if the spell is displayed at that position
+    --- @usage NAG:IsSpellAtPosition(12345, "primary")
+    function NAG:IsSpellAtPosition(spellId, position)
+        if not spellId or not position then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        local frame = NAG.Frame.iconFrames[position]
+        if not frame then
+            return false
+        end
+        
+        return frame.spellId == spellId and frame:IsVisible()
+    end
+
+    --- Check if a spell ID is displayed anywhere in the NAG frames.
+    --- @param spellId number The spell ID to check
+    --- @return table|nil Returns position info if found, nil if not found
+    --- @usage NAG:GetSpellPosition(12345)
+    function NAG:GetSpellPosition(spellId)
+        if not spellId then return nil end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return nil
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                return {
+                    position = position,
+                    frame = frame,
+                    isPrimary = position == "primary",
+                    isAOE = position == "aoe",
+                    isLeft = strmatch(position, "^left") ~= nil,
+                    isRight = strmatch(position, "^right") ~= nil,
+                    isAbove = strmatch(position, "^above") ~= nil,
+                    isBelow = strmatch(position, "^below") ~= nil
+                }
+            end
+        end
+        
+        return nil
+    end
+
+    --- Get all spells currently displayed in NAG frames.
+    --- @return table Table of displayed spells with their positions
+    --- @usage NAG:GetDisplayedSpells()
+    function NAG:GetDisplayedSpells()
+        local displayedSpells = {}
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return displayedSpells
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId and frame:IsVisible() then
+                displayedSpells[position] = {
+                    spellId = frame.spellId,
+                    frame = frame,
+                    isPrimary = position == "primary",
+                    isAOE = position == "aoe",
+                    isLeft = strmatch(position, "^left") ~= nil,
+                    isRight = strmatch(position, "^right") ~= nil,
+                    isAbove = strmatch(position, "^above") ~= nil,
+                    isBelow = strmatch(position, "^below") ~= nil
+                }
+            end
+        end
+        
+        return displayedSpells
+    end
+
+    --- Check if a spell is displayed in left positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any left position
+    --- @usage NAG:IsSpellInLeftPositions(12345)
+    function NAG:IsSpellInLeftPositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^left") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed in right positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any right position
+    --- @usage NAG:IsSpellInRightPositions(12345)
+    function NAG:IsSpellInRightPositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^right") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed in above positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any above position
+    --- @usage NAG:IsSpellInAbovePositions(12345)
+    function NAG:IsSpellInAbovePositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^above") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed in below positions.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if found in any below position
+    --- @usage NAG:IsSpellInBelowPositions(12345)
+    function NAG:IsSpellInBelowPositions(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if strmatch(position, "^below") and frame.spellId == spellId and frame:IsVisible() then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    --- Check if a spell is displayed as the primary spell.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if the spell is the primary spell
+    --- @usage NAG:IsPrimarySpell(12345)
+    function NAG:IsPrimarySpell(spellId)
+        return self:IsSpellAtPosition(spellId, "primary")
+    end
+
+    --- Check if a spell is displayed as the AOE spell.
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if the spell is the AOE spell
+    --- @usage NAG:IsAOESpell(12345)
+    function NAG:IsAOESpell(spellId)
+        return self:IsSpellAtPosition(spellId, "aoe")
+    end
+
+    --- Get all positions where a spell is displayed.
+    --- @param spellId number The spell ID to check
+    --- @return table Array of positions where the spell is displayed
+    --- @usage NAG:GetSpellPositions(12345)
+    function NAG:GetSpellPositions(spellId)
+        if not spellId then return {} end
+        
+        local positions = {}
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return positions
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                tinsert(positions, position)
+            end
+        end
+        
+        return positions
+    end
+
+    --- Check if any spell is displayed at a specific position.
+    --- @param position string The position to check (e.g., "primary", "left1", "right2")
+    --- @return boolean True if any spell is displayed at that position
+    --- @usage NAG:IsPositionOccupied("primary")
+    function NAG:IsPositionOccupied(position)
+        if not position then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        local frame = NAG.Frame.iconFrames[position]
+        if not frame then
+            return false
+        end
+        
+        return frame.spellId ~= nil and frame:IsVisible()
+    end
+
+    --- Get the spell ID displayed at a specific position.
+    --- @param position string The position to check (e.g., "primary", "left1", "right2")
+    --- @return number|nil The spell ID at that position, or nil if no spell
+    --- @usage NAG:GetSpellAtPosition("primary")
+    function NAG:GetSpellAtPosition(position)
+        if not position then return nil end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return nil
+        end
+        
+        local frame = NAG.Frame.iconFrames[position]
+        if not frame or not frame:IsVisible() then
+            return nil
+        end
+        
+        return frame.spellId
+    end
+
+    --- Count how many positions a spell is displayed in.
+    --- @param spellId number The spell ID to check
+    --- @return number The number of positions where the spell is displayed
+    --- @usage NAG:GetSpellDisplayCount(12345)
+    function NAG:GetSpellDisplayCount(spellId)
+        if not spellId then return 0 end
+        
+        local count = 0
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return count
+        end
+        
+        for _, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                count = count + 1
+            end
+        end
+        
+        return count
+    end
+
+    --- Check if a spell is displayed in any secondary position (non-primary, non-AOE).
+    --- @param spellId number The spell ID to check
+    --- @return boolean True if the spell is in a secondary position
+    --- @usage NAG:IsSpellInSecondaryPosition(12345)
+    function NAG:IsSpellInSecondaryPosition(spellId)
+        if not spellId then return false end
+        
+        if not NAG.Frame or not NAG.Frame.iconFrames then
+            return false
+        end
+        
+        for position, frame in pairs(NAG.Frame.iconFrames) do
+            if frame.spellId == spellId and frame:IsVisible() then
+                -- Check if it's not primary or AOE
+                if position ~= "primary" and position ~= "aoe" then
+                    return true
+                end
+            end
+        end
+        
+        return false
+    end
+
+end
+
+--- Placeholder for moving the player for a specific duration.
+--- @function NAG:MoveDuration
+--- @param duration number The duration to move for.
+--- @return boolean True if the action was successful.
+--- @usage NAG:MoveDuration(2)
+function NAG:MoveDuration(duration)
+    -- TODO: Implement logic for moving for a specific duration.
+    self:Print("Warning: MoveDuration is not yet fully implemented.")
+    return false
+end
+
+--- Placeholder for checking if the player is in front of the target.
+--- @function NAG:FrontOfTarget
+--- @return boolean True if the player is in front of the target, false otherwise.
+--- @usage NAG:FrontOfTarget()
+function NAG:FrontOfTarget()
+    -- TODO: Implement logic to check player position relative to target.
+    self:Print("Warning: FrontOfTarget is not yet fully implemented.")
+    return true -- Assuming true for now.
+end
+
+-- ~~~~~~~~~~~~~~~~~~~~
+-- Network Statistics
+
+-- Network latency tracking with outlier removal
+local networkStats = {
+    lastUpdate = 0,
+    updateInterval = 0.5, -- Update every 0.5 seconds
+    readings = {}, -- Store last 10 readings
+    maxReadings = 10,
+    currentAverage = 0 -- Cached average
+}
+
+--- Gets the current network latency with outlier removal and caching.
+--- Reads GetNetStats() only once every 0.5 seconds, maintains a rolling average
+--- of the last 10 readings, discards the top 2 highest and lowest values,
+--- and returns the average of the remaining 6 values.
+--- @function NAG:GetNetStats
+--- @return number The average network latency in seconds
+--- @usage local latency = NAG:GetNetStats()
+function NAG:GetNetStats()
+    local currentTime = GetTime()
+    
+    -- Check if we need to update
+    if currentTime - networkStats.lastUpdate < networkStats.updateInterval then
+        return networkStats.currentAverage
+    end
+    
+    -- Update the timestamp
+    networkStats.lastUpdate = currentTime
+    
+    -- Get current network stats
+    local _, _, lagHome, lagWorld = GetNetStats()
+    local currentLag = math.max(lagHome or 0, lagWorld or 0) / 1000 -- Convert to seconds
+    
+    -- Add new reading to the array
+    table.insert(networkStats.readings, currentLag)
+    
+    -- Keep only the last maxReadings
+    if #networkStats.readings > networkStats.maxReadings then
+        table.remove(networkStats.readings, 1)
+    end
+    
+    -- Calculate new average with outlier removal
+    if #networkStats.readings >= 6 then -- Need at least 6 readings for outlier removal
+        -- Create a copy for sorting
+        local sortedReadings = {}
+        for i, value in ipairs(networkStats.readings) do
+            sortedReadings[i] = value
+        end
+        
+        -- Sort the readings
+        table.sort(sortedReadings)
+        
+        -- Remove top 2 highest and lowest values
+        local startIndex = 3 -- Skip lowest 2
+        local endIndex = #sortedReadings - 2 -- Skip highest 2
+        
+        -- Calculate average of remaining values
+        local sum = 0
+        local count = 0
+        for i = startIndex, endIndex do
+            sum = sum + sortedReadings[i]
+            count = count + 1
+        end
+        
+        networkStats.currentAverage = count > 0 and (sum / count) or currentLag
+    else
+        -- Not enough readings yet, use simple average
+        local sum = 0
+        for _, value in ipairs(networkStats.readings) do
+            sum = sum + value
+        end
+        networkStats.currentAverage = #networkStats.readings > 0 and (sum / #networkStats.readings) or currentLag
+    end
+    
+    return networkStats.currentAverage
+end
+
+--- Gets debug information about the network stats tracking.
+--- @function NAG:GetNetStatsDebug
+--- @return table Debug information about network stats
+--- @usage local debug = NAG:GetNetStatsDebug()
+function NAG:GetNetStatsDebug()
+    return {
+        lastUpdate = networkStats.lastUpdate,
+        updateInterval = networkStats.updateInterval,
+        readingsCount = #networkStats.readings,
+        maxReadings = networkStats.maxReadings,
+        currentAverage = networkStats.currentAverage,
+        allReadings = networkStats.readings -- Copy of all readings for analysis
+    }
 end

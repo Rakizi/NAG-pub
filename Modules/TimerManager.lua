@@ -1,17 +1,14 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Unknown (original), please update.
-    Module Purpose: Timer Management System - centralized timer management and tracking functionality. Facade for Ace3 timer operations and ensures proper cleanup.
-    STATUS: Production
-    TODO: Document timer usage patterns and add more categories if needed.
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
----@diagnostic disable: undefined-global, undefined-field
+--- @module "TimerManager"
+--- Manages timer functionality for NAG.
+---
+--- This module provides functions for creating, canceling, and checking timers.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -23,26 +20,26 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
----@class TimerManager: ModuleBase, AceTimer-3.0
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+--- @class TimerManager: ModuleBase, AceTimer-3.0
 local TimerManager = NAG:CreateModule("TimerManager", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 10,    -- Early in debug options, before ThrottleManager
@@ -58,7 +55,7 @@ TimerManager.Categories = {
     UI_NOTIFICATION = "ui_notification", -- UI notification and alert timers
 }
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function TimerManager:ModuleInitialize()
         -- Initialize timer tracking
@@ -79,7 +76,7 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 --- Creates and registers a new timer
 --- @param category string The category for the timer (use TimerManager.Categories)
 --- @param name string Unique name for the timer within its category
@@ -96,7 +93,7 @@ function TimerManager:Create(category, name, callback, interval, repeating, args
     end
 
     if self.timers[category][name] then
-        self:Debug(format("Timer already exists: %s in category %s", name, category))
+        -- Don't spam debug for duplicate timers - just return existing
         return self.timers[category][name]
     end
 
@@ -136,7 +133,6 @@ function TimerManager:Cancel(category, name)
         return
     end
 
-    self:Debug(format("Cancelling timer: %s in category %s", name, category))
     -- Call parent AceTimer-3.0 CancelTimer method
     self:CancelTimer(self.timers[category][name])
     self.timers[category][name] = nil

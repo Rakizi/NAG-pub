@@ -1,24 +1,18 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (original authors, update as needed)
-    Module Purpose: Time To Death (TTD) Management System
-    STATUS: Production
-    TODO: 
-      - Add more advanced prediction models
-      - Integrate with encounter modules
-    
-    The TTDManager provides time-to-death predictions for units using health sampling
-    and linear regression analysis.
-]]
----@diagnostic disable: undefined-global, undefined-field
+--- @module "TTDManager"
+--- Manages time-to-death (TTD) predictions for units using health sampling and linear regression analysis.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
+
+-- Libraries
+local RC = LibStub("LibRangeCheck-3.0")
 
 -- Lua APIs (using WoW's optimized versions where available)
 local format = format or string.format -- WoW's optimized version if available
@@ -29,25 +23,25 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local MIN_SAMPLE_INTERVAL = 0.1
 local HISTORY_COUNT = 100
@@ -58,7 +52,7 @@ local TRAINING_DUMMY_AURAS = {
     [61574] = true  -- Horde Banner Aura
 }
 
----@class TTDManager: ModuleBase
+--- @class TTDManager: ModuleBase
 local TTDManager = NAG:CreateModule("TTDManager", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 25,    -- After StateManager, before TrinketTracker
@@ -73,7 +67,7 @@ local TTDManager = NAG:CreateModule("TTDManager", nil, {
     }
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function TTDManager:ModuleInitialize()
         -- Initialize iterable units
@@ -96,10 +90,10 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (none required for this module, handled by timer)
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function TTDManager:IsTrainingDummy(unit)
     if not UnitExists(unit) then return false end
     if not ns.IsTrainingDummy() then return false end
@@ -168,7 +162,7 @@ function TTDManager:CalculateTimeToX(guid, targetPercent, minSamples)
 
     local samples = unitData.samples
     local n = #samples
-    
+
     -- Linear regression calculation
     local Ex2, Ex, Exy, Ey = 0, 0, 0, 0
     for _, sample in ipairs(samples) do
@@ -190,7 +184,7 @@ function TTDManager:CalculateTimeToX(guid, targetPercent, minSamples)
     local seconds = (targetPercent - a) / b
     -- Adjust for elapsed time
     seconds = seconds - (GetTime() - unitData.startTime)
-    
+
     -- Handle edge cases
     if seconds < 0 then return 9999 end
     return min(7777, seconds)
@@ -282,16 +276,86 @@ function TTDManager:GetMeleeMobCount()
     return self.state.meleeMobCount
 end
 
---- Get appropriate number of targets based on class type
+--- Get appropriate number of targets based on class type and distance
+--- @param meleeRange number|nil Optional range for melee classes (defaults to 7)
+--- @param rangedRange number|nil Optional range for ranged classes (defaults to target distance + 5)
 --- @return number The appropriate number of targets for the player's class
-function TTDManager:GetTargetCount()
+function TTDManager:GetTargetCount(meleeRange, rangedRange)
     local _, englishClass = UnitClass("player")
     local isRangedClass = englishClass == "HUNTER" or englishClass == "MAGE" or
         englishClass == "WARLOCK" or englishClass == "DRUID" or
         englishClass == "SHAMAN" or englishClass == "PRIEST"
 
-    -- Ranged classes can hit all targets, melee only those in range
-    return isRangedClass and self.state.mobCount or self.state.meleeMobCount
+    -- If no target exists, return 0
+    if not UnitExists("target") then
+        return 0
+    end
+
+    -- Get distance from player to target
+    local targetDistance = 0
+    if RC then
+        local minRange, maxDist = RC:GetRange("target", true)
+        targetDistance = minRange or maxDist or 0
+    else
+        -- Fallback if RC library not available
+        self:Error("LibRangeCheck-3.0 not found for distance calculation")
+        return isRangedClass and self.state.mobCount or self.state.meleeMobCount
+    end
+
+    -- Set default ranges if not provided
+    local defaultMeleeRange = meleeRange or 7
+    local defaultRangedRange = rangedRange and (targetDistance + rangedRange) or (targetDistance + 5)
+
+    if isRangedClass then
+        -- Ranged classes: always use the provided range or target distance + 5 yards
+        return self:CountEnemiesInRange(defaultRangedRange)
+    else
+        -- Melee classes: first try the provided melee range or 7 yards around player
+        local meleeCount = self:CountEnemiesInRange(defaultMeleeRange)
+
+        -- If no mobs around player, use the provided ranged range or target distance + 5 yards
+        if meleeCount == 0 then
+            return self:CountEnemiesInRange(defaultRangedRange)
+        else
+            return meleeCount
+        end
+    end
+end
+
+--- Count enemies within a specific range using distance-based calculation
+--- @param maxRange number The maximum range to check
+--- @return number The number of enemies in range
+function TTDManager:CountEnemiesInRange(maxRange)
+    -- Validate inputs
+    if not maxRange then return 0 end
+    if not RC then
+        self:Error("LibRangeCheck-3.0 not found")
+        return 0
+    end
+
+    -- Validate and clamp maxRange
+    maxRange = min(max(1, maxRange), 100)
+
+    local count = 0
+    -- Skip first 4 units (player, pet, target, mouseover) as they're handled separately
+    local ignoredCount = 4
+
+    local iterableUnits = self:GetIterableUnits()
+    for i = ignoredCount + 1, #iterableUnits do
+        local unit = iterableUnits[i]
+        if UnitExists(unit) and UnitCanAttack("player", unit) then
+            -- Get exact range info
+            local minRange, maxDist = RC:GetRange(unit, true)
+
+            -- Use most precise range value
+            local distance = minRange or maxDist
+            if distance and distance <= maxRange then
+                count = count + 1
+            end
+        end
+    end
+
+    return count
 end
 
 --- Initialize the list of units to iterate over

@@ -61,6 +61,8 @@ if L then
         L["bothOutput"] = "디버그와 채팅 모두"
         L["btk"] = "BTK"
         L["btkDesc"] = "BTK 모듈 기능"
+        L["btkDisableEmotes"] = "무릎 꿇기 감정 표현 비활성화"
+        L["btkDisableEmotesDesc"] = "godtier 사용자가 버프를 얻거나 잃을 때 다른 플레이어가 무릎을 꿇거나 경례하도록 하는 자동 감정 표현 기능 비활성화 (Godtier만)"
         L["buffCheckInterval"] = "버프 확인 간격"
         L["buffCheckIntervalDesc"] = "누락된 공격대 버프 확인 빈도 (초)"
         L["buffSuggestionThreshold"] = "버프 제안 임계값"
@@ -746,7 +748,7 @@ if L then
         L["resetClassDesc"] = "직업 설정을 기본값으로 초기화"
         L["resetToDefault"] = "기본값으로 초기화"
         L["resetConfirmation"] = "'%s'의 설정을 기본값으로 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다."
-        
+
         -- Types.lua Stats
         L["strength"] = "힘"
         L["agility"] = "민첩"
@@ -775,14 +777,14 @@ if L then
         L["health"] = "생명력"
         L["mana"] = "마나"
         L["mp5"] = "5초당 마나"
-        
+
         -- Types.lua Categories
         L["character"] = "캐릭터"
         L["buffs"] = "강화 효과"
         L["debuffs"] = "약화 효과"
         L["combat"] = "전투"
         L["class"] = "직업"
-        
+
         -- Types.lua Buff Types
         L["stats"] = "특성"
         L["spell_resistance"] = "주문 저항"
@@ -799,7 +801,7 @@ if L then
         L["major_mana"] = "상급 마나"
         L["armor"] = "방어도"
         L["heroism"] = "영웅심"
-        
+
         -- Types.lua Debuff Types
         L["spell_damage"] = "주문 피해"
         L["spell_crit"] = "주문 치명타"
@@ -809,7 +811,7 @@ if L then
         L["physical_damage_reduction"] = "물리 피해 감소"
         L["attack_speed"] = "공격 속도"
         L["healing_reduction"] = "치유 감소"
-        
+
         -- Types.lua Combat Types
         L["unknown"] = "알 수 없음"
         L["any"] = "모든"
@@ -817,7 +819,7 @@ if L then
         L["main_hand"] = "주 손"
         L["off_hand"] = "보조 손"
         L["ranged"] = "원거리"
-        
+
         -- Types.lua Class Types
         L["humanoid"] = "인간형"
         L["ghost_wolf"] = "유령 늑대"
@@ -834,14 +836,14 @@ if L then
         L["blood"] = "혈기"
         L["frost"] = "냉기"
         L["unholy"] = "부정"
-        
+
         -- Types.lua Rune Types
         L["rune_unknown"] = "알 수 없는 룬"
         L["rune_blood"] = "혈기 룬"
         L["rune_frost"] = "냉기 룬"
         L["rune_unholy"] = "부정 룬"
         L["rune_death"] = "죽음의 룬"
-        
+
         -- Types.lua Rune Slots
         L["slot_unknown"] = "알 수 없는 슬롯"
         L["slot_left_blood"] = "왼쪽 혈기 룬"
@@ -850,18 +852,18 @@ if L then
         L["slot_right_frost"] = "오른쪽 냉기 룬"
         L["slot_left_unholy"] = "왼쪽 부정 룬"
         L["slot_right_unholy"] = "오른쪽 부정 룬"
-        
+
         -- Types.lua Eclipse Phases
         L["unknown_phase"] = "알 수 없는 단계"
         L["neutral_phase"] = "중립 단계"
         L["solar_phase"] = "태양 단계"
         L["lunar_phase"] = "달 단계"
-        
+
         -- Types.lua Swap Sets
         L["swap_set_unknown"] = "알 수 없는 교체 세트"
         L["swap_set_main"] = "주 교체 세트"
         L["swap_set_swap1"] = "교체 세트 1"
-        
+
         -- Types.lua Mob Types
         L["none"] = "없음"
         L["aberration"] = "이형"
@@ -1027,9 +1029,7 @@ if L then
     end
 end
 
---===================================================================================================
--- DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE
---===================================================================================================
+-- ~~~~~~~~~~ DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE ~~~~~~~~~~
 
 if L then
     -- WoW Patch 40400 UnitCreatureTypes

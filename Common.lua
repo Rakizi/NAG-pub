@@ -1,41 +1,16 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "Common"
+--- Handles common functionality for the NAG addon.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS: good
-    NOTES: Add any additional comments or notes
-
-]]
-
---- ======= LOCALIZE =======
---Addon
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
 
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class StateManager : ModuleBase
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
----@class PullTimerManager : ModuleBase
-local PullTimer = NAG:GetModule("PullTimerManager")
 
 --WoW API
 local GetSpellCooldown = ns.GetSpellCooldownUnified
@@ -48,31 +23,32 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 --File
 
---- ======= GLOBALIZE =======
+-- ======= GLOBALIZE =======
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 do --== PRE-PULL/ROTATION/THROTTLER FUNCTIONS ==--
+
     --- Generic Rotation Function that handles the rotation logic.
     --- @param self NAG The NAG addon object
     --- @return boolean success Returns false if rotation setup fails
@@ -117,7 +93,7 @@ do --== PRE-PULL/ROTATION/THROTTLER FUNCTIONS ==--
     --- @return nil
     function NAG:Update(rotation)
         if self.isLoadScreenRecent then return end
-        if PullTimer:GetTimeToZero() then return end
+        --if PullTimer:GetTimeToZero() then return end
         local chk = ns.check()
         local shouldReturn = not chk or not self:ShouldShowDisplay()
 
@@ -149,13 +125,13 @@ do --== PRE-PULL/ROTATION/THROTTLER FUNCTIONS ==--
 end
 
 function NAG:HasGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     return StateManager:HasGlyph(glyphId)
 end
 
 function NAG:HasPrimeGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     -- Check prime glyph slots (type 0)
     for i = 1, GetNumGlyphSockets() do
@@ -169,7 +145,7 @@ function NAG:HasPrimeGlyph(glyphId)
 end
 
 function NAG:HasMajorGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     -- Check major glyph slots (type 1)
     for i = 1, GetNumGlyphSockets() do
@@ -183,7 +159,7 @@ function NAG:HasMajorGlyph(glyphId)
 end
 
 function NAG:HasMinorGlyph(glyphId)
-    if not glyphId then return false end
+    if not glyphId or not _G.GetNumGlyphSockets then return false end
 
     -- Check minor glyph slots (type 2)
     for i = 1, GetNumGlyphSockets() do

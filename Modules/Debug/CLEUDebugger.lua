@@ -1,22 +1,17 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Debug utilities for monitoring Combat Log Event Unfiltered (CLEU)
-    STATUS: ok
-    TODO: 
-        - Add more event filters as needed
-        - Improve output formatting options
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
----@diagnostic disable: undefined-global, undefined-field
+--- @module "CLEUDebugger"
+--- Debug utilities for monitoring Combat Log Event Unfiltered (CLEU) events.
+---
+--- Provides a module for filtering and logging CLEU events based on various
+--- conditions and parameters.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
---- @class NAG : AceAddon-3.0, AceConsole-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DebugManager : ModuleBase
+--- @type DebugManager|ModuleBase|AceModule
 local Debug = NAG:GetModule("DebugManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -33,19 +28,18 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         filters = {
             excludeCommon = true,
             excludedEvents = {
@@ -73,8 +67,8 @@ local OUTPUT_MODES = {
     BOTH = "BOTH"
 }
 
----@class CLEUDebugger: ModuleBase, AceConsole-3.0
----@field hidden boolean
+--- @class CLEUDebugger: ModuleBase, AceConsole-3.0
+--- @field hidden boolean
 local CLEUDebugger = NAG:CreateModule("CLEUDebugger", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     moduleType = ns.MODULE_TYPES.DEBUG,
@@ -85,9 +79,10 @@ local CLEUDebugger = NAG:CreateModule("CLEUDebugger", defaults, {
     hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     --- Initialize the module
+
     --- @param self CLEUDebugger
     function CLEUDebugger:ModuleInitialize()
         self:Debug("CLEUDebugger initialized")
@@ -108,9 +103,10 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     --- Handle COMBAT_LOG_EVENT_UNFILTERED events
+
     --- @param self CLEUDebugger
     function CLEUDebugger:COMBAT_LOG_EVENT_UNFILTERED()
         local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool =
@@ -169,12 +165,13 @@ do
     end
 end
 
--- ============================ MESSAGE HANDLERS ============================
+-- ~~~~~~~~~~ MESSAGE HANDLERS ~~~~~~~~~~
 -- (none)
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for CLEU Debugger settings
+
     --- @param self CLEUDebugger
     --- @return table The options table for AceConfig
     function CLEUDebugger:GetOptions()
@@ -351,7 +348,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 --- Add a spell ID to track
 --- @param self CLEUDebugger
 --- @param spellID number The spell ID to track

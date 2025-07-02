@@ -1,16 +1,13 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    https://creativecommons.org/licenses/by-nc/4.0/
+--- @module "Version"
+--- Version detection module for World of Warcraft across all versions
+---
+--- Provides a standardized way to detect and handle different WoW versions.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    Author: Rakizi
-    Date: 2024
-
-    Version detection module for World of Warcraft across all versions
-    Provides a standardized way to detect and handle different WoW versions
-]]
-
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
 
@@ -23,35 +20,40 @@ local WOW_PROJECT_WRATH_CLASSIC = WOW_PROJECT_WRATH_CLASSIC
 local WOW_PROJECT_CATACLYSM_CLASSIC = WOW_PROJECT_CATACLYSM_CLASSIC
 local WOW_PROJECT_MISTS_CLASSIC = WOW_PROJECT_MISTS_CLASSIC
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+-- Math operations (WoW optimized)
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
--- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+-- String operations (WoW optimized)
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+-- Table operations (WoW optimized)
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local tostring = tostring
+local tonumber = tonumber
 
---- ============================ CONTENT ============================
----@class Version
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+--- @class Version
 local Version = {}
 
 -- Version Constants
@@ -148,18 +150,16 @@ end
 --- @return string expansion The current expansion identifier
 function Version:GetExpansion()
     local expansionVersion = self:GetExpansionVersion()
-    
+
     -- First check the WoW project ID for more specific information
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
-        ---@diagnostic disable-next-line: undefined-global
         if C_GameModeManager and C_GameModeManager.IsFeatureID and C_GameModeManager.IsFeatureID(7) then
             return self.EXPANSIONS.PLUNDERSTORM
         end
         return self.EXPANSIONS.MAINLINE
     elseif WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
         -- Check for Season of Discovery
-        ---@diagnostic disable-next-line: undefined-global
         if C_Engraving and C_Engraving.IsEngravingEnabled() then
             return self.EXPANSIONS.SOD  -- Special Season of Discovery expansion
         end
@@ -171,7 +171,7 @@ function Version:GetExpansion()
     elseif WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC then
         return self.EXPANSIONS.MISTS
     end
-    
+
     -- Fallback to expansion version number detection
     if expansionVersion >= self.EXPANSION_VERSIONS.RETAIL_MIN then
         return self.EXPANSIONS.MAINLINE
@@ -203,10 +203,9 @@ function Version:GetVersionInfo()
     -- Determine game type
     local gameType
     local expansion = self:GetExpansion()
-    
+
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- Check for Plunderstorm (if available)
-        ---@diagnostic disable-next-line: undefined-global
         if C_GameModeManager and C_GameModeManager.IsFeatureID and C_GameModeManager.IsFeatureID(7) then
             gameType = self.GAME_TYPES.PLUNDERSTORM
         else
@@ -254,12 +253,12 @@ end
 --- @return string tocSuffix The appropriate TOC suffix for the expansion
 function Version:GetTocSuffix(expansion)
     expansion = expansion or self:GetExpansion()
-    
+
     -- Handle Season of Discovery with same TOC as Vanilla
     if expansion == self.EXPANSIONS.SOD then
         return self.TOC_SUFFIXES.VANILLA
     end
-    
+
     -- Map expansion to TOC suffix
     if expansion == self.EXPANSIONS.VANILLA then
         return self.TOC_SUFFIXES.VANILLA
@@ -415,7 +414,7 @@ end
 --- @return string dataSource The data source identifier
 function Version:GetDataSource(expansion)
     expansion = expansion or self:GetExpansion()
-    
+
     -- Return mapped data source or default to expansion name
     return self.DATA_MAPPING[expansion] or expansion
 end

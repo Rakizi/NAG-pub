@@ -1,19 +1,12 @@
---- ============================ HEADER ============================
---[[
-    Module Purpose: Implements the APL (Action Priority List) core logic for NAG, including schema-driven function generation and implementation registration.
-    Authors: NextActionGuide Team
-    Contact: See project repository
-    STATUS: Active
-    TODO: 
-      - Expand schema support for new action/value types
-      - Improve error reporting for user scripts
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    See LICENSE for full license text.
-]]
+--- @module "APL"
+--- Implements the APL (Action Priority List) core logic for NAG, including schema-driven function generation and implementation registration.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local addonName, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
@@ -27,40 +20,36 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 local setmetatable = setmetatable
 local next = next
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Core Modules
 local APLSchema = nil -- Will be set in ModuleInitialize
 local Types = nil     -- Will be set in ModuleInitialize
 
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+local defaults = {}
 
----@class APL: ModuleBase
-local APLModule = NAG:CreateModule("APL", defaults, {
+--- @class APL : AceModule
+APLModule = NAG:CreateModule("APL", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 10,
 })
@@ -78,7 +67,7 @@ APLModule.Implementations = {
     Actions = {}
 }
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function APLModule:ModuleInitialize()
         local startTime = debugprofilestop()
@@ -126,13 +115,13 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (No event handlers defined in this module)
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 -- (No options UI defined in this module)
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function APLModule:InitializeMetadataFromSchema()
     local startTime = debugprofilestop()
     self:Debug("Initializing metadata from schema")
@@ -146,14 +135,14 @@ function APLModule:InitializeMetadataFromSchema()
     local actionTypes = {}
     local valueTypes = {}
     -- Get action types
-    if schema.messages.APLAction and schema.messages.APLAction.action and schema.messages.APLAction.action.fields then
-        for actionType, _ in pairs(schema.messages.APLAction.action.fields) do
+    if schema.messages.APLAction and schema.messages.APLAction.oneofs and schema.messages.APLAction.oneofs.action then
+        for _, actionType in ipairs(schema.messages.APLAction.oneofs.action) do
             table.insert(actionTypes, actionType)
         end
     end
     -- Get value types
-    if schema.messages.APLValue and schema.messages.APLValue.value and schema.messages.APLValue.value.fields then
-        for valueType, _ in pairs(schema.messages.APLValue.value.fields) do
+    if schema.messages.APLValue and schema.messages.APLValue.oneofs and schema.messages.APLValue.oneofs.value then
+        for _, valueType in ipairs(schema.messages.APLValue.oneofs.value) do
             table.insert(valueTypes, valueType)
         end
     end
@@ -171,8 +160,8 @@ function APLModule:InitializeMetadataFromSchema()
             self.Metadata.Values[valueType] = metadata
         end
     end
-    self:Debug(format("Generated metadata for %d actions and %d values", 
-        ns.tCount(self.Metadata.Actions), 
+    self:Debug(format("Generated metadata for %d actions and %d values",
+        ns.tCount(self.Metadata.Actions),
         ns.tCount(self.Metadata.Values)))
     local endTime = debugprofilestop()
     self:Debug(format("Metadata initialization completed in %.2f ms", endTime - startTime))

@@ -1,19 +1,16 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi
-    Module Purpose: Type registry and enum system for NAG modules, including schema integration and type normalization utilities.
-    STATUS: Active
-    TODO: Expand schema import support, add more type categories as needed
-]]
----@diagnostic disable: duplicate-set-field, undefined-global, unused-local
+--- @module "Types"
+--- Manages type registry and enum system for NAG modules, including schema integration and type normalization utilities.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
+local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 -- Lua APIs (using WoW's optimized versions where available)
 local format = format or string.format -- WoW's optimized version if available
@@ -24,27 +21,33 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 local pairs = pairs
 local setmetatable = setmetatable
+local ipairs = ipairs
+local tostring = tostring
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+-- Locals for the options UI viewer
+local searchQuery = ""
+local searchResults = {}
+
 -- Alias table for manual overrides
 local Aliases = {
     -- Example: ["APLValueRuneSlot"] = "RuneSlot",
@@ -89,9 +92,10 @@ end
 -- Cache for type lookups to avoid repetitive searching
 local TypeLookupCache = {}
 
----@class Types: ModuleBase
+--- @class Types: ModuleBase
 local Types = NAG:CreateModule("Types", nil, {
     moduleType = ns.MODULE_TYPES.CORE,
+    optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     optionsOrder = 5,     -- Early in debug options
     childGroups = "tree", -- Use tree structure for options
 })
@@ -435,7 +439,7 @@ Types.SwapSet = TypeRegistry:Register("SwapSet", {
 })
 
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function Types:ModuleInitialize()
         self.Registry = TypeRegistry
@@ -444,7 +448,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- Helper functions for class validation
 function Types:GetSpellClassSet(className)
     local classInfo = self:GetType("ClassInfo")
@@ -504,11 +508,11 @@ function Types:ImportTypesFromSchema(schema)
         else
             -- Convert schema enum format to TypeRegistry format
             local values = {}
-            for valueId, valueName in pairs(enumValues) do
+            for valueName, valueId in pairs(enumValues) do
                 -- Only clean up the name if the type isn't in the preserve list
                 local cleanName = valueName
                 if not PRESERVE_PREFIX_TYPES[enumName] then
-                    local prefix = enumName .. "Type"  -- e.g., "MobType" for "MobTypeBeast"
+                    local prefix = enumName .. "Type" -- e.g., "MobType" for "MobTypeBeast"
                     if cleanName:find("^" .. prefix) then
                         cleanName = cleanName:sub(#prefix + 1)
                     elseif cleanName:find("^" .. enumName) then
@@ -519,6 +523,7 @@ function Types:ImportTypesFromSchema(schema)
                         cleanName = cleanName:sub(2)
                     end
                 end
+                self:Debug(format("  - Processing enum value: %s -> %s (clean: %s)", tostring(valueName), tostring(valueId), tostring(cleanName)))
                 values[cleanName] = valueId
             end
             -- Register the type
@@ -529,8 +534,8 @@ function Types:ImportTypesFromSchema(schema)
             }
             TypeRegistry:Register(enumName, values, metadata)
             count = count + 1
-            self:Debug(format("Registered schema type %s with %d values (%s prefix cleaning)", 
-                enumName, 
+            self:Debug(format("Registered schema type %s with %d values (%s prefix cleaning)",
+                enumName,
                 ns.tCount(values),
                 PRESERVE_PREFIX_TYPES[enumName] and "without" or "with"))
         end
@@ -539,7 +544,7 @@ function Types:ImportTypesFromSchema(schema)
     return count
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function Types:LoadSchemaTypes()
         -- Clear caches when reloading schema types
@@ -564,7 +569,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function Types:GetType(name)
     -- Quick return for nil input
     if not name then return nil end
@@ -635,7 +640,146 @@ function Types:SearchEnumValues(searchTerm)
     return TypeRegistry:SearchValues(searchTerm)
 end
 
--- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
+function Types:GetOptions()
+    -- Helper function to build dynamic search results
+    local function GetSearchResults()
+        local args = {}
+        local results = TypeRegistry:SearchValues(searchQuery)
+        if not next(results) then
+            args.noresults = {
+                type = "description",
+                name = format(L["No results found for '%s'"], searchQuery),
+            }
+        else
+            for typeName, values in pairs(results) do
+                args[typeName] = {
+                    type = "group",
+                    name = typeName,
+                    args = {}
+                }
+                local sortedValueNames = {}
+                for valueName in pairs(values) do tinsert(sortedValueNames, valueName) end
+                sort(sortedValueNames)
+
+                for _, valueName in ipairs(sortedValueNames) do
+                    local valueId = values[valueName]
+                    args[typeName].args[valueName] = {
+                        type = "description",
+                        name = format("%s = %s", valueName, tostring(valueId)),
+                    }
+                end
+            end
+        end
+        return args
+    end
+
+    -- Helper function to build the tree of all types
+    local function GetAllTypes()
+        local args = {}
+        local categories = {} -- { categoryName = {typeObj1, typeObj2}, ... }
+
+        -- Group types by category
+        for _, typeObj in pairs(TypeRegistry._types) do
+            local categoryName = typeObj:GetCategory()
+            if not categories[categoryName] then
+                categories[categoryName] = {}
+            end
+            tinsert(categories[categoryName], typeObj)
+        end
+
+        -- Get sorted category names
+        local sortedCategoryNames = {}
+        for catName in pairs(categories) do
+            tinsert(sortedCategoryNames, catName)
+        end
+        sort(sortedCategoryNames)
+
+        -- Build the args table
+        for _, categoryName in ipairs(sortedCategoryNames) do
+            local typeList = categories[categoryName]
+            sort(typeList, function(a, b) return a:GetName() < b:GetName() end)
+
+            args[categoryName] = { type = "group", name = categoryName, childGroups = "tree", args = {} }
+
+            for _, typeObj in ipairs(typeList) do
+                local typeName = typeObj:GetName()
+                local typeValues = typeObj:GetValues()
+
+                args[categoryName].args[typeName] = {
+                    type = "group",
+                    name = typeName,
+                    desc = typeObj:GetDescription(),
+                    args = {}
+                }
+
+                local sortedValueNames = {}
+                for valueName in pairs(typeValues) do
+                    tinsert(sortedValueNames, valueName)
+                end
+                sort(sortedValueNames)
+
+                for _, valueName in ipairs(sortedValueNames) do
+                    local valueId = typeValues[valueName]
+                    args[categoryName].args[typeName].args[valueName] = {
+                        type = "description",
+                        name = format("%s = %s", valueName, tostring(valueId))
+                    }
+                end
+            end
+        end
+        return args
+    end
+
+    -- Options table definition
+    local options = {
+        type = "group",
+        name = "Types Viewer",
+        args = {
+            viewerHeader = {
+                order = 1,
+                type = "header",
+                name = "Type and Enum Viewer",
+            },
+            viewerDescription = {
+                order = 2,
+                type = "description",
+                name = "Browse or search all registered enum types and their values, including those imported from the schema.",
+            },
+            search = {
+                order = 3,
+                type = "input",
+                name = function() return L["Search"] end,
+                desc = function() return L["Search for an enum value across all types."] end,
+                get = function() return searchQuery end,
+                set = function(info, value)
+                    searchQuery = value or ""
+                    -- Refresh the options UI to show/hide results
+                    AceConfigRegistry:NotifyChange("NAG")
+                end,
+                width = "full",
+            },
+            searchResults = {
+                order = 4,
+                type = "group",
+                name = function() return L["Search Results"] end,
+                hidden = function() return #searchQuery < 2 end,
+                args = GetSearchResults(),
+            },
+            allTypes = {
+                order = 5,
+                type = "group",
+                name = function() return L["All Registered Types"] end,
+                childGroups = "tree",
+                hidden = function() return #searchQuery >= 2 end,
+                args = GetAllTypes(),
+            },
+        }
+    }
+    return options
+end
+
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 -- Make types accessible through NAG.Types
 ns.Types = Types
 

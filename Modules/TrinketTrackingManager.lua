@@ -1,25 +1,17 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "TrinketTrackingManager"
+--- Manages trinket proc tracking and ICD learning.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    TrinketTrackingManager
-    ----------------------
-    Manages trinket proc tracking and ICD learning.
-
-    Responsibilities:
-    - Track trinket proc states
-    - Learn trinket ICDs and durations
-    - Track proc uptime and cooldowns
-    - Provide proc prediction and timing information
-]]
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class Types : ModuleBase
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 
 --WoW API
@@ -34,31 +26,28 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
-    global = {
-        debug = false,
-    },
 }
----@class TrinketTrackingManager: ModuleBase, AceTimer-3.0
+--- @class TrinketTrackingManager: ModuleBase, AceTimer-3.0
 local TrinketTrackingManager = NAG:CreateModule("TrinketTrackingManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 303,   -- After StateManager
@@ -75,6 +64,7 @@ local TrinketTrackingManager = NAG:CreateModule("TrinketTrackingManager", defaul
 })
 
 do -- Core functionality
+
     --- Initialize the TrinketTrackingManager module
     --- @param self TrinketTrackingManager
     function TrinketTrackingManager:ModuleInitialize()
@@ -113,11 +103,11 @@ do -- Core functionality
             -- Spell Power trinkets
             [91838] = Types:GetType("Stat").SPELL_POWER -- Spell Power
         }
-        
+
         -- Register for events
         self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         self:RegisterEvent("PLAYER_ENTERING_WORLD")
-        
+
         -- Initialize trinket info for currently equipped trinkets
         self:InitializeEquippedTrinkets()
     end
@@ -180,6 +170,7 @@ do -- Core functionality
 end
 
 do -- Event Handlers
+
     --- Handle aura application
     --- @param self TrinketTrackingManager
     --- @param timestamp number
@@ -212,6 +203,7 @@ do -- Event Handlers
 end
 
 do -- State Management
+
     --- Get trinket data by proc spell ID
     --- @param spellId number The proc spell ID to look up
     --- @return table|nil The trinket data if found
@@ -329,6 +321,7 @@ do -- State Management
 end
 
 do -- Trinket Analysis Functions
+
     --- Analyzes a trinket and returns its information
     --- @param self TrinketTrackingManager
     --- @param itemId number The ID of the trinket to analyze
@@ -351,7 +344,7 @@ do -- Trinket Analysis Functions
         }
 
         -- First check if we have a TooltipParsingManager to use
-        ---@type TooltipParsingManager
+        --- @type TooltipParsingManager|AceModule
         local TooltipParser = NAG:GetModule("TooltipParsingManager", true)
         if TooltipParser then
             local tooltipInfo = TooltipParser:AnalyzeTrinket(itemId)
@@ -366,7 +359,7 @@ do -- Trinket Analysis Functions
                 trinketInfo.procType = tooltipInfo.procType
                 trinketInfo.buffId = tooltipInfo.buffId
                 trinketInfo.stacks = tooltipInfo.stacks or 0
-                
+
                 -- Cache and return early
                 self.state.trinketInfo[itemId] = trinketInfo
                 return trinketInfo
@@ -519,7 +512,7 @@ end
 function TrinketTrackingManager:GetInternalCooldownRemaining(spellId)
     -- Initialize or get proc state
     local procState = self:InitializeProcState(spellId)
-    
+
     -- If we have a last proc time and an ICD, calculate remaining time
     if procState.lastProcTime and procState.icd then
         local currentTime = GetTime()
@@ -537,6 +530,7 @@ function TrinketTrackingManager:GetInternalCooldownRemaining(spellId)
 end
 
 do -- Legacy Tooltip Scanning Functions - Kept for backward compatibility
+
     --- Helper function to convert time text to seconds
     local function parseTimeToSeconds(value, unit)
         if not value or not unit then return 0 end
@@ -637,9 +631,9 @@ do -- Legacy Tooltip Scanning Functions - Kept for backward compatibility
     --- @return table Information about procs and stats found
     function TrinketTrackingManager:ScanTooltipData(itemId)
         if not itemId then return nil end
-        
+
         -- Get TooltipParsingManager if available
-        ---@type TooltipParsingManager
+        --- @type TooltipParsingManager|AceModule
         local TooltipParser = NAG:GetModule("TooltipParsingManager", true)
         if TooltipParser then
             return TooltipParser:ParseItemTooltip(itemId)

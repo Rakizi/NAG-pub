@@ -1,29 +1,16 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "ClassBase"
+--- Provides a base class for all class modules in NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
-
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
-local SpecializationCompat = ns.SpecializationCompat
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+--- @type SpecializationCompat
+local SpecializationCompat = ns.SpecializationCompat
+--- @type Version
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
@@ -41,25 +28,25 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Add GenerateUniqueName utility function to ns namespace
 --- Generates a unique name by appending a number if needed
 --- @param baseRotations table Table of base rotations to check against
@@ -102,7 +89,7 @@ function ns.AddRotationToDefaults(defaults, specID, name, config)
     defaults.char.selectedRotations = defaults.char.selectedRotations or {}
 
     -- Register tracked IDs with DataManager using ImportExport's registration function
-    ---@class ImportExport : ModuleBase
+    --- @type ImportExport|AceModule|ModuleBase
     local ImportExport = ns.ImportExport
     if ImportExport and ImportExport.RegisterRotationEntities then
         ImportExport:RegisterRotationEntities(config)
@@ -176,14 +163,13 @@ local ClassBase = {
     optionsCategory = ns.MODULE_CATEGORIES.CLASS,
     optionsOrder = 100,
     childGroups = "tree",
-    debug = false
 }
 
 --- Creates a new class module that inherits from ModuleBase and ClassBase
 --- @param name string The name of the module
 --- @param classDefaults? table Optional class-specific defaults
 --- @param mixins? table Optional additional functionality to mix in
---- @return ModuleBase? The created module
+--- @return ClassBase|AceModule|ModuleBase? The created module
 function NAG:CreateClassModule(name, classDefaults, mixins)
     -- Check if this is the player's class first
     local _, playerClass = UnitClass("player")
@@ -212,7 +198,7 @@ function NAG:CreateClassModule(name, classDefaults, mixins)
     end
 
     -- Create module with ModuleBase as prototype
-    ---@class ClassBase : ModuleBase
+    --- @type ClassBase|AceModule|ModuleBase
     local module = self:CreateModule(name, mergedDefaults, mixins)
 
     -- Set class module flags
@@ -261,26 +247,6 @@ do -- Ace3 lifecycle
         if self.className == "DEATHKNIGHT" then
             self:Print("Setting Death Knight module to enabled")
             self:SetEnabledState(true)
-
-            -- Check for WeakAuras after a delay to ensure WeakAuras is loaded
-            C_Timer.After(6, function()
-                local hasOldWA = ns.IsWeakAuraLoaded("DK Next Action Guide - by Fonsas")
-                local hasNewWA = ns.IsWeakAuraLoaded("DK Next Action Guide (comp) - by Fonsas")
-                
-                if hasOldWA or not hasNewWA then
-                    C_Timer.After(2, function()
-                        local message = "\124cffF772E6 [Fonsas] whispers: "
-                        if hasOldWA and hasNewWA then
-                            message = message .. "Hey there! I noticed you have both the old and new DK WeakAuras installed. Please delete the old 'DK Next Action Guide - by Fonsas' WeakAura to avoid any conflicts! Keep the new 'WA is DK Next Action Guide (comp) - by Fonsas' for the best experience! You can find the latest WeakAura under /nag > Class > Import WeakAura. \124r"
-                        elseif hasOldWA and not hasNewWA then
-                            message = message .. "Hey there! I noticed you're still using my old DK WeakAura. It's time to let it go - like Arthas and his crown! Please delete the old 'DK Next Action Guide - by Fonsas' WeakAura and import the new 'WA is DK Next Action Guide (comp) - by Fonsas' for the best experience! You can find the latest WeakAura under /nag > Class > Import WeakAura. \124r"
-                        elseif not hasNewWA then
-                            message = message .. "Hey there! Don't forget to import the new DK WeakAura 'DK Next Action Guide (comp) - by Fonsas' for the best experience! You can find it under /nag > Class > Import WeakAura. \124r"
-                        end
-                        print(message)
-                    end)
-                end
-            end)
         end
 
         -- Register class-specific options
@@ -296,7 +262,7 @@ do -- Ace3 lifecycle
     --- This method should be overridden by class modules to register their specific spells
     --- @param self ClassBase
     function ClassBase:RegisterSpellTracking()
-        ---@class SpellTrackingManager : ModuleBase
+        --- @type SpellTrackingManager|AceModule|ModuleBase
         local SpellTracker = NAG:GetModule("SpellTrackingManager")
         if not SpellTracker then return end
 
@@ -653,7 +619,7 @@ do  -- Rotation handling
         if not selectedName then
             self:Debug("GetCurrentRotation: No selected rotation, looking for default")
             local classDB = self:GetClass()
-            
+
             -- First check spec-independent rotations (specID 0)
             local specIndependentRotations = classDB.rotations and classDB.rotations[0]
             if specIndependentRotations then
@@ -665,7 +631,7 @@ do  -- Rotation handling
                     end
                 end
             end
-            
+
             -- If no spec-independent default found, check spec-specific rotations
             if not selectedName and specID > 0 then
                 local classRotations = classDB.rotations and classDB.rotations[specID]
@@ -690,17 +656,17 @@ do  -- Rotation handling
 
         -- First check for user-modified rotation in class DB
         local classDB = self:GetClass()
-        
+
         -- Check spec-independent custom rotations first
         local customRotations = classDB.customRotations and classDB.customRotations[0]
         local rotation = customRotations and customRotations[selectedName]
-        
+
         -- If not found in spec-independent, check spec-specific custom rotations
         if not rotation and specID > 0 then
             customRotations = classDB.customRotations and classDB.customRotations[specID]
             rotation = customRotations and customRotations[selectedName]
         end
-        
+
         self:Debug("GetCurrentRotation: Found in custom rotations: " .. tostring(rotation ~= nil))
 
         -- If not found in custom rotations, check base rotations
@@ -708,13 +674,13 @@ do  -- Rotation handling
             -- Check spec-independent base rotations first
             local classRotations = classDB.rotations and classDB.rotations[0]
             rotation = classRotations and classRotations[selectedName]
-            
+
             -- If not found in spec-independent, check spec-specific base rotations
             if not rotation and specID > 0 then
                 classRotations = classDB.rotations and classDB.rotations[specID]
                 rotation = classRotations and classRotations[selectedName]
             end
-            
+
             self:Debug("GetCurrentRotation: Found in base rotations: " .. tostring(rotation ~= nil))
         end
 
@@ -735,7 +701,7 @@ do  -- Rotation handling
                 end
             end
         end
-        
+
         -- If no spec-independent default found, check spec-specific
         if not defaultConfig and specID > 0 then
             classRotations = classDB.rotations and classDB.rotations[specID]
@@ -801,11 +767,11 @@ do  -- Rotation handling
 
         -- Get class DB
         local classDB = self:GetClass()
-        
+
         -- First check if this is a spec-independent rotation (specID 0)
         local foundInSpecIndependent = (classDB.rotations and classDB.rotations[0] and classDB.rotations[0][rotationName]) or
             (classDB.customRotations and classDB.customRotations[0] and classDB.customRotations[0][rotationName])
-        
+
         -- If not found in spec-independent, verify the spec exists and check spec-specific rotations
         if not foundInSpecIndependent then
             if specID > 0 then
@@ -906,7 +872,7 @@ do  -- Rotation handling
     --- @param self ClassBase
     --- @param config table The rotation configuration containing spell locations
     function ClassBase:ProcessSpellLocations(config)
-        ---@class DataManager : ModuleBase
+        --- @type DataManager|AceModule|ModuleBase
         local DataManager = ns.DataManager
         if not config then
             self:Debug("ProcessSpellLocations: No config provided")
@@ -955,7 +921,7 @@ do  -- Rotation handling
         end
 
         -- Get the ImportExport module
-        ---@class ImportExport : ModuleBase
+        --- @type ImportExport|AceModule|ModuleBase
         local ImportExport = ns.ImportExport
         if not ImportExport then
             return false, "ImportExport module not found"
@@ -1000,7 +966,7 @@ do  -- Rotation handling
         else
             -- For standard rotations, add to defaults
             ns.AddRotationToDefaults(self.defaults, result.specID, result.name, result)
-            
+
             -- Re-register defaults to ensure they take effect
             self.db:RegisterDefaults(self.defaults)
         end
@@ -1019,6 +985,7 @@ do  -- Rotation handling
 end -- Rotation handling
 
 do  -- Import/Export
+
     --- Generates a unique name for a rotation by appending a number if needed
     --- @param self ClassBase
     --- @param specID number The specialization ID
@@ -1042,7 +1009,7 @@ do  -- Import/Export
             tostring(specID) .. ", rotation: " .. tostring(rotationName))
 
         -- Get the ImportExport module
-        ---@class ImportExport : ModuleBase
+        --- @type ImportExport|AceModule|ModuleBase
         local ImportExport = NAG:GetModule("ImportExport")
         if not ImportExport then
             self:Error("ImportExport module not found")
@@ -1069,7 +1036,7 @@ do  -- Import/Export
     --- @return string|nil error Error message if import failed
     function ClassBase:ImportRotation()
         -- Get the ImportExport module
-        ---@class ImportExport : ModuleBase
+        --- @type ImportExport|AceModule|ModuleBase
         local ImportExport = NAG:GetModule("ImportExport")
         if not ImportExport then
             self:Error("ImportExport module not found")
@@ -1154,7 +1121,7 @@ end
 --- @param self ClassBase
 --- @return table Returns the class options configuration group
 function ClassBase:GetOptions()
-    ---@class DataManager : ModuleBase
+    --- @type DataManager|AceModule|ModuleBase
     local DataManager = ns.DataManager
     -- Create the main container for class options
     local options = {}
@@ -1199,7 +1166,7 @@ function ClassBase:GetOptions()
                         order = 2,
                         width = 1,
                         func = function()
-                            ---@class RotationManager : ModuleBase
+                            --- @type RotationManager|AceModule|ModuleBase
                             local RotationManager = NAG:GetModule("RotationManager")
                             if RotationManager then
                                 RotationManager:Toggle()
@@ -1394,7 +1361,7 @@ end
 --- @return table Options table for spell locations
 function ClassBase:CreateSpellLocationOptions()
     -- Get DataManager reference
-    ---@class DataManager : ModuleBase
+    --- @type DataManager|AceModule|ModuleBase
     local DataManager = NAG:GetModule("DataManager")
     if not DataManager then return {} end
 
@@ -1438,15 +1405,15 @@ function ClassBase:CreateSpellLocationOptions()
             if lastAction then
                 -- Extract spell ID from various action patterns
                 local spellId
-                
+
                 -- Direct Cast call
                 spellId = lastAction:match("Cast%((%d+)%)")
-                
+
                 -- PaladinCastWithMacro
                 if not spellId then
                     spellId = lastAction:match("PaladinCastWithMacro%((%d+)[%s,]")
                 end
-                
+
                 -- StrictSequence - get the first spell ID after the name
                 if not spellId and lastAction:match("StrictSequence") then
                     local afterName = lastAction:match("StrictSequence%([^,]+,([^%)]+)%)")
@@ -1454,7 +1421,7 @@ function ClassBase:CreateSpellLocationOptions()
                         spellId = afterName:match("(%d+)")
                     end
                 end
-                
+
                 -- Sequence - get the first spell ID after the name
                 if not spellId and lastAction:match("Sequence") then
                     local afterName = lastAction:match("Sequence%([^,]+,([^%)]+)%)")
@@ -1504,35 +1471,37 @@ function ClassBase:CreateSpellLocationOptions()
             desc = L["spellLocationDesc"] or "Select the position for this spell",
             order = spell.name and spell.name:byte(1) or 999,
             values = {
-                [""] = L["default"] or "Default",
+                [""] = L["preSet"] or "Pre-set",
                 ["LEFT"] = L["left"] or "Left",
                 ["RIGHT"] = L["right"] or "Right",
                 ["ABOVE"] = L["above"] or "Above",
                 ["BELOW"] = L["below"] or "Below",
-                ["AOE"] = L["aoe"] or "AoE"
+                ["AOE"] = L["aoe"] or "AoE",
+                ["PRIMARY"] = L["middle"] or "Middle",
+                ["IGNORE"] = L["ignore"] or "Ignore"
             },
             get = function()
-                if not specID or not classDB.specSpellLocations[specID] then return "" end
-                for position, spellList in pairs(classDB.specSpellLocations[specID]) do
-                    if tContains(spellList, spellId) then
-                        return position
+                if not specID then return "" end
+                local charDB = self:GetChar()
+                charDB.spellLocationOverrides = charDB.spellLocationOverrides or {}
+                local override = charDB.spellLocationOverrides[specID] and charDB.spellLocationOverrides[specID][spellId]
+                if override then return override end
+                -- Fallback to class preset
+                if classDB.specSpellLocations[specID] then
+                    for position, spellList in pairs(classDB.specSpellLocations[specID]) do
+                        if tContains(spellList, spellId) then
+                            return position
+                        end
                     end
                 end
                 return ""
             end,
             set = function(_, value)
                 if not specID then return end
-
-                -- Ensure the spec table exists
-                classDB.specSpellLocations[specID] = classDB.specSpellLocations[specID] or {
-                    ABOVE = {},
-                    BELOW = {},
-                    RIGHT = {},
-                    LEFT = {},
-                    AOE = {}
-                }
-
-                -- Remove from existing position
+                local charDB = self:GetChar()
+                charDB.spellLocationOverrides = charDB.spellLocationOverrides or {}
+                charDB.spellLocationOverrides[specID] = charDB.spellLocationOverrides[specID] or {}
+                -- Remove from all class preset positions
                 for pos, spellList in pairs(classDB.specSpellLocations[specID]) do
                     for i = #spellList, 1, -1 do
                         if spellList[i] == spellId then
@@ -1543,18 +1512,30 @@ function ClassBase:CreateSpellLocationOptions()
                         classDB.specSpellLocations[specID][pos] = nil
                     end
                 end
-
-                -- Add to new position
-                if value ~= "" then
-                    classDB.specSpellLocations[specID][value] = classDB.specSpellLocations[specID][value] or {}
-                    table.insert(classDB.specSpellLocations[specID][value], spellId)
+                if value == "" then
+                    -- Pre-set: remove override, use class preset
+                    charDB.spellLocationOverrides[specID][spellId] = nil
+                elseif value == "IGNORE" then
+                    charDB.spellLocationOverrides[specID][spellId] = "IGNORE"
+                else
+                    -- User override: set as new default
+                    charDB.spellLocationOverrides[specID][spellId] = value
                 end
-
                 -- Update DataManager
-                DataManager:SetSpellPosition(spellId, value ~= "" and value or nil)
-
-                -- Notify config change
-                AceConfigRegistry:NotifyChange("NAG")
+                if value == "" then
+                    -- Use class preset
+                    for pos, spellList in pairs(classDB.specSpellLocations[specID]) do
+                        if tContains(spellList, spellId) then
+                            DataManager:SetSpellPosition(spellId, pos)
+                            return
+                        end
+                    end
+                    DataManager:SetSpellPosition(spellId, nil)
+                elseif value == "IGNORE" then
+                    DataManager:SetSpellPosition(spellId, nil)
+                else
+                    DataManager:SetSpellPosition(spellId, value)
+                end
             end
         }
     end
@@ -1563,6 +1544,7 @@ function ClassBase:CreateSpellLocationOptions()
 end
 
 do -- Battle Potion handling
+
     --- Gets the default battle potion ID for the current spec
     --- @param self ClassBase
     --- @return number|nil The potion ID or nil if none is set

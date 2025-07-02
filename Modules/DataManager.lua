@@ -1,33 +1,22 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi
-    Module Purpose: DataManager module for managing, processing, and indexing all versioned and runtime data entities (spells, items, sets, etc) in NAG. Handles entity relationships, type/flag indexing, and provides high-level data access APIs.
-    STATUS: In Progress
-    TODO:
-        - Refactor and clean up legacy logic
-        - Improve flag/type/relationship indexing
-        - Add more robust error handling and validation
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    https://creativecommons.org/licenses/by-nc/4.0/
-]]
-
---- ============================ LOCALIZE ============================
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub, string.lower
-
+--- @module "DataManager"
+--- Handles data management and processing for the NAG addon.
+---
+--- This module provides functions for managing, processing, and indexing all versioned and runtime data entities (spells, items, sets, etc) in NAG. Handles entity relationships, type/flag indexing, and provides high-level data access APIs.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 -- ISSUES: Clean it all up
 -- 1. big issue is only first item added gives the behavior, the rest are just added as flags.
 
 
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Types : ModuleBase
-local Types = NAG:GetModule("Types") -- Get the Types module reference
-
----@class DebugManager : ModuleBase
+--- @type Types|AceModule|ModuleBase
+local Types = NAG:GetModule("Types")
+--- @type DebugManager|ModuleBase|AceModule
 local DebugManager = NAG:GetModule("DebugManager")
 
 --WoW API
@@ -44,26 +33,26 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
---- ======= FORWARD DECLARATIONS =======
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+-- ======= FORWARD DECLARATIONS =======
 --- Helper functions
 local initializeStorage
 local getEntityStorage
@@ -79,13 +68,7 @@ local SpellProcessorV2
 local TierSetProcessorV2
 local ProcessorsV2 = {}
 
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
-
----@class DataManager: ModuleBase, AceConsole-3.0, AceTimer-3.0
+--- @class DataManager: ModuleBase, AceConsole-3.0, AceTimer-3.0
 local DataManager = NAG:CreateModule("DataManager", defaults, {
     -- No defaults needed
     moduleType = ns.MODULE_TYPES.CORE,
@@ -128,7 +111,8 @@ DataManager.SpellPosition = {
     RIGHT = "right",
     ABOVE = "above",
     BELOW = "below",
-    AOE = "aoe"
+    AOE = "aoe",
+    PRIMARY = "primary"
 }
 
 
@@ -1220,28 +1204,45 @@ do -- Base processor class
                 entry.bonuses = entry.bonuses or {}
                 for count, bonus in pairs(rawData.bonuses) do
                     if bonus.spellId then
-                        -- Store bonus info
                         entry.bonuses[count] = entry.bonuses[count] or {}
-                        entry.bonuses[count].spellId = bonus.spellId
-
-                        -- Transform path for set bonus spell
-                        local spellPath = transformPath(entry.path, entry.entryType, DataManager.EntityTypes.SPELL)
-                        table.insert(spellPath, format("%dpc", count))
-
-                        -- Create spell entry
-                        local spellProcessor = ProcessorsV2[DataManager.EntityTypes.SPELL]
-                        local spellEntry = spellProcessor:process(bonus.spellId, spellPath, bonus)
-                        if spellEntry then
-                            -- Add the piece count to the spell entry
-                            spellEntry.setBonusCount = count
-
-                            -- Create relationship
-                            self:addRelationship(
-                                entry[entry.entryType .. "Id"],
-                                DataManager.EntityTypes.SPELL,
-                                bonus.spellId,
-                                getRelationshipType(entry.entryType, DataManager.EntityTypes.SPELL)
-                            )
+                        -- Support multiple spellIds (table) or single value
+                        if type(bonus.spellId) == "table" then
+                            entry.bonuses[count].spellIds = {}
+                            for _, spellId in ipairs(bonus.spellId) do
+                                table.insert(entry.bonuses[count].spellIds, spellId)
+                                -- Transform path for set bonus spell
+                                local spellPath = transformPath(entry.path, entry.entryType, DataManager.EntityTypes.SPELL)
+                                table.insert(spellPath, format("%dpc", count))
+                                -- Create spell entry
+                                local spellProcessor = ProcessorsV2[DataManager.EntityTypes.SPELL]
+                                local spellEntry = spellProcessor:process(spellId, spellPath, bonus)
+                                if spellEntry then
+                                    spellEntry.setBonusCount = count
+                                    -- Create relationship
+                                    self:addRelationship(
+                                        entry[entry.entryType .. "Id"],
+                                        DataManager.EntityTypes.SPELL,
+                                        spellId,
+                                        getRelationshipType(entry.entryType, DataManager.EntityTypes.SPELL)
+                                    )
+                                end
+                            end
+                        else
+                            entry.bonuses[count].spellId = bonus.spellId
+                            local spellId = bonus.spellId
+                            local spellPath = transformPath(entry.path, entry.entryType, DataManager.EntityTypes.SPELL)
+                            table.insert(spellPath, format("%dpc", count))
+                            local spellProcessor = ProcessorsV2[DataManager.EntityTypes.SPELL]
+                            local spellEntry = spellProcessor:process(spellId, spellPath, bonus)
+                            if spellEntry then
+                                spellEntry.setBonusCount = count
+                                self:addRelationship(
+                                    entry[entry.entryType .. "Id"],
+                                    DataManager.EntityTypes.SPELL,
+                                    spellId,
+                                    getRelationshipType(entry.entryType, DataManager.EntityTypes.SPELL)
+                                )
+                            end
                         end
                     end
                 end
@@ -1513,8 +1514,8 @@ do -- Helper functions
     end
 end
 
---========================================================================================================================================
-do --========================================================================== ACE3 Public Methods(ModuleInitialize, ModuleEnable)
+do -- ~~~~~~~~~~~~~~~~~~~~ ACE3 Public Methods(ModuleInitialize, ModuleEnable)
+
     --- @param self DataManager
     function DataManager:ModuleInitialize()
         -- Initialize storage first
@@ -1543,11 +1544,11 @@ do -- Event Handlers
     function DataManager:NAG_VERSION_DATA_SELECTED()
         if ns.data then
             local startTime = debugprofilestop()
-            
+
             -- Use the new DataWalker module instead of TableWalker
             local DataWalker = NAG:GetModule("DataWalker")
             DataWalker:Walk(ns.data, ProcessorsV2)
-            
+
             local endTime = debugprofilestop()
             self:Debug(format("OnInitialize: DataWalker took %dms", endTime - startTime))
             self:SendMessage("NAG_DATA_LOADED")
@@ -1573,7 +1574,8 @@ do -- Event Handlers
     end
 end
 
-do --========================================================================== helper methods(SetSpellPosition, GetSetBonus, ProcessPetAbilities)
+do -- ~~~~~~~~~~~~~~~~~~~~ helper methods(SetSpellPosition, GetSetBonus, ProcessPetAbilities)
+
     --- Sets a spell's position
     --- @param self DataManager
     --- @param id number The spell ID
@@ -1608,17 +1610,18 @@ do --========================================================================== 
     --- @param self DataManager
     --- @param setId number The set ID
     --- @param count number The piece count
-    --- @return table|nil The set bonus spell
+    --- @return table|nil The set bonus spells (table of spells or nil)
     function DataManager:GetSetBonus(setId, count)
         local bonuses = self:GetRelated(setId, self.EntityTypes.TIERSET, self.EntityTypes.SPELL)
+        local result = {}
         if bonuses then
             for spellId, spell in pairs(bonuses) do
                 if spell.setBonusCount == count then
-                    return spell
+                    table.insert(result, spell)
                 end
             end
         end
-        return nil
+        return #result > 0 and result or nil
     end
 
     --- @param self DataManager
@@ -1742,7 +1745,8 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== High Level Data Entry Functions(Add, AddSpell, AddItem)
+do -- ~~~~~~~~~~~~~~~~~~~~ High Level Data Entry Functions(Add, AddSpell, AddItem)
+
     --- Adds an entity to the data store
     --- @param self DataManager
     --- @param id number The entity ID
@@ -1768,7 +1772,8 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byId public methods(Get, GetItem, GetSpell, GetTierSet)
+do -- ~~~~~~~~~~~~~~~~~~~~ byId public methods(Get, GetItem, GetSpell, GetTierSet)
+
     --- Gets an entity by its ID and type
     --- @param self DataManager
     --- @param id number The entity ID
@@ -1853,7 +1858,8 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byRelationship public methods(GetRelated, HasRelationship, GetAllRelationships)
+do -- ~~~~~~~~~~~~~~~~~~~~ byRelationship public methods(GetRelated, HasRelationship, GetAllRelationships)
+
     --- Gets all related entities of a specific relationship type
     --- @param self DataManager
     --- @param id number The source entity ID
@@ -1895,7 +1901,8 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byName public methods(GetByName, GetAllByName)
+do -- ~~~~~~~~~~~~~~~~~~~~ byName public methods(GetByName, GetAllByName)
+
     --- Gets an entity by its name with optional flag filtering
     --- @param self DataManager
     --- @param name string The name to look up
@@ -1971,7 +1978,8 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== byFlag public methods(HasFlag, GetFlags, GetAllByFlag, GetAllByFlags)
+do -- ~~~~~~~~~~~~~~~~~~~~ byFlag public methods(HasFlag, GetFlags, GetAllByFlag, GetAllByFlags)
+
     --- Checks if an entity has a specific flag
     --- @param self DataManager
     --- @param id number The entity ID
@@ -2060,9 +2068,71 @@ do --========================================================================== 
 
         return result
     end
+
+    --- Adds a flag to an entity
+    --- @param self DataManager
+    --- @param id number The entity ID
+    --- @param entityType string The entity type
+    --- @param flag string The flag to add
+    --- @return boolean True if the flag was added, false otherwise
+    function DataManager:AddFlag(id, entityType, flag)
+        local entity = self:Get(id, entityType)
+        if not entity or not flag then return false end
+        if entity.flags[flag] then return true end -- Already present
+        entity.flags[flag] = true
+        -- Update flag index
+        self.storage.byFlag[flag] = self.storage.byFlag[flag] or {}
+        table.insert(self.storage.byFlag[flag], entity)
+        return true
+    end
+
+    --- Removes a flag from an entity
+    --- @param self DataManager
+    --- @param id number The entity ID
+    --- @param entityType string The entity type
+    --- @param flag string The flag to remove
+    --- @return boolean True if the flag was removed, false otherwise
+    function DataManager:RemoveFlag(id, entityType, flag)
+        local entity = self:Get(id, entityType)
+        if not entity or not flag then return false end
+        if not entity.flags[flag] then return true end -- Already absent
+        entity.flags[flag] = nil
+        -- Remove from flag index
+        local flagList = self.storage.byFlag[flag]
+        if flagList then
+            for i = #flagList, 1, -1 do
+                if flagList[i] == entity then
+                    table.remove(flagList, i)
+                end
+            end
+            if #flagList == 0 then self.storage.byFlag[flag] = nil end
+        end
+        return true
+    end
+
+    --- Sets the full flag set for an entity (replaces all flags)
+    --- @param self DataManager
+    --- @param id number The entity ID
+    --- @param entityType string The entity type
+    --- @param flags table Table of flags to set (keys = flag names, values = true)
+    --- @return boolean True if the flags were set, false otherwise
+    function DataManager:SetFlags(id, entityType, flags)
+        local entity = self:Get(id, entityType)
+        if not entity or type(flags) ~= "table" then return false end
+        -- Remove all current flags from index
+        for flag in pairs(entity.flags) do
+            self:RemoveFlag(id, entityType, flag)
+        end
+        -- Add new flags
+        for flag, value in pairs(flags) do
+            if value then self:AddFlag(id, entityType, flag) end
+        end
+        return true
+    end
 end
 
-do --========================================================================== byType public methods(HasType, GetTypes, GetAllByType)
+do -- ~~~~~~~~~~~~~~~~~~~~ byType public methods(HasType, GetTypes, GetAllByType)
+
     --- @param self DataManager
     --- @param id number The entity ID
     --- @param entityType string The entity type
@@ -2148,7 +2218,7 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== DEBUGGING public methods
+do -- ~~~~~~~~~~~~~~~~~~~~ DEBUGGING public methods
     local function formatEntryInfo(entry)
         local info = {
             format("ID: %d", entry[entry.entryType .. "Id"]),
@@ -2564,7 +2634,8 @@ do --========================================================================== 
     end
 end
 
-do --========================================================================== bySpellId public methods(GetTalentBySpellId)
+do -- ~~~~~~~~~~~~~~~~~~~~ bySpellId public methods(GetTalentBySpellId)
+
     --- Gets a talent by its spell ID
     --- @param self DataManager
     --- @param spellId number The spell ID to look up
@@ -2581,4 +2652,233 @@ ns.DataManager = DataManager
 function DataManager:RegisterStaticData(sourceName, dataTables)
     self.staticData = self.staticData or {}
     self.staticData[sourceName] = dataTables
+end
+
+--- Deletes an entity from all storage and indices
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @return boolean True if deleted, false otherwise
+function DataManager:Delete(id, entityType)
+    local entity = self:Get(id, entityType)
+    if not entity then return false end
+    -- Remove from main storage
+    local storage = self.storage.entities[entityType]
+    if storage then storage[id] = nil end
+    -- Remove from byName
+    if entity.name and self.storage.byName[entity.name] then
+        for i = #self.storage.byName[entity.name], 1, -1 do
+            if self.storage.byName[entity.name][i] == entity then
+                table.remove(self.storage.byName[entity.name], i)
+            end
+        end
+        if #self.storage.byName[entity.name] == 0 then self.storage.byName[entity.name] = nil end
+    end
+    -- Remove from byFlag
+    for flag in pairs(entity.flags or {}) do
+        self:RemoveFlag(id, entityType, flag)
+    end
+    -- Remove from byType
+    for category, value in pairs(entity.types or {}) do
+        if type(value) == "table" then
+            for _, v in ipairs(value) do
+                self:RemoveType(id, entityType, category, v)
+            end
+        else
+            self:RemoveType(id, entityType, category, value)
+        end
+    end
+    -- Remove all relationships
+    for targetType, targets in pairs(entity.relationships or {}) do
+        for targetId in pairs(targets) do
+            self:RemoveRelationship(id, entityType, targetId, targetType)
+        end
+    end
+    -- Remove reverse relationships
+    for relationType, rels in pairs(self.storage.relationships) do
+        if rels[id] then
+            for targetId, target in pairs(rels[id]) do
+                self:RemoveRelationship(id, entityType, targetId, target.entryType)
+            end
+            rels[id] = nil
+        end
+    end
+    return true
+end
+
+--- Updates an entity's fields (shallow merge, does not create if missing)
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param data table Table of fields to update
+--- @return boolean True if updated, false otherwise
+function DataManager:Update(id, entityType, data)
+    local entity = self:Get(id, entityType)
+    if not entity or type(data) ~= "table" then return false end
+    for k, v in pairs(data) do
+        entity[k] = v
+    end
+    return true
+end
+
+--- Adds a type value to an entity
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param category string The type category
+--- @param value any The type value
+--- @return boolean True if added, false otherwise
+function DataManager:AddType(id, entityType, category, value)
+    local entity = self:Get(id, entityType)
+    if not entity or not category or value == nil then return false end
+    entity.types = entity.types or {}
+    local typeRegistry = Types:GetType(category)
+    if not typeRegistry then return false end
+    self.storage.byType[category] = self.storage.byType[category] or {}
+    self.storage.byType[category][value] = self.storage.byType[category][value] or {}
+    if typeRegistry._allowMultiple then
+        entity.types[category] = entity.types[category] or {}
+        for _, v in ipairs(entity.types[category]) do if v == value then return true end end
+        table.insert(entity.types[category], value)
+    else
+        if entity.types[category] == value then return true end
+        entity.types[category] = value
+    end
+    self.storage.byType[category][value][id] = entity
+    return true
+end
+
+--- Removes a type value from an entity
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param category string The type category
+--- @param value any The type value
+--- @return boolean True if removed, false otherwise
+function DataManager:RemoveType(id, entityType, category, value)
+    local entity = self:Get(id, entityType)
+    if not entity or not category or value == nil then return false end
+    local typeRegistry = Types:GetType(category)
+    if not typeRegistry then return false end
+    if typeRegistry._allowMultiple and entity.types[category] then
+        for i = #entity.types[category], 1, -1 do
+            if entity.types[category][i] == value then
+                table.remove(entity.types[category], i)
+            end
+        end
+        if #entity.types[category] == 0 then entity.types[category] = nil end
+    elseif entity.types[category] == value then
+        entity.types[category] = nil
+    end
+    if self.storage.byType[category] and self.storage.byType[category][value] then
+        self.storage.byType[category][value][id] = nil
+        if next(self.storage.byType[category][value]) == nil then
+            self.storage.byType[category][value] = nil
+        end
+    end
+    return true
+end
+
+--- Sets all types for an entity (replaces all types)
+--- @param self DataManager
+--- @param id number The entity ID
+--- @param entityType string The entity type
+--- @param types table Table of types (category -> value(s))
+--- @return boolean True if set, false otherwise
+function DataManager:SetTypes(id, entityType, types)
+    local entity = self:Get(id, entityType)
+    if not entity or type(types) ~= "table" then return false end
+    -- Remove all current types
+    for category, value in pairs(entity.types or {}) do
+        if type(value) == "table" then
+            for _, v in ipairs(value) do
+                self:RemoveType(id, entityType, category, v)
+            end
+        else
+            self:RemoveType(id, entityType, category, value)
+        end
+    end
+    -- Add new types
+    for category, value in pairs(types) do
+        if type(value) == "table" then
+            for _, v in ipairs(value) do
+                self:AddType(id, entityType, category, v)
+            end
+        else
+            self:AddType(id, entityType, category, value)
+        end
+    end
+    return true
+end
+
+--- Adds a relationship between two entities
+--- @param self DataManager
+--- @param sourceId number The source entity ID
+--- @param sourceType string The source entity type
+--- @param targetId number The target entity ID
+--- @param targetType string The target entity type
+--- @return boolean True if added, false otherwise
+function DataManager:AddRelationship(sourceId, sourceType, targetId, targetType)
+    local source = self:Get(sourceId, sourceType)
+    local target = self:Get(targetId, targetType)
+    if not source or not target then return false end
+    local relationType = getRelationshipType(sourceType, targetType)
+    self.storage.relationships[relationType] = self.storage.relationships[relationType] or {}
+    self.storage.relationships[relationType][sourceId] = self.storage.relationships[relationType][sourceId] or {}
+    if self.storage.relationships[relationType][sourceId][targetId] then return true end
+    self.storage.relationships[relationType][sourceId][targetId] = target
+    -- Add to source entity
+    source.relationships = source.relationships or {}
+    source.relationships[targetType] = source.relationships[targetType] or {}
+    source.relationships[targetType][targetId] = true
+    -- Add reverse
+    local reverseType = getRelationshipType(targetType, sourceType)
+    self.storage.relationships[reverseType] = self.storage.relationships[reverseType] or {}
+    self.storage.relationships[reverseType][targetId] = self.storage.relationships[reverseType][targetId] or {}
+    self.storage.relationships[reverseType][targetId][sourceId] = source
+    target.relationships = target.relationships or {}
+    target.relationships[sourceType] = target.relationships[sourceType] or {}
+    target.relationships[sourceType][sourceId] = true
+    return true
+end
+
+--- Removes a relationship between two entities
+--- @param self DataManager
+--- @param sourceId number The source entity ID
+--- @param sourceType string The source entity type
+--- @param targetId number The target entity ID
+--- @param targetType string The target entity type
+--- @return boolean True if removed, false otherwise
+function DataManager:RemoveRelationship(sourceId, sourceType, targetId, targetType)
+    local source = self:Get(sourceId, sourceType)
+    local target = self:Get(targetId, targetType)
+    if not source or not target then return false end
+    local relationType = getRelationshipType(sourceType, targetType)
+    if self.storage.relationships[relationType] and self.storage.relationships[relationType][sourceId] then
+        self.storage.relationships[relationType][sourceId][targetId] = nil
+        if next(self.storage.relationships[relationType][sourceId]) == nil then
+            self.storage.relationships[relationType][sourceId] = nil
+        end
+    end
+    if source.relationships and source.relationships[targetType] then
+        source.relationships[targetType][targetId] = nil
+        if next(source.relationships[targetType]) == nil then
+            source.relationships[targetType] = nil
+        end
+    end
+    -- Remove reverse
+    local reverseType = getRelationshipType(targetType, sourceType)
+    if self.storage.relationships[reverseType] and self.storage.relationships[reverseType][targetId] then
+        self.storage.relationships[reverseType][targetId][sourceId] = nil
+        if next(self.storage.relationships[reverseType][targetId]) == nil then
+            self.storage.relationships[reverseType][targetId] = nil
+        end
+    end
+    if target.relationships and target.relationships[sourceType] then
+        target.relationships[sourceType][sourceId] = nil
+        if next(target.relationships[sourceType]) == nil then
+            target.relationships[sourceType] = nil
+        end
+    end
+    return true
 end

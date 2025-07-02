@@ -1,56 +1,54 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: APL Monitor module for debugging and visualizing action priority lists
-    STATUS: good
-    TODO: 
-        - Add more filter toggles in options
-        - Improve grouped view formatting
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
+--- @module "APLMonitor"
+--- Debugging and visualizing action priority lists (APL) for NAG
+---
+--- Provides a UI for monitoring and analyzing APL conditions in real time.
+--- Useful for developers and advanced users to debug rotations.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+--
+-- luacheck: ignore GetSpellInfo
 
----@diagnostic disable: ...
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
---- @class NAG : AceAddon-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local LSM = LibStub("LibSharedMedia-3.0")
 
----@class DataManager
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 
--- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+-- Lua APIs (WoW-optimized versions where available)
+-- Math operations
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
--- String manipulation (WoW's optimized versions)
-local strmatch = string.match -- WoW's version
-local strfind = string.find   -- WoW's version
-local strsub = string.sub     -- WoW's version
-local strlower = string.lower -- WoW's version
-local strupper = string.upper -- WoW's version
-local strsplit = string.split -- WoW's specific version
-local strjoin = string.join   -- WoW's specific version
+-- String operations
+local strmatch = strmatch -- WoW's optimized version
+local strfind = strfind   -- WoW's optimized version
+local strsub = strsub     -- WoW's optimized version
+local strlower = strlower -- WoW's optimized version
+local strupper = strupper -- WoW's optimized version
+local strsplit = strsplit -- WoW-specific
+local strjoin = strjoin   -- WoW-specific
 
--- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+-- Table operations
+local tinsert = tinsert     -- WoW's optimized version
+local tremove = tremove     -- WoW's optimized version
+local wipe = wipe           -- WoW-specific
+local tContains = tContains -- WoW-specific
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Constants
 local DisplayMode = {
@@ -61,7 +59,6 @@ local DisplayMode = {
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         displayMode = DisplayMode.SIMPLE,
         updateInterval = 0.1,
         maxConditions = 100,
@@ -95,7 +92,7 @@ local defaults = {
     }
 }
 
----@class APLMonitor: ModuleBase, AceTimer-3.0
+--- @class APLMonitor: ModuleBase, AceTimer-3.0
 local APLMonitor = NAG:CreateModule("APLMonitor", defaults, {
     moduleType = ns.MODULE_TYPES.DEBUG,
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
@@ -112,7 +109,7 @@ local APLMonitor = NAG:CreateModule("APLMonitor", defaults, {
     },
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function APLMonitor:ModuleEnable()
         local profileConfig = self:GetCurrentRotation()
@@ -148,7 +145,7 @@ do
     end
 
     function APLMonitor:GetCurrentRotation()
-        ---@class ClassBase
+        --- @type ClassBase|AceModule
         local classModule = NAG:GetModule(NAG.CLASS, true)
         if classModule then
             local rotation = select(1, classModule:GetCurrentRotation())
@@ -162,7 +159,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS & HELPERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS & HELPERS ~~~~~~~~~~
 
 local function splitSubConditions(condition)
     -- Remove outermost parentheses if they enclose the entire condition
@@ -246,8 +243,8 @@ local function evaluateCondition(condition)
                     return function(_, spellId) return NAG:CanCast(spellId) end
                 elseif k == "TimeToReady" then
                     return function(_, spellId) return NAG:TimeToReady(spellId) or 0 end
-                elseif k == "TimeRemaining" then
-                    return function() return NAG:TimeRemaining() or 0 end
+                elseif k == "RemainingTime" then
+                    return function() return NAG:RemainingTime() or 0 end
                 else
                     return NAG[k]
                 end
@@ -338,7 +335,7 @@ local function getConditionGroupType(condition)
         return "Distance"
     elseif condition:match("NumberTargets") or condition:match("Targets") then
         return "Targets"
-    elseif condition:match("TimeCurrent") or condition:match("TimeRemaining") or condition:match("Time") then
+    elseif condition:match("CurrentTime") or condition:match("RemainingTime") or condition:match("Time") then
         return "Time"
     elseif condition:match("IsExecutePhase") or condition:match("Execute") then
         return "Execute"
@@ -355,7 +352,7 @@ local function getConditionGroupType(condition)
     end
 end
 
--- ============================ UI & OPTIONS ============================
+-- ~~~~~~~~~~ UI & OPTIONS ~~~~~~~~~~
 
 function APLMonitor:CreateFrame(parentFrame, numConditions, rotationConfig)
     if self.frame then
@@ -697,7 +694,7 @@ function APLMonitor:UpdateGroupedView(conditions)
     end
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 
 --- Gets the options table for APL Monitor settings
 --- @return table The options table for AceConfig
@@ -826,6 +823,6 @@ function APLMonitor:UpdateAppearance()
     end
 end
 
--- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 
 ns.APLMonitor = APLMonitor

@@ -1,18 +1,24 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
---- ======= LOCALIZE =======
+--- @module "StateManager"
+--- Manages the state of the NAG addon.
+---
+--- This module provides functions for checking and managing the state of the NAG addon.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+--
+-- luacheck: ignore GetSpellInfo
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
+
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
----@class Types : ModuleBase
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 --Libs
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
@@ -36,27 +42,27 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 local SpecializationCompat = ns.SpecializationCompat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Initialize default state structure
 local function CreateDefaultState()
@@ -152,13 +158,15 @@ local function CreateDefaultState()
 end
 
 local defaults = {
-    global = {
-        debug = false,
+    char = {
+        enableElementalShamanAutoRotation = true, -- Enable automatic rotation switching for Elemental Shamans
+        elementalShamanAOEThreshold = 3, -- Number of targets to trigger AOE rotation
+        enableFrostDKAutoRotation = true, -- Enable automatic rotation switching for Frost DKs
     },
 }
 
 
----@class StateManager: ModuleBase, AceTimer-3.0
+--- @class StateManager: ModuleBase, AceTimer-3.0
 local StateManager = NAG:CreateModule("StateManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 20,    -- Early in debug options
@@ -220,7 +228,7 @@ function StateManager:ModuleInitialize()
     -- Initialize state
     self.state = self.state or CreateDefaultState()
     NAG.state = self.state -- Keep a local reference
-    
+
     -- Initialize combat state
     self.state.combat = self.state.combat or {
         time = 0,
@@ -228,14 +236,14 @@ function StateManager:ModuleInitialize()
         encounterTimer = nil,
         encounterEndTime = nil
     }
-    
+
     -- Initialize player state
     self.state.player = self.state.player or {
         inCombat = UnitAffectingCombat("player"),
         lastCast = 0,
         lastCastId = nil
     }
-    
+
     -- Initialize next state
     self.state.next = self.state.next or {
         nextTime = GetTime()
@@ -245,9 +253,17 @@ end
 function StateManager:ModuleEnable()
     -- Initialize state
     self:ResetState()
+    
+    -- Start periodic checks for Elemental Shaman rotation switching
+    self:StartElementalShamanRotationCheck()
 end
 
 function StateManager:ModuleDisable()
+    -- Cancel the Elemental Shaman rotation check timer
+    if self.elementalShamanTimer then
+        self:CancelTimer(self.elementalShamanTimer)
+        self.elementalShamanTimer = nil
+    end
 end
 
 -- Core state update methods
@@ -267,7 +283,7 @@ function StateManager:UpdatePlayerState()
     local state = self.state.player
     -- Update class info
     local _, classFileName, classId = UnitClass("player")
-    --state.classInfo.id = classId             
+    --state.classInfo.id = classId
     state.classInfo.name = classFileName     -- NAG.CLASS
     state.classInfo.fileName = classFileName -- NAG.CLASSFILE
 
@@ -323,7 +339,7 @@ do -- Spec change handling
         -- ADDED: Handle nil specialization gracefully
         if not currentSpec then
             self:Debug("ProcessSpecChange: No specialization available yet, will retry later")
-            
+
             -- Initialize with default values to avoid nil errors
             if not state.id then
                 state.id = 0
@@ -335,12 +351,12 @@ do -- Spec change handling
                 -- Update NAG global reference with safe default
                 NAG.SPECID = 0
             end
-            
+
             -- Schedule a retry after a short delay
             C_Timer.After(2, function()
                 self:ProcessSpecChange()
             end)
-            
+
             return
         end
 
@@ -365,14 +381,14 @@ do -- Spec change handling
             self:SendMessage("NAG_SPEC_UPDATED")
         else
             self:Debug("ProcessSpecChange: Failed to get valid spec info")
-            
+
             -- Initialize with default values to avoid nil errors
             state.id = 0
             state.name = "Unknown"
             state.index = currentSpec
             state.role = nil
             state.description = "Specialization info not available"
-            
+
             -- Update NAG global reference with safe default
             NAG.SPECID = 0
         end
@@ -418,6 +434,21 @@ function StateManager:UpdateEquipmentState()
                 slot = slot,
                 flags = flags
             })
+
+            -- Track raw weapon damage for mainhand/offhand using TooltipParsingManager
+            if slot == 16 or slot == 17 then
+                local TooltipParsingManager = NAG:GetModule("TooltipParsingManager")
+                state.WeaponDamage = state.WeaponDamage or {}
+                local itemLink = GetInventoryItemLink("player", slot)
+                local dmg = TooltipParsingManager and TooltipParsingManager.GetWeaponDamage and TooltipParsingManager:GetWeaponDamage(itemLink or itemId)
+                state.WeaponDamage[slot] = dmg or { itemId = itemId, min = nil, max = nil, name = select(1, GetItemInfo(itemId)) }
+            end
+        end
+    end
+    -- Remove cached damage if weapon is unequipped
+    for _, slot in ipairs(slotCategories.weapons) do
+        if not GetInventoryItemID("player", slot) and state.WeaponDamage and state.WeaponDamage[slot] then
+            state.WeaponDamage[slot] = nil
         end
     end
 
@@ -461,11 +492,11 @@ end
 
 function StateManager:UpdateTrinketState()
     local state = self.state.player.equipment
-    ---@class SpellTrackingManager
+    --- @type SpellTrackingManager|AceModule|ModuleBase
     local SpellTracker = NAG:GetModule("SpellTrackingManager")
-    ---@class TooltipParsingManager
+    --- @type TooltipParsingManager|AceModule|ModuleBase
     local TooltipParser = NAG:GetModule("TooltipParsingManager", true)
-    ---@class TrinketTrackingManager
+    --- @type TrinketTrackingManager|AceModule|ModuleBase
     local TrinketTracker = NAG:GetModule("TrinketTrackingManager")
 
     -- Track equipped trinkets and their procs
@@ -487,7 +518,7 @@ function StateManager:UpdateTrinketState()
             -- Register new trinket
             if itemId then
                 state.trinkets[slot] = itemId
-                
+
                 -- First try to analyze trinket using TooltipParser
                 local trinketInfo = nil
                 if TooltipParser then
@@ -635,7 +666,7 @@ function StateManager:ResetCombat()
     NAG:ResetStrictSequences()
 
     -- Reset TTD data
-    ---@class TTDManager
+    --- @type TTDManager|AceModule
     local TTDManager = NAG:GetModule("TTDManager")
     if TTDManager then
         TTDManager:ResetTTD()
@@ -804,16 +835,29 @@ do -- External Helper methods
         end
         return false
     end
+
+    --- Gets the raw (unmodified) weapon damage for a given slot (16=mainhand, 17=offhand)
+    --- @param self StateManager
+    --- @param slot number 16 for mainhand, 17 for offhand
+    --- @return table|nil Table with fields: itemId, min, max, name
+    function StateManager:GetWeaponDamage(slot)
+        local state = self.state.player.equipment
+        if state.WeaponDamage then
+            return state.WeaponDamage[slot]
+        end
+        return nil
+    end
 end
 
-do --==================================================================================== Form/Stance Processing
+do -- ~~~~~~~~~~ Form/Stance Processing
     function StateManager:UpdateFormsState()
         local state = self.state.player.shapeshiftForm
-        local formID = GetShapeshiftFormID()
+        local formIndex = GetShapeshiftForm()
+        local formID = GetShapeshiftFormID() -- May be nil for Paladins
 
-        if formID then
-            local _, active, _, spellID = GetShapeshiftFormInfo(GetShapeshiftForm())
-            state.id = formID
+        if formIndex and formIndex > 0 then
+            local _, active, _, spellID = GetShapeshiftFormInfo(formIndex)
+            state.id = formID or formIndex -- Use formIndex as fallback if formID is nil
             state.spellId = spellID
             state.active = active
         else
@@ -831,7 +875,8 @@ do --===========================================================================
     end
 end
 
-do --==================================================================================== Pet State GTG
+do -- ~~~~~~~~~~ Pet State GTG
+
     --- Check if a spell belongs to the current pet
     --- @param spellId number Spell ID to check
     --- @return boolean True if spell belongs to current pet
@@ -866,7 +911,8 @@ do --===========================================================================
 end
 
 --- Talents Verify cata 5/21
-do --==================================================================================== Talent Management
+do -- ~~~~~~~~~~ Talent Management
+
     --- Updates the talent state for all specs
     --- Verify cata 5/21
     function StateManager:UpdateTalentState()
@@ -955,9 +1001,63 @@ do --===========================================================================
         -- Get spell ID for current rank from talent data
         return talent["rank" .. currentRank]
     end
+
+    --- Checks and switches Elemental Shaman rotation based on target count
+    --- @param self StateManager
+    function StateManager:CheckElementalShamanRotationSwitch()
+        -- Check if automatic rotation switching is enabled
+        if not self:GetChar().enableElementalShamanAutoRotation then
+            return
+        end
+        
+        if not NAG.Class then return end
+        
+        local classModule = NAG.Class
+        local currentSpec = SpecializationCompat:GetActiveSpecialization()
+        if not currentSpec then return end
+        
+        local specID = SpecializationCompat:GetSpecializationInfo(currentSpec)
+        if not specID then return end
+        
+        -- Get current rotation selection
+        local currentRotation, selectedRotation = classModule:GetCurrentRotation()
+        if not currentRotation then return end
+        
+        -- Get number of targets (using a reasonable range for AOE detection)
+        local numTargets = NAG:NumberTargets(10) or 0
+        
+        -- Get the configurable threshold for AOE detection
+        local aoeThreshold = self:GetChar().elementalShamanAOEThreshold or 3
+        
+        -- Determine which rotation to use based on target count
+        local targetRotation = nil
+        if numTargets > aoeThreshold then
+            -- AOE situation - use AOE rotation
+            targetRotation = "AOE - Ele"
+        else
+            -- Single target situation - use single target rotation
+            targetRotation = "Single Target - Ele"
+        end
+        
+        -- Only switch if the target rotation is different from current
+        if selectedRotation ~= targetRotation then
+            self:Debug(format("Elemental Shaman: Switching from '%s' to '%s' (targets: %d, threshold: %d)", 
+                selectedRotation or "Unknown", targetRotation, numTargets, aoeThreshold))
+            
+            -- Select the appropriate rotation
+            local success = classModule:SelectRotation(specID, targetRotation)
+            if success then
+                -- Refresh the rotation setup
+                classModule:SetupRotation()
+                self:Debug(format("Elemental Shaman: Successfully switched to '%s' rotation", targetRotation))
+            else
+                self:Warn(format("Elemental Shaman: Failed to switch to '%s' rotation", targetRotation))
+            end
+        end
+    end
 end
 
-do --==================================================================================== Event Handlers
+do -- ~~~~~~~~~~ Event Handlers
     function StateManager:PLAYER_ENTERING_WORLD(event, unit)
         if unit == "player" then
             NAG.lastEclipsePhase = "NeutralPhase"
@@ -972,7 +1072,7 @@ do --===========================================================================
     function StateManager:PLAYER_TARGET_CHANGED()
         local state = self.state.target
         local newGuid = UnitGUID("target")
-        
+
         -- If target changed (different GUID), reset the start time
         if newGuid ~= state.guid then
             state.guid = newGuid
@@ -987,6 +1087,18 @@ do --===========================================================================
 
         if self.state.player.classInfo.name == "ROGUE" then
             --NAG:UpdateComboPointsAndTarget()
+        end
+
+        -- Handle Elemental Shaman automatic rotation switching based on target count
+        if UnitClassBase('player') == "SHAMAN" then
+            local currentSpec = SpecializationCompat:GetActiveSpecialization()
+            if currentSpec then
+                local specID = SpecializationCompat:GetSpecializationInfo(currentSpec)
+                -- Check if we're in Elemental spec (ID 262 in MoP)
+                if specID == 262 and self:GetChar().enableElementalShamanAutoRotation then
+                    self:CheckElementalShamanRotationSwitch()
+                end
+            end
         end
     end
 
@@ -1005,10 +1117,12 @@ do --===========================================================================
         if equipmentSlot >= 1 and equipmentSlot <= 19 then
             self:UpdateEquipmentState()
         end
-        
-        --TODO: Maybe we dont want to force select rotation here?
+
         -- Handle Death Knight Frost spec weapon configuration detection
         if equipmentSlot == 17 and UnitClassBase('player') == "DEATHKNIGHT" then
+            if not self:GetChar().enableFrostDKAutoRotation then
+                return
+            end
             local currentSpec = SpecializationCompat:GetActiveSpecialization()
             if currentSpec then
                 local specID = SpecializationCompat:GetSpecializationInfo(currentSpec)
@@ -1016,15 +1130,14 @@ do --===========================================================================
                 if specID == 251 then
                     local offhandItem = GetInventoryItemLink("player", 17)
                     local classModule = NAG.Class
-                    
                     if offhandItem then
                         -- Dual-wielding - use MasterFrost
-                        classModule:SelectRotation(specID, "Death Knight MasterFrost")
-                        self:Debug("Equipped offhand detected - switching to MasterFrost rotation")
+                        classModule:SelectRotation(specID, "Masterfrost by Darkfrog")
+                        self:Debug("Equipped offhand detected - switching to Masterfrost by Darkfrog rotation")
                     else
                         -- 2H weapon - use Frost 2H
-                        classModule:SelectRotation(specID, "Death Knight Frost 2H")
-                        self:Debug("No offhand detected - switching to 2H Frost rotation")
+                        classModule:SelectRotation(specID, "Frost 2H by Darkfrog")
+                        self:Debug("No offhand detected - switching to Frost 2H by Darkfrog rotation")
                     end
                     -- Refresh the rotation setup
                     classModule:SetupRotation()
@@ -1153,5 +1266,12 @@ do --===========================================================================
     end
 end
 
-
-ns.StateManager = StateManager
+--- Starts periodic checking for Elemental Shaman rotation switching
+--- @param self StateManager
+function StateManager:StartElementalShamanRotationCheck()
+    -- No longer needed: do not start a timer
+    if self.elementalShamanTimer then
+        self:CancelTimer(self.elementalShamanTimer)
+        self.elementalShamanTimer = nil
+    end
+end

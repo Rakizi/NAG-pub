@@ -1,11 +1,16 @@
---- Specialization Compatibility Layer for NAG
--- Provides cross-version specialization mapping and detection
--- Supports version-based and custom overrides (e.g., SoD, Classic, Retail, etc.)
+--- @module "SpecializationCompat"
+--- Provides cross-version specialization mapping and detection
+--- Supports version-based and custom overrides (e.g., SoD, Classic, Retail, etc.)
+---
 
 local _, ns = ...
 local Version = ns.Version
 
+--- @class SpecializationCompat
 local SpecializationCompat = {}
+
+local GetSpecialization = ns.GetSpecializationUnified
+local GetSpecializationInfo = ns.GetSpecializationInfoUnified
 
 -- MoP+ standard specID mapping (base)
 -- Always 5 entries per class: [1]=Spec1, [2]=Spec2, [3]=Spec3, [4]=Spec4 (if any), [5]=Initial (if any)

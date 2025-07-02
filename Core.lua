@@ -1,59 +1,42 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "Core"
+--- Handles core functionality for the NAG addon.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-    STATUS: good
-    NOTES: Core utility functions that don't depend on NAG
-]]
-
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
-
---WoW API
 
 -- Lua APIs (using WoW's optimized versions where available)
 local format = format or string.format -- WoW's optimized version if available
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
+
+local bit = bit
+
+-- Lua APIs (using WoW's optimized versions where available)
 local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 -- Type checking and assertions
 function ns.assertType(value, expectedType, paramName)
@@ -211,25 +194,24 @@ ns.COLORS = {
 
 --- Gets a color by name and returns it in the requested format
 --- @param colorName string The name of the color to get
---- @param format? string Optional format: "table" (default), "rgba", "hex", "rgbaTable"
+--- @param formatType? string Optional format: "table" (default), "rgba", "hex", "rgbaTable"
 --- @return table|number[]|string|{r:number,g:number,b:number,a:number} The color in the requested format
-function ns.GetColor(colorName, format)
+function ns.GetColor(colorName, formatType)
     local color = ns.COLORS[colorName] or ns.COLORS.WHITE
-    format = format or "table"
+    formatType = formatType or "table"
 
-    if format == "table" then
+    if formatType == "table" then
         return color
-    elseif format == "rgba" then
+    elseif formatType == "rgba" then
         return color.r, color.g, color.b, color.a
-    elseif format == "hex" then
-        return format("|cff%02x%02x%02x",
+    elseif formatType == "hex" then
+        return string.format("|cff%02x%02x%02x", -- Use string.format directly
             math.floor(color.r * 255),
             math.floor(color.g * 255),
             math.floor(color.b * 255))
-    elseif format == "rgbaTable" then
+    elseif formatType == "rgbaTable" then
         return { color.r, color.g, color.b, color.a }
     end
 
     return color
 end
-

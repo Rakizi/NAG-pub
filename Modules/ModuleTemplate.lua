@@ -1,50 +1,104 @@
---- ============================ HEADER ============================
+--- @module "ModuleTemplate"
+--- Template module demonstrating best practices for NAG modules
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+
+-- ~~~~~~~~~~ LIBRARY REFERENCE ~~~~~~~~~~
 --[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
+    This is a reference of available modern C_ API functions in this environment.
+    Leave this section intact for anything you build.
+    This will be used to help you throughout all modules.
 
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
+    IMPORTANT FOR AI AGENTS:
+    - If any function you try below returns nil or raises an error:
+        1- Check if the namespace exists (is not nil).
+        2- Scan the namespace dynamically to list all available functions.
+        3️- Adapt to the client version.
 
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
+    HOW TO CHECK FOR AVAILABLE FUNCTIONS:
+    Example to scan a namespace:
 
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+        local namespace = C_Item
+        if namespace then
+            for k, v in pairs(namespace) do
+                if type(v) == "function" then
+                    print("Available: C_Item." .. k)
+                end
+            end
+        else
+            print("Namespace C_Item not found.")
+        end
 
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
+    HOW TO SCAN ALL AVAILABLE C_ NAMESPACES:
 
-    STATUS: Template
-    NOTES: Template module demonstrating best practices for NAG modules
+        for k, v in pairs(_G) do
+            if type(v) == "table" and k:find("^C_") then
+                print("Namespace found: " .. k)
+            end
+        end
 
-    Timer Usage:
-    This module uses the TimerManager for all timer-related operations. The TimerManager
-    provides centralized timer management and ensures proper cleanup. Example usage:
+    --------------------------------------------------------------------------------
 
-    - Creating a timer:
-      ns.TimerManager:Create(ns.TimerManager.Categories.UI_NOTIFICATION, "UpdateDisplay", self.OnUpdate, 0.1, true)
+    --- C_Item ---
+    - C_Item.GetItemInfo(item) -> itemGUID, itemID, itemLink, ...
+    - C_Item.GetItemInfoByID(itemID) -> name, itemLink, quality, ...
+    - C_Item.GetItemNameByID(itemID) -> name
+    - C_Item.GetItemIconByID(itemID) -> icon
+    - C_Item.GetItemSpell(item) -> spellID, spellName, spellIconID
+    - C_Item.IsItemDataCachedByID(itemID) -> boolean
 
-    - Canceling a timer:
-      ns.TimerManager:Cancel(ns.TimerManager.Categories.UI_NOTIFICATION, "UpdateDisplay")
+    --- C_Spell ---
+    - C_Spell.GetSpellInfo(spellID) -> name, rank, icon, ...
+    - C_Spell.GetSpellName(spellID) -> name
+    - C_Spell.GetSpellIcon(spellID) -> icon
+    - C_Spell.GetSpellLink(spellID) -> link
 
-    - Checking if a timer is active:
-      ns.TimerManager:IsTimerActive(ns.TimerManager.Categories.UI_NOTIFICATION, "UpdateDisplay")
+    --- DataManager (Custom System) ---
+    local DataManager = NAG:GetModule("DataManager")
+    - DataManager:Get(id, entityType) -> entity
+    - DataManager:GetItem(id) -> item
+    - DataManager:GetSpell(id) -> spell
+    - DataManager:GetByName(name, flags, matchAll) -> entity
+    - DataManager:GetAllByName(name, flags, matchAll) -> {entities}
+    - DataManager:GetRelated(id, sourceType, targetType) -> {relatedEntities}
+    - DataManager:GetAllByFlag(flag, entityType) -> {entities}
+    - DataManager:HasFlag(id, entityType, flag) -> boolean
+
+    --------------------------------------------------------------------------------
+
+    TROUBLESHOOTING WORKFLOW FOR AI AGENTS:
+
+    If any function call fails:
+    - Use `type(C_Item)` or `type(C_Spell)` to verify the namespace.
+    - Use pairs(namespace) to explore available functions.
+    - Functions may differ across client versions. Dynamically adapt.
+    - Never assume function existence — always validate before call.
+    - Ask the user to run /run commands or /dump commands to test usability of a function if something doesnt go as expected.
+    --------------------------------------------------------------------------------
+
+    There are a lot of functions in the NAG codebase to speed things up. They are listed in these files:
+    - \NAG\Common.lua for common functions
+    - \NAG\handlers\APLhandlers.lua for APL functions
+    - \NAG\handlers\BuffDebuffHandlers.lua for buff/debuff functions
+    - \NAG\handlers\ItemHandlers.lua for item functions
+    - \NAG\handlers\MiscHandlers.lua for misc functions
+    - \NAG\handlers\ResourceHandlers.lua for resource functions
+    - \NAG\handlers\StatHandlers.lua for stat functions
+    The above files contain a lot of functions that can be used to speed things up.
+
 ]]
 
---- ======= LOCALIZE =======
+
+-- ======= LOCALIZE =======
 --Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local TimerManager = NAG:GetModule("TimerManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -86,25 +140,25 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local CONSTANTS = {
     DEFAULT_SIZE = 32,
@@ -146,7 +200,7 @@ local defaults = {
     }
 }
 
----@class ModuleTemplate: ModuleBase
+--- @class ModuleTemplate: ModuleBase
 local ModuleTemplate = NAG:CreateModule("ModuleTemplate", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DISPLAY, -- Category in options UI
     optionsOrder = 50,                              -- Order within category
@@ -192,6 +246,7 @@ local ModuleTemplate = NAG:CreateModule("ModuleTemplate", defaults, {
 ModuleTemplate.frame = nil
 
 do -- Ace3 lifecyle methods
+
     --- Initialize the module
     function ModuleTemplate:ModuleInitialize()
         self:Info("Initializing ModuleTemplate")

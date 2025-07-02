@@ -1,35 +1,33 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "SpellTrackingManager"
+--- Manages spell-related state tracking.
+---
+---  Responsibilities:
+---    - Track spell travel times
+---    - Track periodic effects (DoTs/HoTs)
+---    - Track cast counts
+---
+---  State Structure:
+---    ---------------
+---    state = {
+---        travelTime = {},      -- {spellId = {STT = number, inFlight = timestamp, projectileSpeed = number}}
+---        periodicEffects = {}, -- {spellId = {targets = {[guid] = {lastTickTime = timestamp, tickDamage = number}}, spellId = number, auraId = number}}
+---        castTracking = {},    -- {spellId = {recentCasts = {timestamp, ...}, lastCast = timestamp}}
+---        icdTracking = {},     -- {spellId = {duration = number, lastProc = number}} -- Track both ICD duration and last proc time
+---    }
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    SpellTrackingManager
-    -------------------
-    Manages spell-related state tracking.
-
-    Responsibilities:
-    - Track spell travel times
-    - Track periodic effects (DoTs/HoTs)
-    - Track cast counts
-
-    State Structure:
-    ---------------
-    state = {
-        travelTime = {},      -- {spellId = {STT = number, inFlight = timestamp, projectileSpeed = number}}
-        periodicEffects = {}, -- {spellId = {targets = {[guid] = {lastTickTime = timestamp, tickDamage = number}}, spellId = number, auraId = number}}
-        castTracking = {},    -- {spellId = {recentCasts = {timestamp, ...}, lastCast = timestamp}}
-        icdTracking = {},     -- {spellId = {duration = number, lastProc = number}} -- Track both ICD duration and last proc time
-    }
-]]
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@class StateManager : ModuleBase
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -41,32 +39,28 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+local defaults = {}
 
----@class SpellTrackingManager: ModuleBase, AceEvent-3.0, AceTimer-3.0
+--- @class SpellTrackingManager: ModuleBase, AceEvent-3.0, AceTimer-3.0
 local SpellTrackingManager = NAG:CreateModule("SpellTrackingManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsOrder = 25,    -- Early in debug options
@@ -85,6 +79,7 @@ local SpellTrackingManager = NAG:CreateModule("SpellTrackingManager", defaults, 
 })
 
 do -- Core functionality
+
     --- Initialize the SpellTrackingManager module
     --- @param self SpellTrackingManager
     function SpellTrackingManager:ModuleInitialize()
@@ -127,6 +122,7 @@ end
 
 
 do -- Registration Functions
+
     --- Register periodic damage tick time for spells
     --- @param self SpellTrackingManager
     --- @param spellIds table Array of spell IDs
@@ -251,6 +247,7 @@ do -- Registration Functions
 end
 
 do -- Event Handlers
+
     --- Handle PLAYER_REGEN_ENABLED event
     --- @param self SpellTrackingManager
     function SpellTrackingManager:PLAYER_REGEN_ENABLED()
@@ -560,6 +557,7 @@ do -- Event Handlers
 end
 
 do -- Update methods
+
     --- Update ICD tracking when a spell procs
     --- @param self SpellTrackingManager
     --- @param spellId number
@@ -598,6 +596,7 @@ do -- Update methods
 end
 
 do -- Getters
+
     --- Get cast count within the last minute
     --- @param self SpellTrackingManager
     --- @param spellId number
@@ -649,7 +648,7 @@ do -- Getters
 
         -- Check if spell is in flight
         if not travelTime.inFlight then return false end
-        
+
         -- If we have projectile speed, calculate if it should have landed by now
         if travelTime.projectileSpeed then
             local distance = NAG:DistanceToTarget()

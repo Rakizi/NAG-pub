@@ -1,19 +1,18 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Debug management module for centralized logging and debugging
-    STATUS: good
-    TODO: 
-        - (none)
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
----@diagnostic disable: undefined-global, undefined-field
+--- Handles centralized logging and debugging functionality for the NAG addon.
+---
+--- Provides a module for managing debug settings, logging messages, and
+--- debugging conditions.
+---
+--- * Dev mode (enableDevMode) controls access to developer features and UI only.
+--- * Debug level (debugLevel) controls all logging output (globally and per-module).
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
---- @class NAG : AceAddon-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -26,40 +25,38 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Constants
 local DEBUG_LEVELS = {
     NONE = 0,
-    FATAL = 1,
-    ERROR = 2,
-    WARN = 3,
-    INFO = 4,
-    DEBUG = 5,
-    TRACE = 6,
+    ERROR = 1,
+    WARN = 2,
+    INFO = 3,
+    DEBUG = 4,
+    TRACE = 5,
 }
 
 local DEBUG_COLORS = {
-    [DEBUG_LEVELS.FATAL] = '|cffff0000', -- Red
-    [DEBUG_LEVELS.ERROR] = '|cffff4500', -- Orange Red
+    [DEBUG_LEVELS.ERROR] = '|cffff0000', -- Red
     [DEBUG_LEVELS.WARN]  = '|cffffff00', -- Yellow
     [DEBUG_LEVELS.INFO]  = '|cff00ff00', -- Green
     [DEBUG_LEVELS.DEBUG] = '|cff00bfff', -- Deep Sky Blue
@@ -96,7 +93,12 @@ local dlapiBuffer = {}
 local isInitialized = false
 local isDLAPIReady = false
 
---- ============================ ACE3 LIFECYCLE ============================
+-- Helper to check if dev mode is enabled (safe for early loading)
+local function isDevModeEnabled()
+    return NAG.db and NAG:GetGlobal() and NAG:GetGlobal().enableDevMode
+end
+
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function DebugManager:ModuleInitialize()
         isInitialized = true
@@ -143,7 +145,7 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 --- Check if debug output is enabled for a given severity
 --- @param severity string The severity level to check
@@ -151,17 +153,12 @@ end
 function DebugManager:ShouldLog(severity)
     if not isInitialized then return true end -- Allow all messages during early logging
 
-    -- Always show FATAL and ERROR regardless of debug settings
-    if severity == "FATAL" or severity == "ERROR" then
+    -- Always show ERROR regardless of debug settings
+    if severity == "ERROR" then
         return true
     end
 
-    -- For other severities, check if debug is enabled and check debug level
-    if not NAG:IsDevModeEnabled() then
-        return false
-    end
-
-    -- Check debug level
+    -- For other severities, only check debug level (dev mode does not gate logging)
     local severityLevel = DEBUG_LEVELS[severity] or DEBUG_LEVELS.DEBUG
     return severityLevel <= NAG:GetGlobal().debugLevel
 end
@@ -208,7 +205,7 @@ function DebugManager:DebugLog(category, message)
     if DLAPI and DLAPI.DebugLog then
         -- Log to the specific category
         DLAPI.DebugLog(category, message)
-        
+
         -- Also log to the consolidated category if the message should be logged based on severity
         local severity = category -- In our case, category is the severity
         if self:ShouldLog(severity) then
@@ -225,88 +222,95 @@ end
 function DebugManager:Log(message, severity, printTrace)
     if not message then return end
     severity = severity or "DEBUG"
-
-    -- If not initialized, buffer the message
+    local stackTrace = printTrace and debugstack(3, 2, 0) or nil
+    -- Early logging: only buffer if dev mode is enabled
     if not isInitialized then
-        tinsert(messageBuffer, {
-            message = message,
-            severity = severity,
-            printTrace = printTrace
-        })
+        if isDevModeEnabled() then
+            tinsert(messageBuffer, { message = message, severity = severity, printTrace = printTrace })
+        end
         return
     end
-
-    -- Early return if debugging is disabled for this severity
-    if not self:ShouldLog(severity) then return end
-
-    local stackTrace = printTrace and debugstack(3, 2, 0) or nil
-
     -- Format and output the message
     local formattedMessage = formatDebugMessage(severity, message, stackTrace)
     print(formattedMessage) --keep
-
     -- Log to DLAPI if appropriate - severity is used as the category
     self:DebugLog(severity, formattedMessage)
 end
 
 -- Convenience methods for different debug levels
 --- @param self DebugManager
---- @param message string The message to log
---- @param printTrace? boolean Whether to include a stack trace
-function DebugManager:Debug(message, printTrace)
-    self:Log(message, "DEBUG", printTrace)
+--- @param msg string The message or format string to log
+--- @param ... any Format values, with optional boolean as last arg for printTrace
+function DebugManager:Debug(msg, ...)
+    local args = {...}
+    local printTrace = false
+    if #args > 0 and type(args[#args]) == "boolean" then
+        printTrace = table.remove(args)
+    end
+    local formatted = (#args > 0) and format(msg, unpack(args)) or tostring(msg)
+    self:Log(formatted, "DEBUG", printTrace)
 end
 
---- @param self DebugManager
---- @param message string The message to log
---- @param printTrace? boolean Whether to include a stack trace
-function DebugManager:Trace(message, printTrace)
-    self:Log(message, "TRACE", printTrace)
+function DebugManager:Trace(msg, ...)
+    local args = {...}
+    local printTrace = false
+    if #args > 0 and type(args[#args]) == "boolean" then
+        printTrace = table.remove(args)
+    end
+    local formatted = (#args > 0) and format(msg, unpack(args)) or tostring(msg)
+    self:Log(formatted, "TRACE", printTrace)
 end
 
---- @param self DebugManager
---- @param message string The message to log
---- @param printTrace? boolean Whether to include a stack trace
-function DebugManager:Info(message, printTrace)
-    self:Log(message, "INFO", printTrace)
+function DebugManager:Info(msg, ...)
+    local args = {...}
+    local printTrace = false
+    if #args > 0 and type(args[#args]) == "boolean" then
+        printTrace = table.remove(args)
+    end
+    local formatted = (#args > 0) and format(msg, unpack(args)) or tostring(msg)
+    self:Log(formatted, "INFO", printTrace)
 end
 
---- @param self DebugManager
---- @param message string The message to log
---- @param printTrace? boolean Whether to include a stack trace
-function DebugManager:Warn(message, printTrace)
-    self:Log(message, "WARN", printTrace)
+function DebugManager:Warn(msg, ...)
+    local args = {...}
+    local printTrace = false
+    if #args > 0 and type(args[#args]) == "boolean" then
+        printTrace = table.remove(args)
+    end
+    local formatted = (#args > 0) and format(msg, unpack(args)) or tostring(msg)
+    self:Log(formatted, "WARN", printTrace)
 end
 
---- @param self DebugManager
---- @param message string The message to log
---- @param printTrace? boolean Whether to include a stack trace
-function DebugManager:Error(message, printTrace)
-    self:Log(message, "ERROR", printTrace)
+function DebugManager:Error(msg, ...)
+    local args = {...}
+    local printTrace = false
+    if #args > 0 and type(args[#args]) == "boolean" then
+        printTrace = table.remove(args)
+    end
+    local formatted = (#args > 0) and format(msg, unpack(args)) or tostring(msg)
+    self:Log(formatted, "ERROR", printTrace)
 end
 
---- @param self DebugManager
---- @param message string The message to log
---- @param printTrace? boolean Whether to include a stack trace
-function DebugManager:Fatal(message, printTrace)
-    self:Log(message, "FATAL", printTrace)
-end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 -- (No explicit event handlers outside Ace3 lifecycle in this module)
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for debug settings
+
     --- @return table The options table for AceConfig
     function DebugManager:GetOptions()
         local options = {}
 
+        -- Clarification: Dev mode controls access to developer features/UI. Debug level controls all logging output.
         options.args = {
-            enableDebug = {
+            enableDevMode = {
                 type = "toggle",
                 name = function(info) return L[info[#info]] or info[#info] end,
-                desc = function(info) return L[info[#info] .. "Desc"] or "" end,
+                desc = function(info)
+                    return (L[info[#info] .. "Desc"] or "") .. "\n|cffaaaaaaDev mode controls access to developer features and UI only. It does NOT affect logging output.|r"
+                end,
                 get = function(info) return NAG:GetGlobal()[info[#info]] end,
                 set = function(info, value)
                     NAG:GetGlobal()[info[#info]] = value
@@ -317,11 +321,12 @@ do
             debugLevel = {
                 type = "select",
                 name = function(info) return L[info[#info]] or info[#info] end,
-                desc = function(info) return L[info[#info] .. "Desc"] or "" end,
+                desc = function(info)
+                    return (L[info[#info] .. "Desc"] or "") .. "\n|cffaaaaaaDebug level controls all logging output (globally and per-module). It is NOT affected by dev mode.|r"
+                end,
                 set = function(info, value) NAG:GetGlobal()[info[#info]] = value end,
                 get = function(info) return NAG:GetGlobal()[info[#info]] end,
-
-                order = 2,
+                order = 1,
                 values = function()
                     local levels = {}
                     for name, id in pairs(DEBUG_LEVELS) do
@@ -332,11 +337,104 @@ do
             },
         }
 
+        -- Add a 'Toggle All' row at the top
+        options.args.toggleAll = {
+            type = "group",
+            name = "Set All Modules Debug Level",
+            order = 0,
+            inline = true,
+            args = {}
+        }
+        local debugLevelValues = {
+            [0] = "NONE",
+            [1] = "ERROR",
+            [2] = "WARN",
+            [3] = "INFO",
+            [4] = "DEBUG",
+            [5] = "TRACE",
+        }
+        for lvl, lvlName in pairs(debugLevelValues) do
+            options.args.toggleAll.args["all_lvl_" .. lvl] = {
+                type = "toggle",
+                name = lvlName,
+                desc = "Set all modules debug level to " .. lvlName,
+                get = function()
+                    for _, module in NAG:IterateModules() do
+                        if type(module.GetGlobal) == "function" then
+                            if (module:GetGlobal().debugLevel or NAG:GetGlobal().debugLevel or 0) ~= lvl then
+                                return false
+                            end
+                        end
+                    end
+                    return true
+                end,
+                set = function(_, val)
+                    if val then
+                        for _, module in NAG:IterateModules() do
+                            if type(module.GetGlobal) == "function" then
+                                module:GetGlobal().debugLevel = lvl
+                            end
+                        end
+                    end
+                end,
+                width = "half",
+                order = lvl,
+            }
+        end
+
+        -- Per-module debug level controls (each module as its own group)
+        options.args.moduleDebugLevels = {
+            type = "group",
+            name = "Per-Module Debug Levels",
+            order = 10,
+            inline = false,
+            args = {}
+        }
+        -- Gather and sort module names
+        local moduleNames = {}
+        for name, module in NAG:IterateModules() do
+            if type(module.GetGlobal) == "function" then
+                table.insert(moduleNames, name)
+            end
+        end
+        table.sort(moduleNames)
+        local order = 1
+        for _, name in ipairs(moduleNames) do
+            local module = NAG:GetModule(name)
+            options.args.moduleDebugLevels.args[name] = {
+                type = "group",
+                name = name,
+                order = order,
+                inline = true, -- compact radio row
+                args = (function()
+                    local toggles = {}
+                    for lvl, lvlName in pairs(debugLevelValues) do
+                        toggles["lvl_" .. lvl] = {
+                            type = "toggle",
+                            name = lvlName,
+                            desc = nil,
+                            get = function() return (module:GetGlobal().debugLevel == lvl) end,
+                            set = function(_, val)
+                                if val then
+                                    module:GetGlobal().debugLevel = lvl
+                                end
+                            end,
+                            width = "half",
+                            order = lvl,
+                        }
+                    end
+                    return toggles
+                end)()
+            }
+            order = order + 1
+        end
+
+        -- Keep the testing group as is
         options.args.testing = {
             type = "group",
             name = function(info) return L[info[#info]] or info[#info] end,
             desc = function(info) return L[info[#info] .. "Desc"] or "" end,
-            order = 15,
+            order = 100,
             inline = true,
             set = function(info, value) NAG:GetGlobal()[info[#info]] = value end,
             get = function(info) return NAG:GetGlobal()[info[#info]] end,
@@ -392,7 +490,7 @@ do
     end
 end
 
---- ============================ SLASH COMMANDS ============================
+-- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~
 SLASH_NAGDEBUGLEVEL1 = "/nagdebuglevel"
 SlashCmdList["NAGDEBUGLEVEL"] = function(msg)
     local level = tonumber(msg)
@@ -402,14 +500,8 @@ SlashCmdList["NAGDEBUGLEVEL"] = function(msg)
     else
         print(format("Current debug level: %d", NAG:GetGlobal().debugLevel))
         print("Usage: /nagdebuglevel [0-6]")
-        print("0: None, 1: Fatal, 2: Error, 3: Warn, 4: Info, 5: Debug, 6: Trace")
+        print("0: None, 1: Error, 2: Warn, 3: Info, 4: Debug, 5: Trace")
     end
-end
-
-SLASH_NAGDEBUG1 = "/nagdebug"
-SlashCmdList["NAGDEBUG"] = function()
-    NAG:GetGlobal().enableDebug = not NAG:GetGlobal().enableDebug
-    AceConfigRegistry:NotifyChange("NAG")
 end
 
 -- Expose in private namespace

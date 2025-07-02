@@ -1,74 +1,57 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "Options"
+--- Handles all options, configuration, and settings UI for NAG addon
+---
+--- This module defines and manages all Ace3 options tables, configuration UI, and related logic for the Next Action Guide addon.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+--- ToDo:  Modify to dynamically retrieve class icons, druid/deathknight icons weren't correct in last attempt
+--- ToDo:  remove any toggle functions, add methods(tooltips)
+--- ToDo:  Verify all table returns, make sure all return correct
+--- ToDo:  Change glow color selection to dropdown with color swatches (or use a color picker)
+--- ToDo:  rewrite burst tracker options to have similar structure to resource bar options
+--- ToDo:  Fix last selected group not being remembered
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS: GOOD: Organized, Error handling added
-    TODO: Modify to dynamically retrieve class icons, druid/deathknight icons weren't correct in last attempt
-    TODO: remove any toggle functions, add methods(tooltips)
-    TODO: Verify all table returns, make sure all return correct
-    TODO: Change glow color selection to dropdown with color swatches
-    TODO: rewrite burst tracker options to have similar structure to resource bar options
-    TODO: Fix last selected group not being remembered
-
-
-
-    ]]
-
---- ======= LOCALIZE =======
---Addon
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
+-- Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon Main addon reference
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
---Libs
 
+-- Libs
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
 
-
 local GetItemInfo = ns.GetItemInfoUnified
+
 -- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
 local max = max or math.max
 local abs = abs or math.abs
 
-
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local tostring = tostring
+local tonumber = tonumber
+local unpack = unpack
 
---File
---- ======= GLOBALIZE =======
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
---Local Helper Functions ==============================================================================================
+-- ~~~~~~~~~~Local Helper Functions ~~~~~~~~~~
 
 
 
@@ -113,8 +96,7 @@ end
 
 
 do --== Reset Options ==--
-    --- @class NAG
-    --- @field CreateResetOptions fun(self: NAG): table
+
     --- @usage NAG:CreateResetOptions()
     --- @return table A container with reset options for the addon
     function NAG:CreateResetOptions()
@@ -250,12 +232,11 @@ do --== Reset Options ==--
 end
 
 do --== Splash/Key Options ==--
-    --- @class NAG
-    --- @field CreateSplashOptions fun(self: NAG): table
+
     --- @usage NAG:CreateSplashOptions()
     --- @return table A container with splash options for the addon
     function NAG:CreateSplashOptions()
-        ---@class DataManager
+        --- @type DataManager|AceModule|ModuleBase
         local DataManager = NAG:GetModule("DataManager")
         return {
             logoGroup = {
@@ -442,18 +423,12 @@ do --== Splash/Key Options ==--
 end
 
 do --== Display Options ==--
-    --- @class NAG
-    --- @field frameControls table
-    --- @field general table
-    --- @field keybinds table
-    --- @field borders table
-    --- @field glow table
-    --- @field frames table
+
     --- @return table
     --- @usage NAG:CreateDisplayOptions()
     function NAG:CreateDisplayOptions()
         -- Check if we have an enabled class module
-        ---@class ClassBase : ModuleBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = self:GetModule(self.CLASS, true)
         local hasEnabledModule = classModule and classModule:IsEnabled()
 
@@ -660,7 +635,7 @@ do --== Display Options ==--
                         order = 1,
                         fontSize = "medium",
                     },
-                    enableWAResourceBar = {
+                   --[[ enableWAResourceBar = {
                         type = "toggle",
                         name = "Use WeakAuras Resource Bar",
                         desc = "Use WeakAuras version of the resource bar instead of the built-in frame",
@@ -670,8 +645,8 @@ do --== Display Options ==--
                             NAG.db.char.enableWAResourceBar = value
                             if value then
                                 -- Let the module handle its own settings
-                                ---@class ResourceBarManager : ModuleBase
-                                local RBM = NAG:GetModule("ResourceBarManager")
+                                --- @type ResourceBarManager|AceModule|ModuleBase
+                                local RBM = NAG:GetModule("ResourceBarManager", true)
                                 if RBM then
                                     RBM:Disable()
                                     RBM:GetChar().enabled = false
@@ -692,7 +667,7 @@ do --== Display Options ==--
                             NAG.db.char.enableWABurstBoxes = value
                             if value then
                                 -- Let the module handle its own settings
-                                ---@class BurstTrackerManager : ModuleBase
+                                --- @type BurstTrackerManager|AceModule|ModuleBase
                                 local BTM = NAG:GetModule("BurstTrackerManager")
                                 if BTM then
                                     BTM:Disable()
@@ -705,7 +680,7 @@ do --== Display Options ==--
                                 end
                             end
                         end,
-                    },
+                    },]]
                 },
             },
 
@@ -801,6 +776,18 @@ do --== Display Options ==--
                     end
                 end,
             },
+
+            minimapDetach = {
+                type = "toggle",
+                name = L["minimapDetach"] or "Detach Minimap Icon",
+                desc = L["minimapDetachDesc"] or "Show the minimap icon as a draggable icon anywhere on your screen instead of attached to the minimap.",
+                order = 6,
+                get = function() return self.db.global.minimap.detached end,
+                set = function(_, value)
+                    self.db.global.minimap.detached = value
+                    NAG:UpdateMinimapIconMode()
+                end,
+            },
         }
     end
 end
@@ -822,8 +809,6 @@ do --== Thanks Options ==--
         EVOKER = 13
     }
 
-    --- @class NAG
-    --- @field CreateThanksOptions fun(self: NAG): table
     --- @usage NAG:CreateAcknowledgementsOptions()
     --- @return table A container with acknowledgements options for the addon
     function NAG:CreateAcknowledgementsOptions()

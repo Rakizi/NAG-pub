@@ -1,21 +1,14 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Profiling utility for measuring and reporting code performance in NAG. Provides function timing, cumulative timing, and reporting tools for debugging and optimization.
-    STATUS: GOOD: Error handling added
-    TODO: 
-        - Add more advanced memory profiling
-        - Integrate with external profiling tools if needed
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-]]
+--- @module "ProfilingUtility"
+--- Provides a module for measuring and reporting code performance in NAG.
+---
+--- Provides function timing, cumulative timing, and reporting tools for debugging and optimization.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
----@diagnostic disable: undefined-field
-
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -28,29 +21,26 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
-    global = {
-        debug = false,
-    },
 }
 
 ---@class ProfilingUtility : ModuleBase, AceTimer-3.0
@@ -68,9 +58,10 @@ ProfilingUtility.timings = {}
 ProfilingUtility.callTimestamps = {}
 ProfilingUtility.profilingStack = {}
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     --- Called when the module is initialized
+
     --- @param self ProfilingUtility
     function ProfilingUtility:ModuleInitialize()
         self:Reset()
@@ -89,12 +80,12 @@ do
     end
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     -- No event handlers defined for this module
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 --- Performs a complete cleanup of the profiling module
 --- @param self ProfilingUtility
@@ -400,11 +391,8 @@ function ProfilingUtility:PrintReportToFrame(sortField)
         return
     end
 
-    ---@diagnostic disable-next-line: undefined-field
     frame:SetTitle("Profiling Report")
-    ---@diagnostic disable-next-line: undefined-field
     frame:SetStatusText("NAG Profiling Report")
-    ---@diagnostic disable-next-line: undefined-field
     frame:SetLayout("Fill")
 
     local editBox = AceGUI:Create("MultiLineEditBox")
@@ -413,13 +401,10 @@ function ProfilingUtility:PrintReportToFrame(sortField)
         return
     end
 
-    ---@diagnostic disable-next-line: undefined-field
     editBox:SetLabel("Report")
     editBox:SetFullWidth(true)
     editBox:SetFullHeight(true)
-    ---@diagnostic disable-next-line: undefined-field
     editBox:DisableButton(true)
-    ---@diagnostic disable-next-line: undefined-field
     frame:AddChild(editBox)
 
     local reportText = ""
@@ -430,7 +415,6 @@ function ProfilingUtility:PrintReportToFrame(sortField)
                 entry.callsPerMinute)
     end
 
-    ---@diagnostic disable-next-line: undefined-field
     editBox:SetText(reportText)
 end
 

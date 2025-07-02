@@ -1,13 +1,12 @@
---- ============================ HEADER ============================
+--- @module "DataLoader"
+--- Handles version-specific data loading across different WoW versions.
+---
+--- Responsible for selecting the appropriate version's data based on the current game version.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+
 --[[
-    See LICENSE for full license text.
-    Authors: Rakizi
-    Module Purpose: DataLoader module for handling version-specific data loading across different WoW versions. Responsible for selecting the appropriate version's data based on the current game version.
-    STATUS: Stable
-    TODO: 
-        - Add support for new expansions as needed
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    https://creativecommons.org/licenses/by-nc/4.0/
 
     Supported Data Files Structure:
     /data
@@ -55,11 +54,11 @@
     - reagents         -- Crafting and spell reagents
 ]]
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -71,37 +70,31 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
-
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 
 ---@class DataLoader : ModuleBase
 local DataLoader = NAG:CreateModule("DataLoader", defaults)
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     --- Initializes the DataLoader module
     function DataLoader:ModuleInitialize()
@@ -110,7 +103,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 --- Loads data specific to the current WoW version
 function DataLoader:LoadVersionSpecificData()
     local expansionKey = Version:GetExpansion()

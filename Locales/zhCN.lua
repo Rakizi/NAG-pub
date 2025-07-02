@@ -62,6 +62,8 @@ if L then
         L["bothOutput"] = "调试和聊天都输出"
         L["btk"] = "BTK"
         L["btkDesc"] = "Bent The Knee模块功能"
+        L["btkDisableEmotes"] = "禁用屈膝表情"
+        L["btkDisableEmotesDesc"] = "禁用自动表情功能，当godtier用户获得/失去增益时让其他玩家跪下或敬礼（仅限Godtier）"
         L["buffCheckInterval"] = "增益检查间隔"
         L["buffCheckIntervalDesc"] = "检查缺失团队增益的频率（秒）"
         L["buffSuggestionThreshold"] = "增益建议阈值"
@@ -745,7 +747,7 @@ if L then
         L["resetClassDesc"] = "将职业设置重置为默认值"
         L["resetToDefault"] = "重置为默认值"
         L["resetConfirmation"] = "确定要将"%s"重置为默认设置吗？\n此操作无法撤消。"
-        
+
         -- Types.lua Stats
         L["strength"] = "力量"
         L["agility"] = "敏捷"
@@ -774,14 +776,14 @@ if L then
         L["health"] = "生命值"
         L["mana"] = "法力值"
         L["mp5"] = "5秒回蓝"
-        
+
         -- Types.lua Categories
         L["character"] = "角色"
         L["buffs"] = "增益"
         L["debuffs"] = "减益"
         L["combat"] = "战斗"
         L["class"] = "职业"
-        
+
         -- Types.lua Buff Types
         L["stats"] = "属性"
         L["spell_resistance"] = "法术抗性"
@@ -798,7 +800,7 @@ if L then
         L["major_mana"] = "强效法力"
         L["armor"] = "护甲"
         L["heroism"] = "英勇"
-        
+
         -- Types.lua Debuff Types
         L["spell_damage"] = "法术伤害"
         L["spell_crit"] = "法术暴击"
@@ -808,7 +810,7 @@ if L then
         L["physical_damage_reduction"] = "物理伤害减免"
         L["attack_speed"] = "攻击速度"
         L["healing_reduction"] = "治疗效果降低"
-        
+
         -- Types.lua Combat Types
         L["unknown"] = "未知"
         L["any"] = "任意"
@@ -816,7 +818,7 @@ if L then
         L["main_hand"] = "主手"
         L["off_hand"] = "副手"
         L["ranged"] = "远程"
-        
+
         -- Types.lua Class Types
         L["humanoid"] = "人型生物"
         L["ghost_wolf"] = "幽魂之狼"
@@ -833,14 +835,14 @@ if L then
         L["blood"] = "鲜血"
         L["frost"] = "冰霜"
         L["unholy"] = "邪恶"
-        
+
         -- Types.lua Rune Types
         L["rune_unknown"] = "未知符文"
         L["rune_blood"] = "血符文"
         L["rune_frost"] = "冰霜符文"
         L["rune_unholy"] = "邪恶符文"
         L["rune_death"] = "死亡符文"
-        
+
         -- Types.lua Rune Slots
         L["slot_unknown"] = "未知符文槽"
         L["slot_left_blood"] = "左血符文"
@@ -849,18 +851,18 @@ if L then
         L["slot_right_frost"] = "右冰霜符文"
         L["slot_left_unholy"] = "左邪恶符文"
         L["slot_right_unholy"] = "右邪恶符文"
-        
+
         -- Types.lua Eclipse Phases
         L["unknown_phase"] = "未知月蚀"
         L["neutral_phase"] = "中性月蚀"
         L["solar_phase"] = "日蚀"
         L["lunar_phase"] = "月蚀"
-        
+
         -- Types.lua Swap Sets
         L["swap_set_unknown"] = "未知切换套装"
         L["swap_set_main"] = "主要切换套装"
         L["swap_set_swap1"] = "切换套装1"
-        
+
         -- Types.lua Mob Types
         L["none"] = "无"
         L["aberration"] = "畸变"
@@ -1026,9 +1028,7 @@ if L then
     end
 end
 
---===================================================================================================
--- DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE
---===================================================================================================
+-- ~~~~~~~~~~ DO NOT MODIFY/TRANSLATE ANYTHING BELOW THIS LINE ~~~~~~~~~~
 
 
 if L then

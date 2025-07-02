@@ -1,37 +1,28 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "PullTimerManager"
+--- Handles pull timer management and countdown functionality for NAG.
+---
+--- This module provides functions for managing pull timers and countdown functionality.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-             Fonsas: @Fonsas http://discord.gg/ebonhold
-    
 
-    Pull Timer Management System
-    --------------------------
-    The PullTimerManager provides centralized management of pull timers and countdown functionality.
-    Handles both pull timer tracking and pre-pull spell casting.
 
-    STATUS: 
-    TODO:   
-
-]]
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
-
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
+--- @type StateManager|AceModule|ModuleBase
+local StateManager = NAG:GetModule("StateManager")
+
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true) -- Enable silent fallback
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
-
----@class StateManager : ModuleBase
-local StateManager = NAG:GetModule("StateManager")
 
 -- WoW API Compatibility
 local GetSpellInfo = ns.GetSpellInfoUnified
@@ -48,28 +39,28 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 local pairs = pairs
 local ipairs = ipairs
 local select = select
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Local constants
 local PULL_TIMER_UPDATE_INTERVAL = 0.1
 local TIMER_CATEGORY = Timer.Categories.COMBAT
@@ -84,7 +75,7 @@ local defaults = {
     }
 }
 
----@class PullTimerManager: ModuleBase, AceEvent-3.0
+--- @class PullTimerManager: ModuleBase, AceEvent-3.0
 local PullTimerManager = NAG:CreateModule("PullTimerManager", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.CLASS, -- Place in spec options since it's spec-specific
@@ -111,7 +102,7 @@ local PullTimerManager = NAG:CreateModule("PullTimerManager", defaults, {
     }
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function PullTimerManager:ModuleInitialize()
     end
@@ -126,7 +117,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function PullTimerManager:START_PLAYER_COUNTDOWN(event, initiatedBy, timeRemaining, duration)
         if UnitAffectingCombat("player") then return end
@@ -138,15 +129,16 @@ do
     end
 end
 
--- ============================ MESSAGE HANDLERS ============================
+-- ~~~~~~~~~~ MESSAGE HANDLERS ~~~~~~~~~~
 do
     function PullTimerManager:OnRotationChanged()
         self:UpdateCurrentRotation()
     end
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do --== Options Functions ==--
+
     --- Gets the options table for the PullTimerManager module
     --- @return table The options table for AceConfig-3.0
     function PullTimerManager:GetOptions()
@@ -383,11 +375,11 @@ do --== Options Functions ==--
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (Local helpers and public API functions should be outside do blocks for scope)
 
 function PullTimerManager:UpdateCurrentRotation()
-    ---@class ClassBase
+    --- @type ClassBase|AceModule|ModuleBase
     local classModule = NAG:GetModule(NAG.CLASS, true)
     if classModule then
         local rotation, name = classModule:GetCurrentRotation()

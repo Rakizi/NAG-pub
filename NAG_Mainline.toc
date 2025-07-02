@@ -3,6 +3,13 @@
 ## Title: Next Action Guides(NAG)
 ## Notes: Works with Next Action Guides (https://discorg.gg/ebonhold)
 ## Author: Rakizi & Fonsas
+## IconTexture: Interface\AddOns\NAG\Media\NAGMiniMap.png
+## AddonCompartmentFunc: NAG_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: NAG_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: NAG_OnAddonCompartmentLeave
+## Group: NAG
+## Category: User Interface
+## X-Category: Interface Enhancements
 ## SavedVariables: NAGDB
 ## X-Curse-Project-ID: 1057119
 ## X-Wago-Project-ID: BKpqpqGE
@@ -28,13 +35,16 @@ NAG.lua
 Utils.lua
 
 # Data Files
-data\Retail\Data.xml
+Mainline\data\Data.xml
 
 # Entity Behaviors
 EntityBehaviors.lua
 
 # Ace3 Modules
 modules.xml
+
+# Unit Testing
+Modules/Tests/tests.xml
 
 # APL System
 #APL\APL.xml
@@ -44,7 +54,6 @@ Dialogs.lua
 Common.lua
 Config.lua
 handlers\handlers.xml
-APLhandlers.lua
 #handlersnew.lua
 
 Mainline\Mainline.xml

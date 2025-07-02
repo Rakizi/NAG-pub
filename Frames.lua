@@ -1,43 +1,24 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "Frames"
+--- Handles all frame creation, icon management, and border logic for NAG addon
+---
+--- This module manages the creation and updating of all UI frames, icon frames, borders, and related display logic for the Next Action Guide addon.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+---
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS:
-    TODO: Remove main/secondary spells?  Don't think needed now. just add to table and put in right spot?
-    NOTES: Add any additional comments or notes
-
-]]
-
---- ======= LOCALIZE =======
---Addon
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
+-- Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class KeybindManager : ModuleBase
+--- @type KeybindManager|AceModule|ModuleBase
 local KeybindManager = NAG:GetModule("KeybindManager")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 
-
---Libs
+-- Libs
 local LSM = LibStub("LibSharedMedia-3.0")
 local LCG = LibStub("LibCustomGlow-1.0")
 if not LCG then error("LibCustomGlow-1.0 is required") end
@@ -49,13 +30,13 @@ end
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
 
---WoW API
+-- WoW API
 local GetSpellCooldown = ns.GetSpellCooldownUnified
 local GetSpellCharges = ns.GetSpellChargesUnified
 local GetItemCooldown = ns.GetItemCooldownUnified
 
 -- Lua APIs (using WoW's optimized versions where available)
-local format = format or string.format -- WoW's optimized version if available
+local format = format or string.format
 local floor = floor or math.floor
 local ceil = ceil or math.ceil
 local min = min or math.min
@@ -63,27 +44,30 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local tostring = tostring
+local unpack = unpack
 
---File
---- ======= GLOBALIZE =======
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 function ns.AddTooltip(frame)
     if not frame then return end
@@ -236,6 +220,7 @@ function ns.RefreshAllBorders()
 end
 
 do --== Frame Creation Functions ==--
+
     --- Initializes the parent frame for the NAG addon.
     --- @param self NAG The NAG addon object
     --- @usage NAG:InitializeParentFrame()
@@ -351,7 +336,7 @@ do --== Frame Creation Functions ==--
     function NAG:CreateIconFrame(name, parent, width, height, texCoord, point, relativeTo, relativePoint, offsetX,
                                  offsetY)
         if not name or not parent then
-            self:Fatal("CreateIconFrame: Missing required parameters name or parent")
+            self:Error("CreateIconFrame: Missing required parameters name or parent")
             return nil
         end
 
@@ -517,7 +502,7 @@ do --== Frame Creation Functions ==--
 
         if not self.Frame.iconFrames["primary"] then
             self:Debug("CreateOrUpdateIconFrames: Creating primary icon frame")
-            --- @class Frame
+            --- @type Frame
             local primaryFrame = NAG:CreateIconFrame("primary", parent, iconWidth, iconHeight, nil, "CENTER", parent,
                 "CENTER", 0, 0)
             primaryFrame.cooldown = CreateFrame("Cooldown", nil, primaryFrame, "CooldownFrameTemplate")
@@ -527,14 +512,14 @@ do --== Frame Creation Functions ==--
             ns.AddBorder(self.Frame.iconFrames["primary"])
         end
 
-        --- @class Frame
+        --- @type Frame
         local primaryFrame = self.Frame.iconFrames["primary"]
 
         -- Update or create above frames
         for i = 1, maxAboveIcons do
             local key = "above" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local aboveFrame = NAG:CreateIconFrame(key, parent, iconWidth, iconHeight * frameWeight,
                     { 0.1, 0.9, 0.25, 0.75 }, "TOP", primaryFrame, "TOP", 0, (iconHeight * frameWeight + gap) * i)
                 self.Frame.iconFrames[key] = aboveFrame
@@ -551,7 +536,7 @@ do --== Frame Creation Functions ==--
         for i = 1, maxBelowIcons do
             local key = "below" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local belowFrame = NAG:CreateIconFrame(key, parent, iconWidth, iconHeight * frameWeight,
                     { 0.1, 0.9, 0.25, 0.75 }, "BOTTOM", primaryFrame, "BOTTOM", 0, -(iconHeight * frameWeight + gap) * i)
                 self.Frame.iconFrames[key] = belowFrame
@@ -566,7 +551,7 @@ do --== Frame Creation Functions ==--
 
         -- Update or create aoe frame
         if not self.Frame.iconFrames["aoe"] then
-            --- @class Frame
+            --- @type Frame
             local aoeFrame = NAG:CreateIconFrame("aoe", parent, iconHeight * frameWeight, iconHeight,
                 { 0.25, 0.75, 0.1, 0.9 }, "RIGHT", primaryFrame, "RIGHT", 0, 0)
             aoeFrame:SetAlpha(0.75)
@@ -583,7 +568,7 @@ do --== Frame Creation Functions ==--
         for i = 1, maxLeftIcons do
             local key = "left" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local leftFrame = NAG:CreateIconFrame(key, parent, iconWidth * frameWeight, iconHeight,
                     { 0.25, 0.75, 0.1, 0.9 }, "LEFT", primaryFrame, "LEFT", -(iconHeight * frameWeight + gap) * i, 0)
                 self.Frame.iconFrames[key] = leftFrame
@@ -600,7 +585,7 @@ do --== Frame Creation Functions ==--
         for i = 1, maxRightIcons do
             local key = "right" .. i
             if not self.Frame.iconFrames[key] then
-                --- @class Frame
+                --- @type Frame
                 local rightFrame = NAG:CreateIconFrame(key, parent, iconWidth * frameWeight, iconHeight,
                     { 0.25, 0.75, 0.1, 0.9 }, "RIGHT", primaryFrame, "RIGHT", (iconHeight * frameWeight + gap) * i, 0)
                 self.Frame.iconFrames[key] = rightFrame
@@ -793,7 +778,10 @@ do --== Icon Frame Update Functions ==--
                 elseif entity.position == DataManager.SpellPosition.AOE then
                     aoeSpellId = spellId
                     local key = "aoe"
-                    if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                    if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                        -- Frame exists and is available, use it
+                    else
+                        -- Frame doesn't exist or is occupied, fall back to left
                         if leftIndex > char.numLeftIcons then
                             self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                             return
@@ -806,15 +794,17 @@ do --== Icon Frame Update Functions ==--
                 elseif entity.position == DataManager.SpellPosition.ABOVE then
                     -- Handle above spells
                     local key = "above" .. aboveIndex
-                    if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                    if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                        -- Frame exists and is available, use it
+                        aboveIndex = aboveIndex + 1
+                    else
+                        -- Frame doesn't exist or is occupied, fall back to left
                         if leftIndex > char.numLeftIcons then
                             self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                             return
                         end
                         key = "left" .. leftIndex
                         leftIndex = leftIndex + 1
-                    else
-                        aboveIndex = aboveIndex + 1
                     end
                     NAG.Frame.iconFrames[key].spellId = spellId
                     self:UpdateIcon(key, spellId)
@@ -822,15 +812,17 @@ do --== Icon Frame Update Functions ==--
                     -- Handle below spells/totems
                     if totemCount < maxBelowFrames then
                         local key = "below" .. belowIndex
-                        if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                        if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                            -- Frame exists and is available, use it
+                            belowIndex = belowIndex + 1
+                        else
+                            -- Frame doesn't exist or is occupied, fall back to left
                             if leftIndex > char.numLeftIcons then
                                 self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                                 return
                             end
                             key = "left" .. leftIndex
                             leftIndex = leftIndex + 1
-                        else
-                            belowIndex = belowIndex + 1
                         end
                         NAG.Frame.iconFrames[key].spellId = spellId
                         self:UpdateIcon(key, spellId)
@@ -839,15 +831,17 @@ do --== Icon Frame Update Functions ==--
                 elseif entity.position == DataManager.SpellPosition.RIGHT then
                     -- Handle right side spells
                     local key = "right" .. rightIndex
-                    if not NAG.Frame.iconFrames[key] or NAG.Frame.iconFrames[key].spellId then
+                    if NAG.Frame.iconFrames[key] and not NAG.Frame.iconFrames[key].spellId then
+                        -- Frame exists and is available, use it
+                        rightIndex = rightIndex + 1
+                    else
+                        -- Frame doesn't exist or is occupied, fall back to left
                         if leftIndex > char.numLeftIcons then
                             self:Warn("UpdateIcons: leftIndex exceeds maximum allowed positions")
                             return
                         end
                         key = "left" .. leftIndex
                         leftIndex = leftIndex + 1
-                    else
-                        rightIndex = rightIndex + 1
                     end
                     NAG.Frame.iconFrames[key].spellId = spellId
                     self:UpdateIcon(key, spellId)
@@ -875,7 +869,7 @@ do --== Icon Frame Update Functions ==--
         if not main and aoeSpellId then
             NAG.Frame.iconFrames["primary"].spellId = aoeSpellId
             self:UpdateIcon("primary", aoeSpellId)
-            
+
             -- Hide the AOE icon frame since we moved its spell to primary
             if NAG.Frame.iconFrames["aoe"] then
                 NAG.Frame.iconFrames["aoe"]:Hide()

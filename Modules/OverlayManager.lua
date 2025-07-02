@@ -1,39 +1,37 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (add author names and contact info here)
-    Module Purpose: OverlayManager - Handles creation, display, and management of overlays (icons, notifications, text) on frames for the NAG addon.
-    STATUS: Active
-    TODO: (add any outstanding tasks here)
-]]
----@diagnostic disable: ...
+--- @module "OverlayManager"
+--- Handles creation, display, and management of overlays (icons, notifications, text) on frames for the NAG addon.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
 local LSM = LibStub("LibSharedMedia-3.0")
 
---- ============================ CONTENT ============================
+local GetSpellTexture = ns.GetSpellTextureUnified
+
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         overlayConfigs = {
             cancel = {
                 texture = "Interface\\TargetingFrame\\UI-RaidTargetingIcon_7",
                 blendMode = "ADD",
                 size = .5,
+                textureScale = 0.5, -- Scale the X texture to 60% of the overlay size
                 point = "TOPRIGHT",
                 relativePoint = "BOTTOMLEFT",
                 xOffset = 0,
                 yOffset = 0,
-                alpha = .75,
+                alpha = 1,
                 showSpellIcon = true
             },
             startattack = {
@@ -99,6 +97,24 @@ local defaults = {
                     texture = "Interface\\Tooltips\\UI-Tooltip-Background"
                 },
                 pulse = false
+            },
+            pooling = {
+                texture = "Interface\\Minimap\\UI-Minimap-Background", -- Circular texture
+                blendMode = "BLEND",
+                size = 1.0, -- Cover the entire icon
+                point = "CENTER",
+                relativePoint = "CENTER",
+                xOffset = 0,
+                yOffset = 0,
+                alpha = 0.7,
+                textureAlpha = 0.5, -- Semi-transparent circle
+                showSpellIcon = false,
+                pulse = true,
+                textColor = { 1, 1, 0, 1 }, -- Yellow text
+                textSize = 11,
+                textFont = "Friz Quadrata TT",
+                textFlags = "OUTLINE",
+                text = "Pooling"
             }
         }
     }
@@ -119,7 +135,7 @@ local OverlayManager = NAG:CreateModule("OverlayManager", defaults, {
     }
 })
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function OverlayManager:CreateOverlay(frame, overlayType, customConfig)
     if not frame or not overlayType then
         self:Debug("CreateOverlay: Missing frame or overlayType")
@@ -263,7 +279,7 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     -- Generate consistent key for this overlay
     local spellId = customConfig and customConfig.spellId
     local overlayKey = self:GetOverlayKey(frame, overlayType, spellId)
-    self:Debug(format("ShowOverlay: Processing overlay - Type: %s, SpellId: %s, Key: %s", 
+    self:Debug(format("ShowOverlay: Processing overlay - Type: %s, SpellId: %s, Key: %s",
         overlayType, spellId or "none", overlayKey))
 
     -- Initialize frame tracking if needed
@@ -302,24 +318,41 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     overlay:SetSize(size, size)
     overlay:SetFrameLevel(frame:GetFrameLevel() + 2)
     overlay:SetFrameStrata("MEDIUM")
-    self:Debug(format("ShowOverlay: Created frame - Size: %d, Level: %d, Strata: %s", 
+    self:Debug(format("ShowOverlay: Created frame - Size: %d, Level: %d, Strata: %s",
         size, overlay:GetFrameLevel(), overlay:GetFrameStrata()))
 
     -- Create and setup the spell icon texture if needed
     if (config.showSpellIcon and customConfig and customConfig.spellIcon) then
         if not overlay.spellIcon then
             overlay.spellIcon = overlay:CreateTexture(nil, "ARTWORK")
-            overlay.spellIcon:SetAllPoints()
             self:Debug("ShowOverlay: Created spell icon texture")
         end
         overlay.spellIcon:SetTexture(customConfig.spellIcon)
         overlay.spellIcon:SetAlpha(1.0)
+        
+        -- Apply spell icon zoom if specified
+        if config.spellIconZoom then
+            local iconSize = size * config.spellIconZoom
+            overlay.spellIcon:SetSize(iconSize, iconSize)
+            overlay.spellIcon:ClearAllPoints()
+            overlay.spellIcon:SetPoint("CENTER", overlay, "CENTER", 0, 0)
+            self:Debug(format("ShowOverlay: Zoomed spell icon to %.0f%% (size: %d)", config.spellIconZoom * 100, iconSize))
+        else
+            overlay.spellIcon:SetAllPoints()
+        end
+        
+        -- Apply desaturation if specified
+        if config.spellIconDesaturated then
+            overlay.spellIcon:SetDesaturated(true)
+            self:Debug("ShowOverlay: Desaturated spell icon")
+        else
+            overlay.spellIcon:SetDesaturated(false)
+        end
     end
 
     -- Create and setup the overlay texture
     if not overlay.texture then
         overlay.texture = overlay:CreateTexture(nil, "OVERLAY")
-        overlay.texture:SetAllPoints()
         self:Debug("ShowOverlay: Created overlay texture")
     end
 
@@ -327,9 +360,24 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     if config.texture then
         overlay.texture:SetTexture(config.texture)
         overlay.texture:SetBlendMode(config.blendMode)
-        overlay.texture:SetAlpha(config.alpha)
-        self:Debug(format("ShowOverlay: Set texture properties - Blend: %s, Alpha: %.2f", 
-            config.blendMode, config.alpha))
+        
+        -- Use textureAlpha if specified, otherwise use general alpha
+        local textureAlpha = config.textureAlpha or config.alpha
+        overlay.texture:SetAlpha(textureAlpha)
+        
+        -- Apply texture scaling if specified (for smaller X overlays)
+        if config.textureScale then
+            local textureSize = size * config.textureScale
+            overlay.texture:SetSize(textureSize, textureSize)
+            overlay.texture:ClearAllPoints()
+            overlay.texture:SetPoint("CENTER", overlay, "CENTER", 0, 0)
+            self:Debug(format("ShowOverlay: Scaled texture to %.1f%% (size: %d)", config.textureScale * 100, textureSize))
+        else
+            overlay.texture:SetAllPoints()
+        end
+        
+        self:Debug(format("ShowOverlay: Set texture properties - Blend: %s, Alpha: %.2f",
+            config.blendMode, textureAlpha))
     end
 
     -- Position overlay using config
@@ -339,17 +387,42 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     self:Debug(format("ShowOverlay: Positioned overlay - Point: %s, RelPoint: %s, Offset: %d,%d",
         config.point, config.relativePoint or config.point, config.xOffset or 0, config.yOffset or 0))
 
-    -- Add pulse animation for notification type
-    if overlayType == "notification" and config.pulse and not overlay.pulse then
+    -- Add text overlay for pooling and other text-enabled overlay types
+    if config.text and config.text ~= "" then
+        if not overlay.text then
+            overlay.text = overlay:CreateFontString(nil, "OVERLAY")
+            self:Debug("ShowOverlay: Created text overlay")
+        end
+        
+        -- Setup font properties
+        local LSM = LibStub("LibSharedMedia-3.0")
+        local fontPath = LSM:Fetch("font", config.textFont) or LSM:GetDefault("font")
+        local fontSize = config.textSize or 12
+        local fontFlags = config.textFlags or "OUTLINE"
+        
+        if overlay.text:SetFont(fontPath, fontSize, fontFlags) then
+            overlay.text:SetText(config.text)
+            overlay.text:SetPoint("CENTER", overlay, "CENTER", 0, 0)
+            overlay.text:SetTextColor(unpack(config.textColor or {1, 1, 1, 1}))
+            overlay.text:SetAlpha(config.alpha or 1)
+            overlay.text:Show()
+            self:Debug(format("ShowOverlay: Setup text '%s' with font %s size %d", config.text, fontPath, fontSize))
+        else
+            self:Error("ShowOverlay: Failed to set font for text overlay")
+        end
+    end
+
+    -- Add pulse animation for notification and pooling types
+    if (overlayType == "notification" or overlayType == "pooling") and config.pulse and not overlay.pulse then
         overlay.pulse = overlay:CreateAnimationGroup()
         local pulseIn = overlay.pulse:CreateAnimation("Scale")
-        pulseIn:SetScale(1.2, 1.2)
-        pulseIn:SetDuration(0.5)
+        pulseIn:SetScale(1.15, 1.15)
+        pulseIn:SetDuration(0.6)
         pulseIn:SetSmoothing("IN_OUT")
         pulseIn:SetOrder(1)
         local pulseOut = overlay.pulse:CreateAnimation("Scale")
-        pulseOut:SetScale(0.8333, 0.8333)
-        pulseOut:SetDuration(0.5)
+        pulseOut:SetScale(0.87, 0.87)
+        pulseOut:SetDuration(0.6)
         pulseOut:SetSmoothing("IN_OUT")
         pulseOut:SetOrder(2)
         overlay.pulse:SetLooping("REPEAT")
@@ -367,9 +440,9 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     -- Start monitoring check function if provided
     if checkFunc then
         local function monitor()
-            if not overlay:GetParent() then 
+            if not overlay:GetParent() then
                 self:Debug(format("Monitor: Overlay %s lost parent, cleaning up", overlayKey))
-                return 
+                return
             end
 
             local success, shouldShow = pcall(checkFunc)
@@ -462,6 +535,73 @@ function OverlayManager:GetOptions()
         }
         return not (disabledOptions[overlayType] and disabledOptions[overlayType][optionName])
     end
+
+    -- Add pooling overlay specific options
+    options.args.poolingOverlay = {
+        type = "group",
+        name = L["poolingOverlay"] or "Pooling Overlay",
+        order = 2,
+        args = {
+            enabled = {
+                type = "toggle",
+                name = L["enablePoolingOverlay"] or "Enable Pooling Overlay",
+                desc = L["enablePoolingOverlayDesc"] or "Show visual overlay when energy pooling",
+                order = 1,
+                get = function() return self:GetGlobal().overlayConfigs.pooling ~= nil end,
+                set = function(_, value)
+                    if not value then
+                        -- Hide all pooling overlays and disable
+                        self:GetGlobal().overlayConfigs.pooling = nil
+                        for key, data in pairs(self.state.activeOverlays or {}) do
+                            if key:find("_pooling") then
+                                if data.overlay then data.overlay:Hide() end
+                                self.state.activeOverlays[key] = nil
+                            end
+                        end
+                    else
+                        -- Re-enable with defaults
+                        self:GetGlobal().overlayConfigs.pooling = {
+                            texture = "Interface\\Minimap\\UI-Minimap-Background",
+                            blendMode = "BLEND",
+                            size = 1.0,
+                            point = "CENTER",
+                            relativePoint = "CENTER",
+                            xOffset = 0,
+                            yOffset = 0,
+                            alpha = 0.7,
+                            textureAlpha = 0.5,
+                            showSpellIcon = false,
+                            pulse = true,
+                            textColor = { 1, 1, 0, 1 },
+                            textSize = 11,
+                            textFont = "Friz Quadrata TT",
+                            textFlags = "OUTLINE",
+                            text = "Pooling"
+                        }
+                    end
+                end
+            },
+            testPooling = {
+                type = "execute",
+                name = L["testPooling"] or "Test Pooling Overlay",
+                desc = L["testPoolingDesc"] or "Show pooling overlay for 3 seconds to test appearance",
+                order = 2,
+                disabled = function() return self:GetGlobal().overlayConfigs.pooling == nil end,
+                func = function()
+                    if NAG.Frame and NAG.Frame.iconFrames and NAG.Frame.iconFrames["primary"] then
+                        local primaryFrame = NAG.Frame.iconFrames["primary"]
+                        local endTime = GetTime() + 3
+                        self:ShowPooling(primaryFrame, function()
+                            return GetTime() < endTime
+                        end)
+                        NAG:Info("Testing pooling overlay for 3 seconds")
+                    else
+                        NAG:Error("No primary frame available for testing")
+                    end
+                end
+            }
+        }
+    }
 
     -- Create options for each overlay type
     for overlayType, config in pairs(self:GetGlobal().overlayConfigs) do
@@ -750,7 +890,7 @@ function OverlayManager:RefreshAllOverlays()
                         overlayData.overlay:Hide()
                     end
                 else
-                    self:Error(format("RefreshAllOverlays: Error in check function for %s: %s", 
+                    self:Error(format("RefreshAllOverlays: Error in check function for %s: %s",
                         overlayKey, tostring(shouldShow)))
                 end
             end
@@ -770,14 +910,14 @@ function OverlayManager:DumpActiveOverlays()
         self:Debug("No active overlays table")
         return
     end
-    
+
     local count = 0
     for key, data in pairs(self.state.activeOverlays) do
         count = count + 1
         if data.overlay then
-            self:Debug(format("[%d] Key: %s, Frame: %s, Visible: %s, Parent: %s", 
+            self:Debug(format("[%d] Key: %s, Frame: %s, Visible: %s, Parent: %s",
                 count,
-                key, 
+                key,
                 data.overlay:GetName() or "unnamed",
                 data.overlay:IsVisible() and "yes" or "no",
                 data.overlay:GetParent() and data.overlay:GetParent():GetName() or "no parent"
@@ -890,12 +1030,12 @@ function OverlayManager:ShowTextOverlay(frame, text, duration, checkFunc, custom
 
     -- Get the actual font path from LSM
     local fontPath = LSM:Fetch("font", finalConfig.font) or LSM:GetDefault("font")
-    
+
     -- Update text properties
     overlay.textFrame.text:SetFont(fontPath, finalConfig.fontSize, finalConfig.fontFlags)
     overlay.textFrame.text:SetTextColor(unpack(finalConfig.fontColor))
     overlay.textFrame.text:SetText(text)
-    
+
     -- Position the text within the frame according to config
     overlay.textFrame.text:ClearAllPoints()
     overlay.textFrame.text:SetPoint(finalConfig.point or "CENTER", overlay.textFrame, finalConfig.relativePoint or finalConfig.point or "CENTER", finalConfig.xOffset or 0, finalConfig.yOffset or 0)
@@ -960,7 +1100,27 @@ function OverlayManager:ShowInfo(frame, text, duration)
     })
 end
 
--- ============================ ACE3 LIFECYCLE ============================
+function OverlayManager:ShowPooling(frame, checkFunc)
+    if not frame then
+        self:Debug("ShowPooling: Missing frame")
+        return
+    end
+
+    self:Debug("ShowPooling: Creating pooling overlay")
+    return self:ShowOverlay(frame, "pooling", nil, checkFunc)
+end
+
+function OverlayManager:HidePooling(frame)
+    if not frame then
+        self:Debug("HidePooling: Missing frame")
+        return
+    end
+
+    self:Debug("HidePooling: Hiding pooling overlay")
+    self:HideOverlay(frame, "pooling")
+end
+
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function OverlayManager:ModuleEnable()
         -- Register callback for LSM updates
@@ -972,5 +1132,5 @@ do
     end
 end
 
--- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 ns.OverlayManager = OverlayManager

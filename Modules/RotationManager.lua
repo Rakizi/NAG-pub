@@ -1,19 +1,16 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (original authors, add as needed)
-    Module Purpose: Manages the UI and logic for user rotation management in NAG.
-    STATUS: Active
-    TODO: (add any TODOs here)
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
----@diagnostic disable: undefined-field
+--- @module "RotationManager"
+--- Module for managing user rotations in NAG
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
+
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
+--- @type Version|ModuleBase|AceModule
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceGUI = LibStub("AceGUI-3.0")
@@ -22,9 +19,11 @@ local SpecializationCompat = ns.SpecializationCompat
 
 --Libs
 local LSM = LibStub("LibSharedMedia-3.0")
----@class GlowManager : ModuleBase
+--- @type GlowManager|AceModule|ModuleBase
 local GlowManager = NAG:GetModule("GlowManager")
 if not GlowManager then error("GlowManager is required") end
+local LUIDropDownMenu = LibStub("LibUIDropDownMenu-4.0")
+if not LUIDropDownMenu then error("LibUIDropDownMenu-4.0 is required") end
 
 --WoW API
 local UnitPower = UnitPower
@@ -41,23 +40,23 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 local pairs = pairs
 local ipairs = ipairs
 local select = select
@@ -85,11 +84,8 @@ local function formatDate(dateValue)
     return L["rotationUnknown"] or "Unknown"
 end
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         framePosition = {
             point = "CENTER",
@@ -100,6 +96,16 @@ local defaults = {
         frameSize = {
             width = 1000,
             height = 400
+        },
+        selector = {
+            enabled = true,
+            size = 34,
+            position = {
+                point = "TOPLEFT",
+                relativePoint = "TOPLEFT",
+                x = -30,
+                y = 30
+            }
         }
     }
 }
@@ -108,41 +114,114 @@ local defaults = {
 local RotationManager = NAG:CreateModule("RotationManager", defaults, {
     -- Module defaults
     -- Module type and category
-    moduleType = ns.MODULE_TYPES.FEATURE,
+    moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.DISPLAY,
     optionsOrder = 150,
     -- Event handlers
     messageHandlers = {
-        NAG_ROTATION_CHANGED = "OnRotationChanged"
+        NAG_ROTATION_CHANGED = "OnRotationChanged",
+        NAG_FRAME_SHOWN = "OnMainFrameShown",
+        NAG_FRAME_HIDDEN = "OnMainFrameHidden"
     }
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function RotationManager:ModuleInitialize()
         self.frame = nil
+        self.selectorFrame = nil
+        self.rotationDropdownFrame = nil
+        self.devMenuFrame = nil
+        self:SetState("isMainFrameVisible", true) -- Assume visible by default and let messages update
     end
 
     function RotationManager:ModuleEnable()
         -- Frame will be created on first use
+        self:RegisterEvent("PLAYER_TALENT_UPDATE")
+        self:UpdateSelectorVisibility()
     end
 
     function RotationManager:ModuleDisable()
         if self.frame then
             self.frame:Hide()
         end
+        if self.selectorFrame then
+            self.selectorFrame:Hide()
+        end
+        self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+        self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        self:UnregisterEvent("PLAYER_TALENT_UPDATE")
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
+function RotationManager:OnMainFrameShown()
+    self:SetState("isMainFrameVisible", true)
+    self:UpdateSelectorVisibility()
+end
+
+function RotationManager:OnMainFrameHidden()
+    self:SetState("isMainFrameVisible", false)
+    self:UpdateSelectorVisibility()
+end
+
 function RotationManager:OnRotationChanged()
     self:Debug("OnRotationChanged: Starting")
     if self.frame and self.frame:IsShown() then
         self:RefreshRotationList()
     end
+    self:UpdateSelectorVisibility()
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+function RotationManager:PLAYER_TALENT_UPDATE()
+    self:UpdateSelectorVisibility()
+end
+
+function RotationManager:PLAYER_REGEN_DISABLED()
+    -- Entering combat
+    self:UpdateSelectorVisibility()
+end
+
+function RotationManager:PLAYER_REGEN_ENABLED()
+    -- Leaving combat
+    self:UpdateSelectorVisibility()
+end
+
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
+function RotationManager:GetAutoRotationEnabled()
+    local StateManager = NAG:GetModule("StateManager")
+    if not StateManager then
+        return false
+    end
+    
+    -- Check if either Elemental Shaman or Frost DK auto rotation is enabled
+    local elementalEnabled = StateManager:GetChar().enableElementalShamanAutoRotation
+    local frostDKEnabled = StateManager:GetChar().enableFrostDKAutoRotation
+    
+    return elementalEnabled or frostDKEnabled
+end
+
+function RotationManager:SetAutoRotationEnabled(enabled)
+    local StateManager = NAG:GetModule("StateManager")
+    if not StateManager then
+        return
+    end
+    
+    -- Set both Elemental Shaman and Frost DK auto rotation to the same value
+    StateManager:GetChar().enableElementalShamanAutoRotation = enabled
+    StateManager:GetChar().enableFrostDKAutoRotation = enabled
+    
+    -- Restart Elemental Shaman timer if needed
+    if enabled then
+        StateManager:StartElementalShamanRotationCheck()
+    else
+        if StateManager.elementalShamanTimer then
+            StateManager:CancelTimer(StateManager.elementalShamanTimer)
+            StateManager.elementalShamanTimer = nil
+        end
+    end
+end
+
 function RotationManager:Toggle()
     self:Debug("Toggle: Starting")
     if not self.frame then
@@ -154,6 +233,341 @@ function RotationManager:Toggle()
         self:RefreshRotationList()
         self.frame:Show()
     end
+    self:UpdateSelectorVisibility()
+end
+
+function RotationManager:GetAvailableRotationsCount()
+    local classModule = NAG:GetModule(NAG.CLASS)
+    if not classModule then
+        return 0
+    end
+
+    local currentSpec = SpecializationCompat:GetActiveSpecialization()
+    local specID = currentSpec and select(1, SpecializationCompat:GetSpecializationInfo(currentSpec)) or 0
+    local rotations = classModule:GetAvailableRotations(specID)
+
+    if not rotations then
+        return 0
+    end
+
+    local count = 0
+    for name, config in pairs(rotations) do
+        if config.enabled then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+function RotationManager:UpdateSelectorVisibility()
+    local charDB = self:GetChar()
+    if not charDB.selector.enabled then
+        if self.selectorFrame then
+            self.selectorFrame:Hide()
+        end
+        return
+    end
+
+    if not self.selectorFrame then
+        self:CreateSelectorFrame()
+        if not self.selectorFrame then return end
+    end
+    
+    local mainFrameVisible = self:GetState("isMainFrameVisible")
+
+    -- No need to hide based on combat or rotation count anymore
+    --[[
+    local rotationCount = self:GetAvailableRotationsCount()
+
+    -- Hide selector if there's only one or zero rotations
+    if rotationCount <= 1 then
+        self.selectorFrame:Hide()
+        return
+    end
+    
+    -- Handle combat visibility
+    if InCombatLockdown() and charDB.selector.hideInCombat then
+        self.selectorFrame:Hide()
+        return
+    end
+    ]]
+
+    -- If we passed all checks, ensure it's shown and update appearance
+    self.selectorFrame:Show()
+    self.selectorFrame:SetAlpha(1.0)
+    if self.selectorFrameTexture then
+        self.selectorFrameTexture:SetDesaturated(false)
+    end
+
+    self:ApplySelectorSize()
+end
+
+-- ~~~~~~~~~~ ROTATION SELECTOR UI ~~~~~~~~~~
+function RotationManager:CreateSelectorFrame()
+    if self.selectorFrame then
+        return
+    end
+
+    local charDB = self:GetChar()
+    local size = charDB.selector.size
+
+    local f = CreateFrame("Button", "NAGRotationSelector", UIParent, "SecureHandlerClickTemplate")
+    f:SetSize(size, size)
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetFrameStrata("MEDIUM")
+    f:SetScript("OnDragStart", function(frame)
+        frame:StartMoving()
+    end)
+    f:SetScript("OnDragStop", function(frame)
+        frame:StopMovingOrSizing()
+        self:SaveSelectorPosition(frame)
+    end)
+
+    f:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
+        GameTooltip:AddLine(L["rotationSelector"] or "Rotation Selector")
+        GameTooltip:AddLine(L["rotationSelectorDrag"] or "|cffeda55fDrag|r to move")
+        GameTooltip:AddLine(L["LMB_to_select_rotation"] or "|cffeda55fLeft-click|r to select rotation")
+        GameTooltip:AddLine(L["RMB_for_settings"] or "|cffeda55fRight-click|r for settings")
+        if NAG:IsDevModeEnabled() then
+            GameTooltip:AddLine(L["Shift_RMB_for_dev_menu"] or "|cffeda55fShift + Right-click|r for dev menu")
+        end
+        GameTooltip:Show()
+    end)
+    f:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+    local tex = f:CreateTexture(nil, "BACKGROUND")
+    tex:SetTexture("Interface/AddOns/NAG/Media/nagN.png")
+    tex:SetAllPoints(f)
+    f:SetNormalTexture(tex)
+    self.selectorFrameTexture = tex
+
+    f:SetScript("OnMouseUp", function(_, button)
+        if button == "LeftButton" then
+            self:ShowRotationMenu()
+        elseif button == "RightButton" then
+            if IsShiftKeyDown() and NAG:IsDevModeEnabled() then
+                self:ShowDevMenu()
+            else
+                self:ShowSettingsMenu()
+            end
+        end
+    end)
+
+    self.selectorFrame = f
+    self:RestoreSelectorPosition(f)
+    f:Show()
+end
+
+function RotationManager:SaveSelectorPosition(frame)
+    if not self.db or not self.db.char then
+        self:Debug("Cannot save selector position, database not initialized.")
+        return
+    end
+
+    local charDB = self:GetChar()
+    local point, _, relativePoint, x, y = frame:GetPoint()
+    charDB.selector.position.point = point
+    charDB.selector.position.relativePoint = relativePoint
+    charDB.selector.position.x = x
+    charDB.selector.position.y = y
+end
+
+function RotationManager:RestoreSelectorPosition(frame)
+    local charDB = self:GetChar()
+    frame:ClearAllPoints()
+    
+    -- Try to anchor to NAG frame if available, otherwise fall back to UIParent
+    local anchorFrame = NAG.Frame or UIParent
+    frame:SetPoint(
+        charDB.selector.position.point,
+        anchorFrame,
+        charDB.selector.position.relativePoint,
+        charDB.selector.position.x,
+        charDB.selector.position.y
+    )
+end
+
+function RotationManager:ApplySelectorSize()
+    if not self.selectorFrame then return end
+    local charDB = self:GetChar()
+    local size = charDB.selector.size
+
+    local mainFrameVisible = self:GetState("isMainFrameVisible")
+    if not mainFrameVisible then
+        size = size * 0.8
+    end
+
+    self.selectorFrame:SetSize(size, size)
+end
+
+-- ~~~~~~~~~~ ROTATION SELECTOR MENUS ~~~~~~~~~~
+
+function RotationManager:ShowRotationMenu()
+    -- Get Rotations
+    local classModule = NAG:GetModule(NAG.CLASS)
+    if not classModule then
+        return
+    end
+
+    local currentSpec = SpecializationCompat:GetActiveSpecialization()
+    local specID = currentSpec and select(1, SpecializationCompat:GetSpecializationInfo(currentSpec)) or 0
+    local rotations, displayNames = classModule:GetAvailableRotations(specID)
+    local currentRotationName = select(2, classModule:GetCurrentRotation())
+
+    local rotationListForSorting = {}
+    for name, config in pairs(rotations) do
+        if config.enabled then -- Only show enabled rotations
+            tinsert(rotationListForSorting, {
+                name = name,
+                displayName = displayNames[name] or name,
+                isSelected = (name == currentRotationName)
+            })
+        end
+    end
+    tsort(rotationListForSorting, function(a, b) return a.displayName < b.displayName end)
+
+    if #rotationListForSorting == 0 then
+        return
+    end
+
+    local menuList = {}
+    for _, rotInfo in ipairs(rotationListForSorting) do
+        local menuItem = {
+            text = rotInfo.isSelected and ("|cff00ff00" .. rotInfo.displayName .. "|r") or rotInfo.displayName,
+            value = rotInfo.name,
+            func = function()
+                classModule:SelectRotation(specID, rotInfo.name)
+            end,
+            checked = rotInfo.isSelected,
+        }
+        tinsert(menuList, menuItem)
+    end
+
+    -- Add the close button
+    tinsert(menuList, {
+        text = L["close"] or "Close",
+        func = function()
+            -- This function is intentionally empty.
+            -- LibUIDropDownMenu closes the menu automatically after a function call.
+        end,
+        notCheckable = true
+    })
+    
+    if not self.rotationDropdownFrame then
+        self.rotationDropdownFrame = LUIDropDownMenu:Create_UIDropDownMenu("NAGRotationSelectorDropdownMenu", UIParent)
+    end
+
+    LUIDropDownMenu:EasyMenu(menuList, self.rotationDropdownFrame, "cursor", 0, 0, "MENU")
+end
+
+function RotationManager:ShowSettingsMenu()
+    if self.selectorMenu and self.selectorMenu:IsShown() then
+        AceGUI:Release(self.selectorMenu)
+        self.selectorMenu = nil
+        return
+    end
+
+    local menu = AceGUI:Create("Frame")
+    menu:SetTitle(L["selectorSettings"] or "Selector Settings")
+    menu:SetLayout("Fill")
+    menu:EnableResize(false)
+    menu:SetWidth(300)
+    menu:SetHeight(320)
+    menu:SetCallback("OnClose", function(widget)
+        AceGUI:Release(widget)
+        if self.selectorMenu == widget then
+            self.selectorMenu = nil
+        end
+    end)
+    self.selectorMenu = menu
+    local charDB = self:GetChar()
+
+    -- Use a scroll frame for all settings
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("List")
+    scroll:SetFullWidth(true)
+    scroll:SetFullHeight(true)
+    menu:AddChild(scroll)
+
+    -- Option: Disable
+    local disableBtn = AceGUI:Create("Button")
+    disableBtn:SetText(L["disable"] or "Disable")
+    disableBtn:SetFullWidth(true)
+    disableBtn:SetCallback("OnClick", function()
+        charDB.selector.enabled = false
+        if self.selectorFrame then self.selectorFrame:Hide() end
+        self:UpdateSelectorVisibility()
+        menu:Hide()
+    end)
+    scroll:AddChild(disableBtn)
+
+    -- Option: Import Rotation
+    local importBtn = AceGUI:Create("Button")
+    importBtn:SetText(L["rotationImport"] or "Import Rotation")
+    importBtn:SetFullWidth(true)
+    importBtn:SetCallback("OnClick", function()
+        StaticPopup_Show("NAG_IMPORT_ROTATION_STRING")
+        menu:Hide()
+    end)
+    scroll:AddChild(importBtn)
+
+    -- Option: Resize
+    local sizeSlider = AceGUI:Create("Slider")
+    sizeSlider:SetLabel(L["resize"] or "Resize")
+    sizeSlider:SetValue(charDB.selector.size)
+    sizeSlider:SetSliderValues(30, 100, 1)
+    sizeSlider:SetFullWidth(true)
+    sizeSlider:SetCallback("OnValueChanged", function(_, _, value)
+        charDB.selector.size = value
+        self:ApplySelectorSize()
+    end)
+    scroll:AddChild(sizeSlider)
+
+    -- Option: Automatic Rotation Switching
+    local autoRotationToggle = AceGUI:Create("CheckBox")
+    autoRotationToggle:SetLabel(L["autoRotationSwitching"] or "Automatic Rotation Switching")
+    autoRotationToggle:SetDescription(L["autoRotationSwitchingDesc"] or "Automatically switch rotations for Elemental Shamans and Frost DKs based on targets/weapons")
+    autoRotationToggle:SetValue(self:GetAutoRotationEnabled())
+    autoRotationToggle:SetFullWidth(true)
+    autoRotationToggle:SetCallback("OnValueChanged", function(_, _, value)
+        self:SetAutoRotationEnabled(value)
+    end)
+    scroll:AddChild(autoRotationToggle)
+
+    -- Add a close button at the bottom
+    local closeBtn = AceGUI:Create("Button")
+    closeBtn:SetText(L["close"] or "Close")
+    closeBtn:SetFullWidth(true)
+    closeBtn:SetCallback("OnClick", function()
+        menu:Hide()
+    end)
+    scroll:AddChild(closeBtn)
+
+    -- Position the menu at the cursor
+    local x, y = GetCursorPosition()
+    local scale = UIParent:GetEffectiveScale()
+    menu:ClearAllPoints()
+    menu:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x / scale, y / scale)
+end
+
+function RotationManager:ShowDevMenu()
+    if not self.devMenuFrame then
+        self.devMenuFrame = LUIDropDownMenu:Create_UIDropDownMenu("NAGDevMenu", UIParent)
+    end
+    local menu = {
+        { text = "Next Action Guide Dev", isTitle = true, notCheckable = true },
+        { text = "Encounter Stopwatch", func = function() NAG:GetModule("EncounterStopwatch"):Toggle() end, notCheckable = true },
+        { text = "Entity Behavior Tester", func = function() NAG:GetModule("EntityBehaviorTester"):Toggle() end, notCheckable = true },
+        { text = "APL Monitor", func = function() NAG:GetModule("APLMonitor"):Toggle() end, notCheckable = true },
+        { text = "Event Debugger", func = function() NAG:GetModule("EventDebugger"):Toggle() end, notCheckable = true },
+        { text = "CLEU Debugger", func = function() NAG:GetModule("CLEUDebugger"):Toggle() end, notCheckable = true },
+        { text = "Toggle Script Errors", func = function() NAG:ToggleScriptErrors() end, notCheckable = true },
+        { text = L["close"] or "Close", func = function() end, notCheckable = true },
+    }
+    LUIDropDownMenu:EasyMenu(menu, self.devMenuFrame, "cursor", 0, 0, "MENU")
 end
 
 function RotationManager:CreateFrame()
@@ -210,7 +624,7 @@ function RotationManager:CreateFrame()
         end
 
         -- Get class module
-        ---@class ClassBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = NAG:GetModule(NAG.CLASS)
         if not classModule then
             NAG:Error("Class module not found")
@@ -268,6 +682,19 @@ function RotationManager:CreateFrame()
         StaticPopup_Show("NAG_NEW_ROTATION")
     end)
     importGroup:AddChild(newRotationBtn)
+
+    local toggleBtn = AceGUI:Create("Button")
+    toggleBtn:SetWidth(150)
+    toggleBtn:SetCallback("OnClick", function()
+        local charDB = self:GetChar()
+        charDB.selector.enabled = not charDB.selector.enabled
+        self:UpdateSelectorVisibility()
+        -- Update button text
+        local btnText = charDB.selector.enabled and (L["hideSelector"] or "Hide Selector") or (L["showSelector"] or "Show Selector")
+        toggleBtn:SetText(btnText)
+    end)
+    importGroup:AddChild(toggleBtn)
+    self.toggleSelectorBtn = toggleBtn
 
     frame:AddChild(importGroup)
 
@@ -368,8 +795,14 @@ function RotationManager:CreateFrame()
 end
 
 function RotationManager:SaveFramePosition(frame)
+    -- ** THE FIX: Add checks to ensure db and char tables exist **
+    if not self.db or not self.db.char then
+        self:Debug("Cannot save frame position, database not initialized.")
+        return
+    end
+
     local charDB = self:GetChar()
-    local point, relativeTo, relativePoint, x, y = frame.frame:GetPoint()
+    local point, _, relativePoint, x, y = frame.frame:GetPoint()
     charDB.framePosition.point = point
     charDB.framePosition.relativePoint = relativePoint
     charDB.framePosition.x = x
@@ -390,20 +823,27 @@ end
 
 function RotationManager:RefreshRotationList()
     self:Debug("RefreshRotationList: Starting")
+
+    if self.toggleSelectorBtn then
+        local charDB = self:GetChar()
+        local btnText = charDB.selector.enabled and (L["hideSelector"] or "Hide Selector") or (L["showSelector"] or "Show Selector")
+        self.toggleSelectorBtn:SetText(btnText)
+    end
+
     if not self.scroll then return end
     self.scroll:ReleaseChildren()
 
     -- Get current spec
     local currentSpec = SpecializationCompat:GetActiveSpecialization()
     local specID = 0  -- Default to 0 (spec-independent) if no valid spec
-    
+
     -- Only try to get spec info if we have a valid spec
     if currentSpec and currentSpec > 0 then
         specID = select(1, SpecializationCompat:GetSpecializationInfo(currentSpec)) or 0
     end
 
     -- Get class module
-    ---@class ClassBase
+    --- @type ClassBase|AceModule|ModuleBase
     local classModule = NAG:GetModule(NAG.CLASS)
     if not classModule then
         self:Debug("RefreshRotationList: No class module found")
@@ -681,7 +1121,7 @@ end
 -- Register slash command
 NAG:RegisterChatCommand("nagrot", function() RotationManager:Toggle() end)
 
--- ============================ VALIDATION ============================
+-- ~~~~~~~~~~ VALIDATION ~~~~~~~~~~
 function RotationManager:ValidateAllRotations()
     local results = {}
     local classModule = NAG:GetModule(NAG.CLASS)

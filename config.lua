@@ -1,45 +1,25 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "config"
+--- Handles configuration for the NAG addon.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-	STATUS: good
-
-]]
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
-
---- ======= LOCALIZE =======
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@class Types : ModuleBase
+--- @type Types|AceModule|ModuleBase
 local Types = NAG:GetModule("Types")
 --Libs
--- Error checking function
+
+--WoW API
 local GetTalentInfo = ns.GetTalentInfoUnified
+
 
 -- Lua APIs (using WoW's optimized versions where available)
 local format = format or string.format -- WoW's optimized version if available
@@ -50,29 +30,29 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 --File
 
---- ======= GLOBALIZE =======
---- ============================ CONTENT ============================
---==========================================Helper Functions==========================================
+-- ~~~~~~~~~~ GLOBALIZE ~~~~~~~~~~
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+-- ~~~~~~~~~~ Helper Functions ~~~~~~~~~~
 
 
 
@@ -113,7 +93,7 @@ do --== Rotation Functions ==--
         end
 
         -- Pre-register found spell IDs with DataManager
-        ---@class DataManager : ModuleBase
+        --- @type DataManager|AceModule|ModuleBase
         local DataManager = self:GetModule("DataManager")
         if DataManager then
             for spellId in pairs(spellIds) do
@@ -209,7 +189,7 @@ do --== Rotation Functions ==--
                 -- Get the arguments string
                 local argsString = arg:match("^NAG:[%w_]+(%b())$")
                 argsString = argsString:sub(2, -2) -- Remove parentheses
-                
+
                 -- Validate the function and its arguments
                 if type(NAG[funcName]) == "function" then
                     local valid, err = NAG:ValidateFunctionArguments(funcName, argsString)
@@ -317,8 +297,34 @@ do --== Rotation Functions ==--
                     return num ~= nil and num >= 0, "Invalid tolerance value (must be >= 0)"
                 end
             },
+            position = {
+                name = "position",
+                pattern = false,
+                validate = function(arg)
+                    -- Remove quotes if present
+                    local pos = arg:match('^["\'](.+)["\']$') or arg
+                    -- Convert to uppercase for validation
+                    local upperPos = pos:upper()
+                    local validPositions = {
+                        ["LEFT"] = true,
+                        ["RIGHT"] = true,
+                        ["UP"] = true,
+                        ["DOWN"] = true,
+                        ["ABOVE"] = true,
+                        ["BELOW"] = true,
+                        ["AOE"] = true,
+                        ["PRIMARY"] = true,
+                        ["CENTER"] = true,
+                        ["MIDDLE"] = true
+                    }
+                    if validPositions[upperPos] then
+                        return true, nil
+                    end
+                    return false, "Invalid position value (must be LEFT, RIGHT, UP, DOWN, ABOVE, BELOW, AOE, PRIMARY, CENTER, or MIDDLE)"
+                end
+            },
             id = {
-                name = "id", 
+                name = "id",
                 pattern = false,
                 validate = function(arg)
                     -- Support database path
@@ -334,7 +340,7 @@ do --== Rotation Functions ==--
                     if not numId then
                         return false, "Invalid ID format"
                     end
-                    return (DataManager:GetSpell(numId) or DataManager:GetItem(numId)), 
+                    return (DataManager:GetSpell(numId) or DataManager:GetItem(numId)),
                         "ID not registered: " .. tostring(numId)
                 end
             },
@@ -538,7 +544,50 @@ do --== Rotation Functions ==--
                     return false, "Invalid sequence name format"
                 end
             },
+            position = {
+                name = "position",
+                pattern = false,
+                validate = function(arg)
+                    -- Remove quotes if present
+                    local position = arg:match('^["\'](.+)["\']$') or arg
+                    -- Convert to uppercase for validation
+                    local upperPos = position:upper()
+                    -- Valid positions based on Cast function implementation
+                    local validPositions = {
+                        LEFT = true,
+                        RIGHT = true,
+                        UP = true,
+                        DOWN = true,
+                        AOE = true
+                    }
+                    return validPositions[upperPos] == true, "Invalid position (must be 'LEFT', 'RIGHT', 'UP', 'DOWN', or 'AOE')"
+                end
+            },
         }
+
+        -- Add sourceUnit type for unit validation
+        genericTypes["sourceUnit"] = {
+            name = "sourceUnit",
+            pattern = patterns.unit,
+            validate = function(arg)
+                -- Remove quotes if present and validate unit name
+                local unit = arg:match('^["\'](.+)["\']$') or arg
+                local validUnits = {
+                    "player", "target", "focus", "mouseover", "pet",
+                    "party1", "party2", "party3", "party4",
+                    "raid1", "raid2", "raid3", "raid4", "raid5",
+                    "arena1", "arena2", "arena3", "arena4", "arena5",
+                    "boss1", "boss2", "boss3", "boss4", "boss5"
+                }
+                for _, validUnit in ipairs(validUnits) do
+                    if unit == validUnit then
+                        return true, nil
+                    end
+                end
+                return false, "Invalid unit name (must be player, target, focus, etc.)"
+            end
+        }
+
         -- Add a single dynamic type validator
         genericTypes["typeValidator"] = {
             name = "typeValidator",
@@ -594,12 +643,11 @@ do --== Rotation Functions ==--
             DotIsActive = { required = { "id" }, optional = { "targetUnit" } },
             DotRemainingTime = { required = { "id" }, optional = { "targetUnit" } },
             DotTickFrequency = { required = { "id" }, optional = { "targetUnit" } },
-            
-            -- Also add RemainingTime function which dispatches to the appropriate function
-            RemainingTime = { required = {} },
+            DotPercentIncrease = { required = { "id" }, optional = { "targetUnit" } },
 
             -- Casting actions
-            Cast = { required = { "id" }, optional = { "tolerance" } },
+            Cast = { required = { "id" }, optional = { {"tolerance", "position"}, "position" } },
+            ActivateAura = { required = { "id" }, optional = { "tolerance", "position" } },
             CastFriendly = { required = { "id" }, optional = { "target" } },
             Channel = { required = { "id" }, optional = { "interruptIf", "boolean" } },
             ChannelSpell = { required = { "id" }, optional = { "interruptIf", "boolean" } },
@@ -621,16 +669,16 @@ do --== Rotation Functions ==--
             TargetUnit = { required = { "newTarget" } },
 
             -- Time and combat functions
-            TimeCurrent = { required = {} },
-            TimeCurrentPercent = { required = {} },
-            TimeRemaining = { required = {} },
-            TimeRemainingPercent = { required = {} },
             Wait = { required = { "expression" } },
             WaitUntil = { required = { "expression" } },
             Schedule = { required = { "time", "callable" } },
+            CurrentTime = { required = {} },
+            CurrentTimePercent = { required = {} },
+            RemainingTime = { required = {} },
+            RemainingTimePercent = { required = {} },
 
             -- Resource functions
-            CurrentHealth = { required = {} },
+            CurrentHealth = { required = {}, optional = { "sourceUnit" } },
             CurrentHealthPercent = { required = {} },
             CurrentMana = { required = {} },
             CurrentManaPercent = { required = {} },
@@ -646,11 +694,19 @@ do --== Rotation Functions ==--
             CurrentSoulShards = { required = {} },
             CurrentDemonicFury = { required = {} },
             CurrentArcaneCharges = { required = {} },
+            CurrentChi = { required = {} },
+            MaxChi = { required = {} },
+            MaxMana = { required = {} },
+            CurrentAttackPower = { required = {} },
+
+            -- Monk-specific Chi functions (aliases)
+            MonkCurrentChi = { required = {} },
+            MonkMaxChi = { required = {} },
 
             -- Rune functions
             CurrentRuneCount = { required = { {"typeValidator", "RuneType"} } },
             CurrentNonDeathRuneCount = { required = { {"typeValidator", "RuneType"} } },
-            CurrentRuneActive = { required = { {"typeValidator", "RuneType"} } },
+            CurrentRuneActive = { required = { {"typeValidator", "RuneSlot"} } },
             CurrentRuneDeath = { required = { {"typeValidator", "RuneSlot"} } },
             RuneCooldown = { required = { {"typeValidator", "RuneType"} } },
             NextRuneCooldown = { required = { {"typeValidator", "RuneType"} } },
@@ -679,6 +735,9 @@ do --== Rotation Functions ==--
             PetHealthPercent = { required = {} },
             PetSpellIsReady = { required = { "id" } },
             PetCast = { required = { "id" } },
+            HunterCurrentPetFocus = { required = {} },
+            HunterCurrentPetFocusPercent = { required = {} },
+            HunterPetIsActive = { required = {} },
 
             EnergyThreshold = { required = { "expression" } },
             -- Class-specific functions
@@ -980,7 +1039,7 @@ do --== Rotation Functions ==--
         self:Info("InitializeRotation()")
 
         -- Get class module
-        ---@class ClassBase : ModuleBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = self:GetModule(self.CLASS, true)
         if not classModule or not classModule:IsEnabled() then
             return true -- Return true for classes without modules or with disabled modules

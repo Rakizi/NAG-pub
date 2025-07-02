@@ -1,55 +1,66 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+--- @module "NAG"
+--- Main entry point and core logic for the Next Action Guide addon
+---
+--- This module initializes the NAG addon, manages core settings, options, slash commands, and provides the main API for all modules.
+---
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held
-        liable for any damages arising from the use of this software.
-
-
-    You are free to:
-    - Share — copy and redistribute the material in any medium or format
-    - Adapt — remix, transform, and build upon the material
-
-    Under the following terms:
-    - Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were
-        made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or
-        your use.
-    - NonCommercial — You may not use the material for commercial purposes.
-
-    Full license text: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-
-    Author: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Date: 06/01/2024
-
-    STATUS: good?  Added localization to non-info prints and to /nag slash command. translations i imagine may need verification?
-
-
-]]
-
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
---Addon
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
+-- Addon
 local _, ns = ...
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
+
+---@type SpecializationCompat
 local SpecializationCompat = ns.SpecializationCompat
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = string.match -- WoW's version
-local strfind = string.find   -- WoW's version
-local strsub = string.sub     -- WoW's version
-local strlower = string.lower -- WoW's version
-local strupper = string.upper -- WoW's version
-local strsplit = string.split -- WoW's specific version
-local strjoin = string.join   -- WoW's specific version
-local strtrim = string.trim   -- Added for strtrim function
+local strmatch = string.match
+local strfind = string.find
+local strsub = string.sub
+local strlower = string.lower
+local strupper = string.upper
+local strsplit = string.split
+local strjoin = string.join
+local strtrim = string.trim
 
---WoW API
+-- WoW API
 local GetAddOnMetadata = ns.GetAddOnMetadataUnified
+local GetSpellInfo = ns.GetSpellInfoUnified
+local GetSpecializationInfo = ns.GetSpecializationInfoUnified
 
 -- Table operations (WoW's optimized versions)
 local EXPERIMENTAL_FEATURES = true
 ns.EXPERIMENTAL_FEATURES = EXPERIMENTAL_FEATURES or false
---- ======= LOCALIZE =======
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
+
+-- Standard Lua functions
+local sort = table.sort
+local concat = table.concat
+local pairs = pairs
+local ipairs = ipairs
+local type = type
+local tostring = tostring
+local tonumber = tonumber
+local unpack = unpack
+local error = error
+local select = select
+local next = next
+local format = format or string.format
+local floor = floor or math.floor
+local ceil = ceil or math.ceil
+local min = min or math.min
+local max = max or math.max
+local abs = abs or math.abs
+
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+
+-- ======= LOCALIZE =======
 -- Module category constants
 ns.MODULE_CATEGORIES = {
     GENERAL = "general",                   -- General options
@@ -60,20 +71,17 @@ ns.MODULE_CATEGORIES = {
     DEBUG = "debug",                       -- Debug options
     ACKNOWLEDGEMENTS = "acknowledgements", -- Acknowledgements options
 }
-
-
----@class NAG:AceModule, AceEvent-3.0, AceConsole-3.0, AceTimer-3.0
+--- @class NAG:AceAddon
 local NAG = LibStub("AceAddon-3.0"):NewAddon("NAG", "AceEvent-3.0", "AceConsole-3.0", "AceTimer-3.0")
+
 NAG.trinketFunctionsUsed = false -- Global flag to track if trinket functions have been used
 _G.NAG = NAG
-NAG.x = ns 
+NAG.x = ns
 
 ns.assertType(NAG, "table", "NAG")
 LibStub("AceEvent-3.0"):Embed(NAG) -- This adds RegisterCallback functionality to NAG
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 ns.assertType(L, "table", "L")
-
-
 
 BINDING_HEADER_NAG = "Next Action Guide"
 BINDING_NAME_NAG_TOGGLE_DEBUG_FRAME = "Toggle Debug Frame"
@@ -132,7 +140,7 @@ NAG.defaults = {
         keysMigrated = false,
 
         -- Debug settings
-        enableDebug = false,             -- Enable debug mode
+        enableDevMode = false,             -- Enable dev mode
         debugLevel = 2,                  -- Debug level (0-6)
         enableFakeExecute = false,       -- Enable fake execute
         fakeExecuteHealth = 20,          -- Fake execute health
@@ -227,7 +235,10 @@ NAG.defaults = {
     }
 }
 
+-- Spell Cost Learner modules register their options inline below
+
 do -- Core ACE3 functions --
+
     --- Initializes the addon.
     -- This function is called when the addon is initialized. It sets up the database,
     -- registers options tables, and sets up slash commands.
@@ -239,10 +250,10 @@ do -- Core ACE3 functions --
         if self:GetGlobal().combatMetricsBaseline == nil then
             self:GetGlobal().combatMetricsBaseline = false
         end
-        
+
         -- Make ns.combatMetricsBaseline reference the global DB value for easy access
         ns.combatMetricsBaseline = self:GetGlobal().combatMetricsBaseline
-        
+
         -- Add a function to calibrate the combat metrics baseline
         function ns.CalibrateMetricsBaseline(value)
             local global = NAG:GetGlobal()
@@ -282,18 +293,18 @@ do -- Core ACE3 functions --
         NAG.TTD = NAG:GetModule("TTDManager")
         NAG.SpellTracker = NAG:GetModule("SpellTrackingManager")
         NAG.DebugManager = NAG:GetModule("DebugManager")
-        NAG.BTM = NAG:GetModule("BurstTrackerManager")
-        NAG.RBM = NAG:GetModule("ResourceBarManager")
+       -- NAG.BTM = NAG:GetModule("BurstTrackerManager", true)
+       -- NAG.RBM = NAG:GetModule("ResourceBarManager", true)
         NAG.DM = NAG:GetModule("DataManager")
         NAG.KM = NAG:GetModule("KeybindManager")
-        NAG.PT = NAG:GetModule("PullTimerManager")
+        --NAG.PT = NAG:GetModule("PullTimerManager")
         NAG.Timer = NAG:GetModule("TimerManager")
         NAG.Trinket = NAG:GetModule("TrinketTrackingManager")
         NAG.Version = ns.Version
         NAG.Types = NAG:GetModule("Types")
         NAG.OM = NAG:GetModule("OverlayManager")
-        NAG.SL = NAG:GetModule("SpellLearner")
-        NAG.SLM = NAG:GetModule("SpellLearnerStateManager")
+        --NAG.SL = NAG:GetModule("SpellLearner")
+        --NAG.SLM = NAG:GetModule("SpellLearnerStateManager")
 
         -- Validate keys
         ns.retrieveValidKeys()
@@ -369,6 +380,13 @@ do -- Core ACE3 functions --
     --- @param self NAG The addon object
     function NAG:OnEnable()
         if Extras and Extras.InitializepF then Extras:InitializepF() end
+        
+        -- Apply nameplate settings 2 seconds after UI fully loads or reloads
+        C_Timer.After(2, function()
+            SetCVar("nameplateShowAll", 1)
+            SetCVar("nameplateMaxDistance", 41)
+        end)
+        
         -- Show welcome message
     end
 
@@ -531,7 +549,7 @@ do -- Core ACE3 functions --
         return char and char.defaultBattlePotion or nil
     end
     NAG.GetBattlePotion = NAG.GetDefaultBattlePotion
-    
+
     --- Updates the default battle potion setting based on class/spec
     --- @param self NAG The addon object
     function NAG:UpdateDefaultBattlePotion()
@@ -601,6 +619,7 @@ end
 
 
 do -- Core options
+
     --- Initializes the options structure.
     --- @param self NAG The addon object
     function NAG:InitializeOptions()
@@ -620,6 +639,16 @@ do -- Core options
 
             self.options[category] = self:CreateOptionsGroup(category, category, nil, getter, setter)
         end
+
+        -- In InitializeOptions, set up the group with a dummy args (will be replaced in GetOptions)
+        self.options[ns.MODULE_CATEGORIES.FEATURE].args = self.options[ns.MODULE_CATEGORIES.FEATURE].args or {}
+        self.options[ns.MODULE_CATEGORIES.FEATURE].args.spellCostLearner = {
+            type = "group",
+            name = "Spell Cost Learner",
+            order = 1,
+            childGroups = "tab",
+            args = {}, -- will be replaced in GetOptions
+        }
 
         -- Register options table
         LibStub("AceConfig-3.0"):RegisterOptionsTable("NAG", function() return self:GetOptions() end)
@@ -676,6 +705,25 @@ do -- Core options
                 end
             end
         end
+        -- Update Spell Cost Learner sub-tabs with direct module options
+        if self.options[ns.MODULE_CATEGORIES.FEATURE]
+            and self.options[ns.MODULE_CATEGORIES.FEATURE].args
+            and self.options[ns.MODULE_CATEGORIES.FEATURE].args.spellCostLearner then
+            
+            local spellLearner = NAG:GetModule("SpellLearner", true)
+            local predictionManager = NAG:GetModule("PredictionManager", true)
+            local predictionAPI = NAG:GetModule("PredictionAPI", true)
+            local spellAnalyzer = NAG:GetModule("SpellAnalyzer", true)
+            local stateManager = NAG:GetModule("SpellLearnerStateManager", true)
+            
+            self.options[ns.MODULE_CATEGORIES.FEATURE].args.spellCostLearner.args = {
+                SpellLearner = spellLearner and spellLearner.GetOptions and spellLearner:GetOptions() or nil,
+                PredictionManager = predictionManager and predictionManager.GetOptions and predictionManager:GetOptions() or nil,
+                PredictionAPI = predictionAPI and predictionAPI.GetOptions and predictionAPI:GetOptions() or nil,
+                SpellAnalyzer = spellAnalyzer and spellAnalyzer.GetOptions and spellAnalyzer:GetOptions() or nil,
+                SpellLearnerStateManager = stateManager and stateManager.GetOptions and stateManager:GetOptions() or nil,
+            }
+        end
         -- Return the complete options table
         return {
             type = "group",
@@ -694,6 +742,7 @@ do -- Core options
 end
 
 do -- Core settings access helpers
+
     --- Gets the profile settings.
     --- @param self NAG The addon object
     --- @return table The profile settings
@@ -738,6 +787,7 @@ do -- Core settings access helpers
 end
 
 do -- Rando helper functions
+
     --- Toggles edit mode for the addon
     function NAG:ToggleEditMode()
         if not self.Frame then return end
@@ -780,13 +830,13 @@ do -- Rando helper functions
 
     --- Checks if dev mode is enabled.
     --- @param self NAG The addon object
-    --- @return boolean True if debug mode is enabled, false otherwise
+    --- @return boolean True if dev mode is enabled, false otherwise
     function NAG:IsDevModeEnabled()
         -- During initial loading, before DB is initialized, use the default value
         if not self.db then
             return false
         end
-        return self:GetGlobal().enableDebug
+        return self:GetGlobal().enableDevMode
     end
 
     --- Checks if any displays should be shown based on combat state and settings
@@ -860,7 +910,7 @@ function NAG:SlashCommand(input, editbox)
         end
         return true
     elseif command == "rotation" or command == "rot" then
-        ---@class ClassBase
+        ---@type ClassBase|AceModule|ModuleBase
         local classModule = self:GetModule(self.CLASS, true)
         if not classModule then return false end
 
@@ -887,7 +937,7 @@ function NAG:SlashCommand(input, editbox)
             return false
         else
             -- Toggle the Rotation Manager
-            ---@class RotationManager : ModuleBase
+            ---@type RotationManager|AceModule|ModuleBase
             local RotationManager = self:GetModule("RotationManager")
             if RotationManager then
                 RotationManager:Toggle()
@@ -966,87 +1016,102 @@ function NAG:SlashCommand(input, editbox)
 end
 
 do --== DebugManager wrappers
+
     --- Prints an info level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintInfo(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Info(message, printTrace)
+            return
+        end
+        if lvl < 4 then return end
         DebugManager:Info(message, printTrace)
     end
-
     NAG.Info = NAG.PrintInfo
+    
     --- Prints a debug level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintDebug(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Debug(message, printTrace)
+            return
+        end
+        if lvl < 5 then return end
         DebugManager:Debug(message, printTrace)
     end
-
     NAG.Debug = NAG.PrintDebug
+
     --- Prints a warning level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintWarn(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Warn(message, printTrace)
+            return
+        end
+        if lvl < 3 then return end
         DebugManager:Warn(message, printTrace)
     end
-
     NAG.Warn = NAG.PrintWarn
+
     --- Prints an error level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintError(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Error(message, printTrace)
+            return
+        end
+        if lvl < 2 then return end
         DebugManager:Error(message, printTrace)
     end
 
     NAG.Error = NAG.PrintError
-    --- Prints a fatal level message if debug level is sufficient
-    --- @param self NAG The NAG addon object
-    --- @param message string The message to print
-    --- @param printTrace? boolean If true, print stack trace
-    function NAG:PrintFatal(message, printTrace)
-        if not DebugManager then
-            ---@class DebugManager : ModuleBase
-            DebugManager = self:GetModule("DebugManager")
-        end
-        DebugManager:Fatal(message, printTrace)
-    end
 
-    NAG.Fatal = NAG.PrintFatal
     --- Prints a trace level message if debug level is sufficient
     --- @param self NAG The NAG addon object
     --- @param message string The message to print
     --- @param printTrace? boolean If true, print stack trace
     function NAG:PrintTrace(message, printTrace)
         if not DebugManager then
-            ---@class DebugManager : ModuleBase
             DebugManager = self:GetModule("DebugManager")
         end
+        local lvl = (self.db and self.db.global and self.db.global.debugLevel)
+        if type(lvl) ~= "number" then
+            DebugManager:Trace(message, printTrace)
+            return
+        end
+        if lvl < 6 then return end
         DebugManager:Trace(message, printTrace)
     end
-
     NAG.Trace = NAG.PrintTrace
+
 end
 
 do --== WeakAuras Integration API ==--
+
     --- Checks if WeakAuras Burst Boxes integration is enabled(used in weakauras)
     --- @param self NAG The NAG addon object
     --- @return boolean True if WeakAuras Burst Boxes integration is enabled, false otherwise
@@ -1067,7 +1132,7 @@ do --== WeakAuras Integration API ==--
     --- @return number The next time + optional offset
     function NAG:NextTime(offset)
         if not StateManager then
-            ---@class StateManager : ModuleBase
+            --- @type StateManager|AceModule|ModuleBase
             StateManager = self:GetModule("StateManager")
         end
         local nextTime = StateManager:GetNextTime()
@@ -1077,7 +1142,7 @@ do --== WeakAuras Integration API ==--
         return 0
     end
 
-    --[[ replaced with APLHandler version 
+    --[[ replaced with APLHandler version
     function NAG:GetBattlePotion()
         return NAG.db and NAG.db.char and NAG.db.char.defaultBattlePotion
     end
@@ -1115,7 +1180,7 @@ function NAG:RefreshConfig()
     self:SendMessage("NAG_CONFIG_CHANGED")
 end
 
-do --================================== Migrations --==================================--
+do -- ~~~~~~~~~~ Migrations ~~~~~~~~~~~~
     -- Core migration definitions
     NAG.migrations = {
         [40000] = function(self) -- v4.0.0 Major DB restructure
@@ -1140,7 +1205,7 @@ do --================================== Migrations --===========================
         end,
         [40100] = function(self) -- v4.1.0 Key storage restructure
             local global = self:GetGlobal()
-            
+
             -- Create new storage structure
             global.keys = global.keys or {}
             global.keys.legacy = global.keys.legacy or {
@@ -1248,6 +1313,7 @@ do --================================== Migrations --===========================
 end
 
 do -- Shared Options Utilities
+
     --- Gets the appropriate settings DB based on module type
     --- @param moduleType string The module type
     --- @param global table The global settings table
@@ -1322,4 +1388,69 @@ do -- Shared Options Utilities
             args = {}
         }
     end
+end
+
+do --== Addon Compartment Functions ==--
+    --- Handles clicks on the addon compartment button.
+    --- @param frame Frame The button that was clicked.
+    --- @param button string The mouse button used ("LeftButton", "RightButton", etc.).
+    function NAG_OnAddonCompartmentClick(frame, button)
+        local NAG = _G.NAG -- Get addon instance
+        if not NAG then return end
+
+        if button == "LeftButton" then
+            if AceConfigDialog.OpenFrames["NAG"] then
+                AceConfigDialog:Close("NAG")
+            else
+                AceConfigDialog:Open("NAG")
+            end
+        elseif button == "RightButton" then
+            if IsShiftKeyDown() and NAG:IsDevModeEnabled() then
+                -- Show debug menu
+                local menu = {
+                    { text = "Next Action Guide Dev", isTitle = true },
+                    { text = "Encounter Stopwatch", func = function() NAG:GetModule("EncounterStopwatch"):Toggle() end },
+                    { text = "Entity Behavior Tester", func = function() NAG:GetModule("EntityBehaviorTester"):Toggle() end },
+                    { text = "APL Monitor", func = function() NAG:GetModule("APLMonitor"):Toggle() end },
+                    { text = "Event Debugger", func = function() NAG:GetModule("EventDebugger"):Toggle() end },
+                    { text = "CLEU Debugger", func = function() NAG:GetModule("CLEUDebugger"):Toggle() end },
+                    { text = "Toggle Script Errors", func = function() NAG:ToggleScriptErrors() end },
+                }
+                if not NAG.debugMenuFrame then
+                    NAG.debugMenuFrame = LibStub("LibUIDropDownMenu-4.0"):Create_UIDropDownMenu("NAGDebugMenuFrame", UIParent)
+                end
+                LibStub("LibUIDropDownMenu-4.0"):EasyMenu(menu, NAG.debugMenuFrame, "cursor", 0, 0, "MENU")
+            else
+                NAG:ToggleEditMode()
+            end
+        end
+    end
+
+    --- Shows a tooltip when hovering over the addon compartment button.
+    --- @param frame Frame The button being hovered over.
+    function NAG_OnAddonCompartmentEnter(frame)
+        if not GameTooltip:IsForbidden() then
+            GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+            GameTooltip:AddLine("Next Action Guide")
+            GameTooltip:AddLine("|cFFFFFFFFLeft Click|r to open settings")
+            GameTooltip:AddLine("|cFFFFFFFFRight Click|r to toggle edit mode")
+            if _G.NAG and _G.NAG:IsDevModeEnabled() then
+                GameTooltip:AddLine("|cFFFFFFFFShift-Right Click|r to open dev menu")
+            end
+            GameTooltip:Show()
+        end
+    end
+
+    --- Hides the tooltip when the mouse leaves the addon compartment button.
+    --- @param frame Frame The button being left.
+    function NAG_OnAddonCompartmentLeave(frame)
+        GameTooltip:Hide()
+    end
+end
+
+function NAG:Log(level, message, printTrace)
+    if not DebugManager then
+        DebugManager = self:GetModule("DebugManager")
+    end
+    DebugManager:Log(message, level, printTrace)
 end

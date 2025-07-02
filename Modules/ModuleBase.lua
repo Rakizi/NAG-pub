@@ -1,10 +1,14 @@
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- @module "ModuleBase"
+--- Provides a base class for all modules in NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
--- ModuleBase.lua
+
+
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
-
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -40,23 +44,23 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
 
 -- Constants
@@ -103,29 +107,30 @@ ns.DEBUG_LEVELS = {
     TRACE = 5
 }
 
---- ============================ TYPE DEFINITIONS ============================
+-- ~~~~~~~~~~ TYPE DEFINITIONS ~~~~~~~~~~
 
----@class ModuleBase : AceAddon, AceModule, AceEvent-3.0
----@field moduleType string The type of module (core, optional, debug, system, class)
----@field className string The class name this module is for (if type is class)
----@field defaults? table Module-specific database defaults
----@field migrations? table<number, function> Version-specific migration functions
----@field ModuleInitialize? function Called after OnInitialize for module-specific initialization
----@field ModuleEnable? function Called after OnEnable for module-specific enabling
----@field ModuleDisable? function Called after OnDisable for module-specific cleanup
----@field ModuleRefreshConfig? function Called when module configuration needs to be refreshed
----@field GetOptions? function Returns the module's options table for configuration UI
----@field OnSettingChanged? function Called when a module setting changes
----@field optionsCategory? string The category name for module options
----@field optionsOrder? number The order of the module in the options list
----@field childGroups? string The childGroups value for module options
+--- @class ModuleBase : AceAddon, AceModule, AceEvent-3.0
+--- @field moduleType string The type of module (core, optional, debug, system, class)
+--- @field className string The class name this module is for (if type is class)
+--- @field defaults? table Module-specific database defaults
+--- @field migrations? table<number, function> Version-specific migration functions
+--- @field ModuleInitialize? function Called after OnInitialize for module-specific initialization
+--- @field ModuleEnable? function Called after OnEnable for module-specific enabling
+--- @field ModuleDisable? function Called after OnDisable for module-specific cleanup
+--- @field ModuleRefreshConfig? function Called when module configuration needs to be refreshed
+--- @field GetOptions? function Returns the module's options table for configuration UI
+--- @field OnSettingChanged? function Called when a module setting changes
+--- @field optionsCategory? string The category name for module options
+--- @field optionsOrder? number The order of the module in the options list
+--- @field childGroups? string The childGroups value for module options
 local ModuleBase = {
     DEBUG_LEVELS = ns.DEBUG_LEVELS
 }
 
---- ============================ LIFECYCLE METHODS ============================
+-- ~~~~~~~~~~ LIFECYCLE METHODS ~~~~~~~~~~
 do
     --- Called when the module is initialized.
+
     --- @param self ModuleBase
     function ModuleBase:OnInitialize()
         -- Skip initialization for class modules if not the right class
@@ -152,8 +157,8 @@ do
             self:MigrateModuleSettings()
         end
 
-        -- Register options if GetOptions is implemented
-        if self.GetOptions then
+        -- Register options if GetOptions is defined and not skipped
+        if self.GetOptions and not self.skipAutoOptions then
             self:RegisterModuleOptions()
         end
 
@@ -245,9 +250,10 @@ do
     end
 end
 
---- ============================ DATABASE METHODS ============================
+-- ~~~~~~~~~~ DATABASE METHODS ~~~~~~~~~~
 do
     --- Default handler for database reset events
+
     --- @param self ModuleBase
     --- @param event string The event name
     --- @param resetType string The type of reset being performed ("all", "global", "char", "class")
@@ -370,9 +376,10 @@ do
     end
 end
 
---- ============================ STATE MANAGEMENT ============================
+-- ~~~~~~~~~~ STATE MANAGEMENT ~~~~~~~~~~
 do
     --- Initializes the module's state
+
     --- @param self ModuleBase
     function ModuleBase:InitializeState()
         -- If module already has state, skip
@@ -445,9 +452,10 @@ do
     end
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Registers the module options.
+
     --- @param self ModuleBase
     function ModuleBase:RegisterModuleOptions()
         local moduleOptions = self:GetOptions()
@@ -494,26 +502,6 @@ do
                     -- Save enabled state to database for feature modules
                     if self.moduleType == ns.MODULE_TYPES.FEATURE and self.db and self.db.char then
                         self.db.char.enabled = value
-                    end
-                    AceConfigRegistry:NotifyChange("NAG")
-                end,
-            }
-        end
-
-        -- Add debug toggle for modules that want debug logging
-        if (self.db and self.db.global and self.db.global.debug ~= nil) then
-            optionsGroup.args.debug = {
-                type = "toggle",
-                order = 1,
-                name = L["debugLogging"] or "Enable Debug Logging",
-                desc = L["debugLoggingDesc"] or "Enable debug logging for this module",
-                get = function() return self:GetGlobal().debug end,
-                set = function(_, value)
-                    self:GetGlobal().debug = value
-                    if value then
-                        self:EnableDebug()
-                    else
-                        self:DisableDebug()
                     end
                     AceConfigRegistry:NotifyChange("NAG")
                 end,
@@ -602,7 +590,7 @@ do
     --- Called by NAG's core RefreshConfig
     --- @param self ModuleBase
     function ModuleBase:RefreshConfig()
-        if self.GetOptions then
+        if self.GetOptions and not self.skipAutoOptions then
             self:RegisterModuleOptions()
         end
 
@@ -613,119 +601,123 @@ do
     end
 end
 
---- ============================ DEBUG LOGGING ============================
+-- ~~~~~~~~~~ DEBUG LOGGING ~~~~~~~~~~
 do
-    --- Enables debug logging.
-    --- @param self ModuleBase
-    function ModuleBase:EnableDebug()
-        self:GetGlobal().debug = true
-        self:Print("Debug mode enabled")
-    end
-
-    --- Disables debug logging.
-    --- @param self ModuleBase
-    function ModuleBase:DisableDebug()
-        self:Print("Debug mode disabled")
-        self:GetGlobal().debug = false
-    end
-
     --- Logs an error message.
     --- @param self ModuleBase
-    --- @param msg string The error message
-    --- @param ... any Additional arguments to format the message
+    --- @param msg string The error message or format string
+    --- @param ... any Format values, with optional boolean as last arg for printTrace
     function ModuleBase:Error(msg, ...)
-        -- Errors are always logged regardless of debug flag
-        local args = {...}
-        local success, result = pcall(function()
-            return format("[%s] %s", self:GetName(), format(msg, unpack(args)))
-        end)
-        if success then
-            NAG:Error(result)
-        else
-            -- If formatting fails, just print the raw message
-            NAG:Error(format("[%s] %s", self:GetName(), tostring(msg)))
+        if self:ShouldLog(ns.DEBUG_LEVELS.ERROR) then
+            local args = {...}
+            local printTrace = false
+            if #args > 0 and type(args[#args]) == "boolean" then
+                printTrace = table.remove(args)
+            end
+            local success, result = pcall(function()
+                return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+            end)
+            if success then
+                NAG:Log("ERROR", result, printTrace)
+            else
+                NAG:Log("ERROR", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+            end
         end
     end
 
     --- Logs a warning message.
     --- @param self ModuleBase
-    --- @param msg string The warning message
-    --- @param ... any Additional arguments to format the message
+    --- @param msg string The warning message or format string
+    --- @param ... any Format values, with optional boolean as last arg for printTrace
     function ModuleBase:Warn(msg, ...)
-        -- Warnings are always logged regardless of debug flag
-        local args = {...}
-        local success, result = pcall(function()
-            return format("[%s] %s", self:GetName(), format(msg, unpack(args)))
-        end)
-        if success then
-            NAG:Warn(result)
-        else
-            -- If formatting fails, just print the raw message
-            NAG:Warn(format("[%s] %s", self:GetName(), tostring(msg)))
+        if self:ShouldLog(ns.DEBUG_LEVELS.WARN) then
+            local args = {...}
+            local printTrace = false
+            if #args > 0 and type(args[#args]) == "boolean" then
+                printTrace = table.remove(args)
+            end
+            local success, result = pcall(function()
+                return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+            end)
+            if success then
+                NAG:Log("WARN", result, printTrace)
+            else
+                NAG:Log("WARN", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+            end
         end
     end
 
     --- Logs an info message.
     --- @param self ModuleBase
-    --- @param msg string The info message
-    --- @param ... any Additional arguments to format the message
+    --- @param msg string The info message or format string
+    --- @param ... any Format values, with optional boolean as last arg for printTrace
     function ModuleBase:Info(msg, ...)
-        -- Info messages are always logged regardless of debug flag
-        local args = {...}
-        local success, result = pcall(function()
-            return format("[%s] %s", self:GetName(), format(msg, unpack(args)))
-        end)
-        if success then
-            NAG:Info(result)
-        else
-            -- If formatting fails, just print the raw message
-            NAG:Info(format("[%s] %s", self:GetName(), tostring(msg)))
+        if self:ShouldLog(ns.DEBUG_LEVELS.INFO) then
+            local args = {...}
+            local printTrace = false
+            if #args > 0 and type(args[#args]) == "boolean" then
+                printTrace = table.remove(args)
+            end
+            local success, result = pcall(function()
+                return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+            end)
+            if success then
+                NAG:Log("INFO", result, printTrace)
+            else
+                NAG:Log("INFO", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+            end
         end
     end
 
     --- Logs a debug message.
     --- @param self ModuleBase
-    --- @param msg string The debug message
-    --- @param ... any Additional arguments to format the message
+    --- @param msg string The debug message or format string
+    --- @param ... any Format values, with optional boolean as last arg for printTrace
     function ModuleBase:Debug(msg, ...)
-        if self:GetGlobal().debug ~= false then
-            -- Optionally, also check DebugManager's verbosity here
+        if self:ShouldLog(ns.DEBUG_LEVELS.DEBUG) then
             local args = {...}
+            local printTrace = false
+            if #args > 0 and type(args[#args]) == "boolean" then
+                printTrace = table.remove(args)
+            end
             local success, result = pcall(function()
-                return format("[%s] %s", self:GetName(), format(msg, unpack(args)))
+                return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
             end)
             if success then
-                NAG:Debug(result)
+                NAG:Log("DEBUG", result, printTrace)
             else
-                -- If formatting fails, just print the raw message
-                NAG:Debug(format("[%s] %s", self:GetName(), tostring(msg)))
+                NAG:Log("DEBUG", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
             end
         end
     end
 
     --- Logs a trace message.
     --- @param self ModuleBase
-    --- @param msg string The trace message
-    --- @param ... any Additional arguments to format the message
+    --- @param msg string The trace message or format string
+    --- @param ... any Format values, with optional boolean as last arg for printTrace
     function ModuleBase:Trace(msg, ...)
-        if self:GetGlobal().debug ~= false then
+        if self:ShouldLog(ns.DEBUG_LEVELS.TRACE) then
             local args = {...}
+            local printTrace = false
+            if #args > 0 and type(args[#args]) == "boolean" then
+                printTrace = table.remove(args)
+            end
             local success, result = pcall(function()
-                return format("[%s] %s", self:GetName(), format(msg, unpack(args)))
+                return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
             end)
             if success then
-                NAG:Trace(result)
+                NAG:Log("TRACE", result, printTrace)
             else
-                -- If formatting fails, just print the raw message
-                NAG:Trace(format("[%s] %s", self:GetName(), tostring(msg)))
+                NAG:Log("TRACE", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
             end
         end
     end
 end
 
---- ============================ MIGRATION ============================
-do 
+-- ~~~~~~~~~~ MIGRATION ~~~~~~~~~~
+do
     --- Migrates the module settings.
+
     --- @param self ModuleBase
     function ModuleBase:MigrateModuleSettings()
         if not self.db or not self.migrations then return end
@@ -775,9 +767,10 @@ do
     end
 end
 
---- ============================ EVENT MANAGEMENT ============================
+-- ~~~~~~~~~~ EVENT MANAGEMENT ~~~~~~~~~~
 do
     --- Registers module event handlers from the eventHandlers table
+
     --- @param self ModuleBase
     function ModuleBase:RegisterEventHandlers()
         if not self.eventHandlers then return end
@@ -868,7 +861,7 @@ do
     end
 end
 
---- ============================ MODULE CREATION ============================
+-- ~~~~~~~~~~ MODULE CREATION ~~~~~~~~~~
 do
     -- Set default module prototype for NAG
     NAG:SetDefaultModulePrototype(ModuleBase)
@@ -883,8 +876,15 @@ do
     --- @param mixins? table|nil The module mixins
     --- @return ModuleBase The new module
     function NAG:CreateModule(name, defaults, mixins)
+        -- Ensure defaults exists
+        defaults = defaults or {}
+        defaults.global = defaults.global or {}
+        -- Inject debug toggle by default unless explicitly set or opted out
+        if defaults.global.debugLevel == nil then
+            defaults.global.debugLevel = ns.DEBUG_LEVELS.ERROR
+        end
         -- Create module with our base prototype
-        ---@class ModuleBase : AceAddon, AceModule, AceEvent-3.0
+        --- @class ModuleBase : AceAddon, AceModule, AceEvent-3.0
         local module = self:NewModule(name)
 
         -- Store defaults if provided
@@ -928,7 +928,113 @@ do
     end
 end
 
---[[ ============================ EXAMPLE USAGE ============================
+-- Helper to get per-module debug level (fallback to global)
+function ModuleBase:GetDebugLevel()
+    local lvl = self:GetGlobal() and self:GetGlobal().debugLevel
+    if lvl == nil then
+        return ns.DEBUG_LEVELS.ERROR
+    end
+    return lvl
+end
+
+-- Helper to check if a message at a given level should be logged
+function ModuleBase:ShouldLog(level)
+    return self:GetDebugLevel() >= level
+end
+
+-- Update logging methods to use debugLevel
+function ModuleBase:Debug(msg, ...)
+    if self:ShouldLog(ns.DEBUG_LEVELS.DEBUG) then
+        local args = {...}
+        local printTrace = false
+        if #args > 0 and type(args[#args]) == "boolean" then
+            printTrace = table.remove(args)
+        end
+        local success, result = pcall(function()
+            return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+        end)
+        if success then
+            NAG:Log("DEBUG", result, printTrace)
+        else
+            NAG:Log("DEBUG", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+        end
+    end
+end
+
+function ModuleBase:Trace(msg, ...)
+    if self:ShouldLog(ns.DEBUG_LEVELS.TRACE) then
+        local args = {...}
+        local printTrace = false
+        if #args > 0 and type(args[#args]) == "boolean" then
+            printTrace = table.remove(args)
+        end
+        local success, result = pcall(function()
+            return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+        end)
+        if success then
+            NAG:Log("TRACE", result, printTrace)
+        else
+            NAG:Log("TRACE", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+        end
+    end
+end
+
+function ModuleBase:Info(msg, ...)
+    if self:ShouldLog(ns.DEBUG_LEVELS.INFO) then
+        local args = {...}
+        local printTrace = false
+        if #args > 0 and type(args[#args]) == "boolean" then
+            printTrace = table.remove(args)
+        end
+        local success, result = pcall(function()
+            return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+        end)
+        if success then
+            NAG:Log("INFO", result, printTrace)
+        else
+            NAG:Log("INFO", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+        end
+    end
+end
+
+function ModuleBase:Warn(msg, ...)
+    if self:ShouldLog(ns.DEBUG_LEVELS.WARN) then
+        local args = {...}
+        local printTrace = false
+        if #args > 0 and type(args[#args]) == "boolean" then
+            printTrace = table.remove(args)
+        end
+        local success, result = pcall(function()
+            return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+        end)
+        if success then
+            NAG:Log("WARN", result, printTrace)
+        else
+            NAG:Log("WARN", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+        end
+    end
+end
+
+function ModuleBase:Error(msg, ...)
+    if self:ShouldLog(ns.DEBUG_LEVELS.ERROR) then
+        local args = {...}
+        local printTrace = false
+        if #args > 0 and type(args[#args]) == "boolean" then
+            printTrace = table.remove(args)
+        end
+        local success, result = pcall(function()
+            return format("[%s] %s", self:GetName(), (#args > 0 and format(msg, unpack(args)) or tostring(msg)))
+        end)
+        if success then
+            NAG:Log("ERROR", result, printTrace)
+        else
+            NAG:Log("ERROR", format("[%s] %s", self:GetName(), tostring(msg)), printTrace)
+        end
+    end
+end
+
+
+--[[ ~~~~~~~~~~ EXAMPLE USAGE ~~~~~~~~~~
 -- Example of a typical core module that manages some game functionality
 do
     -- Default settings
@@ -937,7 +1043,7 @@ do
             -- Global settings that apply account-wide
             updateInterval = 0.5,
             enableLogging = false,
-            debug = false
+            debugLevel = ns.DEBUG_LEVELS.NONE
         },
         char = {
             -- Character-specific settings
@@ -946,7 +1052,7 @@ do
         }
     }
 
-    ---@class ExampleManager : ModuleBase
+    --- @type ExampleManager|AceModule|ModuleBase
     local ExampleManager = NAG:CreateModule("ExampleManager", defaults, {
         moduleType = ns.MODULE_TYPES.CORE,
         optionsCategory = ns.MODULE_CATEGORIES.GENERAL,

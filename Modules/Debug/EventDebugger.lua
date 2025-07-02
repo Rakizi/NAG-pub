@@ -1,19 +1,17 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: Debug utilities for development and troubleshooting
-    STATUS: ok
-    TODO: 
-        - None
-]]
----@diagnostic disable: ...
+--- @module "EventDebugger"
+--- Debug utilities for development and troubleshooting.
+---
+--- Provides a module for managing debug settings, logging messages, and
+--- debugging conditions.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
---- @class NAG : AceAddon-3.0
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DebugManager : ModuleBase
+--- @type DebugManager|ModuleBase|AceModule
 local Debug = NAG:GetModule("DebugManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -28,30 +26,29 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 -- Default settings
 local defaults = {
     global = {
-        debug = false,
         filters = {
             excludeCommon = true,
             excludedEvents = {
@@ -69,8 +66,8 @@ local defaults = {
     }
 }
 
----@class EventDebugger: ModuleBase
----@field hidden boolean
+--- @class EventDebugger: ModuleBase
+--- @field hidden boolean
 local EventDebugger = NAG:CreateModule("EventDebugger", defaults, {
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
     moduleType = ns.MODULE_TYPES.DEBUG,
@@ -80,7 +77,7 @@ local EventDebugger = NAG:CreateModule("EventDebugger", defaults, {
     hidden = function() return not NAG:IsDevModeEnabled() end,
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     --- @param self EventDebugger
     function EventDebugger:ModuleInitialize()
@@ -117,9 +114,10 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     --- Generic event handler to catch and print all events.
+
     --- @param self EventDebugger
     --- @param event string The event name.
     --- @param ... any Additional arguments passed to the event handler.
@@ -154,15 +152,16 @@ do
     end
 end
 
--- ============================ SLASH COMMANDS ============================
+-- ~~~~~~~~~~ SLASH COMMANDS ~~~~~~~~~~
 SLASH_NAGEVENTDEBUG1 = "/nageventdebug"
 SlashCmdList["NAGEVENTDEBUG"] = function()
     EventDebugger:Toggle()
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for Event Debugger settings
+
     --- @param self EventDebugger
     --- @return table The options table for AceConfig
     function EventDebugger:GetOptions()
@@ -231,7 +230,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (none outside do blocks in this file)
 
 -- Expose in private namespace

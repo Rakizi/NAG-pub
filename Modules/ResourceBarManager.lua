@@ -1,4 +1,3 @@
---- ============================ HEADER ============================
 --[[
     Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
@@ -23,12 +22,12 @@
     STATUS: Initial implementation
 ]]
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
---- @class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class Version : ModuleBase
+--- @type Version
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -36,7 +35,7 @@ local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 --Libs
 local LSM = LibStub("LibSharedMedia-3.0")
----@class GlowManager : ModuleBase
+--- @type GlowManager|AceModule|ModuleBase
 local GlowManager = NAG:GetModule("GlowManager")
 if not GlowManager then error("GlowManager is required") end
 
@@ -58,28 +57,28 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 local pairs = pairs
 local ipairs = ipairs
 local select = select
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local COLORS = {
     ACTIVE = { 0.0, 1.0, 0.0, 0.4 },   -- Green with 40% opacity
@@ -91,9 +90,6 @@ local COLORS = {
 }
 
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         enabled = false,
         useRotationResourceBar = true,
@@ -124,13 +120,14 @@ local defaults = {
     }
 }
 
----@class ResourceBarManager: ModuleBase
+--- @class ResourceBarManager: ModuleBase
 local ResourceBarManager = NAG:CreateModule("ResourceBarManager", defaults, {
     moduleType = ns.MODULE_TYPES.FEATURE,
     optionsCategory = ns.MODULE_CATEGORIES.FEATURE, -- Place in spec options since it's spec-specific
     optionsOrder = 300,                             -- After burst trackers
     childGroups = "tree",                          -- Use tree structure for options
-    hidden = function() return not NAG:IsDevModeEnabled() end,
+    hidden = function() return true end,
+    disabled = function() return true end,
     eventHandlers = {
         ["UNIT_POWER_UPDATE"] = true,
         ["UNIT_MAXPOWER"] = true,
@@ -161,7 +158,7 @@ ResourceBarManager.activeGlows = {}
 ResourceBarManager.trackedAuras = {}
 ResourceBarManager.iconPool = nil
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function ResourceBarManager:ModuleInitialize()
         -- Initialize module state
@@ -201,7 +198,7 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function ResourceBarManager:OnPowerUpdate(event, unit, powerType)
         if unit ~= "player" then return end
@@ -248,7 +245,7 @@ do
     end
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     function ResourceBarManager:GetOptions()
         -- Get base options from ModuleBase
@@ -681,7 +678,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (Local helpers and public API functions should be outside do blocks for scope)
 
 function ResourceBarManager:ShouldShowBar()
@@ -1054,7 +1051,7 @@ function ResourceBarManager:GetCurrentResourceBar()
 
     -- If rotation settings should be used and are available, use them
     if self.db.char.useRotationResourceBar then
-        ---@class ClassBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = NAG:GetModule(NAG.CLASS, true)
         if classModule then
             local rotation = select(1, classModule:GetCurrentRotation())

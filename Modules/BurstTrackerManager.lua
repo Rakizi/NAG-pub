@@ -1,30 +1,26 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Rakizi: farendil2020@gmail.com @rakizi http://discord.gg/ebonhold
-    Module Purpose: BurstTrackerManager - Handles burst tracker frames, spell tracking, and related UI for NAG.
-    STATUS: Initial implementation
-    TODO: Refactor for modularity, add more customization options
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
----@diagnostic disable: undefined-global, undefined-field
+--- @module "BurstTrackerManager"
+--- Module Purpose: BurstTrackerManager - Handles burst tracker frames, spell tracking, and related UI for NAG.
+--- STATUS: Initial implementation
+--- TODO: Refactor for modularity, add more customization options
+--- License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
---- ============================ LOCALIZE ============================
+
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 --Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DataManager : ModuleBase
+--- @type DataManager|AceModule|ModuleBase
 local DataManager = NAG:GetModule("DataManager")
----@class KeybindManager : ModuleBase
+--- @type KeybindManager|AceModule|ModuleBase
 local KeybindManager = NAG:GetModule("KeybindManager")
----@class Version
+--- @class Version
 local Version = ns.Version
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
----@class GlowManager : ModuleBase
+--- @type GlowManager|AceModule|ModuleBase
 local GlowManager = NAG:GetModule("GlowManager")
----@class LibSharedMedia-3.0
+--- @class LibSharedMedia-3.0
 local LSM = LibStub("LibSharedMedia-3.0")
 
 --WoW API
@@ -42,30 +38,27 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Default settings
 local defaults = {
-    global = {
-        debug = false,
-    },
     char = {
         enabled = false,
         useRotationBurstTrackers = true,
@@ -97,12 +90,14 @@ local defaults = {
     }
 }
 
----@class BurstTrackerManager: ModuleBase
+--- @class BurstTrackerManager: ModuleBase
 local BurstTrackerManager = NAG:CreateModule("BurstTrackerManager", defaults, {
     moduleType = ns.MODULE_TYPES.FEATURE,
     optionsCategory = ns.MODULE_CATEGORIES.FEATURE,
     optionsOrder = 450,
     childGroups = "tree",
+    hidden = function() return true end,
+    disabled = function() return true end,
     eventHandlers = {
         ["PLAYER_REGEN_DISABLED"] = "OnCombatStateChanged",
         ["PLAYER_REGEN_ENABLED"] = "OnCombatStateChanged",
@@ -112,14 +107,18 @@ local BurstTrackerManager = NAG:CreateModule("BurstTrackerManager", defaults, {
     messageHandlers = {
         ["NAG_ROTATION_CHANGED"] = "OnRotationChanged",
         ["NAG_ROTATION_SAVED"] = "OnRotationChanged",
+    },
+    dependencies = {
+        "LibSharedMedia-3.0"
     }
 })
 
 -- Module variables
 BurstTrackerManager.trackers = {}
 BurstTrackerManager.activeGlows = {}
+BurstTrackerManager.LSM = LibStub("LibSharedMedia-3.0")
 
---- ============================ ORGANIZATION ============================
+-- ~~~~~~~~~~ ORGANIZATION ~~~~~~~~~~
 do -- Ace3 lifecycle methods
     function BurstTrackerManager:ModuleInitialize()
         self.trackers = {}
@@ -165,7 +164,7 @@ do -- Event handlers
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 -- (All other public and helper functions remain unchanged, placed here)
 
 --- Checks if burst trackers should be shown based on char settings
@@ -222,7 +221,9 @@ end
 -- Helper: Sets up the stack count font string
 local function SetupStackCountDisplay(frame, fontPath, fontSize, fontOutline, fontColor)
     frame.stackCount = frame:CreateFontString(nil, "OVERLAY")
-    frame.stackCount:SetFont(fontPath, fontSize, fontOutline)
+    local fontPath = self.LSM:Fetch("font", self.db.char.appearance.stackFont) or self.LSM:GetDefault("font")
+    frame.stackCount:SetFont(fontPath, self.db.char.appearance.stackFontSize,
+        self.db.char.appearance.stackFontOutline)
     frame.stackCount:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -2, 2)
     frame.stackCount:SetTextColor(unpack(fontColor))
     frame.stackCount:SetText("")
@@ -1378,7 +1379,7 @@ function BurstTrackerManager:GetCurrentBurstTrackers()
 
     -- If rotation settings should be used and are available, use them instead
     if self.db.char.useRotationBurstTrackers then
-        ---@class ClassBase
+        --- @type ClassBase|AceModule|ModuleBase
         local classModule = NAG:GetModule(NAG.CLASS, true)
         if classModule then
             local rotation = select(1, classModule:GetCurrentRotation())
@@ -1395,7 +1396,7 @@ end
 --- @return table A table of available spells with their info
 function BurstTrackerManager:GetAvailableSpells()
     local spells = {}
-    ---@class StateManager
+    --- @type StateManager|AceModule|ModuleBase
     local StateManager = NAG:GetModule("StateManager")
     if not StateManager then return spells end
 
@@ -1445,7 +1446,7 @@ function BurstTrackerManager:GetAvailableSpells()
     return spells
 end
 
---- ============================ MODULE EXPOSURE ============================
+-- ~~~~~~~~~~ MODULE EXPOSURE ~~~~~~~~~~
 ns.BurstTrackerManager = BurstTrackerManager
 
 

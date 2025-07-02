@@ -1,22 +1,20 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: (Unknown, please update if needed)
-    Module Purpose: Displays current time, remaining time, and percentage values for encounters.
-    STATUS: Stable
-    TODO: (None listed)
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
----@diagnostic disable: undefined-global, undefined-field
+--- Displays current time, remaining time, and percentage values for encounters.
+---
+--- Provides a module for monitoring and visualizing encounter progress.
+--- @module "EncounterStopwatch"
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ============================ LOCALIZE ============================
+---@diagnostic disable: invisible
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@class StateManager : ModuleBase
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 
 -- Lua APIs
@@ -35,8 +33,8 @@ local UPDATE_INTERVAL = 0.1
 local FRAME_WIDTH = 250  -- Increased for better readability
 local FRAME_HEIGHT = 140  -- Increased to accommodate the new line
 
---- ============================ CONTENT ============================
----@class EncounterStopwatch: ModuleBase
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+--- @class EncounterStopwatch: ModuleBase
 local EncounterStopwatch = NAG:CreateModule("EncounterStopwatch", {
     char = {
         position = {
@@ -54,12 +52,12 @@ local EncounterStopwatch = NAG:CreateModule("EncounterStopwatch", {
     optionsOrder = 30,
     childGroups = "tree",
     -- Show module if debug mode is enabled OR we're in a trial area with a training dummy
-    hidden = function() 
+    hidden = function()
         return not (NAG:IsDevModeEnabled() or (ns.IsTrainingDummy() and UnitExists("target") and UnitCreatureType("target") == "Mechanical"))
     end
 })
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function EncounterStopwatch:ModuleInitialize()
         -- Register events for target changes and combat
@@ -72,7 +70,7 @@ do
         if not self.frame then
             self:CreateFrame()
         end
-        
+
         -- Check current target when enabled
         self:CheckTarget()
     end
@@ -85,11 +83,11 @@ do
     end
 end
 
--- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function EncounterStopwatch:OnCombatChange(event)
         if not self:GetChar().autoShow then return end
-        
+
         local inCombat = (event == "PLAYER_REGEN_DISABLED")
         if inCombat and self:IsTrainingDummy() then
             -- Enable encounter timer settings when entering combat
@@ -123,7 +121,7 @@ do
 
     function EncounterStopwatch:CheckTarget()
         if not self:GetChar().autoShow then return end
-        
+
         if not self:IsTrainingDummy() then
             -- Hide frame and cancel timer if no training dummy
             if self.frame then
@@ -134,7 +132,7 @@ do
     end
 end
 
--- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     function EncounterStopwatch:GetOptions()
         return {
@@ -194,10 +192,10 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function EncounterStopwatch:IsTrainingDummy()
     if not UnitExists("target") then return false end
-    
+
     -- Check if we're in a capital city and target is mechanical
     return ns.IsTrainingDummy() and UnitCreatureType("target") == "Mechanical"
 end
@@ -210,7 +208,7 @@ function EncounterStopwatch:CreateFrame()
     frame:SetHeight(FRAME_HEIGHT)
     frame:SetLayout("List")  -- Changed to List layout for better control
     frame:EnableResize(false)
-    
+
     -- Set initial position
     frame.frame:ClearAllPoints()
     frame.frame:SetPoint(
@@ -272,9 +270,9 @@ end
 function EncounterStopwatch:Update()
     if not self.frame or not self.frame:IsShown() then return end
 
-    local currentTime = NAG:TimeCurrent() or 0
-    local remainingTime = NAG:TimeRemaining() or 0
-    local remainingPercent = NAG:TimeRemainingPercent() or 100
+    local currentTime = NAG:CurrentTime() or 0
+    local remainingTime = NAG:RemainingTime() or 0
+    local remainingPercent = NAG:RemainingTimePercent() or 100
 
     -- For simulated encounters, target HP should decrease with progress
     local simulatedTargetHP = remainingPercent  -- Target HP matches remaining time percentage

@@ -1,23 +1,21 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Authors: Unknown (original), please update.
-    Module Purpose: Throttle Management System - centralized management of throttled operations like TTD tracking and other periodic updates that need rate limiting.
-    STATUS: Production
-    TODO: Add more granular control for throttling categories if needed.
-    License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
----@diagnostic disable: undefined-global, undefined-field
+--- @module "ThrottleManager"
+--- Manages throttling and rate limiting for NAG.
+---
+--- This module provides functions for throttling and rate limiting for NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
+--
 
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class TimerManager : ModuleBase
+--- @type TimerManager|AceModule|ModuleBase
 local Timer = NAG:GetModule("TimerManager")
----@class TTDManager : ModuleBase
+--- @type TTDManager|AceModule|ModuleBase
 local TTD = NAG:GetModule("TTDManager")
----@class StateManager : ModuleBase
+--- @type StateManager|AceModule|ModuleBase
 local StateManager = NAG:GetModule("StateManager")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -30,25 +28,25 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 local TIMER_CATEGORY = Timer.Categories.CORE
 
 local UPDATE_INTERVALS = {
@@ -59,7 +57,7 @@ local UPDATE_INTERVALS = {
     DISPLAY_UPDATE = 0.1  -- Update display visibility frequently
 }
 
----@class ThrottleManager: ModuleBase
+--- @class ThrottleManager: ModuleBase
 local ThrottleManager = NAG:CreateModule("ThrottleManager", {
     global = {
         intervals = UPDATE_INTERVALS,
@@ -102,7 +100,7 @@ local ThrottleManager = NAG:CreateModule("ThrottleManager", {
     }
 })
 
---- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function ThrottleManager:ModuleInitialize()
     end
@@ -115,7 +113,7 @@ do
     end
 end
 
---- ============================ EVENT HANDLERS ============================
+-- ~~~~~~~~~~ EVENT HANDLERS ~~~~~~~~~~
 do
     function ThrottleManager:NAG_CLASS_MODULE_READY(event, hasEnabledModule)
         if hasEnabledModule then
@@ -173,9 +171,10 @@ do
     end
 end
 
---- ============================ OPTIONS UI ============================
+-- ~~~~~~~~~~ OPTIONS UI ~~~~~~~~~~
 do
     --- Gets the options table for Throttle Manager settings
+
     --- @return table The options table
     function ThrottleManager:GetOptions()
         return {
@@ -314,21 +313,21 @@ do
     end
 end
 
---- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 function ThrottleManager:UpdateDisplayVisibility()
     -- Update burst trackers visibility
-    ---@type BurstTrackerManager
-    local BurstTrackerManager = NAG:GetModule("BurstTrackerManager")
-    if BurstTrackerManager and BurstTrackerManager:IsEnabled() then
-        BurstTrackerManager:UpdateAllTrackersVisibility()
-    end
+    --- @type BurstTrackerManager
+    --local BurstTrackerManager = NAG:GetModule("BurstTrackerManager", true)
+    --if BurstTrackerManager and BurstTrackerManager.IsEnabled and BurstTrackerManager:IsEnabled() then
+    --    BurstTrackerManager:UpdateAllTrackersVisibility()
+    --end
 
     -- Update resource bar visibility
-    ---@type ResourceBarManager
-    local ResourceBarManager = NAG:GetModule("ResourceBarManager")
-    if ResourceBarManager and ResourceBarManager:IsEnabled() then
-        ResourceBarManager:UpdateBarVisibility()
-    end
+    --- @type ResourceBarManager
+    --local ResourceBarManager = NAG:GetModule("ResourceBarManager", true)
+    --if ResourceBarManager and ResourceBarManager.IsEnabled and ResourceBarManager:IsEnabled() then
+    --    ResourceBarManager:UpdateBarVisibility()
+    --end
 end
 
 function ThrottleManager:Update()
@@ -411,7 +410,7 @@ end
 function ThrottleManager:ForceRotationUpdate()
     -- Update display visibility
     self:UpdateDisplayVisibility()
-    
+
     -- Force immediate rotation calculation
     if NAG.cachedRotationFunc then
         NAG:Update(NAG.cachedRotationFunc)

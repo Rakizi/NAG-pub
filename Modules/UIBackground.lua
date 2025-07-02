@@ -1,17 +1,12 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-    See LICENSE for full license text.
+--- @module "UIBackground"
+--- Handles UI background management and customization for NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
-    Author: Rakizi
-    Date: 03/19/2024
-
-    STATUS: Active
-    NOTES: UI Background module for NAG, allowing users to select and customize background icons
-]]
-
---- ============================ LOCALIZE ============================
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
 local _, ns = ...
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 local LSM = LibStub("LibSharedMedia-3.0")
@@ -24,7 +19,7 @@ local tinsert = tinsert
 local tremove = tremove
 local wipe = wipe
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 -- Constants
 local CONSTANTS = {
     DEFAULT_SCALE = 1.0,
@@ -45,7 +40,7 @@ local defaults = {
     }
 }
 
----@class UIBackground: ModuleBase
+--- @class UIBackground: ModuleBase
 local UIBackground = NAG:CreateModule("UIBackground", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.DISPLAY,
@@ -54,12 +49,12 @@ local UIBackground = NAG:CreateModule("UIBackground", defaults, {
     name = L["Background"],
     desc = L["BackgroundDesc"],
     libs = { "AceTimer-3.0" },
-    
+
     -- Event handlers
     eventHandlers = {
         PLAYER_ENTERING_WORLD = "OnEnteringWorld",
     },
-    
+
     -- Message handlers
     messageHandlers = {
         NAG_CONFIG_CHANGED = "OnConfigChanged"
@@ -77,7 +72,7 @@ function UIBackground:AttachBackgroundToPrimary()
     if not primary then return end
 
     local charDB = self:GetChar()
-    
+
     -- If 'none' is selected, hide any existing background and return
     if charDB.selectedBackground == "none" then
         if primary.bgTexture then
@@ -121,7 +116,7 @@ function UIBackground:HookPrimaryIconFrame()
     local primary = GetPrimaryIconFrame()
     if not primary or self.primaryIconHooked then return end
     self.primaryIconHooked = true
-    
+
     primary:HookScript("OnShow", function()
         self:AttachBackgroundToPrimary()
     end)
@@ -134,7 +129,7 @@ function UIBackground:EnsureBackgroundOnPrimaryIcon()
     -- Only check once when the module is enabled
     if self.primaryIconChecked then return end
     self.primaryIconChecked = true
-    
+
     local primary = GetPrimaryIconFrame()
     if primary then
         self:AttachBackgroundToPrimary()
@@ -144,7 +139,7 @@ end
 
 function UIBackground:UpdateLockState()
     local charDB = self:GetChar()
-    
+
     -- Skip processing if 'none' is selected
     if charDB.selectedBackground == "none" then
         self:HideBackgroundOnPrimary()
@@ -296,4 +291,4 @@ function UIBackground:RegisterModuleOptions()
 end
 
 -- Make module available globally through NAG
-ns.UIBackground = UIBackground 
+ns.UIBackground = UIBackground

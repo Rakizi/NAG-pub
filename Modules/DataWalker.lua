@@ -1,26 +1,17 @@
---- ============================ HEADER ============================
---[[
-    See LICENSE for full license text.
-    Author: Rakizi
-    Module Purpose: Walks and processes hierarchical data structures for NAG modules, providing flexible processors for different entity types.
-    STATUS: Production
-    TODO: Add more robust error handling and support for additional data types.
-]]
+--- @module "DataWalker"
+--- Walks and processes hierarchical data structures for NAG modules, providing flexible processors for different entity types.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
----@diagnostic disable: undefined-global, undefined-field
-
---- ============================ LOCALIZE ============================
-local _, ns = ...
----@class NAG
+-- ~~~~~~~~~~ LOCALIZE ~~~~~~~~~~
+local addonName, ns = ...
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
----@class DebugManager : ModuleBase
+--- @type DebugManager|ModuleBase|AceModule
 local DebugManager = NAG:GetModule("DebugManager")
 
 --WoW API
-local GetSpellCooldown = ns.GetSpellCooldownUnified
-local GetSpellCharges = ns.GetSpellChargesUnified
-local GetSpellInfo = ns.GetSpellInfoUnified
-local UnitAura = ns.UnitAuraUnified
 local UnitClass = UnitClass
 
 -- Lua APIs (using WoW's optimized versions where available)
@@ -49,13 +40,9 @@ local sort = table.sort
 local concat = table.concat
 local unpack = unpack
 
---- ============================ CONTENT ============================
-local defaults = {
-    global = {
-        debug = false,
-    },
-}
----@class DataWalker: ModuleBase, AceConsole-3.0
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
+
+--- @class DataWalker: ModuleBase, AceConsole-3.0
 local DataWalker = NAG:CreateModule("DataWalker", defaults, {
     moduleType = ns.MODULE_TYPES.CORE,
     optionsCategory = ns.MODULE_CATEGORIES.DEBUG,
@@ -119,7 +106,7 @@ local IGNORED_PATH_COMPONENTS = {
     ["EVOKER"] = true,
 }
 
--- ============================ ACE3 LIFECYCLE ============================
+-- ~~~~~~~~~~ ACE3 LIFECYCLE ~~~~~~~~~~
 do
     function DataWalker:ModuleInitialize()
         self:Debug("DataWalker module initialized")
@@ -131,7 +118,7 @@ do
     end
 end
 
--- ============================ HELPERS & PUBLIC API ============================
+-- ~~~~~~~~~~ HELPERS & PUBLIC API ~~~~~~~~~~
 
 -- Core walker implementation
 function DataWalker:Walk(data, processors, options)
@@ -188,7 +175,7 @@ function DataWalker:WalkNode(node)
     if self:ShouldSkipPath(currentPath) then
         self:Trace("WalkNode: Skipping path: " .. currentPath)
         return true
-    else 
+    else
         self:Debug(format("WalkNode: Processing path: %s", currentPath))
     end
     -- Handle different node types
@@ -374,4 +361,4 @@ function DataWalker:ClearSkipPaths()
 end
 
 -- Expose in private namespace
-ns.DataWalker = DataWalker 
+ns.DataWalker = DataWalker

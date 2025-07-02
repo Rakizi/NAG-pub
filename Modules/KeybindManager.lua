@@ -1,13 +1,13 @@
---- ============================ HEADER ============================
---[[
-    Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
-]]
----@diagnostic disable: undefined-field: string.match, string.gmatch, string.find, string.gsub
+--- @module "KeybindManager"
+--- Handles keybind management and configuration for NAG.
+--- License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/legalcode)
+--- Authors: @Rakizi: farendil2020@gmail.com, @Fonsas
+--- Discord: https://discord.gg/ebonhold
 
---- ======= LOCALIZE =======
+-- ======= LOCALIZE =======
 -- Addon
 local _, ns = ...
----@class NAG
+--- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
 
@@ -25,30 +25,29 @@ local max = max or math.max
 local abs = abs or math.abs
 
 -- String manipulation (WoW's optimized versions)
-local strmatch = strmatch -- WoW's version
-local strfind = strfind   -- WoW's version
-local strsub = strsub     -- WoW's version
-local strlower = strlower -- WoW's version
-local strupper = strupper -- WoW's version
-local strsplit = strsplit -- WoW's specific version
-local strjoin = strjoin   -- WoW's specific version
+local strmatch = strmatch
+local strfind = strfind
+local strsub = strsub
+local strlower = strlower
+local strupper = strupper
+local strsplit = strsplit
+local strjoin = strjoin
 
 -- Table operations (WoW's optimized versions)
-local tinsert = tinsert     -- WoW's version
-local tremove = tremove     -- WoW's version
-local wipe = wipe           -- WoW's specific version
-local tContains = tContains -- WoW's specific version
+local tinsert = tinsert
+local tremove = tremove
+local wipe = wipe
+local tContains = tContains
 
 -- Standard Lua functions (no WoW equivalent)
-local sort = table.sort     -- No WoW equivalent
-local concat = table.concat -- No WoW equivalent
+local sort = table.sort
+local concat = table.concat
 
---- ============================ CONTENT ============================
+-- ~~~~~~~~~~ CONTENT ~~~~~~~~~~
 
 local defaults = {
     global = {
         -- Global settings shared across all characters
-        debug = false,
         enableKeybinds = true,
         enableKeybindsPrimaryOnly = false,
         keybindTextColor = { 1, 1, 1, 1 },
@@ -91,6 +90,7 @@ local KeybindManager = NAG:CreateModule("KeybindManager", defaults, {
     eventHandlers = {
         ["UPDATE_MACROS"] = true,
         ["UPDATE_BINDINGS"] = true,
+        ["PLAYER_LOGIN"] = true,
         ["PLAYER_ENTERING_WORLD"] = true,
         ["BAG_UPDATE_COOLDOWN"] = true,
         ["ACTIONBAR_SLOT_CHANGED"] = true,
@@ -105,6 +105,8 @@ local KeybindManager = NAG:CreateModule("KeybindManager", defaults, {
 -- Globals
 local throttleTimer = 0
 local THROTTLE_INTERVAL = 0.5
+local LOGIN_SCAN_DELAY = 2.0 -- Delay after login before scanning
+local isInitialScanComplete = false
 local SUPPORTED_UIS = {
     BLIZZARD = "Blizzard",
     ELVUI = "ElvUI",
@@ -125,19 +127,55 @@ end
 --- @return string|nil The formatted keybind string, or nil if no key provided
 function KeybindManager:FormatKeybind(key)
     if not key then return nil end
-    return key:gsub("ALT%-", "A")
-        :gsub("CTRL%-", "C")
-        :gsub("SHIFT%-", "S")
-        :gsub("NUMPAD", "N")
-        :gsub("BUTTON", "M")
-        :gsub("MOUSEWHEELUP", "WU")
-        :gsub("MOUSEWHEELDOWN", "WD")
-        :gsub("MOUSEWHEELLEFT", "WL")
-        :gsub("MOUSEWHEELRIGHT", "WR")
-        :gsub("DIVIDE", "/")
-        :gsub("MULTIPLY", "*")
-        :gsub("MINUS", "-")
-        :gsub("ADD", "+")
+
+    -- Define the replacements
+    local replacements = {
+        ["MOUSEWHEELUP"] = "WU",
+        ["MOUSEWHEELDOWN"] = "WD",
+        ["MOUSEWHEELLEFT"] = "WL",
+        ["MOUSEWHEELRIGHT"] = "WR",
+        ["NUMPADADD"] = "N+",
+        ["NUMPADDIVIDE"] = "N/",
+        ["NUMPADMULTIPLY"] = "N*",
+        ["NUMPADMINUS"] = "N-",
+        ["BUTTON"] = "M",
+        ["NUMPAD"] = "N",
+        ["ALT"] = "A",
+        ["CTRL"] = "C",
+        ["SHIFT"] = "S",
+    }
+
+    -- Create an ordered list of keys to ensure longest match is found first
+    local orderedKeys = {}
+    for k in pairs(replacements) do
+        table.insert(orderedKeys, k)
+    end
+    table.sort(orderedKeys, function(a, b) return #a > #b end)
+
+    local parts = {strsplit("-", key)}
+    local modifierString = ""
+    local mainKey = ""
+
+    -- Process modifiers first
+    for i = 1, #parts - 1 do
+        local part = parts[i]
+        modifierString = modifierString .. (replacements[part] or part)
+    end
+
+    -- Process the main key (the last part)
+    mainKey = parts[#parts]
+    for _, k in ipairs(orderedKeys) do
+        if mainKey:find("^"..k) then
+            mainKey = mainKey:gsub(k, replacements[k], 1)
+            break
+        end
+    end
+
+    if modifierString ~= "" then
+        return modifierString .. "-" .. mainKey
+    else
+        return mainKey
+    end
 end
 
 -- Button configuration by addon
@@ -236,6 +274,7 @@ KeybindManager.ActionSlotsBy = {
 do -- Module Functions
     function KeybindManager:ModuleInitialize()
         self.managedFrames = {}
+        isInitialScanComplete = false
 
         -- Migrate existing settings if they exist in the main DB
         self:MigrateSettings()
@@ -250,10 +289,14 @@ do -- Module Functions
     end
 
     function KeybindManager:ModuleEnable()
-        self:ScanAllActions()
+        -- Don't do initial scan here - wait for PLAYER_LOGIN
+        self:Debug("KeybindManager enabled, waiting for login event")
     end
 
     function KeybindManager:ModuleDisable()
+        -- Cancel any pending timers
+        self:CancelAllTimers()
+        
         -- Clean up managed frames
         if self.managedFrames then
             for frame in pairs(self.managedFrames) do
@@ -271,6 +314,59 @@ do -- Module Functions
         wipe(self.Actions)
         for _, slotTable in pairs(self.ActionSlotsBy) do
             wipe(slotTable)
+        end
+        
+        isInitialScanComplete = false
+    end
+    
+    function KeybindManager:PerformDelayedLoginScan()
+        local playerName = UnitName("player")
+        local playerClass = UnitClass("player")
+        self:Debug(format("Performing delayed login scan for %s (%s)", playerName, playerClass))
+        
+        -- Check WoW's keybind settings (if available in this version)
+        local bindingsPerChar = GetCVar("bindingsPerCharacter")
+        if bindingsPerChar == nil then
+            self:Debug("bindingsPerCharacter CVar not available in this WoW version - likely using default behavior")
+        elseif bindingsPerChar == "0" then
+            self:Warn("WoW is using shared keybindings across characters. Consider enabling 'Per Character Keybindings' in Interface Options for character-specific bindings.")
+        else
+            self:Debug("Using per-character keybindings")
+        end
+        
+        -- First scan all actions
+        self:ScanAllActions()
+        
+        -- Then ensure overrides are properly applied
+        self:ReapplyAllOverrides()
+        
+        -- Update all managed frames
+        self:UpdateAllKeybinds()
+        
+        isInitialScanComplete = true
+        self:Debug(format("Initial keybind scan completed for %s", playerName))
+    end
+    
+    function KeybindManager:ReapplyAllOverrides()
+        self:Debug("Reapplying all character overrides")
+        
+        local char = self:GetChar()
+        if not char or not char.keybindOverrides then
+            return
+        end
+        
+        -- Count total overrides for debug
+        local totalOverrides = 0
+        for overrideType, overrides in pairs(char.keybindOverrides) do
+            if type(overrides) == "table" then
+                for _ in pairs(overrides) do
+                    totalOverrides = totalOverrides + 1
+                end
+            end
+        end
+        
+        if totalOverrides > 0 then
+            self:Debug("Reapplied " .. totalOverrides .. " keybind overrides")
         end
     end
 end
@@ -428,7 +524,11 @@ do -- Options/Config Functions
                                 for id, data in pairs(bindings) do
                                     tinsert(sorted, { id = id, data = data })
                                 end
-                                table.sort(sorted, function(a, b) return a.data.name < b.data.name end)
+                                table.sort(sorted, function(a, b) 
+                                    local nameA = a.data.name or ""
+                                    local nameB = b.data.name or ""
+                                    return nameA < nameB 
+                                end)
 
                                 for _, binding in ipairs(sorted) do
                                     text = text .. format("|T%s:16:16:0:0|t %s: %s\n",
@@ -455,7 +555,11 @@ do -- Options/Config Functions
                                 for id, data in pairs(bindings) do
                                     tinsert(sorted, { id = id, data = data })
                                 end
-                                table.sort(sorted, function(a, b) return a.data.name < b.data.name end)
+                                table.sort(sorted, function(a, b) 
+                                    local nameA = a.data.name or ""
+                                    local nameB = b.data.name or ""
+                                    return nameA < nameB 
+                                end)
 
                                 for _, binding in ipairs(sorted) do
                                     text = text .. format("|T%s:16:16:0:0|t %s: %s\n",
@@ -482,7 +586,11 @@ do -- Options/Config Functions
                                 for id, data in pairs(bindings) do
                                     tinsert(sorted, { id = id, data = data })
                                 end
-                                table.sort(sorted, function(a, b) return a.data.name < b.data.name end)
+                                table.sort(sorted, function(a, b) 
+                                    local nameA = a.data.name or ""
+                                    local nameB = b.data.name or ""
+                                    return nameA < nameB 
+                                end)
 
                                 for _, binding in ipairs(sorted) do
                                     text = text .. format("|T%s:16:16:0:0|t %s: %s\n",
@@ -518,7 +626,15 @@ do -- Options/Config Functions
                                 set = function(_, value)
                                     local spellID, keybind = value:match("(%d+):(.+)")
                                     if spellID and keybind then
-                                        self:OverrideSpellKeybind(tonumber(spellID), keybind)
+                                        spellID = tonumber(spellID)
+                                        if spellID then
+                                            self:OverrideSpellKeybind(spellID, keybind)
+                                            self:Info(format("Added spell keybind override: %d -> %s", spellID, keybind))
+                                        else
+                                            self:Error("Invalid spell ID format")
+                                        end
+                                    else
+                                        self:Error("Format should be SpellID:Keybind (e.g., '12345:ALT-1')")
                                     end
                                 end,
                             },
@@ -531,6 +647,9 @@ do -- Options/Config Functions
                                     local spellID = tonumber(value)
                                     if spellID then
                                         self:OverrideSpellKeybind(spellID, nil)
+                                        self:Info(format("Removed spell keybind override for: %d", spellID))
+                                    else
+                                        self:Error("Invalid spell ID format")
                                     end
                                 end,
                             },
@@ -550,7 +669,15 @@ do -- Options/Config Functions
                                 set = function(_, value)
                                     local itemID, keybind = value:match("(%d+):(.+)")
                                     if itemID and keybind then
-                                        self:OverrideItemKeybind(tonumber(itemID), keybind)
+                                        itemID = tonumber(itemID)
+                                        if itemID then
+                                            self:OverrideItemKeybind(itemID, keybind)
+                                            self:Info(format("Added item keybind override: %d -> %s", itemID, keybind))
+                                        else
+                                            self:Error("Invalid item ID format")
+                                        end
+                                    else
+                                        self:Error("Format should be ItemID:Keybind (e.g., '12345:ALT-2')")
                                     end
                                 end,
                             },
@@ -563,6 +690,9 @@ do -- Options/Config Functions
                                     local itemID = tonumber(value)
                                     if itemID then
                                         self:OverrideItemKeybind(itemID, nil)
+                                        self:Info(format("Removed item keybind override for: %d", itemID))
+                                    else
+                                        self:Error("Invalid item ID format")
                                     end
                                 end,
                             },
@@ -582,7 +712,15 @@ do -- Options/Config Functions
                                 set = function(_, value)
                                     local macroID, keybind = value:match("(%d+):(.+)")
                                     if macroID and keybind then
-                                        self:OverrideMacroKeybind(tonumber(macroID), keybind)
+                                        macroID = tonumber(macroID)
+                                        if macroID then
+                                            self:OverrideMacroKeybind(macroID, keybind)
+                                            self:Info(format("Added macro keybind override: %d -> %s", macroID, keybind))
+                                        else
+                                            self:Error("Invalid macro ID format")
+                                        end
+                                    else
+                                        self:Error("Format should be MacroID:Keybind (e.g., '1:ALT-3')")
                                     end
                                 end,
                             },
@@ -595,6 +733,9 @@ do -- Options/Config Functions
                                     local macroID = tonumber(value)
                                     if macroID then
                                         self:OverrideMacroKeybind(macroID, nil)
+                                        self:Info(format("Removed macro keybind override for: %d", macroID))
+                                    else
+                                        self:Error("Invalid macro ID format")
                                     end
                                 end,
                             },
@@ -664,17 +805,109 @@ do -- Options/Config Functions
     end
 
     function KeybindManager:NAG_KEYBIND_SETTING_CHANGED(message, setting, value)
+        self:Debug(format("Keybind setting changed: %s = %s", setting, tostring(value)))
+        
+        -- If keybinds were just enabled, make sure we have current data
+        if setting == "enableKeybinds" and value and isInitialScanComplete then
+            self:ScanAllActions()
+        end
+        
         self:UpdateAllKeybinds()
     end
 
     function KeybindManager:UpdateAllKeybinds()
         if not self.managedFrames then return end
 
+        local framesUpdated = 0
         for frame in pairs(self.managedFrames) do
             if frame.UpdateKeybindText then
                 frame:UpdateKeybindText()
+                framesUpdated = framesUpdated + 1
             end
         end
+        
+        if framesUpdated > 0 then
+            self:Debug(format("Updated keybinds on %d managed frames", framesUpdated))
+        end
+    end
+    
+    -- Utility function for debugging keybind state
+    function KeybindManager:GetKeybindSummary()
+        local bindingsPerCharCVar = GetCVar("bindingsPerCharacter")
+        local summary = {
+            playerName = UnitName("player"),
+            playerClass = UnitClass("player"),
+            bindingsPerCharacter = bindingsPerCharCVar == nil and "unknown" or (bindingsPerCharCVar == "1"),
+            totalActions = 0,
+            actionsWithKeybinds = 0,
+            overrideCount = 0,
+            managedFrames = 0,
+            sampleActions = {}
+        }
+        
+        -- Count actions and keybinds, grab some samples
+        local sampleCount = 0
+        for slot, action in pairs(self.Actions) do
+            summary.totalActions = summary.totalActions + 1
+            if action.Keybind then
+                summary.actionsWithKeybinds = summary.actionsWithKeybinds + 1
+            end
+            
+            -- Grab first 3 actions as samples for debugging
+            if sampleCount < 3 and action.Type and action.ID then
+                sampleCount = sampleCount + 1
+                summary.sampleActions[sampleCount] = {
+                    slot = slot,
+                    type = action.Type,
+                    id = action.ID,
+                    keybind = action.Keybind
+                }
+            end
+        end
+        
+        -- Count overrides
+        local char = self:GetChar()
+        if char and char.keybindOverrides then
+            for overrideType, overrides in pairs(char.keybindOverrides) do
+                if type(overrides) == "table" then
+                    for _ in pairs(overrides) do
+                        summary.overrideCount = summary.overrideCount + 1
+                    end
+                end
+            end
+        end
+        
+        -- Count managed frames
+        if self.managedFrames then
+            for _ in pairs(self.managedFrames) do
+                summary.managedFrames = summary.managedFrames + 1
+            end
+        end
+        
+        return summary
+    end
+    
+    -- Debug function to compare character states
+    function KeybindManager:DebugCharacterIsolation()
+        local summary = self:GetKeybindSummary()
+        self:Info(format("=== Character Debug: %s (%s) ===", summary.playerName, summary.playerClass))
+        self:Info(format("Bindings per character: %s", tostring(summary.bindingsPerCharacter)))
+        self:Info(format("Actions: %d (with keybinds: %d)", summary.totalActions, summary.actionsWithKeybinds))
+        self:Info(format("Overrides: %d, Managed frames: %d", summary.overrideCount, summary.managedFrames))
+        
+        -- Show sample actions
+        for i, sample in ipairs(summary.sampleActions) do
+            local name = ""
+            if sample.type == "Spell" then
+                name = GetSpellInfo(sample.id) or "Unknown"
+            elseif sample.type == "Item" then 
+                name = GetItemInfo(sample.id) or "Unknown"
+            end
+            self:Info(format("Sample %d: Slot %d = %s %d (%s) -> %s", 
+                i, sample.slot, sample.type, sample.id, name, sample.keybind or "none"))
+        end
+        
+        return summary
     end
 end
 
@@ -753,9 +986,28 @@ end
 
 
 function KeybindManager:ScanAllActions()
+    local startTime = GetTime()
+    local actionsFound = 0
+    local keybindsFound = 0
+    
+    self:Debug("Starting full action scan (slots 1-120)")
+    
     for ActionSlot = 1, 120 do
+        local hadAction = self.Actions[ActionSlot] ~= nil
         self:UpdateAction(ActionSlot)
+        local hasAction = self.Actions[ActionSlot] ~= nil
+        
+        if hasAction then
+            actionsFound = actionsFound + 1
+            if self.Actions[ActionSlot].Keybind then
+                keybindsFound = keybindsFound + 1
+            end
+        end
     end
+    
+    local endTime = GetTime()
+    self:Debug(format("Action scan completed in %.3fs: %d actions, %d with keybinds", 
+        endTime - startTime, actionsFound, keybindsFound))
 end
 
 function KeybindManager:GetCommandName(ActionSlot)
@@ -829,7 +1081,27 @@ do -- Event Handlers
         throttleTimer = currentTime
     end
 
+    function KeybindManager:PLAYER_LOGIN()
+        self:Debug("PLAYER_LOGIN received, scheduling delayed scan")
+        -- Schedule delayed scan to ensure everything is loaded
+        self:ScheduleTimer("PerformDelayedLoginScan", LOGIN_SCAN_DELAY)
+    end
+
+    function KeybindManager:PLAYER_ENTERING_WORLD()
+        -- Backup scan if login scan hasn't completed yet
+        if not isInitialScanComplete then
+            self:Debug("PLAYER_ENTERING_WORLD: Initial scan not complete, performing backup scan")
+            self:ScheduleTimer("PerformDelayedLoginScan", 1.0)
+        else
+            -- Regular scan for world changes (instance entering, etc.)
+            self:Debug("PLAYER_ENTERING_WORLD: Performing regular scan")
+            ThrottledScanAllActions(self)
+        end
+    end
+
     function KeybindManager:ACTIONBAR_SLOT_CHANGED(event, ActionSlot)
+        if not isInitialScanComplete then return end
+        
         if ActionSlot then
             -- Only update the specific slot that changed
             self:UpdateAction(ActionSlot)
@@ -837,26 +1109,26 @@ do -- Event Handlers
     end
 
     function KeybindManager:UPDATE_BINDINGS()
+        if not isInitialScanComplete then return end
         ThrottledScanAllActions(self)
     end
 
-    function KeybindManager:PLAYER_ENTERING_WORLD()
-        -- Initial scan needed to set up all actions
-        self:ScanAllActions()
-    end
-
     function KeybindManager:BAG_UPDATE_COOLDOWN()
+        if not isInitialScanComplete then return end
         ThrottledScanAllActions(self)
     end
 
     function KeybindManager:ACTIVE_TALENT_GROUP_CHANGED()
-        -- Wait 2 seconds for talent switch to complete before scanning
+        if not isInitialScanComplete then return end
+        
+        -- Wait 3 seconds for talent switch to complete before scanning
         self:ScheduleTimer(function()
             ThrottledScanAllActions(self)
         end, 3)
     end
 
     function KeybindManager:UPDATE_MACROS()
+        if not isInitialScanComplete then return end
         ThrottledScanAllActions(self)
     end
 end
@@ -1089,19 +1361,85 @@ do -- Public Keybind Override setters
         if not char.keybindOverrides[Type] then
             char.keybindOverrides[Type] = {}
         end
+        
+        local oldKeybind = char.keybindOverrides[Type][Identifier]
         char.keybindOverrides[Type][Identifier] = Keybind
+        
+        -- If keybind was removed (set to nil), clean up the entry
+        if not Keybind then
+            char.keybindOverrides[Type][Identifier] = nil
+        end
+        
+        -- Log the change
+        if Keybind then
+            if oldKeybind then
+                module:Debug(format("Updated %s override for %s: %s -> %s", Type, tostring(Identifier), oldKeybind, Keybind))
+            else
+                module:Debug(format("Added %s override for %s: %s", Type, tostring(Identifier), Keybind))
+            end
+        else
+            module:Debug(format("Removed %s override for %s", Type, tostring(Identifier)))
+        end
+        
+        -- Immediately update all keybind frames
+        module:UpdateAllKeybinds()
+        
+        -- Send message for other components that might need to know
+        module:SendMessage("NAG_KEYBIND_OVERRIDE_CHANGED", Type, Identifier, Keybind)
     end
 
     function KeybindManager:OverrideSpellKeybind(SpellID, Keybind)
+        if not SpellID then 
+            self:Error("OverrideSpellKeybind: SpellID is required")
+            return 
+        end
         OverrideKeybind(self, "Spell", SpellID, Keybind)
     end
 
     function KeybindManager:OverrideItemKeybind(ItemID, Keybind)
+        if not ItemID then 
+            self:Error("OverrideItemKeybind: ItemID is required")
+            return 
+        end
         OverrideKeybind(self, "Item", ItemID, Keybind)
     end
 
     function KeybindManager:OverrideMacroKeybind(MacroID, Keybind)
+        if not MacroID then 
+            self:Error("OverrideMacroKeybind: MacroID is required")
+            return 
+        end
         OverrideKeybind(self, "Macro", MacroID, Keybind)
+    end
+    
+    -- Batch override function for multiple overrides at once
+    function KeybindManager:SetMultipleOverrides(overrides)
+        if not overrides or type(overrides) ~= "table" then
+            self:Error("SetMultipleOverrides: overrides table is required")
+            return
+        end
+        
+        local char = self:GetChar()
+        local changesCount = 0
+        
+        for overrideType, typeOverrides in pairs(overrides) do
+            if type(typeOverrides) == "table" then
+                if not char.keybindOverrides[overrideType] then
+                    char.keybindOverrides[overrideType] = {}
+                end
+                
+                for identifier, keybind in pairs(typeOverrides) do
+                    char.keybindOverrides[overrideType][identifier] = keybind
+                    changesCount = changesCount + 1
+                end
+            end
+        end
+        
+        if changesCount > 0 then
+            self:Debug(format("Applied %d keybind overrides in batch", changesCount))
+            self:UpdateAllKeybinds()
+            self:SendMessage("NAG_KEYBIND_OVERRIDES_BATCH_CHANGED", overrides)
+        end
     end
 end
 
