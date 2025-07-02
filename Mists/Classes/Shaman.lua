@@ -20,27 +20,25 @@ local defaults = ns.InitializeClassDefaults()
 -- MoP Shaman spec spell locations
 defaults.class.specSpellLocations = {
     [CLASS_SPECS.ELEMENTAL] = {
-        [CLASS_SPECS.ELEMENTAL] = {
-            ABOVE = {2062},
-            BELOW = { 8071, 3599, 5394, 3738, 8190 , 135825},
-            RIGHT = {},
-            LEFT = { 16166, 2894, 33697, 79206, 2825, 26297 , 114049},
-            AOE = { 421, 61882 }
-        },
-        [CLASS_SPECS.ENHANCEMENT] = {
-            ABOVE = {8024, 8232},
-            BELOW = { 3599, 8075, 8512, 5394, 324 , 135825},
-            RIGHT = {},
-            LEFT = { 2062,2825, 51533, 33697, 30823, 114049 },
-            AOE = { 1535 }
-        },
-        [CLASS_SPECS.RESTORATION] = {
-            ABOVE = {},
-            BELOW = {},
-            RIGHT = {},
-            LEFT = {},
-            AOE = {}
-        }
+        ABOVE = {2062},
+        BELOW = { 8071, 3599, 5394, 3738, 8190 , 135825},
+        RIGHT = {},
+        LEFT = { 16166, 2894, 33697, 79206, 2825, 26297 , 114049},
+        AOE = { 421, 61882 }
+    },
+    [CLASS_SPECS.ENHANCEMENT] = {
+        ABOVE = {8024, 8232},
+        BELOW = { 0, 3599, 8075, 8512, 5394, 324 , 135825},
+        RIGHT = {},
+        LEFT = { 2062,2825, 51533, 33697, 30823, 114049 },
+        AOE = { 1535 }
+    },
+    [CLASS_SPECS.RESTORATION] = {
+        ABOVE = {},
+        BELOW = {3599},
+        RIGHT = {},
+        LEFT = {},
+        AOE = {}
     }
 }
 
@@ -69,6 +67,19 @@ if UnitClassBase('player') ~= "SHAMAN" then return end
     or (NAG:CanWeave(421)) and NAG:Cast(421)
     or NAG:Cast(51533)
     or NAG:Cast(8042) --117014, 403, 421
+    
+    or (not(NAG:CanWeave(117014)) and NAG:AuraNumStacks(51530) < 5) and NAG:Cast(117014, "RIGHT")
+    or (not(NAG:CanWeave(403)) and (NAG:AuraNumStacks(51530) < 5 and NAG:AuraNumStacks(51530) > 0)) and NAG:Cast(403, "RIGHT")
+    or (not(NAG:CanWeave(421)) and NAG:AuraNumStacks(51530) < 5) and NAG:Cast(421, "RIGHT")
+
+
+    
+    or (NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(60103) and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(73680) and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(115356) and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(17364, 10)
+    or (NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(73680) and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(115356) and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(60103, 10)
+    or (NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(115356) and NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(73680, 10)
+    or (NAG:SpellTimeToReady(115356) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(115356, 10)
+    or (NAG:DotRemainingTime(8050) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(8050, 10)
+
 
 ]]
 ns.AddRotationToDefaults(defaults,
@@ -85,45 +96,30 @@ ns.AddRotationToDefaults(defaults,
         },
         rotationString = [[
             NAG:AutocastOtherCooldowns()
-    or ((not NAG:DotIsActive(3599)) and (not NAG:AuraIsActive(2894))) and NAG:Cast(3599, "DOWN")
-    or not(NAG:CanWeave(117014)) and NAG:Cast(117014, "RIGHT")
-    or (NAG:CanWeave(117014)) and NAG:Cast(117014) 
-    or NAG:CanWeave(403) and NAG:Cast(403)
-    or not(NAG:CanWeave(403)) and NAG:Cast(403, "RIGHT")
+    or ((not NAG:IsTotemActive(3599)) and (not NAG:IsTotemActive(2894))) and NAG:Cast(2894, 'LEFT')
+    or ((not NAG:IsTotemActive(3599)) and (not NAG:IsTotemActive(2894))) and NAG:Cast(3599)
+    or (NAG:CanWeave(117014) and NAG:AuraNumStacks(51530) < 5) and NAG:Cast(117014) 
+    or (NAG:AuraNumStacks(51530) == 5) and NAG:Cast(117014)
+    or (NAG:CanWeave(403) and NAG:AuraNumStacks(51530) < 5) and NAG:Cast(403)
+    or (NAG:AuraNumStacks(51530) == 5) and NAG:Cast(403)
     or ((not NAG:DotIsActive(8050))) and NAG:Cast(73680)
     or ((not NAG:DotIsActive(8050)) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
     or ((NAG:SpellTimeToReady(17364) >= 4.0)) and NAG:Cast(114049, "LEFT")
     or NAG:Cast(115356)
     or NAG:Cast(17364)
     or NAG:Cast(60103)
-    or ((not NAG:SpellIsReady(2894))) and NAG:Cast(2062)
+    or ((not NAG:IsTotemActive(2894))) and NAG:Cast(2062, 'LEFT')
     or NAG:Cast(73680)
     or ((NAG:DotRemainingTime(8050) <= 15.0) and NAG:AuraIsActive(73683)) and NAG:Cast(8050)
-    or not(NAG:CanWeave(421)) and NAG:Cast(421, "RIGHT")
-    or NAG:CanWeave(421) and NAG:Cast(421)
+    or (NAG:CanWeave(421) and NAG:AuraNumStacks(51530) < 5) and NAG:Cast(421)
+    or (NAG:AuraNumStacks(51530) == 5) and NAG:Cast(421)
     or NAG:Cast(51533, "LEFT")
     or NAG:Cast(8042)
-    or (
-    NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(60103)
-    and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(73680)
-    and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(115356)
-    and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(8050)
-) and NAG:Cast(17364, 10)
-or (
-    NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(73680)
-    and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(115356)
-    and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(8050)
-) and NAG:Cast(60103, 10)
-or (
-    NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(115356)
-    and NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(8050)
-) and NAG:Cast(73680, 10)
-or (
-    NAG:SpellTimeToReady(115356) <= NAG:SpellTimeToReady(8050)
-) and NAG:Cast(115356, 10)
-or (
-    (NAG:DotRemainingTime(8050) <= NAG:SpellTimeToReady(8050))
-) and NAG:Cast(8050, 10)
+        or (NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(60103) and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(73680) and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(115356) and NAG:SpellTimeToReady(17364) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(17364, 10)
+    or (NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(73680) and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(115356) and NAG:SpellTimeToReady(60103) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(60103, 10)
+    or (NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(115356) and NAG:SpellTimeToReady(73680) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(73680, 10)
+    or (NAG:SpellTimeToReady(115356) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(115356, 10)
+    or (NAG:DotRemainingTime(8050) <= NAG:SpellTimeToReady(8050)) and NAG:Cast(8050, 10)
         ]],
 
         -- New action-based format
@@ -149,7 +145,7 @@ or (
     or (NAG:AuraIsKnown(117012) and NAG:AuraIsActive(77762)) and NAG:Cast(73680)
         or (NAG:NumberTargets() >= 2 and NAG:DotRemainingTime(8050) > NAG:SpellCastTime(51505)) and NAG:Cast(51505, "RIGHT")
         or NAG:NumberTargets() >= 2 and NAG:DotIsActive(8050) and NAG:ShouldMultidot(8050, 2, 2.0) and NAG:Cast(8050, "RIGHT")
-        or (NAG:NumberTargets() >= 2 and NAG:AuraNumStacks(324) == 7) and NAG:Cast(8042, "RIGHT")
+        or (NAG:NumberTargets() >= 2 and NAG:AuraNumStacks(51530) == 7) and NAG:Cast(8042, "RIGHT")
         or NAG:NumberTargets() >= 2 and NAG:Cast(114074, "RIGHT")
         or NAG:NumberTargets() >= 2 and NAG:Cast(421, "RIGHT")
             or NAG:NumberTargets() >= 2 and NAG:Cast(421, "RIGHT")

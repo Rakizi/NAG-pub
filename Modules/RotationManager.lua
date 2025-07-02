@@ -101,10 +101,10 @@ local defaults = {
             enabled = true,
             size = 34,
             position = {
-                point = "CENTER",
-                relativePoint = "CENTER",
-                x = 0,
-                y = 200
+                point = "TOPLEFT",
+                relativePoint = "TOPLEFT",
+                x = -30,
+                y = 30
             }
         }
     }
@@ -378,9 +378,12 @@ end
 function RotationManager:RestoreSelectorPosition(frame)
     local charDB = self:GetChar()
     frame:ClearAllPoints()
+    
+    -- Try to anchor to NAG frame if available, otherwise fall back to UIParent
+    local anchorFrame = NAG.Frame or UIParent
     frame:SetPoint(
         charDB.selector.position.point,
-        UIParent,
+        anchorFrame,
         charDB.selector.position.relativePoint,
         charDB.selector.position.x,
         charDB.selector.position.y
@@ -469,8 +472,10 @@ function RotationManager:ShowSettingsMenu()
 
     local menu = AceGUI:Create("Frame")
     menu:SetTitle(L["selectorSettings"] or "Selector Settings")
-    menu:SetLayout("Flow")
+    menu:SetLayout("Fill")
     menu:EnableResize(false)
+    menu:SetWidth(300)
+    menu:SetHeight(320)
     menu:SetCallback("OnClose", function(widget)
         AceGUI:Release(widget)
         if self.selectorMenu == widget then
@@ -479,6 +484,13 @@ function RotationManager:ShowSettingsMenu()
     end)
     self.selectorMenu = menu
     local charDB = self:GetChar()
+
+    -- Use a scroll frame for all settings
+    local scroll = AceGUI:Create("ScrollFrame")
+    scroll:SetLayout("List")
+    scroll:SetFullWidth(true)
+    scroll:SetFullHeight(true)
+    menu:AddChild(scroll)
 
     -- Option: Disable
     local disableBtn = AceGUI:Create("Button")
@@ -490,7 +502,7 @@ function RotationManager:ShowSettingsMenu()
         self:UpdateSelectorVisibility()
         menu:Hide()
     end)
-    menu:AddChild(disableBtn)
+    scroll:AddChild(disableBtn)
 
     -- Option: Import Rotation
     local importBtn = AceGUI:Create("Button")
@@ -500,19 +512,19 @@ function RotationManager:ShowSettingsMenu()
         StaticPopup_Show("NAG_IMPORT_ROTATION_STRING")
         menu:Hide()
     end)
-    menu:AddChild(importBtn)
+    scroll:AddChild(importBtn)
 
     -- Option: Resize
     local sizeSlider = AceGUI:Create("Slider")
     sizeSlider:SetLabel(L["resize"] or "Resize")
     sizeSlider:SetValue(charDB.selector.size)
-    sizeSlider:SetSliderValues(30, 100, 1) -- Min, Max, Step
+    sizeSlider:SetSliderValues(30, 100, 1)
     sizeSlider:SetFullWidth(true)
     sizeSlider:SetCallback("OnValueChanged", function(_, _, value)
         charDB.selector.size = value
         self:ApplySelectorSize()
     end)
-    menu:AddChild(sizeSlider)
+    scroll:AddChild(sizeSlider)
 
     -- Option: Automatic Rotation Switching
     local autoRotationToggle = AceGUI:Create("CheckBox")
@@ -523,22 +535,18 @@ function RotationManager:ShowSettingsMenu()
     autoRotationToggle:SetCallback("OnValueChanged", function(_, _, value)
         self:SetAutoRotationEnabled(value)
     end)
-    menu:AddChild(autoRotationToggle)
+    scroll:AddChild(autoRotationToggle)
 
-    -- Sizing and Positioning
-    local isSpecial = false
-    local class = select(2, UnitClass("player"))
-    if class == "SHAMAN" or class == "DEATHKNIGHT" then
-        local StateManager = NAG:GetModule("StateManager")
-        if StateManager then
-            local currentSpec = StateManager.state and StateManager.state.player and StateManager.state.player.specInfo and StateManager.state.player.specInfo.id
-            if (class == "SHAMAN" and currentSpec == 262) or (class == "DEATHKNIGHT" and currentSpec == 251) then
-                isSpecial = true
-            end
-        end
-    end
-    menu:SetWidth(220)
-    menu:SetHeight(isSpecial and 270 or 220)
+    -- Add a close button at the bottom
+    local closeBtn = AceGUI:Create("Button")
+    closeBtn:SetText(L["close"] or "Close")
+    closeBtn:SetFullWidth(true)
+    closeBtn:SetCallback("OnClick", function()
+        menu:Hide()
+    end)
+    scroll:AddChild(closeBtn)
+
+    -- Position the menu at the cursor
     local x, y = GetCursorPosition()
     local scale = UIParent:GetEffectiveScale()
     menu:ClearAllPoints()

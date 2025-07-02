@@ -28,6 +28,8 @@ local Timer = NAG:GetModule("TimerManager")
 local OverlayManager = NAG:GetModule("OverlayManager")
 --- @type NAG|AceAddon
 local NAG = LibStub("AceAddon-3.0"):GetAddon("NAG")
+--- @type SpecializationCompat
+local SpecializationCompat = ns.SpecializationCompat
 
 -- Libraries
 local L = LibStub("AceLocale-3.0"):GetLocale("NAG", true)
@@ -131,6 +133,8 @@ function NAG:Cast(id, toleranceOrPosition, position)
     -- Parse parameters based on types
     local tolerance = 0
     local overridePosition = nil
+    local resetToDefault = false
+    local wasExplicitlyOverridden = false  -- Track if override came from function call
     
     if toleranceOrPosition then
         if type(toleranceOrPosition) == "number" then
@@ -138,11 +142,16 @@ function NAG:Cast(id, toleranceOrPosition, position)
             -- If third parameter exists and is string, it's the position
             if position and type(position) == "string" then
                 overridePosition = position
+                wasExplicitlyOverridden = true
             end
         elseif type(toleranceOrPosition) == "string" then
             -- Second parameter is position, use default tolerance
             overridePosition = toleranceOrPosition
+            wasExplicitlyOverridden = true
         end
+    else
+        -- If no position is provided, we want to reset to default after cast
+        resetToDefault = true
     end
     
     if not id then return false end
@@ -182,6 +191,47 @@ function NAG:Cast(id, toleranceOrPosition, position)
         id = 137639
     end
     
+    -- Helper to get the default position for a spell from specSpellLocations
+    local function getDefaultPositionForSpell(spellId)
+        local classDB = NAG.Class and NAG.Class.db and NAG.Class.db.class
+        local specIndex = SpecializationCompat and SpecializationCompat.GetActiveSpecialization and SpecializationCompat:GetActiveSpecialization() or nil
+        local specID = (SpecializationCompat and SpecializationCompat.GetSpecID and specIndex) and SpecializationCompat:GetSpecID(NAG.CLASS, specIndex) or nil
+        if not classDB or not classDB.specSpellLocations or not specID or not classDB.specSpellLocations[specID] then
+            return nil
+        end
+        for position, spellList in pairs(classDB.specSpellLocations[specID]) do
+            if tContains(spellList, spellId) then
+                return position
+            end
+        end
+        return nil
+    end
+    
+    -- Check for user spellLocationOverrides (ignore/user-set position)
+    local charDB = NAG.Class and NAG.Class.db and NAG.Class.db.char
+    local specIndex = SpecializationCompat and SpecializationCompat.GetActiveSpecialization and SpecializationCompat:GetActiveSpecialization() or nil
+    local specID = (SpecializationCompat and SpecializationCompat.GetSpecID and specIndex) and SpecializationCompat:GetSpecID(NAG.CLASS, specIndex) or nil
+    if charDB and charDB.spellLocationOverrides and specID and charDB.spellLocationOverrides[specID] then
+        local userOverride = charDB.spellLocationOverrides[specID][id]
+        if userOverride == "IGNORE" then
+            return false
+        elseif userOverride and userOverride ~= "" and not wasExplicitlyOverridden then
+            -- Only apply user override if no explicit position was provided in the function call
+            overridePosition = userOverride
+        end
+    end
+    
+    -- If no explicit position and no user override, get the default position from class file
+    if not overridePosition and not wasExplicitlyOverridden then
+        local defaultPos = getDefaultPositionForSpell(id)
+        if defaultPos then
+            overridePosition = defaultPos
+        else
+            -- If spell isn't defined in class position specification, use middle as fallback
+            overridePosition = "PRIMARY"
+        end
+    end
+    
     -- Try to find entity in DataManager
     local entity = DataManager:Get(id, DataManager.EntityTypes.SPELL) or
         DataManager:Get(id, DataManager.EntityTypes.ITEM)
@@ -202,15 +252,15 @@ function NAG:Cast(id, toleranceOrPosition, position)
     -- Store original position for restoration
     local originalPosition = entity.position
     
-    -- Temporarily override position if provided
+    -- Set position if we have one (explicit override, user override, or default from class file)
     if overridePosition then
         DataManager:SetSpellPosition(id, overridePosition)
     end
     
     -- Ensure position is restored after cast attempt
     local function restorePosition()
-        if overridePosition then
-            -- Need to map lowercase position values back to uppercase keys for SetSpellPosition
+        if wasExplicitlyOverridden then
+            -- If we explicitly overrode the position, restore to the original
             local positionValueToKey = {
                 ["left"] = "LEFT",
                 ["right"] = "RIGHT",
@@ -222,7 +272,13 @@ function NAG:Cast(id, toleranceOrPosition, position)
             
             local originalKey = originalPosition and positionValueToKey[originalPosition] or nil
             DataManager:SetSpellPosition(id, originalKey)
+        elseif resetToDefault then
+            -- If we're resetting to default, get the default position
+            local defaultPos = getDefaultPositionForSpell(id)
+            DataManager:SetSpellPosition(id, defaultPos)
         end
+        -- Note: If we set a default position from class file, we don't restore it
+        -- because that's the intended permanent position
     end
     
     if entity.flags.stance and not NAG.Class.db.char.enableStances then
@@ -252,7 +308,7 @@ function NAG:Cast(id, toleranceOrPosition, position)
     end
     
     -- Delay position restoration to allow visual update to complete
-    if overridePosition then
+    if wasExplicitlyOverridden or resetToDefault then
         local timerName = "restorePosition_" .. id
         -- Cancel any existing timer for this spell before creating a new one
         Timer:Cancel(Timer.Categories.UI_NOTIFICATION, timerName)

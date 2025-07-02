@@ -111,7 +111,8 @@ DataManager.SpellPosition = {
     RIGHT = "right",
     ABOVE = "above",
     BELOW = "below",
-    AOE = "aoe"
+    AOE = "aoe",
+    PRIMARY = "primary"
 }
 
 

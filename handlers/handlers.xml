@@ -11,6 +11,7 @@
     <Script file="APL_DRW.lua"/>
     <Script file="APL_Class.lua"/>
     <Script file="APL_Pet.lua"/>
+    <Script file="TotemTracking.lua"/>
 
     <!-- Resource Handlers -->
     <Script file="ResourceHandlers.lua"/>

@@ -38,6 +38,17 @@ local MIN_ENEMIES_FOR_CL = 2 -- Minimum number of enemies to switch to Chain Lig
 -- Specialization constants
 local ENHANCEMENT_SPEC_ID = 263 -- Enhancement spec ID for Cataclysm
 
+-- Spell CD Bar tracked spells
+local SPELL_CD_BAR_SPELLS = {
+    73680,   -- Unleash Elements  
+    115356,  -- Stormblast  
+    17364,   -- Stormstrike  
+    117014,  -- Elemental Blast  
+    60103,   -- Lava Lash  
+    8050,    -- Flame Shock  
+    8042     -- Earth Shock  
+}
+
 -- Default settings
 local defaults = {
     profile = {
@@ -89,6 +100,58 @@ local defaults = {
             background = "none",
             bgColor = { r = 1, g = 1, b = 1, a = 1 },
             borderArtHeightPct = 1.7, -- default 170% of bar height
+        },
+        -- Preset Layout settings - completely independent system
+        presetLayout = {
+            enabled = true,
+            width = 89,
+            height = 20,
+            alpha = 1.0,
+            point = "CENTER",
+            x = -2,
+            y = 0,
+            locked = false,
+            showBorder = true,
+            borderColor = {r = 1, g = 1, b = 1, a = 1},
+            borderThickness = 1,
+            showCountdownText = true,
+            countdownTextSize = 14,
+            countdownTextColor = {r = 1, g = 1, b = 1, a = 1},
+            lbBarHeightPct = 0.16,
+            clBarHeightPct = 0.15,
+            ebBarHeightPct = 0.15,
+            colors = {
+                background = {r = 0.2, g = 0.2, b = 0.2, a = 0.8},
+                weave = {r = 0.4, g = 0.7, b = 1, a = 0.8},
+                countdown = {r = 0.8, g = 0.2, b = 0.2, a = 0.8},
+                gcd = {r = 0.3, g = 0.3, b = 0.3, a = 0.85},
+                spark = {r = 1, g = 1, b = 1, a = 1},
+                clweave = {r = 0.2, g = 0.4, b = 0.8, a = 0.8},
+                upcomingweave = {r = 0.4, g = 0.7, b = 1, a = 0.8},
+                clupcomingweave = {r = 0.2, g = 0.4, b = 0.8, a = 0.8}
+            },
+            swingTimer = {
+                enabled = true,
+                sparkWidth = 2,
+                sparkColor = false, -- As requested
+                nextSwingEnabled = true,
+                nextSparkColor = {r = 0.8, g = 0.8, b = 0.8, a = 0.7},
+            },
+            background = {
+                enabled = true,
+                style = "Simpler",
+                scale = 1.9,
+                xOffset = -32,
+                yOffset = 8,
+                width = 84,
+                height = 40,
+                alpha = 0.8
+            },
+            -- Spell CD Bar settings
+            spellCDBar = {
+                enabled = true,
+                yOffset = 4
+            }
         }
     }
 }
@@ -99,6 +162,7 @@ local isDragging = false
 local isPositioning = false -- New variable to track positioning mode
 local lastUpdate = 0
 local UPDATE_INTERVAL = 0.016 -- Approximately 60 FPS for smooth movement
+local autoAnchorEnabled = true -- Enable automatic anchoring by default
 
 -- Track current spell cast for GCD bar logic
 local currentCastSpellId = nil
@@ -140,6 +204,10 @@ function ShamanWeaveBar:OnInitialize()
     self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     self:RegisterMessage("NAG_SPEC_UPDATED")
     self:RegisterEvent("PLAYER_LEVEL_UP", "CheckLevelAndSpec")
+    
+    -- Register for NAG frame updates to maintain anchor
+    self:RegisterMessage("NAG_FRAME_UPDATED")
+    self:RegisterMessage("NAG_FRAME_POSITION_CHANGED")
 
     -- Register for swing timer events to force instant update on swing
     local swingTimerLib = LibStub("LibClassicSwingTimerAPI")
@@ -218,6 +286,20 @@ function ShamanWeaveBar:NAG_SPEC_UPDATED()
     self:CheckLevelAndSpec()
 end
 
+function ShamanWeaveBar:NAG_FRAME_UPDATED()
+    -- Update anchor when NAG frame is updated
+    if self.db.profile.presetLayout.enabled and autoAnchorEnabled then
+        self:UpdateFrameAnchor()
+    end
+end
+
+function ShamanWeaveBar:NAG_FRAME_POSITION_CHANGED()
+    -- Update anchor when NAG frame position changes
+    if self.db.profile.presetLayout.enabled and autoAnchorEnabled then
+        self:UpdateFrameAnchor()
+    end
+end
+
 function ShamanWeaveBar:ModuleEnable()
     -- Double check all conditions before enabling
     local _, playerClass = UnitClass("player")
@@ -257,6 +339,11 @@ function ShamanWeaveBar:ModuleEnable()
 
     -- Update visibility based on settings
     self:UpdateVisibility()
+    
+    -- Apply automatic anchor if preset layout is enabled
+    if self.db.profile.presetLayout.enabled and autoAnchorEnabled then
+        self:UpdateFrameAnchor()
+    end
 
     -- Register events
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnCombatStateChanged")
@@ -270,6 +357,19 @@ function ShamanWeaveBar:ModuleEnable()
             lastUpdate = 0
         end
     end)
+
+    self:UpdateFrameSettings()  -- Ensure all settings (including Spell CD Bar) are applied
+
+    -- Force Spell CD Bar frame visibility to match settings
+    if frame and frame.spellCDBarFrame then
+        if self.db.profile.presetLayout.enabled and self.db.profile.presetLayout.spellCDBar.enabled then
+            frame.spellCDBarFrame:Show()
+        else
+            frame.spellCDBarFrame:Hide()
+        end
+    end
+
+    self:UpdateVisibility()     -- Ensure visibility is correct
 end
 
 function ShamanWeaveBar:ModuleDisable()
@@ -301,6 +401,13 @@ function ShamanWeaveBar:CreateFrames()
     local bgTexture = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
     bgTexture:SetPoint("CENTER", frame, "CENTER", 0, 0)
     frame.bgTexture = bgTexture
+
+    -- Create preset layout background texture (lowest layer, behind everything)
+    local presetBgTexture = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+    presetBgTexture:SetPoint("CENTER", frame, "CENTER", 0, 0)
+    -- Texture will be set dynamically based on style selection
+    presetBgTexture:Hide() -- Hidden by default
+    frame.presetBgTexture = presetBgTexture
 
     -- Create countdown bar (drawn first, lowest sublayer)
     local countdownBar = frame:CreateTexture(nil, "ARTWORK", nil, -8)
@@ -510,6 +617,40 @@ function ShamanWeaveBar:CreateFrames()
     ebUpcomingWeaveSparkFrame:Hide()
     frame.ebUpcomingWeaveSpark = ebUpcomingWeaveSparkFrame
 
+    -- Create Spell CD Bar frame (positioned above the main weave bar)
+    local spellCDBarFrame = CreateFrame("Frame", nil, frame)
+    spellCDBarFrame:SetSize(self.db.profile.bar.width, self.db.profile.bar.height)
+    spellCDBarFrame:SetPoint("BOTTOM", frame, "TOP", 0, 0)
+    spellCDBarFrame:Hide() -- Hidden by default, only shown when preset layout is enabled
+    frame.spellCDBarFrame = spellCDBarFrame
+
+    -- Create Spell CD Bar sparks for each tracked spell
+    frame.spellCDSparks = {}
+    for i, spellId in ipairs(SPELL_CD_BAR_SPELLS) do
+        -- Get spell icon using GetSpellTexture for better compatibility
+        local spellIcon = GetSpellTexture(spellId) or "Interface\\Icons\\INV_Misc_QuestionMark"
+        
+        -- Create spark frame for this spell
+        local sparkFrame = CreateFrame("Frame", nil, spellCDBarFrame)
+        sparkFrame:SetSize(16, 16)
+        sparkFrame.spellId = spellId -- Store spell ID for reference
+        
+        -- Create spark texture
+        local spark = sparkFrame:CreateTexture(nil, "OVERLAY", nil, 1)
+        spark:SetAllPoints()
+        spark:SetTexture(spellIcon)
+        spark:SetTexCoord(0.15, 0.85, 0.15, 0.85) -- 30% zoom (crop 15% each side)
+        
+        -- Create mask for circular shape (same as LB/CL/EB sparks)
+        local sparkMask = sparkFrame:CreateMaskTexture()
+        sparkMask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+        sparkMask:SetAllPoints()
+        spark:AddMaskTexture(sparkMask)
+        
+        sparkFrame:Hide() -- Hidden by default
+        frame.spellCDSparks[i] = sparkFrame
+    end
+
     -- Set up dragging for the main frame
     frame:SetMovable(true)
     frame:EnableMouse(true)
@@ -544,6 +685,7 @@ function ShamanWeaveBar:CreateFrames()
     -- Apply dragging to all child frames
     makeFrameDraggable(swingFrame)
     makeFrameDraggable(swingBgBar)
+    makeFrameDraggable(spellCDBarFrame)
 
     -- Set up main frame drag handlers
     frame:SetScript("OnDragStart", function()
@@ -570,24 +712,78 @@ function ShamanWeaveBar:CreateFrames()
     self:UpdateFrameSettings()
 end
 
+function ShamanWeaveBar:GetBackgroundTexturePath(style)
+    if style == "Simpler" then
+        return "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\weaverbgSimpler.png"
+    else
+        return "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\weaverbg.png"
+    end
+end
+
+function ShamanWeaveBar:UpdateFrameAnchor()
+    if not frame or not autoAnchorEnabled then return end
+    
+    -- Get the NAG primary frame
+    local nagFrame = NAG.Frame
+    if not nagFrame then return end
+    
+    -- Get the primary icon frame (the main spell icon)
+    local primaryIconFrame = nagFrame.iconFrames and nagFrame.iconFrames["primary"]
+    if not primaryIconFrame then return end
+    
+    -- Calculate the anchor position
+    local scale = nagFrame:GetScale()
+    local right = primaryIconFrame:GetLeft() + primaryIconFrame:GetWidth() * scale
+    local bottom = primaryIconFrame:GetBottom()
+    
+    -- Fine-tune positioning offsets
+    local offsetX = 4.5   -- Adjust horizontal position
+    local offsetY = 4   -- Adjust vertical position
+
+    -- Add user-configurable offsets from presetLayout
+    local preset = self.db.profile.presetLayout or {}
+    local userX = preset.x or 0
+    local userY = preset.y or 0
+    
+    -- Apply the anchor with additive user offsets
+    frame:ClearAllPoints()
+    frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", right + offsetX + userX, bottom + offsetY + userY)
+end
+
 function ShamanWeaveBar:UpdateFrameSettings()
     if not frame then return end
 
-    -- Update size
-    frame:SetSize(self.db.profile.bar.width, self.db.profile.bar.height)
+    -- Check if preset layout is enabled
+    local usePresetLayout = self.db.profile.presetLayout.enabled
+    
+    -- Choose which settings to use
+    local settings
+    if usePresetLayout then
+        settings = self.db.profile.presetLayout
+    else
+        settings = self.db.profile.bar
+    end
 
-    -- Update position
-    frame:ClearAllPoints()
-    frame:SetPoint(self.db.profile.bar.point, self.db.profile.bar.x, self.db.profile.bar.y)
+    -- Update size
+    frame:SetSize(settings.width, settings.height)
+
+    -- Update position - use automatic anchoring for preset layout
+    if usePresetLayout and autoAnchorEnabled then
+        self:UpdateFrameAnchor()
+    else
+        -- Use manual positioning for regular layout
+        frame:ClearAllPoints()
+        frame:SetPoint(settings.point, settings.x, settings.y)
+    end
 
     -- Update alpha
-    frame:SetAlpha(self.db.profile.bar.alpha)
+    frame:SetAlpha(settings.alpha)
 
     -- Update bar heights and vertical positions
-    local barHeight = self.db.profile.bar.height
-    local lbBarHeight = barHeight * (self.db.profile.bar.lbBarHeightPct or 0.15)
-    local clBarHeight = barHeight * (self.db.profile.bar.clBarHeightPct or 0.15)
-    local ebBarHeight = barHeight * (self.db.profile.bar.ebBarHeightPct or 0.15)
+    local barHeight = settings.height
+    local lbBarHeight = barHeight * (settings.lbBarHeightPct or 0.15)
+    local clBarHeight = barHeight * (settings.clBarHeightPct or 0.15)
+    local ebBarHeight = barHeight * (settings.ebBarHeightPct or 0.15)
 
     -- Proportional offsets for stacking, with clamping to fit inside the main bar
     local halfBarHeight = barHeight / 2
@@ -640,8 +836,24 @@ function ShamanWeaveBar:UpdateFrameSettings()
     frame.gcdBar:ClearAllPoints()
     frame.gcdBar:SetPoint("LEFT", frame, "LEFT", 0, 0)
 
-    -- Update background
-    local barWidth = self.db.profile.bar.width
+    -- Update preset layout background
+    if frame.presetBgTexture then
+        if usePresetLayout and settings.background.enabled then
+            -- Get the texture path based on selected style
+            local texturePath = self:GetBackgroundTexturePath(settings.background.style or "Extended")
+            frame.presetBgTexture:SetTexture(texturePath)
+            frame.presetBgTexture:Show()
+            frame.presetBgTexture:SetSize(settings.background.width * settings.background.scale, settings.background.height * settings.background.scale)
+            frame.presetBgTexture:ClearAllPoints()
+            frame.presetBgTexture:SetPoint("CENTER", frame, "CENTER", settings.background.xOffset, settings.background.yOffset)
+            frame.presetBgTexture:SetAlpha(settings.background.alpha)
+        else
+            frame.presetBgTexture:Hide()
+        end
+    end
+
+    -- Update regular background (only if preset layout is disabled)
+    local barWidth = settings.width
     local bgFile = self.db.profile.bar.background
     local bgPath = nil
     if bgFile == "bg2" then
@@ -652,7 +864,7 @@ function ShamanWeaveBar:UpdateFrameSettings()
         bgPath = "Interface\\AddOns\\NAG\\Media\\ShamanWeaver\\bg4.png"
     end
     if frame.bgTexture then
-        if bgPath then
+        if bgPath and not usePresetLayout then
             frame.bgTexture:SetTexture(bgPath)
             frame.bgTexture:Show()
         else
@@ -667,7 +879,7 @@ function ShamanWeaveBar:UpdateFrameSettings()
     end
 
     -- Update weave bar color
-    local colors = self.db.profile.bar.colors
+    local colors = settings.colors
     frame.weaveBar:SetColorTexture(colors.weave.r, colors.weave.g, colors.weave.b, colors.weave.a)
     frame.clWeaveBar:SetColorTexture(colors.clweave.r, colors.clweave.g, colors.clweave.b, colors.clweave.a)
     frame.upcomingWeaveBar:SetColorTexture(colors.upcomingweave.r, colors.upcomingweave.g, colors.upcomingweave.b, colors.upcomingweave.a)
@@ -681,31 +893,64 @@ function ShamanWeaveBar:UpdateFrameSettings()
 
     -- Update GCD spark
     if frame.gcdSpark then
-        frame.gcdSpark:SetSize(self.db.profile.bar.swingTimer.sparkWidth + 2, barHeight)
+        frame.gcdSpark:SetSize(settings.swingTimer.sparkWidth + 2, barHeight)
         frame.gcdSpark:SetColorTexture(0, 0, 0, 1)
     end
 
     -- Update swing timer settings
     if frame.swingFrame then
         frame.swingBar:SetHeight(barHeight)
-        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, barHeight)
-        frame.spark:SetColorTexture(
-            self.db.profile.bar.swingTimer.sparkColor.r,
-            self.db.profile.bar.swingTimer.sparkColor.g,
-            self.db.profile.bar.swingTimer.sparkColor.b,
-            self.db.profile.bar.swingTimer.sparkColor.a
-        )
+        frame.spark:SetSize(settings.swingTimer.sparkWidth, barHeight)
+        
+        -- Handle sparkColor which can be false or a color table
+        if settings.swingTimer.sparkColor and type(settings.swingTimer.sparkColor) == "table" then
+            frame.spark:SetColorTexture(
+                settings.swingTimer.sparkColor.r,
+                settings.swingTimer.sparkColor.g,
+                settings.swingTimer.sparkColor.b,
+                settings.swingTimer.sparkColor.a
+            )
+        else
+            -- Use default color when sparkColor is false or invalid
+            frame.spark:SetColorTexture(0.8, 0.8, 0.8, 1)
+        end
 
         -- Update swing timer background settings
         if frame.swingBgBar then
             frame.swingBgBar:SetWidth(barWidth)
             frame.swingBgBar:SetHeight(barHeight)
-            frame.swingBgBar:SetColorTexture(0, 0, 0, self.db.profile.bar.swingTimer.backgroundBar.alpha)
-            if self.db.profile.bar.swingTimer.backgroundBar.enabled then
-                frame.swingBgBar:Show()
-            else
+            -- Handle background bar settings for both regular and preset layouts
+            if usePresetLayout then
+                -- Preset layout doesn't use background bar, so hide it
                 frame.swingBgBar:Hide()
+            else
+                -- Regular layout uses background bar settings
+                local backgroundBar = settings.swingTimer.backgroundBar
+                if backgroundBar then
+                    frame.swingBgBar:SetColorTexture(0, 0, 0, backgroundBar.alpha)
+                    if backgroundBar.enabled then
+                        frame.swingBgBar:Show()
+                    else
+                        frame.swingBgBar:Hide()
+                    end
+                else
+                    frame.swingBgBar:Hide()
+                end
             end
+        end
+    end
+
+    -- Update Spell CD Bar frame settings
+    if frame.spellCDBarFrame then
+        if usePresetLayout and settings.spellCDBar and settings.spellCDBar.enabled then
+            -- Show and position the Spell CD Bar frame
+            frame.spellCDBarFrame:Show()
+            frame.spellCDBarFrame:SetSize(settings.width, settings.height)
+            frame.spellCDBarFrame:ClearAllPoints()
+            frame.spellCDBarFrame:SetPoint("BOTTOM", frame, "TOP", 0, settings.spellCDBar.yOffset or 0)
+        else
+            -- Hide the Spell CD Bar frame
+            frame.spellCDBarFrame:Hide()
         end
     end
 end
@@ -716,20 +961,37 @@ function ShamanWeaveBar:UpdateVisibility()
     -- If in positioning mode, always show
     if isPositioning then
         frame:Show()
+        if frame.spellCDBarFrame then
+            frame.spellCDBarFrame:Show()
+        end
         return
     end
 
     -- First check if the bar should be shown at all
     if not self.db.profile.showBar then
         frame:Hide()
+        if frame.spellCDBarFrame then
+            frame.spellCDBarFrame:Hide()
+        end
         return
     end
 
     -- Then check combat state if hideOutOfCombat is enabled
     if self.db.profile.hideOutOfCombat and not UnitAffectingCombat("player") then
         frame:Hide()
+        if frame.spellCDBarFrame then
+            frame.spellCDBarFrame:Hide()
+        end
     else
         frame:Show()
+        -- Only show Spell CD Bar if preset layout and spellCDBar are enabled
+        if frame.spellCDBarFrame then
+            if self.db.profile.presetLayout.enabled and self.db.profile.presetLayout.spellCDBar.enabled then
+                frame.spellCDBarFrame:Show()
+            else
+                frame.spellCDBarFrame:Hide()
+            end
+        end
     end
 end
 
@@ -765,7 +1027,8 @@ local function PositionBarSpark(bar, spark, alignTop, alignBottom)
         local top = bar:GetTop()
         local bottom = bar:GetBottom()
         if left and top and bottom then
-            local sparkX = left + bar:GetWidth()
+            -- Position spark centered at the end of the bar (not extending past it)
+            local sparkX = left + bar:GetWidth() - (spark:GetWidth() or 16) / 2
             local sparkY
             if alignTop then
                 sparkY = top
@@ -788,11 +1051,20 @@ end
 function ShamanWeaveBar:UpdateDisplay()
     if not frame or isDragging or not self.db.profile.showBar then return end
 
+    -- Choose which settings to use
+    local usePresetLayout = self.db.profile.presetLayout.enabled
+    local settings
+    if usePresetLayout then
+        settings = self.db.profile.presetLayout
+    else
+        settings = self.db.profile.bar
+    end
+
     -- Recalculate proportional Y offsets with clamping
-    local barHeight = self.db.profile.bar.height
-    local lbBarHeight = barHeight * (self.db.profile.bar.lbBarHeightPct or 0.15)
-    local clBarHeight = barHeight * (self.db.profile.bar.clBarHeightPct or 0.15)
-    local ebBarHeight = barHeight * (self.db.profile.bar.ebBarHeightPct or 0.15)
+    local barHeight = settings.height
+    local lbBarHeight = barHeight * (settings.lbBarHeightPct or 0.15)
+    local clBarHeight = barHeight * (settings.clBarHeightPct or 0.15)
+    local ebBarHeight = barHeight * (settings.ebBarHeightPct or 0.15)
     local halfBarHeight = barHeight / 2
 
     local desiredLbYOffset = -barHeight * 0.25
@@ -823,6 +1095,12 @@ function ShamanWeaveBar:UpdateDisplay()
         frame.clWeaveSpark:Hide()
         frame.upcomingWeaveSpark:Hide()
         frame.clUpcomingWeaveSpark:Hide()
+        -- Hide Spell CD Bar sparks
+        if frame.spellCDSparks then
+            for i, sparkFrame in ipairs(frame.spellCDSparks) do
+                sparkFrame:Hide()
+            end
+        end
         return
     end
 
@@ -846,39 +1124,106 @@ function ShamanWeaveBar:UpdateDisplay()
     -- Calculate bar widths with smooth interpolation only when decreasing
     local maxWidth = frame:GetWidth()
 
-    -- Update LB weave bar (light blue) and spark
-    local lbRemainingGapTime = rawSwingTimeLeft - lbCastTime
+    -- Apply Maelstrom Weapon logic for input delay with latency awareness and fixed buffer
+    local userPing = NAG:GetNetStats() -- Use cached network stats
+    local baseInputDelay = NAG:InputDelay() or 0.050 -- fallback to 50ms
+    local staticPressBuffer = 0.200 -- 200ms flat buffer for press-to-cast
+    local maelstromStacks = NAG:AuraNumStacks(51530) -- Maelstrom Weapon spell ID
+    
+    -- Final delay: input + ping + 200ms fixed buffer
+    local adjustedInputDelay = baseInputDelay + userPing + staticPressBuffer
+    if maelstromStacks >= 5 then
+        adjustedInputDelay = 0 -- instant cast, ignore delay
+    else
+        adjustedInputDelay = math.min(adjustedInputDelay, 0.45) -- cap at 0.45s
+    end
+    
+    -- Store for debug purposes
+    if self.db.profile.debugInputDelay ~= nil then
+        self.db.profile.debugInputDelay = adjustedInputDelay
+    end
+    
+    -- Store adjusted delay for debug purposes
+    if self.db.profile.debugAdjustedDelay ~= nil then
+        self.db.profile.debugAdjustedDelay = adjustedInputDelay
+    end
+    
+    -- Store network stats for debug purposes
+    if self.db.profile.debugNetworkStats then
+        local netStatsDebug = NAG:GetNetStatsDebug()
+        self.db.profile.debugNetworkStatsData = {
+            currentAverage = netStatsDebug.currentAverage,
+            readingsCount = netStatsDebug.readingsCount,
+            lastUpdate = netStatsDebug.lastUpdate
+        }
+    end
+
+    -- Update LB weave bar (light blue) and spark with improved smoothing
+    local lbRemainingGapTime = rawSwingTimeLeft - (lbCastTime + adjustedInputDelay)
     local epsilon = 1e-3
-    if lbRemainingGapTime > epsilon then
-        local swingProgress = lbRemainingGapTime / weaponSpeed
+    
+    -- Calculate safe gap and visual width with improved smoothing
+    local safeGap = rawSwingTimeLeft - lbCastTime
+    local visualGap = math.max(0, safeGap - adjustedInputDelay)
+    
+    if visualGap > epsilon then
+        local swingProgress = visualGap / weaponSpeed
         local targetWidth = maxWidth * swingProgress
         local currentWidth = frame.weaveBar:GetWidth()
+        
+        -- Smooth interpolation for width changes
         if targetWidth < currentWidth then
             local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
             frame.weaveBar:SetWidth(newWidth)
         else
             frame.weaveBar:SetWidth(targetWidth)
         end
+        
+        -- Smooth alpha transition as gap approaches zero
+        local alpha = math.min(1.0, visualGap / (adjustedInputDelay + 0.1))
+        frame.weaveBar:SetAlpha(alpha)
+        
         frame.weaveBar:Show()
         PositionBarSpark(frame.weaveBar, frame.weaveSpark, false)
     else
-        frame.weaveBar:SetWidth(0)
-        frame.weaveBar:Hide()
-        frame.weaveSpark:Hide()
+        -- Very small gap - shrink width smoothly instead of disappearing
+        local currentWidth = frame.weaveBar:GetWidth()
+        local newWidth = currentWidth * 0.7 -- Gradually shrink
+        if newWidth < 2 then -- Minimum visible width
+            frame.weaveBar:SetWidth(0)
+            frame.weaveBar:Hide()
+            frame.weaveSpark:Hide()
+        else
+            frame.weaveBar:SetWidth(newWidth)
+            frame.weaveBar:SetAlpha(0.3) -- Fade out
+            frame.weaveSpark:Hide()
+        end
     end
 
-    -- Update CL weave bar (darker blue) and spark
-    local clRemainingGapTime = rawSwingTimeLeft - clCastTime
-    if clRemainingGapTime > epsilon then
-        local swingProgress = clRemainingGapTime / weaponSpeed
+    -- Update CL weave bar (darker blue) and spark with improved smoothing
+    local clRemainingGapTime = rawSwingTimeLeft - (clCastTime + adjustedInputDelay)
+    
+    -- Calculate safe gap and visual width with improved smoothing
+    local clSafeGap = rawSwingTimeLeft - clCastTime
+    local clVisualGap = math.max(0, clSafeGap - adjustedInputDelay)
+    
+    if clVisualGap > epsilon then
+        local swingProgress = clVisualGap / weaponSpeed
         local targetWidth = maxWidth * swingProgress
         local currentWidth = frame.clWeaveBar:GetWidth()
+        
+        -- Smooth interpolation for width changes
         if targetWidth < currentWidth then
             local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
             frame.clWeaveBar:SetWidth(newWidth)
         else
             frame.clWeaveBar:SetWidth(targetWidth)
         end
+        
+        -- Smooth alpha transition as gap approaches zero
+        local alpha = math.min(1.0, clVisualGap / (adjustedInputDelay + 0.1))
+        frame.clWeaveBar:SetAlpha(alpha)
+        
         -- Only show CL bar if EB is on cooldown
         local ebStart, ebDuration = GetSpellCooldown(117014)
         local ebOnCD = ebDuration and ebDuration > 1.5 and (ebStart + ebDuration - GetTime()) > 0
@@ -890,13 +1235,22 @@ function ShamanWeaveBar:UpdateDisplay()
             frame.clWeaveSpark:Hide()
         end
     else
-        frame.clWeaveBar:SetWidth(0)
-        frame.clWeaveBar:Hide()
-        frame.clWeaveSpark:Hide()
+        -- Very small gap - shrink width smoothly instead of disappearing
+        local currentWidth = frame.clWeaveBar:GetWidth()
+        local newWidth = currentWidth * 0.7 -- Gradually shrink
+        if newWidth < 2 then -- Minimum visible width
+            frame.clWeaveBar:SetWidth(0)
+            frame.clWeaveBar:Hide()
+            frame.clWeaveSpark:Hide()
+        else
+            frame.clWeaveBar:SetWidth(newWidth)
+            frame.clWeaveBar:SetAlpha(0.3) -- Fade out
+            frame.clWeaveSpark:Hide()
+        end
     end
 
     -- Update LB upcoming weave gap bar (light blue) and spark
-    local lbNextGapTime = max(0, (weaponSpeed) - lbCastTime)
+    local lbNextGapTime = max(0, (weaponSpeed) - (lbCastTime + adjustedInputDelay))
     if lbNextGapTime > epsilon then
         local swingProgress = rawSwingTimeLeft / weaponSpeed
         local safeOffset = 0.02
@@ -935,7 +1289,7 @@ function ShamanWeaveBar:UpdateDisplay()
     end
 
     -- Update CL upcoming weave gap bar (darker blue) and spark
-    local clNextGapTime = max(0, (weaponSpeed) - clCastTime)
+    local clNextGapTime = max(0, (weaponSpeed) - (clCastTime + adjustedInputDelay))
     if clNextGapTime > epsilon then
         local swingProgress = rawSwingTimeLeft / weaponSpeed
         local safeOffset = 0.02
@@ -1015,7 +1369,12 @@ function ShamanWeaveBar:UpdateDisplay()
             r, g, b, a = 0.3, 0.3, 0.3, 0.85
         else
             -- For non-instant casts, check if cast will clip swing
-            if castEndTime >= nextSwingTime then
+            -- Note: We use the actual castEndTime (without adjustedInputDelay) for clipping detection
+            -- Maelstrom Weapon at 5 stacks makes casts instant, so skip clipping check
+            if maelstromStacks == 5 then
+                -- Light green: no clipping possible with instant casts
+                r, g, b, a = 0.4, 1, 0.4, 0.95
+            elseif castEndTime >= nextSwingTime then
                 -- Red: cast will clip next swing
                 r, g, b, a = 1, 0.2, 0.2, 0.95
             else
@@ -1052,7 +1411,7 @@ function ShamanWeaveBar:UpdateDisplay()
     end
 
     -- Update current swing timer bar
-    if self.db.profile.bar.swingTimer.enabled then
+    if settings.swingTimer.enabled then
         local swingProgress = rawSwingTimeLeft / weaponSpeed
         local targetWidth = maxWidth * swingProgress
         local currentWidth = frame.swingBar:GetWidth()
@@ -1066,37 +1425,57 @@ function ShamanWeaveBar:UpdateDisplay()
         end
 
         -- Set fixed spark size and show it
-        frame.spark:SetSize(self.db.profile.bar.swingTimer.sparkWidth, barHeight)
+        frame.spark:SetSize(settings.swingTimer.sparkWidth, barHeight)
         frame.spark:Show()
     else
         frame.swingBar:SetWidth(0)
         frame.spark:Hide()
     end
 
-    -- Update EB weave bar (light purple) and spark
+    -- Update EB weave bar (light purple) and spark with improved smoothing
     local EB_ID = 117014
     -- Only show EB bars if EB is off cooldown
     local ebStart, ebDuration = GetSpellCooldown(EB_ID)
     local ebOnCD = ebDuration and ebDuration > 1.5 and (ebStart + ebDuration - GetTime()) > 0
     if not ebOnCD then
         local ebCastTime = NAG:CastTime(EB_ID)
-        local ebRemainingGapTime = rawSwingTimeLeft - ebCastTime
-        if ebRemainingGapTime > epsilon then
-            local swingProgress = ebRemainingGapTime / weaponSpeed
+        
+        -- Calculate safe gap and visual width with improved smoothing
+        local ebSafeGap = rawSwingTimeLeft - ebCastTime
+        local ebVisualGap = math.max(0, ebSafeGap - adjustedInputDelay)
+        
+        if ebVisualGap > epsilon then
+            local swingProgress = ebVisualGap / weaponSpeed
             local targetWidth = maxWidth * swingProgress
             local currentWidth = frame.ebWeaveBar:GetWidth()
+            
+            -- Smooth interpolation for width changes
             if targetWidth < currentWidth then
                 local newWidth = currentWidth + (targetWidth - currentWidth) * 0.3
                 frame.ebWeaveBar:SetWidth(newWidth)
             else
                 frame.ebWeaveBar:SetWidth(targetWidth)
             end
+            
+            -- Smooth alpha transition as gap approaches zero
+            local alpha = math.min(1.0, ebVisualGap / (adjustedInputDelay + 0.1))
+            frame.ebWeaveBar:SetAlpha(alpha)
+            
             frame.ebWeaveBar:Show()
             PositionBarSpark(frame.ebWeaveBar, frame.ebWeaveSpark, true) -- Changed to alignTop like CL
         else
-            frame.ebWeaveBar:SetWidth(0)
-            frame.ebWeaveBar:Hide()
-            frame.ebWeaveSpark:Hide()
+            -- Very small gap - shrink width smoothly instead of disappearing
+            local currentWidth = frame.ebWeaveBar:GetWidth()
+            local newWidth = currentWidth * 0.7 -- Gradually shrink
+            if newWidth < 2 then -- Minimum visible width
+                frame.ebWeaveBar:SetWidth(0)
+                frame.ebWeaveBar:Hide()
+                frame.ebWeaveSpark:Hide()
+            else
+                frame.ebWeaveBar:SetWidth(newWidth)
+                frame.ebWeaveBar:SetAlpha(0.3) -- Fade out
+                frame.ebWeaveSpark:Hide()
+            end
         end
     else
         frame.ebWeaveBar:SetWidth(0)
@@ -1106,7 +1485,7 @@ function ShamanWeaveBar:UpdateDisplay()
     -- Update EB upcoming weave gap bar (light purple) and spark
     if not ebOnCD then
         local ebCastTime = NAG:CastTime(EB_ID)
-        local ebNextGapTime = max(0, (weaponSpeed) - ebCastTime)
+        local ebNextGapTime = max(0, (weaponSpeed) - (ebCastTime + adjustedInputDelay))
         if ebNextGapTime > epsilon then
             local swingProgress = rawSwingTimeLeft / weaponSpeed
             local safeOffset = 0.02
@@ -1147,6 +1526,59 @@ function ShamanWeaveBar:UpdateDisplay()
         frame.ebUpcomingWeaveBar:SetWidth(0)
         frame.ebUpcomingWeaveBar:Hide()
         frame.ebUpcomingWeaveSpark:Hide()
+    end
+
+    -- Update Spell CD Bar sparks
+    if usePresetLayout and settings.spellCDBar and settings.spellCDBar.enabled and frame.spellCDBarFrame and frame.spellCDSparks then
+        local weaponSpeed = NAG:AutoSwingTime(NAG.Types:GetType("SwingType").MainHand)
+        local maxWidth = frame.spellCDBarFrame:GetWidth()
+        local smoothingFactor = 0.3
+        -- Update each spell spark
+        for i, sparkFrame in ipairs(frame.spellCDSparks) do
+            local spellId = sparkFrame.spellId
+            -- Check if spell is known
+            if NAG:IsKnown(spellId) then
+                -- Calculate GCD-aware cooldown timing
+                local delay = 0
+                if not NAG:IsReadySpell(spellId) then
+                    local spellCooldown = NAG:TimeToReady(spellId)
+                    local gcdTime = NAG:GCDTimeToReady()
+                    if spellCooldown and spellCooldown > 0 then
+                        delay = spellCooldown + gcdTime
+                    else
+                        delay = gcdTime
+                    end
+                end
+                if delay and delay > 0 then
+                    local clampedDelay = math.min(delay, weaponSpeed)
+                    local progress = clampedDelay / weaponSpeed
+                    local targetX = maxWidth * progress
+                    -- Smoothing: interpolate currentX toward targetX
+                    if not sparkFrame.currentX or math.abs(sparkFrame.currentX - targetX) > maxWidth then
+                        sparkFrame.currentX = targetX -- Initialize or reset if out of bounds
+                    else
+                        sparkFrame.currentX = sparkFrame.currentX + (targetX - sparkFrame.currentX) * smoothingFactor
+                    end
+                    sparkFrame:ClearAllPoints()
+                    sparkFrame:SetPoint("CENTER", frame.spellCDBarFrame, "LEFT", sparkFrame.currentX, 0)
+                    sparkFrame:Show()
+                else
+                    sparkFrame:Hide()
+                    sparkFrame.currentX = nil -- Reset smoothing when hidden
+                end
+            else
+                sparkFrame:Hide()
+                sparkFrame.currentX = nil -- Reset smoothing when hidden
+            end
+        end
+    else
+        -- Hide all spell CD sparks if not enabled
+        if frame.spellCDSparks then
+            for i, sparkFrame in ipairs(frame.spellCDSparks) do
+                sparkFrame:Hide()
+                sparkFrame.currentX = nil -- Reset smoothing when hidden
+            end
+        end
     end
 end
 
@@ -1205,9 +1637,410 @@ function ShamanWeaveBar:GetOptions()
                 type = "execute",
                 width = "full",
                 order = 2,
+                disabled = function()
+                    return self.db.profile.presetLayout.enabled and autoAnchorEnabled
+                end,
                 func = function()
                     self:StartPositioning()
                 end
+            },
+            presetLayout = {
+                name = L["Preset Layout"],
+                type = "group",
+                order = 5,
+                inline = false,
+                args = {
+                    enabled = {
+                        name = L["Enable Preset Layout"],
+                        desc = L["Toggle the preset layout system on/off"],
+                        type = "toggle",
+                        width = "full",
+                        order = 0,
+                        set = function(info, value)
+                            self.db.profile.presetLayout.enabled = value
+                            self:UpdateFrameSettings()
+                            -- Refresh the options panel to update button states
+                            if NAG.optionsFrame then
+                                -- NAG.optionsFrame:Refresh()
+                                AceConfigRegistry:NotifyChange("NAG")
+                            end
+                        end,
+                        get = function(info) return self.db.profile.presetLayout.enabled end
+                    },
+                    autoAnchor = {
+                        name = L["Auto Anchor to NAG Frame"] or "Auto Anchor to NAG Frame",
+                        desc = L["Automatically position the weaving bar relative to the NAG primary frame"] or "Automatically position the weaving bar relative to the NAG primary frame",
+                        type = "toggle",
+                        width = "full",
+                        order = 1,
+                        set = function(info, value)
+                            autoAnchorEnabled = value
+                            if self.db.profile.presetLayout.enabled then
+                                self:UpdateFrameSettings()
+                            end
+                            -- Refresh the options panel to update button states
+                            if NAG.optionsFrame then
+                                -- NAG.optionsFrame:Refresh()
+                                AceConfigRegistry:NotifyChange("NAG")
+                            end
+                        end,
+                        get = function(info) return autoAnchorEnabled end
+                    },
+                    -- Basic settings
+                    width = { 
+                        name = L["Width"], 
+                        type = "range", 
+                        min = 45, 
+                        max = 1000, 
+                        step = 1, 
+                        order = 20, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.width = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.width end 
+                    },
+                    height = { 
+                        name = L["Height"], 
+                        type = "range", 
+                        min = 10, 
+                        max = 500, 
+                        step = 1, 
+                        order = 30, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.height = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.height end 
+                    },
+                    alpha = { 
+                        name = L["Alpha"], 
+                        type = "range", 
+                        min = 0, 
+                        max = 1, 
+                        step = 0.05, 
+                        order = 40, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.alpha = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.alpha end 
+                    },
+                    -- Position settings
+                    positionHeader = { name = L["Position"], type = "header", order = 50 },
+                    xOffset = { 
+                        name = L["X Offset"], 
+                        type = "range", 
+                        min = -2000, 
+                        max = 2000, 
+                        step = 1, 
+                        order = 60, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.x = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.x end 
+                    },
+                    yOffset = { 
+                        name = L["Y Offset"], 
+                        type = "range", 
+                        min = -2000, 
+                        max = 2000, 
+                        step = 1, 
+                        order = 70, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.y = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.y end 
+                    },
+                    -- Bar heights
+                    barHeightsHeader = { name = L["Bar Heights"], type = "header", order = 80 },
+                    lbBarHeightPct = { 
+                        name = L["Lightning Bolt Bar Height"], 
+                        type = "range", 
+                        min = 0.05, 
+                        max = 1.0, 
+                        step = 0.01, 
+                        order = 81, 
+                        isPercent = true, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.lbBarHeightPct = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.lbBarHeightPct end 
+                    },
+                    clBarHeightPct = { 
+                        name = L["Chain Lightning Bar Height"], 
+                        type = "range", 
+                        min = 0.05, 
+                        max = 1.0, 
+                        step = 0.01, 
+                        order = 82, 
+                        isPercent = true, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.clBarHeightPct = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.clBarHeightPct end 
+                    },
+                    ebBarHeightPct = { 
+                        name = L["Elemental Blast Bar Height"], 
+                        type = "range", 
+                        min = 0.05, 
+                        max = 1.0, 
+                        step = 0.01, 
+                        order = 83, 
+                        isPercent = true, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.ebBarHeightPct = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.ebBarHeightPct end 
+                    },
+                    -- Custom background settings
+                    backgroundHeader = { name = L["Custom Background"], type = "header", order = 90 },
+                    backgroundEnabled = { 
+                        name = L["Enable Custom Background"], 
+                        type = "toggle", 
+                        order = 91, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.enabled = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.enabled end 
+                    },
+                    backgroundStyle = { 
+                        name = L["Background Style"] or "Background Style", 
+                        desc = L["Select the background style for the preset layout"] or "Select the background style for the preset layout", 
+                        type = "select", 
+                        order = 92, 
+                        values = {
+                            Extended = "Extended",
+                            Simpler = "Simpler"
+                        },
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.style = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.style or "Extended" end 
+                    },
+                    backgroundScale = { 
+                        name = L["Background Scale"], 
+                        type = "range", 
+                        min = 0.1, 
+                        max = 3.0, 
+                        step = 0.1, 
+                        order = 93, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.scale = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.scale end 
+                    },
+                    backgroundXOffset = { 
+                        name = L["Background X Offset"], 
+                        type = "range", 
+                        min = -2000, 
+                        max = 2000, 
+                        step = 1, 
+                        order = 94, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.xOffset = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.xOffset end 
+                    },
+                    backgroundYOffset = { 
+                        name = L["Background Y Offset"], 
+                        type = "range", 
+                        min = -2000, 
+                        max = 2000, 
+                        step = 1, 
+                        order = 95, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.yOffset = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.yOffset end 
+                    },
+                    backgroundWidth = { 
+                        name = L["Background Width"], 
+                        type = "range", 
+                        min = 50, 
+                        max = 1000, 
+                        step = 1, 
+                        order = 96, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.width = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.width end 
+                    },
+                    backgroundHeight = { 
+                        name = L["Background Height"], 
+                        type = "range", 
+                        min = 10, 
+                        max = 500, 
+                        step = 1, 
+                        order = 97, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.height = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.height end 
+                    },
+                    backgroundAlpha = { 
+                        name = L["Background Alpha"], 
+                        type = "range", 
+                        min = 0, 
+                        max = 1, 
+                        step = 0.05, 
+                        order = 98, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.background.alpha = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.background.alpha end 
+                    },
+                    -- Swing timer settings
+                    swingTimerHeader = { name = L["Swing Timer"], type = "header", order = 100 },
+                    swingTimerEnabled = { 
+                        name = L["Enable Swing Timer"], 
+                        type = "toggle", 
+                        order = 101, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.swingTimer.enabled = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.swingTimer.enabled end 
+                    },
+                    swingTimerSparkWidth = { 
+                        name = L["Spark Width"], 
+                        type = "range", 
+                        min = 1, 
+                        max = 10, 
+                        step = 1, 
+                        order = 104, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.swingTimer.sparkWidth = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.swingTimer.sparkWidth end 
+                    },
+                    swingTimerSparkColor = { 
+                        name = L["Spark Color"], 
+                        type = "color", 
+                        hasAlpha = true, 
+                        order = 105, 
+                        set = function(info, r, g, b, a) 
+                            self.db.profile.presetLayout.swingTimer.sparkColor = {r = r, g = g, b = b, a = a}
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) 
+                            local c = self.db.profile.presetLayout.swingTimer.sparkColor
+                            if c and type(c) == "table" then
+                                return c.r, c.g, c.b, c.a 
+                            else
+                                -- Return default color when sparkColor is false
+                                return 0.8, 0.8, 0.8, 1
+                            end
+                        end 
+                    },
+
+                    -- Spell CD Bar settings
+                    spellCDBarHeader = { name = L["Spell CD Bar"] or "Spell CD Bar", type = "header", order = 106 },
+                    spellCDBarEnabled = { 
+                        name = L["Enable Spell CD Bar"] or "Enable Spell CD Bar", 
+                        desc = L["Enables the cooldown tracking bar"] or "Enables the cooldown tracking bar", 
+                        type = "toggle", 
+                        order = 107, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.spellCDBar.enabled = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.spellCDBar.enabled end 
+                    },
+                    spellCDBarYOffset = { 
+                        name = L["Spell CD Bar Y Offset"] or "Spell CD Bar Y Offset", 
+                        desc = L["Adjusts vertical offset above main bar group"] or "Adjusts vertical offset above main bar group", 
+                        type = "range", 
+                        min = -100, 
+                        max = 100, 
+                        step = 1, 
+                        order = 108, 
+                        set = function(info, value) 
+                            self.db.profile.presetLayout.spellCDBar.yOffset = value
+                            self:UpdateFrameSettings() 
+                        end, 
+                        get = function(info) return self.db.profile.presetLayout.spellCDBar.yOffset end 
+                    },
+
+                    -- Reset to defaults
+                    resetHeader = { name = L["Reset"], type = "header", order = 110 },
+                    resetToDefaults = {
+                        name = L["Reset to Defaults"],
+                        desc = L["Reset all preset layout settings to their default values"],
+                        type = "execute",
+                        order = 111,
+                        func = function()
+                            -- Reset preset layout to new finalized defaults
+                            self.db.profile.presetLayout = {
+                                enabled = true,
+                                width = 89,
+                                height = 20,
+                                alpha = 1.0,
+                                point = "CENTER",
+                                x = -2,
+                                y = 0,
+                                locked = false,
+                                showBorder = true,
+                                borderColor = {r = 1, g = 1, b = 1, a = 1},
+                                borderThickness = 1,
+                                showCountdownText = true,
+                                countdownTextSize = 14,
+                                countdownTextColor = {r = 1, g = 1, b = 1, a = 1},
+                                lbBarHeightPct = 0.16,
+                                clBarHeightPct = 0.15,
+                                ebBarHeightPct = 0.15,
+                                colors = {
+                                    background = {r = 0.2, g = 0.2, b = 0.2, a = 0.8},
+                                    weave = {r = 0.4, g = 0.7, b = 1, a = 0.8},
+                                    countdown = {r = 0.8, g = 0.2, b = 0.2, a = 0.8},
+                                    gcd = {r = 0.3, g = 0.3, b = 0.3, a = 0.85},
+                                    spark = {r = 1, g = 1, b = 1, a = 1},
+                                    clweave = {r = 0.2, g = 0.4, b = 0.8, a = 0.8},
+                                    upcomingweave = {r = 0.4, g = 0.7, b = 1, a = 0.8},
+                                    clupcomingweave = {r = 0.2, g = 0.4, b = 0.8, a = 0.8}
+                                },
+                                swingTimer = {
+                                    enabled = true,
+                                    sparkWidth = 2,
+                                    sparkColor = false, -- As requested
+                                    nextSwingEnabled = true,
+                                    nextSparkColor = {r = 0.8, g = 0.8, b = 0.8, a = 0.7},
+                                },
+                                background = {
+                                    enabled = true,
+                                    style = "Simpler",
+                                    scale = 1.9,
+                                    xOffset = -32,
+                                    yOffset = 8,
+                                    width = 84,
+                                    height = 40,
+                                    alpha = 0.8
+                                },
+                                -- Spell CD Bar settings
+                                spellCDBar = {
+                                    enabled = true,
+                                    yOffset = 4
+                                }
+                            }
+                            self:UpdateFrameSettings()
+                            self:UpdateVisibility() -- Ensure visibility is refreshed after resetting defaults
+                        end
+                    }
+                }
             },
             barSettings = {
                 name = L["Bar Settings"],
@@ -1215,7 +2048,7 @@ function ShamanWeaveBar:GetOptions()
                 order = 10,
                 inline = false,
                 args = {
-                    width = { name = L["Width"], type = "range", min = 100, max = 500, step = 1, order = 10, set = function(info, value) self.db.profile.bar.width = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.width end },
+                    width = { name = L["Width"], type = "range", min = 45, max = 500, step = 1, order = 10, set = function(info, value) self.db.profile.bar.width = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.width end },
                     height = { name = L["Height"], type = "range", min = 10, max = 50, step = 1, order = 20, set = function(info, value) self.db.profile.bar.height = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.height end },
                     barHeightsHeader = { name = L["Bar Heights"], type = "header", order = 25 },
                     lbBarHeightPct = { name = L["Lightning Bolt Bar Height"], type = "range", min = 0.05, max = 1.0, step = 0.01, order = 26, isPercent = true, set = function(info, value) self.db.profile.bar.lbBarHeightPct = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.lbBarHeightPct end },
@@ -1247,6 +2080,50 @@ function ShamanWeaveBar:GetOptions()
                     backgroundBarHeader = { name = L["Background Bar"], type = "header", order = 110 },
                     backgroundBarEnabled = { name = L["Enable Background Bar"], type = "toggle", order = 111, set = function(info, value) self.db.profile.bar.swingTimer.backgroundBar.enabled = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.backgroundBar.enabled end },
                     backgroundBarAlpha = { name = L["Background Bar Alpha"], type = "range", min = 0, max = 1, step = 0.05, order = 113, set = function(info, value) self.db.profile.bar.swingTimer.backgroundBar.alpha = value; self:UpdateFrameSettings() end, get = function(info) return self.db.profile.bar.swingTimer.backgroundBar.alpha end },
+                    -- Debug options
+                    debugHeader = { name = L["Debug"], type = "header", order = 120 },
+                    debugInputDelay = { 
+                        name = L["Show Input Delay"], 
+                        desc = L["Display the current adjusted input delay value (for debugging)"], 
+                        type = "toggle", 
+                        order = 121, 
+                        set = function(info, value) 
+                            if value then
+                                self.db.profile.debugInputDelay = 0 -- Initialize to 0
+                            else
+                                self.db.profile.debugInputDelay = nil -- Remove the debug value
+                            end
+                        end, 
+                        get = function(info) return self.db.profile.debugInputDelay ~= nil end 
+                    },
+                    debugNetworkStats = { 
+                        name = L["Show Network Stats"], 
+                        desc = L["Display the current network latency and stats (for debugging)"], 
+                        type = "toggle", 
+                        order = 122, 
+                        set = function(info, value) 
+                            if value then
+                                self.db.profile.debugNetworkStats = true
+                            else
+                                self.db.profile.debugNetworkStats = false
+                            end
+                        end, 
+                        get = function(info) return self.db.profile.debugNetworkStats or false end 
+                    },
+                    debugAdjustedDelay = { 
+                        name = L["Show Adjusted Delay"], 
+                        desc = L["Display the current adjusted input delay value (for debugging)"], 
+                        type = "toggle", 
+                        order = 123, 
+                        set = function(info, value) 
+                            if value then
+                                self.db.profile.debugAdjustedDelay = 0 -- Initialize to 0
+                            else
+                                self.db.profile.debugAdjustedDelay = nil -- Remove the debug value
+                            end
+                        end, 
+                        get = function(info) return self.db.profile.debugAdjustedDelay ~= nil end 
+                    },
                 }
             },
             appearanceSettings = {

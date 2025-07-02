@@ -1471,35 +1471,37 @@ function ClassBase:CreateSpellLocationOptions()
             desc = L["spellLocationDesc"] or "Select the position for this spell",
             order = spell.name and spell.name:byte(1) or 999,
             values = {
-                [""] = L["default"] or "Default",
+                [""] = L["preSet"] or "Pre-set",
                 ["LEFT"] = L["left"] or "Left",
                 ["RIGHT"] = L["right"] or "Right",
                 ["ABOVE"] = L["above"] or "Above",
                 ["BELOW"] = L["below"] or "Below",
-                ["AOE"] = L["aoe"] or "AoE"
+                ["AOE"] = L["aoe"] or "AoE",
+                ["PRIMARY"] = L["middle"] or "Middle",
+                ["IGNORE"] = L["ignore"] or "Ignore"
             },
             get = function()
-                if not specID or not classDB.specSpellLocations[specID] then return "" end
-                for position, spellList in pairs(classDB.specSpellLocations[specID]) do
-                    if tContains(spellList, spellId) then
-                        return position
+                if not specID then return "" end
+                local charDB = self:GetChar()
+                charDB.spellLocationOverrides = charDB.spellLocationOverrides or {}
+                local override = charDB.spellLocationOverrides[specID] and charDB.spellLocationOverrides[specID][spellId]
+                if override then return override end
+                -- Fallback to class preset
+                if classDB.specSpellLocations[specID] then
+                    for position, spellList in pairs(classDB.specSpellLocations[specID]) do
+                        if tContains(spellList, spellId) then
+                            return position
+                        end
                     end
                 end
                 return ""
             end,
             set = function(_, value)
                 if not specID then return end
-
-                -- Ensure the spec table exists
-                classDB.specSpellLocations[specID] = classDB.specSpellLocations[specID] or {
-                    ABOVE = {},
-                    BELOW = {},
-                    RIGHT = {},
-                    LEFT = {},
-                    AOE = {}
-                }
-
-                -- Remove from existing position
+                local charDB = self:GetChar()
+                charDB.spellLocationOverrides = charDB.spellLocationOverrides or {}
+                charDB.spellLocationOverrides[specID] = charDB.spellLocationOverrides[specID] or {}
+                -- Remove from all class preset positions
                 for pos, spellList in pairs(classDB.specSpellLocations[specID]) do
                     for i = #spellList, 1, -1 do
                         if spellList[i] == spellId then
@@ -1510,18 +1512,30 @@ function ClassBase:CreateSpellLocationOptions()
                         classDB.specSpellLocations[specID][pos] = nil
                     end
                 end
-
-                -- Add to new position
-                if value ~= "" then
-                    classDB.specSpellLocations[specID][value] = classDB.specSpellLocations[specID][value] or {}
-                    table.insert(classDB.specSpellLocations[specID][value], spellId)
+                if value == "" then
+                    -- Pre-set: remove override, use class preset
+                    charDB.spellLocationOverrides[specID][spellId] = nil
+                elseif value == "IGNORE" then
+                    charDB.spellLocationOverrides[specID][spellId] = "IGNORE"
+                else
+                    -- User override: set as new default
+                    charDB.spellLocationOverrides[specID][spellId] = value
                 end
-
                 -- Update DataManager
-                DataManager:SetSpellPosition(spellId, value ~= "" and value or nil)
-
-                -- Notify config change
-                AceConfigRegistry:NotifyChange("NAG")
+                if value == "" then
+                    -- Use class preset
+                    for pos, spellList in pairs(classDB.specSpellLocations[specID]) do
+                        if tContains(spellList, spellId) then
+                            DataManager:SetSpellPosition(spellId, pos)
+                            return
+                        end
+                    end
+                    DataManager:SetSpellPosition(spellId, nil)
+                elseif value == "IGNORE" then
+                    DataManager:SetSpellPosition(spellId, nil)
+                else
+                    DataManager:SetSpellPosition(spellId, value)
+                end
             end
         }
     end

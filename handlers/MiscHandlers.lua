@@ -154,11 +154,24 @@ function NAG:CanWeave(spellId)
 
     -- For non-instant casts, check total cast time against swing time
     local gcdTimeToReady = self:GCDTimeToReady()
-    local inputDelay = self:InputDelay()
+    
+    -- Apply Maelstrom Weapon logic for input delay with latency awareness and fixed buffer
+    local userPing = self:GetNetStats() -- Use cached network stats
+    local baseInputDelay = self:InputDelay() or 0.050 -- fallback to 50ms
+    local staticPressBuffer = 0.200 -- 200ms flat buffer for press-to-cast
+    local maelstromStacks = self:AuraNumStacks(51530) -- Maelstrom Weapon spell ID
+    
+    -- Final delay: input + ping + 200ms fixed buffer
+    local adjustedInputDelay = baseInputDelay + userPing + staticPressBuffer
+    if maelstromStacks >= 5 then
+        adjustedInputDelay = 0 -- instant cast, ignore delay
+    else
+        adjustedInputDelay = math.min(adjustedInputDelay, 0.45) -- cap at 0.45s
+    end
+    
     local swingTimeLeft = self:AutoTimeToNext()
-    local totalCastTime = inputDelay + castTime
+    local totalCastTime = adjustedInputDelay + castTime
     local weaponSpeed = self:AutoSwingTime(Types.SwingType.MainHand)
-
 
     return totalCastTime < swingTimeLeft
 end
@@ -182,9 +195,22 @@ function NAG:TimeToNextWeaveGap(spellId)
     if name or StateManager.state.casting then
         return math.huge
     end
-
-    local inputDelay = self:InputDelay()
-    local totalCastTime = inputDelay + castTime
+    
+    -- Apply Maelstrom Weapon logic for input delay with latency awareness and fixed buffer
+    local userPing = self:GetNetStats() -- Use cached network stats
+    local baseInputDelay = self:InputDelay() or 0.050 -- fallback to 50ms
+    local staticPressBuffer = 0.200 -- 200ms flat buffer for press-to-cast
+    local maelstromStacks = self:AuraNumStacks(51530) -- Maelstrom Weapon spell ID
+    
+    -- Final delay: input + ping + 200ms fixed buffer
+    local adjustedInputDelay = baseInputDelay + userPing + staticPressBuffer
+    if maelstromStacks >= 5 then
+        adjustedInputDelay = 0 -- instant cast, ignore delay
+    else
+        adjustedInputDelay = math.min(adjustedInputDelay, 0.45) -- cap at 0.45s
+    end
+    
+    local totalCastTime = adjustedInputDelay + castTime
     local weaponSpeed = self:AutoSwingTime(Types.SwingType.MainHand)
     local currentSwingTime = self:AutoTimeToNext()
 
@@ -634,4 +660,97 @@ function NAG:FrontOfTarget()
     -- TODO: Implement logic to check player position relative to target.
     self:Print("Warning: FrontOfTarget is not yet fully implemented.")
     return true -- Assuming true for now.
+end
+
+-- ~~~~~~~~~~~~~~~~~~~~
+-- Network Statistics
+
+-- Network latency tracking with outlier removal
+local networkStats = {
+    lastUpdate = 0,
+    updateInterval = 0.5, -- Update every 0.5 seconds
+    readings = {}, -- Store last 10 readings
+    maxReadings = 10,
+    currentAverage = 0 -- Cached average
+}
+
+--- Gets the current network latency with outlier removal and caching.
+--- Reads GetNetStats() only once every 0.5 seconds, maintains a rolling average
+--- of the last 10 readings, discards the top 2 highest and lowest values,
+--- and returns the average of the remaining 6 values.
+--- @function NAG:GetNetStats
+--- @return number The average network latency in seconds
+--- @usage local latency = NAG:GetNetStats()
+function NAG:GetNetStats()
+    local currentTime = GetTime()
+    
+    -- Check if we need to update
+    if currentTime - networkStats.lastUpdate < networkStats.updateInterval then
+        return networkStats.currentAverage
+    end
+    
+    -- Update the timestamp
+    networkStats.lastUpdate = currentTime
+    
+    -- Get current network stats
+    local _, _, lagHome, lagWorld = GetNetStats()
+    local currentLag = math.max(lagHome or 0, lagWorld or 0) / 1000 -- Convert to seconds
+    
+    -- Add new reading to the array
+    table.insert(networkStats.readings, currentLag)
+    
+    -- Keep only the last maxReadings
+    if #networkStats.readings > networkStats.maxReadings then
+        table.remove(networkStats.readings, 1)
+    end
+    
+    -- Calculate new average with outlier removal
+    if #networkStats.readings >= 6 then -- Need at least 6 readings for outlier removal
+        -- Create a copy for sorting
+        local sortedReadings = {}
+        for i, value in ipairs(networkStats.readings) do
+            sortedReadings[i] = value
+        end
+        
+        -- Sort the readings
+        table.sort(sortedReadings)
+        
+        -- Remove top 2 highest and lowest values
+        local startIndex = 3 -- Skip lowest 2
+        local endIndex = #sortedReadings - 2 -- Skip highest 2
+        
+        -- Calculate average of remaining values
+        local sum = 0
+        local count = 0
+        for i = startIndex, endIndex do
+            sum = sum + sortedReadings[i]
+            count = count + 1
+        end
+        
+        networkStats.currentAverage = count > 0 and (sum / count) or currentLag
+    else
+        -- Not enough readings yet, use simple average
+        local sum = 0
+        for _, value in ipairs(networkStats.readings) do
+            sum = sum + value
+        end
+        networkStats.currentAverage = #networkStats.readings > 0 and (sum / #networkStats.readings) or currentLag
+    end
+    
+    return networkStats.currentAverage
+end
+
+--- Gets debug information about the network stats tracking.
+--- @function NAG:GetNetStatsDebug
+--- @return table Debug information about network stats
+--- @usage local debug = NAG:GetNetStatsDebug()
+function NAG:GetNetStatsDebug()
+    return {
+        lastUpdate = networkStats.lastUpdate,
+        updateInterval = networkStats.updateInterval,
+        readingsCount = #networkStats.readings,
+        maxReadings = networkStats.maxReadings,
+        currentAverage = networkStats.currentAverage,
+        allReadings = networkStats.readings -- Copy of all readings for analysis
+    }
 end
