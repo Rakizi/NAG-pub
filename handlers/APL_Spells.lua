@@ -360,7 +360,7 @@ function NAG:IsActiveAura(spellId)
     end
 
     if entry.flags.racial and not IsSpellKnown(spellId) then
-        return true
+        return false
     end
 
     -- Check if any of the specific spell IDs are active
