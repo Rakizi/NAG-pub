@@ -617,3 +617,15 @@ end
 function NAG:HunterPetIsActive()
     return UnitExists("pet")
 end
+
+--- Gets the current Eclipse direction for a Balance Druid.
+--- Returns "sun" (toward Solar), "moon" (toward Lunar), or "none" if not moving or unavailable.
+--- @usage NAG:DruidGetEclipseDirection() == "sun"
+--- @return string The current Eclipse direction ("sun", "moon", or "none").
+function NAG:DruidGetEclipseDirection()
+    if GetEclipseDirection then
+        return GetEclipseDirection() or "none"
+    else
+        return "none"
+    end
+end
