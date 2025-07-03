@@ -917,6 +917,8 @@ function NAG:SpellTimeToCharge(spellId)
     return 0
 end
 
+--[[
+--- This is currently handled in NAG/Modules/Snapshotter.lua
 --- Returns the percent increase in DoT damage if a new DoT is applied, compared to the existing one.
 --- @param spellId number The ID of the DoT spell to compare (expected new DoT).
 --- @param targetUnit? string The unit to check (defaults to "target").
@@ -943,6 +945,7 @@ function NAG:DotPercentIncrease(spellId, targetUnit)
     local percentIncrease = (newMultiplier - currentEffect.snapshot.damageMultiplier) / currentEffect.snapshot.damageMultiplier
     return percentIncrease
 end
+]]
 
 --- Determines if a spell should be used for multidotting without casting it.
 --- @param spellId number The ID of the spell.
