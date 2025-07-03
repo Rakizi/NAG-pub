@@ -923,13 +923,14 @@ function NAG:UpdateFramePosition()
         frameSettings.offsetY or 0
     )
 
-    -- Print for debugging
+    --[[ Print for debugging
     self:Debug(format("UpdateFramePosition: Frame position loaded: %s %s %d %d",
         frameSettings.point or "nil",
         frameSettings.relativePoint or "nil",
         frameSettings.offsetX or 0,
         frameSettings.offsetY or 0
     ))
+    --]]
 end
 
 --- Updates the scale of the NAG frame based on stored scale value
@@ -939,5 +940,6 @@ function NAG:UpdateFrameScale()
     local scale = NAG:GetChar().frameSettings.scale
 
     frame:SetScale(scale)
-    self:Debug(format("UpdateFrameScale: Frame scale updated: scale = %s", scale))
+    --[[ self:Debug(format("UpdateFrameScale: Frame scale updated: scale = %s", scale))
+    --]]
 end

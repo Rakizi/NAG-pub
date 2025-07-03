@@ -45,25 +45,34 @@ defaults.class.specSpellLocations = {
 }
 
 local rotationStringWarriorArms = [[
-NAG:AutocastOtherCooldowns()
-    or     ((not NAG:IsActive(12880)) and NAG:Cast(18499))
-    or     ((NAG:NumberTargets() > 3.0) and (not NAG:DotIsActive(115768)) and NAG:Cast(6343))
-    or     ((NAG:NumberTargets() > 3.0) and NAG:IsActive(12328) and NAG:Cast(1680))
-    or     ((NAG:NumberTargets() > 1.0) and NAG:Cast(12328))
-    or     ((NAG:NumberTargets() > 2.0) and NAG:Cast(46924))
-    or     ((NAG:AnyTrinketStatProcsActive(6, -1, -1, 110)) and NAG:Cast(33697))
-    or     ((((NAG:CurrentRage() >= 100.0) and (NAG:NumberTargets() == 1.0))) and NAG:Cast(78))
-    or     ((((NAG:CurrentRage() >= 100.0) and (NAG:NumberTargets() > 1.0))) and NAG:Cast(845))
-    or     (NAG:DistanceToTarget() > 7 and NAG:Cast(100))
-    or     ((not NAG:IsActive(6673)) and NAG:Cast(6673))
-    or     NAG:Cast(12294)
-    -- Hide: or (((NAG:CurrentRage() < 75.0) and (NAG:AutoTimeToNext() >= 2.5) and (not (NAG:IsActive(2825) or NAG:IsActive(85730) or NAG:IsActive(1719))) and NAG:IsReady(100)) and NAG:MoveToRange(9))
-    or     (((NAG:DotIsActive(86346) or ((NAG:TimeToReady(86346) > 5) and (NAG:RemainingTime() > 60)))) and NAG:Cast(6544))
-    or     (((not NAG:DotIsActive(86346)) and NAG:RemainingTime() > 1) and NAG:Cast(86346))
-    or     ((((NAG:CurrentRage() >= 80.0) and (not NAG:IsExecutePhase(20))) or ((NAG:CurrentRage() <= 80.0) and (not NAG:IsExecutePhase(20)) and NAG:DotIsActive(86346)) or ((NAG:CurrentRage() <= 80.0) and NAG:IsExecutePhase(20) and (NAG:NumberTargets() > 1.0))) and NAG:Cast(1464))
-    or     NAG:Cast(5308)
-    or     ((((NAG:CurrentRage() >= 25.0) and (not NAG:IsExecutePhase(20)) and NAG:IsActive(60503)) or (NAG:IsExecutePhase(20) and NAG:IsActive(60503)) or {}) and NAG:Cast(7384))
-    or     NAG:Cast(6673)
+            NAG:AutocastOtherCooldowns()
+    or NAG:Cast(100)
+    or ((NAG:IsExecutePhase(20) and (NAG:AnyTrinketStatProcsActive(6) and (NAG:TrinketProcsMinRemainingTime(6) >= 15.0))) or (NAG:RemainingTime() < 26.5)) and NAG:Cast(76095)
+    or ((NAG:RemainingTime() > 125.0) or (NAG:IsExecutePhase(20) and NAG:AuraIsActive(76095))) and NAG:Cast(33697)
+    or (NAG:NumberTargets() > 1) and NAG:Cast(6343)
+    or (NAG:NumberTargets() > 1) and NAG:Cast(12328)
+    or (NAG:NumberTargets() > 1) and NAG:Cast(46924)
+    or false and NAG:Cast(64382)
+    or ((not NAG:AuraIsActive(12880)) and (NAG:CurrentTime() >= 1.0) and (NAG:AuraIsActive(86346, "target") or NAG:SpellIsReady(118000))) and NAG:Cast(18499)
+    or ((((NAG:RemainingTime() >= 185.0) or NAG:AuraIsActive(2825)) and (not NAG:AuraIsActive(114206))) or (NAG:IsExecutePhase(20) and NAG:AuraIsActive(76095) and (not NAG:AuraIsActive(114206)))) and NAG:Cast(114206)
+    or ((NAG:RemainingTime() >= 72.0) or (NAG:IsExecutePhase(20) and (NAG:AuraIsActive(76095) or (NAG:RemainingTime() <= 15.0)))) and NAG:StrictSequence("someName185", NAG:Cast(126734), NAG:Cast(12292))
+    or ((((NAG:RemainingTime() >= 63.0) and (NAG:CurrentTime() >= 1.5)) or (NAG:IsExecutePhase(20) and (NAG:AuraIsActive(76095) or (NAG:RemainingTime() <= 15.0)))) and (NAG:AuraIsInactiveWithReactionTime(86346, "target") or (NAG:AuraIsActive(12292) and (NAG:AuraRemainingTime(12292) <= 1.5)))) and NAG:Cast(118000)
+    or ((((NAG:RemainingTime() >= 95.0) and NAG:AuraIsKnown(123144)) or (NAG:RemainingTime() >= 185.0)) or (NAG:IsExecutePhase(20) and NAG:AuraIsActive(76095))) and NAG:Cast(1719)
+    or ((not NAG:AuraIsActive(86346, "target")) and NAG:IsExecutePhase(20) and (NAG:RemainingTime() <= 26.5)) and NAG:Cast(86346)
+    or ((NAG:AuraIsActive(86346, "target") and (not NAG:AuraIsKnown(123142))) or (NAG:RemainingTime() <= 3.0)) and NAG:Cast(5308)
+    or NAG:Cast(12294)
+    or NAG:AuraIsActive(86346, "target") and NAG:Cast(6544)
+    or (NAG:AuraIsActive(86346, "target") and (not NAG:IsExecutePhase(20))) and NAG:Cast(1464)
+    or NAG:AuraIsActive(86346, "target") and NAG:Cast(107570)
+    or NAG:AuraIsActive(86346, "target") and NAG:Cast(5308)
+    or (not NAG:AuraIsActive(86346, "target")) and NAG:Cast(86346)
+    or (((not NAG:AuraIsActive(86346, "target")) and ((NAG:CurrentRage() >= 65) or (NAG:RemainingTime() <= 6.0))) or (not NAG:AuraIsActive(139958))) and NAG:Cast(5308)
+    or (((NAG:CurrentRage() >= 110) and NAG:AuraIsInactiveWithReactionTime(86346, "target") and (not NAG:IsExecutePhase(20)))) and NAG:Cast(1464)
+    or NAG:AuraIsActive(60503) and NAG:Cast(7384)
+    or ((not NAG:SpellCanCast(100)) and (not NAG:UnitIsMoving())) and NAG:Channel(46924, function() return (NAG:SpellChanneledTicks(46924) == 4) end)
+    or (NAG:AuraIsActive(46924) and NAG:SpellIsKnown(46924)) and NAG:Cast(6673)
+    or (NAG:CurrentRage() < 10) and NAG:Cast(6673)
+    or ((NAG:CurrentRage() >= 100) or ((NAG:SpellTimeToReady(100) < 1.5) and (NAG:CurrentRage() > (true - 35)))) and NAG:Cast(78)
 ]]
 local rotationStringWarriorFury = [[
 ]]
@@ -137,31 +146,30 @@ ns.AddRotationToDefaults(defaults,
         -- Required parameters
         default = true,
         enabled = true,
-        experimental = true,
+        experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
             { NAG:Cast(2457), -10000 }, { NAG:Cast(6673), -1000 }, { NAG:Cast(76095), -1000 }, { NAG:Cast(64382), -1000 }, { NAG:Cast(100), -1000 }
         },
         rotationString = [[
-    NAG:AutocastOtherCooldowns()
-        or (NAG:IsExecutePhase(20) or (NAG:RemainingTime() <= 25)) and NAG:Cast(76095)
-        or (not NAG:AuraIsActive(114206)) and NAG:Cast(114206)
-        or (not NAG:AuraIsActive(12880)) and NAG:Cast(18499)
-        or NAG:AuraIsActive(86346, "target") and NAG:Cast(6544)
-        or NAG:Cast(23881)
-        or (not NAG:AuraIsActive(86346, "target")) and NAG:Cast(86346)
-        or (NAG:CurrentTime() >= 3) and NAG:Cast(107570)
-        or NAG:Cast(5308)
-        or NAG:Cast(85288)
-        or (NAG:NumberTargets() > 1) and NAG:Cast(1680)
-        or NAG:AuraIsActive(46916) and NAG:Cast(100130)
-        or (NAG:AuraIsActive(86346, "target") and (NAG:CurrentRage() >= 80)) and NAG:Cast(78)
-        or ((not NAG:IsExecutePhase(20)) and (NAG:CurrentRage() >= 60)) and NAG:Cast(78)
-        or ((NAG:CurrentRage() < 80) and (NAG:AutoTimeToNext() >= 2.0) and NAG:SpellIsReady(100)) and NAG:Move(9)
-        or NAG:Cast(100)
-        or ((not NAG:SpellCanCast(100)) and (not NAG:UnitIsMoving()) and (NAG:CurrentTime() >= 1.5)) and NAG:Cast(46924)
-        or (NAG:CurrentRage() <= 80) and NAG:Cast(6673)
-        or false and NAG:Cast(64382)
+NAG:AutocastOtherCooldowns()
+    or (NAG:IsExecutePhase(20) or (NAG:RemainingTime() <= 25)) and NAG:Cast(76095)
+    or (not NAG:AuraIsActive(114206)) and NAG:Cast(114206)
+    or (not NAG:AuraIsActive(12880)) and NAG:Cast(18499)
+    or NAG:AuraIsActive(86346, "target") and NAG:Cast(6544)
+    or NAG:Cast(23881)
+    or (not NAG:AuraIsActive(86346, "target")) and NAG:Cast(86346)
+    or (NAG:CurrentTime() >= 3) and NAG:Cast(107570)
+    or NAG:Cast(5308)
+    or NAG:Cast(85288)
+    or (NAG:NumberTargets() > 1) and NAG:Cast(1680)
+    or NAG:AuraIsActive(46916) and NAG:Cast(100130)
+    or (NAG:AuraIsActive(86346, "target") and (NAG:CurrentRage() >= 80)) and NAG:Cast(78)
+    or ((not NAG:IsExecutePhase(20)) and (NAG:CurrentRage() >= 60)) and NAG:Cast(78)
+    or ((NAG:CurrentRage() < 80) and (NAG:AutoTimeToNext() >= 2.0) and NAG:SpellIsReady(100)) and NAG:Move(9)
+    or NAG:Cast(100)
+    or ((not NAG:SpellCanCast(100)) and (not NAG:UnitIsMoving()) and (NAG:CurrentTime() >= 1.5)) and NAG:Cast(46924)
+    or (NAG:CurrentRage() <= 80) and NAG:Cast(6673)
         ]],
 
         -- New action-based format

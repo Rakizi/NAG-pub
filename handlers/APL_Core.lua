@@ -83,6 +83,41 @@ local tonumber = tonumber
 
 -- ~~~~~~~~~~ Utility Functions ~~~~~~~~~~
 
+-- Table of execute-phase spells and their thresholds (MoP)
+local EXECUTE_SPELLS = {
+    [5308]   = 20,  -- Execute (Warrior)
+    [53351]  = 20,  -- Kill Shot (Hunter)
+    [24275]  = 20,  -- Hammer of Wrath (Paladin)
+    [32379]  = 20,  -- Shadow Word: Death (Priest)
+    [17877]  = 25,  -- Shadowburn (Warlock)
+    -- [1120]   = 20,  -- Drain Soul (Warlock)
+    [115080] = 10,  -- Touch of Death (Monk) -- handled specially below
+    [111240] = 35,  -- Dispatch (Rogue)
+    --[22568]  = 25,  -- Ferocious Bite (Druid, with Blood in the Water)
+    --[114866] = 35,  -- Soul Reaper (Death Knight)
+}
+
+--- Checks if a spell can be executed on the current target, including special logic for Touch of Death.
+--- @param spellId number The spell ID to check.
+--- @param unit string The unit to check (default: "target").
+--- @return boolean True if the spell can be executed, false otherwise.
+function NAG:CanExecuteSpell(spellId, unit)
+    unit = unit or "target"
+    if spellId == 115080 then -- Touch of Death (Monk)
+        if UnitIsPlayer(unit) then
+            local healthPercent = (UnitHealth(unit) / UnitHealthMax(unit)) * 100
+            return healthPercent <= 10
+        else
+            return UnitHealth(unit) <= UnitHealth("player")
+        end
+    end
+    local threshold = EXECUTE_SPELLS[spellId]
+    if threshold then
+        return NAG:IsExecutePhase(threshold)
+    end
+    return true -- Not an execute spell, always allowed
+end
+
 --- Attempts to cast the specified spell and sets it as the next spell to cast.
 --- @param spellId number The ID of the spell to cast.
 --- @return boolean True if the spell ID is valid and set, false otherwise.
@@ -230,6 +265,11 @@ function NAG:Cast(id, toleranceOrPosition, position)
             -- If spell isn't defined in class position specification, use middle as fallback
             overridePosition = "PRIMARY"
         end
+    end
+    
+    -- Execute phase gating (including special logic)
+    if not NAG:CanExecuteSpell(id, "target") then
+        return false
     end
     
     -- Try to find entity in DataManager

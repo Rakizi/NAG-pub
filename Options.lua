@@ -293,33 +293,6 @@ do --== Splash/Key Options ==--
                         set = function(info, value) NAG:GetChar()[info[#info]] = value end,
                         hidden = function() return NAG:GetChar().enableAlways end,
                     },
-                    defaultBattlePotion = {
-                        type = "select",
-                        order = 11,
-                        name = function(info) return L[info[#info]] or info[#info] end,
-                        desc = function(info) return L[info[#info] .. "Desc"] or "" end,
-                        get = function(info)
-                            if not NAG.db.char.defaultBattlePotion then
-                                NAG:UpdateDefaultBattlePotion()
-                            end
-                            return NAG.db.char.defaultBattlePotion
-                        end,
-                        set = function(info, value)
-                            NAG.db.char.defaultBattlePotion = value
-                        end,
-                        values = function()
-                            local potions = {}
-                            local potionItems = DataManager:GetAllByFlags({ "potion" }, DataManager.EntityTypes.ITEM)
-                            for id, item in pairs(potionItems) do
-                                local itemName = GetItemInfo(id)
-                                if itemName then
-                                    potions[id] = itemName
-                                end
-                            end
-                            return potions
-                        end,
-                        default = GetDefaultBattlePotion,
-                    },
                     inputDelay = {
                         type = "range",
                         name = L["inputDelay"],
