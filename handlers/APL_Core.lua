@@ -111,6 +111,9 @@ function NAG:CanExecuteSpell(spellId, unit)
             return UnitHealth(unit) <= UnitHealth("player")
         end
     end
+    if spellId == 24275 and NAG:AuraIsActive(31884) then -- paladin HoW
+        return NAG:SpellCanCast(spellId)
+    end
     local threshold = EXECUTE_SPELLS[spellId]
     if threshold then
         return NAG:IsExecutePhase(threshold)
