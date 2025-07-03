@@ -73,6 +73,8 @@ local rotationStringWarriorArms = [[
     or (NAG:AuraIsActive(46924) and NAG:SpellIsKnown(46924)) and NAG:Cast(6673)
     or (NAG:CurrentRage() < 10) and NAG:Cast(6673)
     or ((NAG:CurrentRage() >= 100) or ((NAG:SpellTimeToReady(100) < 1.5) and (NAG:CurrentRage() > (true - 35)))) and NAG:Cast(78)
+    or     ((NAG:TimeToReady(86346) < NAG:TimeToReady(12294)) and NAG:Cast(86346, 10))
+    or     NAG:Cast(12294, 10)
 ]]
 local rotationStringWarriorFury = [[
 ]]
