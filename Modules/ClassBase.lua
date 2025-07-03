@@ -1771,13 +1771,11 @@ local CLASS_STAT_MAPPING = {
 --- @param self ClassBase
 function ClassBase:UpdateDefaultBattlePotion()
     local char = self:GetChar()
-    if not char then
-        self:Debug("UpdateDefaultBattlePotion: No character settings found")
-        return
-    end
+    if not char then return end
 
     if char.defaultBattlePotion then
-        self:Debug("UpdateDefaultBattlePotion: Character already has defaultBattlePotion set: %s", tostring(char.defaultBattlePotion))
+        --[[ self:Debug("UpdateDefaultBattlePotion: Character already has defaultBattlePotion set: %s", tostring(char.defaultBattlePotion))
+        --]]
         local DataManager = NAG:GetModule("DataManager")
         if DataManager and not DataManager:GetItem(char.defaultBattlePotion) then
             DataManager:AddItem(char.defaultBattlePotion, {"BattlePotion", ns.Version:GetVersionInfo().expansion}, {flags = {battlepotion = true}})
@@ -1787,7 +1785,7 @@ function ClassBase:UpdateDefaultBattlePotion()
 
     local classBase = UnitClassBase("player")
     if not classBase then
-        self:Debug("UpdateDefaultBattlePotion: Could not determine player classBase")
+        self:Warn("UpdateDefaultBattlePotion: Could not determine player classBase")
         return
     end
 
