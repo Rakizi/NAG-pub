@@ -896,6 +896,24 @@ function RotationManager:RefreshRotationList()
         selectIcon:SetWidth(20)
         selectIcon:SetHeight(20)
         selectIcon:SetDisabled(rotation.isSelected)
+        
+        -- Apply color tinting based on selection state
+        if rotation.isSelected then
+            selectIcon.image:SetVertexColor(1, 1, 1, 1)  -- Full color for selected rotation
+        else
+            selectIcon.image:SetVertexColor(0.5, 0.5, 0.5, 1)  -- Gray for unselected rotations
+        end
+        
+        -- Add tooltip
+        selectIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationSelect"] or "Select")
+            GameTooltip:Show()
+        end)
+        selectIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         selectIcon:SetCallback("OnClick", function()
             local valid, err = NAG:ValidateRotation(rotation.config)
             if not valid then
@@ -913,6 +931,17 @@ function RotationManager:RefreshRotationList()
         editIcon:SetImageSize(18, 18)
         editIcon:SetWidth(20)
         editIcon:SetHeight(20)
+        
+        -- Add tooltip
+        editIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationEdit"] or "Edit")
+            GameTooltip:Show()
+        end)
+        editIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         editIcon:SetCallback("OnClick", function()
             -- Create editor frame (same as before)
             local frame = AceGUI:Create("Frame")
@@ -1006,10 +1035,21 @@ function RotationManager:RefreshRotationList()
 
         -- Export icon
         local exportIcon = AceGUI:Create("Icon")
-        exportIcon:SetImage("Interface\\Buttons\\UI-Share-Up")
+        exportIcon:SetImage("Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up")
         exportIcon:SetImageSize(18, 18)
         exportIcon:SetWidth(20)
         exportIcon:SetHeight(20)
+        
+        -- Add tooltip
+        exportIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationExport"] or "Export")
+            GameTooltip:Show()
+        end)
+        exportIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         exportIcon:SetCallback("OnClick", function()
             local ImportExport = NAG:GetModule("ImportExport")
             if ImportExport then
@@ -1030,6 +1070,17 @@ function RotationManager:RefreshRotationList()
         deleteIcon:SetWidth(20)
         deleteIcon:SetHeight(20)
         deleteIcon:SetDisabled(not rotation.config.userModified)
+        
+        -- Add tooltip
+        deleteIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationDelete"] or "Delete")
+            GameTooltip:Show()
+        end)
+        deleteIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         deleteIcon:SetCallback("OnClick", function()
             StaticPopupDialogs["NAG_DELETE_ROTATION_CONFIRM"] = {
                 text = format(

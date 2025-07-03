@@ -265,7 +265,6 @@ NAG:Cast(49206)
     or ((not NAG:AuraIsActive(2825)) and (not NAG:AuraIsActive(51460)) and (NAG:CurrentRunicPower() <= 38) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) > 1.0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) > 1.0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy) > 1.0))) and NAG:Cast(47568)
         ]]
         local rotationDeathKnightUnholyDefault = [[
-
     NAG:AutocastOtherCooldowns()
     or (NAG:AuraIsActive(63560) and (NAG:RemainingTime() <= 60.0)) and NAG:Cast(76095)
     or (NAG:CurrentTime() >= 4.0) and NAG:Cast(49016)
@@ -299,7 +298,7 @@ NAG:Cast(49206)
        ]]
 
     ns.AddRotationToDefaults(defaults, CLASS_SPECS.UNHOLY, "Unholy", {
-        authors = { "@Darkfrog" },
+        authors = { "@Fonsas" },
         default = true,
         enabled = true,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
