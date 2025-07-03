@@ -1,5 +1,5 @@
 ## Interface: 50500
-## Version: 5.0.1
+## Version: 5.0.2
 ## Title: Next Action Guides(NAG)
 ## Notes: Works with Next Action Guides (https://discorg.gg/ebonhold)
 ## Author: Rakizi & Fonsas
