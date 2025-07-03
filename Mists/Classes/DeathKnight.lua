@@ -236,7 +236,7 @@ local rotationDeathKnightFrostTwohand = [[
     or (NAG:DotIsActive(55078) and NAG:DotIsActive(55095)) and NAG:Cast(49020)
     or NAG:Cast(57330)
 ]]
-local rotationDeathKnightUnholyDefault = [[
+local rotationDeathKnightUnholyDefault2 = [[
 
 NAG:Cast(49206)
     or (((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) or (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0)) and (NAG:AuraNumStacks(114851) >= 5) and NAG:IsKnown(45529)) and NAG:Cast(45529)
@@ -264,6 +264,39 @@ NAG:Cast(49206)
     or NAG:Cast(57330)
     or ((not NAG:AuraIsActive(2825)) and (not NAG:AuraIsActive(51460)) and (NAG:CurrentRunicPower() <= 38) and ((NAG:CurrentRuneCount(NAG.Types.RuneType.RuneBlood) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneFrost) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneUnholy) == 0) and (NAG:CurrentRuneCount(NAG.Types.RuneType.RuneDeath) == 0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) > 1.0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) > 1.0) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy) > 1.0))) and NAG:Cast(47568)
         ]]
+        local rotationDeathKnightUnholyDefault = [[
+
+    NAG:AutocastOtherCooldowns()
+    or (NAG:AuraIsActive(63560) and (NAG:RemainingTime() <= 60.0)) and NAG:Cast(76095)
+    or (NAG:CurrentTime() >= 4.0) and NAG:Cast(49016)
+    or ((NAG:CurrentTime() > 15.0) and ((not NAG:SpellIsKnown(115989)) or (not (NAG:SpellTimeToReady(115989) > 79.0))) and (NAG:DotDamageIncreasePercent(55078) > 0.2) and (not NAG:AuraIsActive(115989))) and NAG:Cast(77575)
+    or ((NAG:CurrentTime() > 15.0) and ((not NAG:SpellIsKnown(115989)) or (not (NAG:SpellTimeToReady(115989) > 79.0))) and (NAG:DotDamageIncreasePercent(55078) > 0.05)) and NAG:Cast(45462)
+    or ((NAG:CurrentRunicPower() >= 32) and (NAG:AuraNumStacks(114851) > 10)) and NAG:Cast(45529)
+    or ((NAG:DotRemainingTime(55078) < 3.0) or (NAG:DotRemainingTime(55095) < 3.0)) and NAG:Cast(115989)
+    or (((NAG:DotRemainingTime(55078) < 3.0) or (NAG:DotRemainingTime(55095) < 3.0)) and (not NAG:AuraIsActive(115989))) and NAG:Cast(77575)
+    or (NAG:IsExecutePhase(35) or (NAG:AuraIsKnown(138347) and NAG:IsExecutePhase(35))) and NAG:Cast(114867)
+    or (NAG:SpellIsReady(114867) and (NAG:IsExecutePhase(35) or (NAG:AuraIsKnown(138347) and NAG:IsExecutePhase(35)))) and NAG:Cast(45529)
+    or ((not NAG:DotIsActive(55078)) or (not NAG:DotIsActive(55095))) and NAG:Cast(45462)
+    or NAG:Cast(49206)
+    or NAG:Cast(63560)
+    or (NAG:CurrentRunicPower() > 90) and NAG:Cast(47541)
+    or (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneUnholy) == 2) and NAG:Cast(43265)
+    or ((NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneUnholy) == 2) and NAG:SpellIsReady(43265)) and NAG:Cast(45529)
+    or (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneUnholy) == 2) and NAG:Cast(55090)
+    or ((NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneBlood) == 2) and (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneFrost) == 2)) and NAG:Cast(85948)
+    or NAG:Cast(43265)
+    or (NAG:AuraIsActiveWithReactionTime(81340) or ((not NAG:AuraIsActive(63560)) and (NAG:CurrentNonDeathRuneCount(NAG.Types.RuneType.RuneUnholy) <= 1))) and NAG:Cast(47541)
+    or NAG:Cast(55090)
+    or (NAG:SpellTimeToReady(77575) < 1.0) and NAG:Cast(123693)
+    or NAG:Cast(85948)
+    or NAG:Cast(57330)
+    or NAG:Cast(47541)
+    or NAG:Cast(47568)
+    or     ((((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy)) and (NAG:DotRemainingTime(55095) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotLeftBlood) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood) <= NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy)) and (NAG:DotRemainingTime(55095) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotRightBlood) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood) <= NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy)) and (NAG:DotRemainingTime(55095) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)))) and NAG:Cast(45477, 10))
+    or     ((((NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)) and (NAG:DotRemainingTime(55078) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)) and (NAG:DotRemainingTime(55078) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotLeftBlood) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood) <= NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)) and (NAG:DotRemainingTime(55078) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotRightBlood) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood) <= NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and (NAG:DotRemainingTime(55078) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotRightFrost) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost) <= NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost))) or ((NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy)) and (NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) and (NAG:DotRemainingTime(55078) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotLeftFrost) and (NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost) <= NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost)))) and NAG:Cast(45462, 10))
+    or     ((((NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood) > NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotLeftBlood)) or ((NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftBlood) > NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightBlood)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotRightBlood)) or ((NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost) > NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotRightFrost)) or ((NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotRightFrost) > NAG:RuneSlotCooldown(NAG.Types.RuneSlot.SlotLeftFrost)) and NAG:CurrentRuneDeath(NAG.Types.RuneSlot.SlotLeftFrost)) or (NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneBlood)) or (NAG:RuneCooldown(NAG.Types.RuneType.RuneUnholy) <= NAG:RuneCooldown(NAG.Types.RuneType.RuneFrost))) and NAG:Cast(55090, 10))
+    or     NAG:Cast(85948, 10)
+       ]]
 
     ns.AddRotationToDefaults(defaults, CLASS_SPECS.UNHOLY, "Unholy", {
         authors = { "@Darkfrog" },
