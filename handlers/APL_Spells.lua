@@ -583,10 +583,12 @@ function NAG:SpellCanCast(spellId, tolerance)
             return targetHealth <= playerHealth and self:IsReadySpell(spellId, tolerance)
         end
     elseif self.CLASS == "ROGUE" then
-        -- Removed for 3/6 to account for pooling issues. But still showing when pooling energy.
-        if not self:HasEnergy(spellId) then
-            self.isPooling = true
-            NAG:Pooling()
+        if not self:HasEnergy(spellId) and not NAG:IsSecondarySpell(spellId) then
+            -- Only start pooling if not already pooling
+            if not self.isPooling then
+                self.isPooling = true
+                NAG:Pooling()
+            end
             
             if spellId == 8676 then 
                 return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
@@ -596,10 +598,10 @@ function NAG:SpellCanCast(spellId, tolerance)
                     return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
                     or self:AuraIsActive(58984) or self:AuraIsActive(11327)
                     or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
-                end
+            end
             return true
-        elseif self.isPooling then
-            self:StopPooling()
+        elseif self.isPooling and not NAG:IsSecondarySpell(spellId)then
+                 self:StopPooling()
         end
         if not self:HasComboPoints(spellId) then
             return false
@@ -612,7 +614,7 @@ function NAG:SpellCanCast(spellId, tolerance)
                 return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
                 or self:AuraIsActive(58984) or self:AuraIsActive(11327)
                 or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
-            end
+        end
     elseif self.CLASS == "WARLOCK" then
         if not self:HasMana(spellId) or not self:HasSoulShards(spellId) then
             return false

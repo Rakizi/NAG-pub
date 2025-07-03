@@ -109,7 +109,7 @@ local defaults = {
                 alpha = 0.7,
                 textureAlpha = 0.5, -- Semi-transparent circle
                 showSpellIcon = false,
-                pulse = true,
+                pulse = false, -- Make pooling overlay text static
                 textColor = { 1, 1, 0, 1 }, -- Yellow text
                 textSize = 11,
                 textFont = "Friz Quadrata TT",
@@ -413,7 +413,12 @@ function OverlayManager:ShowOverlay(frame, overlayType, duration, checkFunc, cus
     end
 
     -- Add pulse animation for notification and pooling types
-    if (overlayType == "notification" or overlayType == "pooling") and config.pulse and not overlay.pulse then
+    if overlayType == "pooling" and overlay.pulse then
+        -- If reusing overlay, stop and hide any existing pulse animation
+        overlay.pulse:Stop()
+        overlay.pulse = nil
+    end
+    if overlayType == "notification" and config.pulse and not overlay.pulse then
         overlay.pulse = overlay:CreateAnimationGroup()
         local pulseIn = overlay.pulse:CreateAnimation("Scale")
         pulseIn:SetScale(1.15, 1.15)
