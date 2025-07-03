@@ -86,7 +86,7 @@ ns.AddRotationToDefaults(defaults,
     or (((not NAG:DotIsActive(93402)) or (NAG:DotRemainingTime(93402) <= 1)) and (NAG:RemainingTime() >= 9)) and NAG:Cast(93402)
     or NAG:DruidGetEclipseDirection() == "sun" and NAG:Cast(2912)
     or NAG:DruidGetEclipseDirection() == "moon" and NAG:Cast(5176)
-    or NAG:DruidGetEclipseDirection() == "moon" and NAG:Cast(5176)
+    or NAG:DruidGetEclipseDirection() == "none" and NAG:Cast(5176)
     or NAG:Cast(5176)
         ]],
         
