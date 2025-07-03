@@ -61,5 +61,6 @@
   <Script file="TrinketTrackingManager.Tests.lua"/>
   <Script file="Types.Tests.lua"/>
   <Script file="UIBackground.Tests.lua"/>
+  <Script file="ShareInGame.Tests.lua"/>
 
 </Ui> 

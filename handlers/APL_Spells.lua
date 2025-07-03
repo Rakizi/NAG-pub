@@ -515,6 +515,9 @@ function NAG:SpellCanCast(spellId, tolerance)
                 end
             end
         end
+        if spellId == 63560 then --dark infusion 
+            return NAG:AuraNumStacks(49572) >= 5 and self:IsReadySpell(spellId, tolerance)
+        end
 
         --TODO believe this can be removed?
         -- Rune Strike has no cooldown, it becomes usable after a dodge or parry

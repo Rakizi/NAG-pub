@@ -83,6 +83,7 @@
     <Script file="Modules\UIBackground.lua"/>
 
     <Script file="Modules\APLWalker.lua"/>
+    <Script file="Modules\ShareInGame.lua"/>
 
     <!-- Test Suites belong in Modules\Tests\tests.xml -->
     
