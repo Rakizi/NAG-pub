@@ -189,7 +189,8 @@ function OverlayManager:CreateOverlay(frame, overlayType, customConfig)
         overlay:GetFrameLevel()))
 
     -- Create spell icon texture if needed
-    if finalConfig.showSpellIcon or finalConfig.spellIcon then
+    -- Prevent spell icon for pooling overlays
+    if overlayType ~= "pooling" and (finalConfig.showSpellIcon or finalConfig.spellIcon) then
         local spellIconName = overlayName .. "_SpellIcon"
         self:Debug(format("CreateOverlay: Adding spell icon texture %s: %s", spellIconName,
             tostring(finalConfig.spellIcon)))
