@@ -1,5 +1,5 @@
 ## Interface: 11507
-## Version: 5.0.2
+## Version: 5.0.3
 ## Title: Next Action Guides(NAG)
 ## Notes: Works with Next Action Guides (https://discorg.gg/ebonhold)
 ## Author: Rakizi & Fonsas
