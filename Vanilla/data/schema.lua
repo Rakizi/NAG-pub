@@ -1,4 +1,4 @@
--- Generated schema for classic on 2025-07-03 20:39:52
+-- Generated schema for classic on 2025-07-03 20:45:19
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['vanilla'] = {
@@ -112,7 +112,32 @@ ns.protoSchema['vanilla'] = {
           power_infusion = {
             id = 15,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/priest/power_infusion.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerPowerInfusionCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeMana",
+                    priority = "core.CooldownPriorityBloodlust"
+                  },
+                  spellId = 10060,
+                  cast = [[{
+	// 		CD: core.Cooldown{
+	// 			Timer:    priest.NewTimer(),
+	// 			Duration: time.Duration(float64(core.PowerInfusionCD)),
+	// 		},
+	// 	}]],
+                  cooldown = {
+                    raw = "time.Duration(float64(core.PowerInfusionCD))",
+                    seconds = nil
+                  },
+                  Flags = "SpellFlagPriest | core.SpellFlagHelpful"
+                }
+              }
+            }
           },
           healing_focus = {
             id = 16,
@@ -5642,7 +5667,22 @@ ns.protoSchema['vanilla'] = {
           sweeping_strikes = {
             id = 13,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/warrior/sweeping_strikes.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerSweepingStrikesCD",
+                  spellId = 12292,
+                  auraDuration = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  label = "Sweeping Strikes"
+                }
+              }
+            }
           },
           mace_specialization = {
             id = 14,
@@ -5796,7 +5836,22 @@ ns.protoSchema['vanilla'] = {
           death_wish = {
             id = 31,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerDeathWishCD",
+                  spellId = 12328,
+                  auraDuration = {
+                    raw = "time.Second * 30",
+                    seconds = 30
+                  },
+                  label = "Death Wish"
+                }
+              }
+            }
           },
           improved_intercept = {
             id = 32,
@@ -5901,7 +5956,22 @@ ns.protoSchema['vanilla'] = {
           last_stand = {
             id = 41,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerLastStandCD",
+                  spellId = 12975,
+                  auraDuration = {
+                    raw = "time.Second * 20",
+                    seconds = 20
+                  },
+                  label = "Last Stand"
+                }
+              }
+            }
           },
           improved_shield_block = {
             id = 42,
@@ -6139,7 +6209,41 @@ ns.protoSchema['vanilla'] = {
           presence_of_mind = {
             id = 13,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerPresenceOfMindCD",
+                  spellId = 12043,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Presence of Mind"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerPresenceOfMindCD",
+                  spellId = 12043,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: cooldown,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cooldown",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              }
+            }
           },
           arcane_mind = {
             id = 14,
@@ -6154,7 +6258,45 @@ ns.protoSchema['vanilla'] = {
           arcane_power = {
             id = 16,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerArcanePowerCD",
+                  spellId = 12042,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Arcane Power"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerArcanePowerCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 12042,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: time.Second * 180,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 180",
+                    seconds = 180
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              }
+            }
           },
           improved_fireball = {
             id = 17,
@@ -6316,6 +6458,33 @@ ns.protoSchema['vanilla'] = {
                     seconds = -1
                   },
                   label = "Combustion"
+                },
+                {
+                  sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerCombustionCD",
+                  spellId = 11129,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Combustion"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerCombustionCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 11129,
+                  cast = [[{
+			CD: cd,
+		}]],
+                  Flags = "core.SpellFlagNoOnCastComplete"
                 }
               }
             }
@@ -6363,7 +6532,32 @@ ns.protoSchema['vanilla'] = {
           cold_snap = {
             id = 41,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerColdSnapCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 12472,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: time.Duration(time.Minute * 10),
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Duration(time.Minute * 10)",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              }
+            }
           },
           improved_blizzard = {
             id = 42,
@@ -6606,7 +6800,45 @@ ns.protoSchema['vanilla'] = {
           bestial_wrath = {
             id = 16,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerBestialWrathCD",
+                  spellId = 19574,
+                  auraDuration = {
+                    raw = "time.Second * 18",
+                    seconds = 18
+                  },
+                  label = "Bestial Wrath Pet"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/hunter/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerBestialWrathCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 19574,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    hunter.NewTimer(),
+				Duration: time.Minute * 2,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 2",
+                    seconds = 120
+                  },
+                  Flags = "core.SpellFlagAPL"
+                }
+              }
+            }
           },
           improved_concussive_shot = {
             id = 17,
@@ -7209,7 +7441,22 @@ ns.protoSchema['vanilla'] = {
           natures_swiftness = {
             id = 43,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/druid/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerNaturesSwiftnessCD",
+                  spellId = 17116,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Natures Swiftness"
+                }
+              }
+            }
           },
           gift_of_nature = {
             id = 44,
@@ -7416,7 +7663,40 @@ ns.protoSchema['vanilla'] = {
           cold_blood = {
             id = 12,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerColdBloodCD",
+                  spellId = 14177,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Cold Blood"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerColdBloodCD",
+                  spellId = 14177,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  }
+                }
+              }
+            }
           },
           improved_kidney_shot = {
             id = 13,
@@ -7562,7 +7842,57 @@ ns.protoSchema['vanilla'] = {
           blade_flurry = {
             id = 29,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerBladeFlurryCD",
+                  spellId = 22482,
+                  Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskEmpty",
+                  DamageMultiplier = "1",
+                  ThreatMultiplier = "1"
+                },
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerBladeFlurryCD",
+                  spellId = 13877,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				GCD: time.Second,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: cooldownDur,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cooldownDur",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagAPL",
+                  IgnoreHaste = "true"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerBladeFlurryCD",
+                  spellId = 13877,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Blade Flurry"
+                }
+              }
+            }
           },
           sword_specialization = {
             id = 30,
@@ -7601,7 +7931,45 @@ ns.protoSchema['vanilla'] = {
           adrenaline_rush = {
             id = 34,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerAdrenalineRushCD",
+                  spellId = 13750,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Adrenaline Rush"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerAdrenalineRushCD",
+                  spellId = 13750,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				GCD: time.Second,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: time.Minute * 5,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 5",
+                    seconds = 300
+                  },
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           },
           master_of_deception = {
             id = 35,
@@ -7705,7 +8073,33 @@ ns.protoSchema['vanilla'] = {
           preparation = {
             id = 47,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/rogue/preparation.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerPreparationCD",
+                  spellId = 14185,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				GCD: time.Second,
+			},
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: time.Minute * 10,
+			},
+			IgnoreHaste: true,
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 10",
+                    seconds = 600
+                  },
+                  Flags = "core.SpellFlagAPL",
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           },
           dirty_deeds = {
             id = 48,
@@ -7965,7 +8359,41 @@ ns.protoSchema['vanilla'] = {
           elemental_mastery = {
             id = 15,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerElementalMasteryCD",
+                  spellId = 16166,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Elemental Mastery"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerElementalMasteryCD",
+                  spellId = 16166,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    cdTimer,
+				Duration: cd,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cd",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              }
+            }
           },
           ancestral_knowledge = {
             id = 16,
@@ -8152,7 +8580,45 @@ ns.protoSchema['vanilla'] = {
           natures_swiftness = {
             id = 44,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerNaturesSwiftnessCD",
+                  spellId = 16188,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Natures Swiftness"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerNaturesSwiftnessCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 16188,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    cdTimer,
+				Duration: cd,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cd",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              }
+            }
           },
           purification = {
             id = 45,
@@ -8529,7 +8995,46 @@ ns.protoSchema['vanilla'] = {
           fel_domination = {
             id = 25,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/warlock/fel_domination.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerFelDominationCD",
+                  spellId = 18708,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Fel Domination"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-classic/sim/warlock/fel_domination.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerFelDominationCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeUnknown",
+                    priority = nil
+                  },
+                  spellId = 18708,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    warlock.NewTimer(),
+				Duration: time.Minute * 15,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 15",
+                    seconds = 900
+                  },
+                  SpellSchool = "core.SpellSchoolShadow",
+                  ProcMask = "core.ProcMaskEmpty"
+                }
+              }
+            }
           },
           fel_stamina = {
             id = 26,
@@ -13979,7 +14484,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        preparation_cd = {
+        preparation = {
           spell = {
             {
               sourceFile = "extern/wowsims-classic/sim/rogue/preparation.go",
@@ -14100,7 +14605,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        thistle_tea_cd = {
+        thistle_tea = {
           spell = {
             {
               sourceFile = "extern/wowsims-classic/sim/rogue/thistle_tea.go",
@@ -14128,7 +14633,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        cold_blood_cd = {
+        cold_blood = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
@@ -14161,21 +14666,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        cold_blood = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerColdBloodCD",
-              spellId = 14177,
-              auraDuration = {
-                raw = "core.NeverExpires",
-                seconds = -1
-              },
-              label = "Cold Blood"
-            }
-          }
-        },
         seal_fate = {
           aura = {
             {
@@ -14204,7 +14694,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        blade_flurry_cd = {
+        blade_flurry = {
           spell = {
             {
               sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
@@ -14254,22 +14744,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        blade_flurry = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerBladeFlurryCD",
-              spellId = 13877,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Blade Flurry"
-            }
-          }
-        },
-        adrenaline_rush_cd = {
+        adrenaline_rush = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
@@ -14306,39 +14781,9 @@ ns.protoSchema['vanilla'] = {
               IgnoreHaste = "true"
             }
           }
-        },
-        adrenaline_rush = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/rogue/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerAdrenalineRushCD",
-              spellId = 13750,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Adrenaline Rush"
-            }
-          }
         }
       },
       druid = {
-        barkskin_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/druid/barkskin.go",
-              registrationType = "RegisterAura",
-              functionName = "registerBarkskinCD",
-              spellId = 22812,
-              auraDuration = {
-                raw = "time.Second * 12",
-                seconds = 12
-              },
-              label = "Barkskin"
-            }
-          }
-        },
         barkskin = {
           aura = {
             {
@@ -14427,21 +14872,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        frenzied_regeneration_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/druid/_frenzied_regeneration.go",
-              registrationType = "RegisterAura",
-              functionName = "registerFrenziedRegenerationCD",
-              spellId = 22842,
-              auraDuration = {
-                raw = "time.Second * 10",
-                seconds = 10
-              },
-              label = "Frenzied Regeneration"
-            }
-          }
-        },
         frenzied_regeneration = {
           aura = {
             {
@@ -14518,21 +14948,6 @@ ns.protoSchema['vanilla'] = {
               registrationType = "RegisterAura",
               functionName = "applyNaturesGrace",
               label = "Natures Grace"
-            }
-          }
-        },
-        natures_swiftness_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/druid/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerNaturesSwiftnessCD",
-              spellId = 17116,
-              auraDuration = {
-                raw = "core.NeverExpires",
-                seconds = -1
-              },
-              label = "Natures Swiftness"
             }
           }
         },
@@ -15154,7 +15569,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        elemental_mastery_cd = {
+        elemental_mastery = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
@@ -15188,22 +15603,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        elemental_mastery = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerElementalMasteryCD",
-              spellId = 16166,
-              auraDuration = {
-                raw = "core.NeverExpires",
-                seconds = -1
-              },
-              label = "Elemental Mastery"
-            }
-          }
-        },
-        natures_swiftness_cd = {
+        natures_swiftness = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
@@ -15238,21 +15638,6 @@ ns.protoSchema['vanilla'] = {
                 seconds = nil
               },
               Flags = "core.SpellFlagNoOnCastComplete"
-            }
-          }
-        },
-        natures_swiftness = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/shaman/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerNaturesSwiftnessCD",
-              spellId = 16188,
-              auraDuration = {
-                raw = "core.NeverExpires",
-                seconds = -1
-              },
-              label = "Natures Swiftness"
             }
           }
         },
@@ -15444,7 +15829,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        bestial_wrath_cd = {
+        bestial_wrath = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/hunter/talents.go",
@@ -15667,7 +16052,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        power_infusion_cd = {
+        power_infusion = {
           spell = {
             {
               sourceFile = "extern/wowsims-classic/sim/priest/power_infusion.go",
@@ -15998,7 +16383,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        fel_domination_cd = {
+        fel_domination = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/warlock/fel_domination.go",
@@ -16034,21 +16419,6 @@ ns.protoSchema['vanilla'] = {
               },
               SpellSchool = "core.SpellSchoolShadow",
               ProcMask = "core.ProcMaskEmpty"
-            }
-          }
-        },
-        fel_domination = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warlock/fel_domination.go",
-              registrationType = "RegisterAura",
-              functionName = "registerFelDominationCD",
-              spellId = 18708,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Fel Domination"
             }
           }
         },
@@ -16720,7 +17090,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        evocation_cd = {
+        evocation = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/mage/evocation.go",
@@ -16773,31 +17143,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        evocation = {
-          spell = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/mage/evocation.go",
-              registrationType = "RegisterSpell",
-              functionName = "registerEvocationCD",
-              spellId = 12051,
-              cast = [[{
-			DefaultCast: core.Cast{
-				GCD: core.GCDDefault,
-			},
-			CD: core.Cooldown{
-				Timer:    mage.NewTimer(),
-				Duration: cooldown,
-			},
-		}]],
-              cooldown = {
-                raw = "cooldown",
-                seconds = nil
-              },
-              Flags = "core.SpellFlagHelpful | core.SpellFlagChanneled | core.SpellFlagAPL",
-              label = "Evocation"
-            }
-          }
-        },
         arcane_concentration = {
           aura = {
             {
@@ -16838,7 +17183,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        presence_of_mind_cd = {
+        presence_of_mind = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
@@ -16872,22 +17217,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        presence_of_mind = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerPresenceOfMindCD",
-              spellId = 12043,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Presence of Mind"
-            }
-          }
-        },
-        arcane_power_cd = {
+        arcane_power = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
@@ -16925,21 +17255,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        arcane_power = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerArcanePowerCD",
-              spellId = 12042,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Arcane Power"
-            }
-          }
-        },
         master_of_elements = {
           aura = {
             {
@@ -16954,7 +17269,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        combustion_cd = {
+        combustion = {
           aura = {
             {
               sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
@@ -16985,22 +17300,7 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        combustion = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerCombustionCD",
-              spellId = 11129,
-              auraDuration = {
-                raw = "core.NeverExpires",
-                seconds = -1
-              },
-              label = "Combustion"
-            }
-          }
-        },
-        cold_snap_cd = {
+        cold_snap = {
           spell = {
             {
               sourceFile = "extern/wowsims-classic/sim/mage/talents.go",
@@ -17098,21 +17398,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        shield_wall_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warrior/shield_wall.go",
-              registrationType = "RegisterAura",
-              functionName = "RegisterShieldWallCD",
-              spellId = 871,
-              auraDuration = {
-                raw = "duration",
-                seconds = nil
-              },
-              label = "Shield Wall"
-            }
-          }
-        },
         shield_wall = {
           aura = {
             {
@@ -17128,21 +17413,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        bloodrage_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warrior/bloodrage.go",
-              registrationType = "RegisterAura",
-              functionName = "registerBloodrageCD",
-              spellId = 2687,
-              auraDuration = {
-                raw = "time.Second * 10",
-                seconds = 10
-              },
-              label = "Bloodrage"
-            }
-          }
-        },
         bloodrage = {
           aura = {
             {
@@ -17155,21 +17425,6 @@ ns.protoSchema['vanilla'] = {
                 seconds = 10
               },
               label = "Bloodrage"
-            }
-          }
-        },
-        shield_block_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warrior/shield_block.go",
-              registrationType = "RegisterAura",
-              functionName = "RegisterShieldBlockCD",
-              spellId = 2565,
-              auraDuration = {
-                raw = "time.Second * time.Duration(5+[]float64{0",
-                seconds = nil
-              },
-              label = "Shield Block"
             }
           }
         },
@@ -17208,21 +17463,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        sweeping_strikes_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warrior/sweeping_strikes.go",
-              registrationType = "RegisterAura",
-              functionName = "registerSweepingStrikesCD",
-              spellId = 12292,
-              auraDuration = {
-                raw = "time.Second * 10",
-                seconds = 10
-              },
-              label = "Sweeping Strikes"
-            }
-          }
-        },
         sweeping_strikes = {
           aura = {
             {
@@ -17235,21 +17475,6 @@ ns.protoSchema['vanilla'] = {
                 seconds = 10
               },
               label = "Sweeping Strikes"
-            }
-          }
-        },
-        recklessness_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warrior/recklessness.go",
-              registrationType = "RegisterAura",
-              functionName = "RegisterRecklessnessCD",
-              spellId = 1719,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Recklessness"
             }
           }
         },
@@ -17485,21 +17710,6 @@ ns.protoSchema['vanilla'] = {
             }
           }
         },
-        death_wish_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warrior/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerDeathWishCD",
-              spellId = 12328,
-              auraDuration = {
-                raw = "time.Second * 30",
-                seconds = 30
-              },
-              label = "Death Wish"
-            }
-          }
-        },
         death_wish = {
           aura = {
             {
@@ -17512,21 +17722,6 @@ ns.protoSchema['vanilla'] = {
                 seconds = 30
               },
               label = "Death Wish"
-            }
-          }
-        },
-        last_stand_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-classic/sim/warrior/talents.go",
-              registrationType = "RegisterAura",
-              functionName = "registerLastStandCD",
-              spellId = 12975,
-              auraDuration = {
-                raw = "time.Second * 20",
-                seconds = 20
-              },
-              label = "Last Stand"
             }
           }
         },

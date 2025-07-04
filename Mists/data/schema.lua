@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-07-03 20:39:54
+-- Generated schema for mop on 2025-07-03 20:45:21
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -9614,6 +9614,40 @@ ns.protoSchema['mists'] = {
                     seconds = 10
                   },
                   label = "Shadowstep"
+                },
+                {
+                  sourceFile = "extern/wowsims-mop/sim/rogue/shadowstep.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerShadowstepCD",
+                  spellId = 36554,
+                  auraDuration = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  label = "Shadowstep"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-mop/sim/rogue/shadowstep.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerShadowstepCD",
+                  spellId = 36554,
+                  cast = [[{
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: time.Second * 24,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 24",
+                    seconds = 24
+                  },
+                  Flags = "core.SpellFlagAPL",
+                  ClassSpellMask = "RogueSpellShadowstep",
+                  RelatedSelfBuff = "rogue.ShadowstepAura",
+                  IgnoreHaste = "true"
                 }
               }
             }
@@ -16493,7 +16527,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        shadowstep_cd = {
+        shadowstep = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/rogue/shadowstep.go",
@@ -16528,21 +16562,6 @@ ns.protoSchema['mists'] = {
               ClassSpellMask = "RogueSpellShadowstep",
               RelatedSelfBuff = "rogue.ShadowstepAura",
               IgnoreHaste = "true"
-            }
-          }
-        },
-        shadowstep = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/rogue/shadowstep.go",
-              registrationType = "RegisterAura",
-              functionName = "registerShadowstepCD",
-              spellId = 36554,
-              auraDuration = {
-                raw = "time.Second * 10",
-                seconds = 10
-              },
-              label = "Shadowstep"
             }
           }
         },
@@ -16679,7 +16698,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        shadow_blades_cd = {
+        shadow_blades = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/rogue/shadow_blades.go",
@@ -16714,21 +16733,6 @@ ns.protoSchema['mists'] = {
               ClassSpellMask = "RogueSpellShadowBlades",
               RelatedSelfBuff = "rogue.ShadowBladesAura",
               IgnoreHaste = "true"
-            }
-          }
-        },
-        shadow_blades = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/rogue/shadow_blades.go",
-              registrationType = "RegisterAura",
-              functionName = "registerShadowBladesCD",
-              spellId = 121471,
-              auraDuration = {
-                raw = "time.Second * 12",
-                seconds = 12
-              },
-              label = "Shadow Blades"
             }
           }
         },
@@ -16815,7 +16819,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        preparation_cd = {
+        preparation = {
           spell = {
             {
               sourceFile = "extern/wowsims-mop/sim/rogue/preparation.go",
@@ -17316,21 +17320,6 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        master_of_subtlety_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/rogue/subtlety/master_of_subtlety.go",
-              registrationType = "RegisterAura",
-              functionName = "registerMasterOfSubtletyCD",
-              spellId = 31223,
-              auraDuration = {
-                raw = "time.Second * 6",
-                seconds = 6
-              },
-              label = "Master of Subtlety"
-            }
-          }
-        },
         master_of_subtlety = {
           aura = {
             {
@@ -17413,7 +17402,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        shadow_dance_cd = {
+        shadow_dance = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/rogue/subtlety/shadow_dance.go",
@@ -17448,21 +17437,6 @@ ns.protoSchema['mists'] = {
               ClassSpellMask = "rogue.RogueSpellShadowDance",
               RelatedSelfBuff = "subRogue.ShadowDanceAura",
               IgnoreHaste = "true"
-            }
-          }
-        },
-        shadow_dance = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/rogue/subtlety/shadow_dance.go",
-              registrationType = "RegisterAura",
-              functionName = "registerShadowDanceCD",
-              spellId = 51713,
-              auraDuration = {
-                raw = "time.Second * 8",
-                seconds = 8
-              },
-              label = "Shadow Dance"
             }
           }
         },
@@ -17791,7 +17765,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        killing_spree_cd = {
+        killing_spree = {
           spell = {
             {
               sourceFile = "extern/wowsims-mop/sim/rogue/combat/killing_spree.go",
@@ -17821,22 +17795,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        killing_spree = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/rogue/combat/killing_spree.go",
-              registrationType = "RegisterAura",
-              functionName = "registerKillingSpreeCD",
-              spellId = 51690,
-              auraDuration = {
-                raw = "time.Second*3 + 1",
-                seconds = nil
-              },
-              label = "Killing Spree"
-            }
-          }
-        },
-        adrenaline_rush_cd = {
+        adrenaline_rush = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/rogue/combat/adrenaline_rush.go",
@@ -17876,39 +17835,9 @@ ns.protoSchema['mists'] = {
               IgnoreHaste = "true"
             }
           }
-        },
-        adrenaline_rush = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/rogue/combat/adrenaline_rush.go",
-              registrationType = "RegisterAura",
-              functionName = "registerAdrenalineRushCD",
-              spellId = 13750,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Adrenaline Rush"
-            }
-          }
         }
       },
       druid = {
-        barkskin_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/druid/barkskin.go",
-              registrationType = "RegisterAura",
-              functionName = "registerBarkskinCD",
-              spellId = 22812,
-              auraDuration = {
-                raw = "time.Second * 12",
-                seconds = 12
-              },
-              label = "Barkskin"
-            }
-          }
-        },
         barkskin = {
           aura = {
             {
@@ -18118,7 +18047,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        berserk_cd = {
+        berserk = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/druid/berserk.go",
@@ -18219,21 +18148,6 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        might_of_ursoc_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/druid/might_of_ursoc.go",
-              registrationType = "RegisterAura",
-              functionName = "registerMightOfUrsocCD",
-              spellId = 106922,
-              auraDuration = {
-                raw = "time.Second * 20",
-                seconds = 20
-              },
-              label = "Might of Ursoc"
-            }
-          }
-        },
         might_of_ursoc = {
           aura = {
             {
@@ -18246,21 +18160,6 @@ ns.protoSchema['mists'] = {
                 seconds = 20
               },
               label = "Might of Ursoc"
-            }
-          }
-        },
-        survival_instincts_cd = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/druid/survival_instincts.go",
-              registrationType = "RegisterAura",
-              functionName = "registerSurvivalInstinctsCD",
-              spellId = 61336,
-              auraDuration = {
-                raw = "core.TernaryDuration(isGlyphed",
-                seconds = nil
-              },
-              label = "Survival Instincts"
             }
           }
         },
@@ -22685,7 +22584,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        bloodlust_cd = {
+        bloodlust = {
           spell = {
             {
               sourceFile = "extern/wowsims-mop/sim/shaman/bloodlust.go",
@@ -22991,7 +22890,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        stormlash_cd = {
+        stormlash = {
           spell = {
             {
               sourceFile = "extern/wowsims-mop/sim/shaman/stormlash_totem.go",
@@ -24890,7 +24789,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        rabid_cd = {
+        rabid = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/hunter/pet_abilities.go",
@@ -24927,21 +24826,6 @@ ns.protoSchema['mists'] = {
                 raw = "time.Second * 90",
                 seconds = 90
               }
-            }
-          }
-        },
-        rabid = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/hunter/pet_abilities.go",
-              registrationType = "RegisterAura",
-              functionName = "registerRabidCD",
-              spellId = 53401,
-              auraDuration = {
-                raw = "time.Second * 20",
-                seconds = 20
-              },
-              label = "Rabid"
             }
           }
         },
@@ -25356,7 +25240,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        rapid_fire_cd = {
+        rapid_fire = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/hunter/rapid_fire.go",
@@ -25392,21 +25276,6 @@ ns.protoSchema['mists'] = {
               },
               Flags = "core.SpellFlagReadinessTrinket",
               ClassSpellMask = "HunterSpellRapidFire"
-            }
-          }
-        },
-        rapid_fire = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/hunter/rapid_fire.go",
-              registrationType = "RegisterAura",
-              functionName = "registerRapidFireCD",
-              spellId = 3045,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Rapid Fire"
             }
           }
         },
@@ -25762,7 +25631,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        bestial_wrath_cd = {
+        bestial_wrath = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/bestial_wrath.go",
@@ -25813,21 +25682,6 @@ ns.protoSchema['mists'] = {
                 seconds = nil
               },
               label = "Bestial Wrath Pet"
-            }
-          }
-        },
-        bestial_wrath = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/hunter/beast_mastery/bestial_wrath.go",
-              registrationType = "RegisterAura",
-              functionName = "registerBestialWrathCD",
-              spellId = 19574,
-              auraDuration = {
-                raw = "duration",
-                seconds = nil
-              },
-              label = "Bestial Wrath"
             }
           }
         },
@@ -26504,7 +26358,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        hymn_of_hope_cd = {
+        hymn_of_hope = {
           spell = {
             {
               sourceFile = "extern/wowsims-mop/sim/priest/_hymn_of_hope.go",
@@ -32175,7 +32029,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        icy_veins_cd = {
+        icy_veins = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/mage/icy_veins.go",
@@ -32213,22 +32067,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        icy_veins = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/mage/icy_veins.go",
-              registrationType = "RegisterAura",
-              functionName = "registerIcyVeinsCD",
-              spellId = 12472,
-              auraDuration = {
-                raw = "time.Second * 20",
-                seconds = 20
-              },
-              label = "Icy Veins"
-            }
-          }
-        },
-        mirror_image_cd = {
+        mirror_image = {
           spell = {
             {
               sourceFile = "extern/wowsims-mop/sim/mage/mirror_image.go",
@@ -32558,7 +32397,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        alter_time_cd = {
+        alter_time = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/mage/alter_time.go",
@@ -32594,21 +32433,6 @@ ns.protoSchema['mists'] = {
               Flags = "core.SpellFlagNoOnCastComplete",
               ClassSpellMask = "MageSpellAlterTime",
               RelatedSelfBuff = "mage.AlterTimeAura"
-            }
-          }
-        },
-        alter_time = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/mage/alter_time.go",
-              registrationType = "RegisterAura",
-              functionName = "registerAlterTimeCD",
-              spellId = 108978,
-              auraDuration = {
-                raw = "time.Second * 6",
-                seconds = 6
-              },
-              label = "Alter Time"
             }
           }
         },
@@ -33457,7 +33281,7 @@ ns.protoSchema['mists'] = {
             }
           }
         },
-        arcane_power_cd = {
+        arcane_power = {
           aura = {
             {
               sourceFile = "extern/wowsims-mop/sim/mage/arcane/arcane_power.go",
@@ -33493,21 +33317,6 @@ ns.protoSchema['mists'] = {
               Flags = "core.SpellFlagNoOnCastComplete",
               ClassSpellMask = "mage.MageSpellArcanePower",
               RelatedSelfBuff = "arcane.arcanePowerAura"
-            }
-          }
-        },
-        arcane_power = {
-          aura = {
-            {
-              sourceFile = "extern/wowsims-mop/sim/mage/arcane/arcane_power.go",
-              registrationType = "RegisterAura",
-              functionName = "registerArcanePowerCD",
-              spellId = 12042,
-              auraDuration = {
-                raw = "time.Second * 15",
-                seconds = 15
-              },
-              label = "Arcane Power"
             }
           }
         },
