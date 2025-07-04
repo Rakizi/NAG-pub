@@ -97,7 +97,7 @@ local EXECUTE_SPELLS = {
     --[114866] = 35,  -- Soul Reaper (Death Knight)
 }
 
---- Checks if a spell can be executed on the current target, including special logic for Touch of Death.
+--- Checks if a spell can be executed on the current target, including special logic for Touch of Death/Hammer of Wrath
 --- @param spellId number The spell ID to check.
 --- @param unit string The unit to check (default: "target").
 --- @return boolean True if the spell can be executed, false otherwise.
@@ -110,6 +110,9 @@ function NAG:CanExecuteSpell(spellId, unit)
         else
             return UnitHealth(unit) <= UnitHealth("player")
         end
+    end
+    if spellId == 24275 and NAG:AuraIsActive(31884) then -- paladin HoW
+        return NAG:SpellCanCast(spellId)
     end
     local threshold = EXECUTE_SPELLS[spellId]
     if threshold then

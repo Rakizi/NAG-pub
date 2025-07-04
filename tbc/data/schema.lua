@@ -1,4 +1,4 @@
--- Generated schema for tbc on 2025-07-01 11:07:20
+-- Generated schema for tbc on 2025-07-03 22:04:28
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['tbc'] = {
@@ -25,16 +25,37 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerInnerFocus",
-                spellId = 14751,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Inner Focus"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerInnerFocus",
+                  spellId = 14751,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Inner Focus"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerInnerFocus",
+                  spellId = 14751,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    priest.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
               }
             }
           },
@@ -76,7 +97,34 @@ ns.protoSchema['tbc'] = {
           power_infusion = {
             id = 10,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/priest/power_infusion.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerPowerInfusionCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeMana",
+                    priority = "core.CooldownPriorityBloodlust"
+                  },
+                  spellId = 10060,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+			},
+			CD: core.Cooldown{
+				Timer:    priest.NewTimer(),
+				Duration: core.PowerInfusionCD,
+			},
+		}]],
+                  cooldown = {
+                    raw = "core.PowerInfusionCD",
+                    seconds = nil
+                  }
+                }
+              }
+            }
           },
           enlightenment = {
             id = 11,
@@ -111,19 +159,7 @@ ns.protoSchema['tbc'] = {
           surge_of_light = {
             id = 17,
             type = "int32",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "setupSurgeOfLight",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Surge of Light"
-              }
-            }
+            label = "optional"
           },
           spirit_of_redemption = {
             id = 33,
@@ -153,15 +189,7 @@ ns.protoSchema['tbc'] = {
           mind_flay = {
             id = 21,
             type = "bool",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/priest/mind_flay.go",
-                registrationType = "RegisterAura",
-                functionName = "newMindFlayDot",
-                label = "MindFlay-"
-              }
-            }
+            label = "optional"
           },
           shadow_weaving = {
             id = 22,
@@ -208,12 +236,32 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/priest/vampiric_touch.go",
-                registrationType = "RegisterAura",
-                functionName = "registerVampiricTouchSpell",
-                spellId = 34917,
-                label = "VampiricTouch-"
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/priest/vampiric_touch.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerVampiricTouchSpell",
+                  spellId = 34917,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost:     baseCost,
+				GCD:      core.GCDDefault,
+				CastTime: time.Millisecond * 1500,
+			},
+		}]],
+                  SpellSchool = "core.SpellSchoolShadow",
+                  ProcMask = "core.ProcMaskSpellDamage",
+                  ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/priest/vampiric_touch.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerVampiricTouchSpell",
+                  spellId = 34917,
+                  label = "VampiricTouch-"
+                }
               }
             }
           }
@@ -360,19 +408,31 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/deep_wounds.go",
-                registrationType = "RegisterAura",
-                functionName = "applyDeepWounds",
-                spellId = 12867,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                ProcMask = "core.ProcMaskPeriodicDamage",
-                DamageMultiplier = "0.2 * float64(warrior.Talents.DeepWounds)",
-                ThreatMultiplier = "1",
-                label = "Deep Wounds"
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/deep_wounds.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "applyDeepWounds",
+                  spellId = 12867,
+                  Flags = "core.SpellFlagNoOnCastComplete",
+                  SpellSchool = "core.SpellSchoolPhysical"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/deep_wounds.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyDeepWounds",
+                  spellId = 12867,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  ProcMask = "core.ProcMaskPeriodicDamage",
+                  DamageMultiplier = "0.2 * float64(warrior.Talents.DeepWounds)",
+                  ThreatMultiplier = "1",
+                  label = "Deep Wounds"
+                }
               }
             }
           },
@@ -396,55 +456,58 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerDeathWishCD",
-                spellId = 12292,
-                auraDuration = {
-                  raw = "time.Second * 30",
-                  seconds = 30
-                },
-                label = "Death Wish"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerDeathWishCD",
+                  spellId = 12292,
+                  auraDuration = {
+                    raw = "time.Second * 30",
+                    seconds = 30
+                  },
+                  label = "Death Wish"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerDeathWishCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 12292,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: cost,
+				GCD:  core.GCDDefault,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    warrior.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  },
+                  IgnoreHaste = "true"
+                }
               }
             }
           },
           mace_specialization = {
             id = 12,
             type = "int32",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyWeaponSpecializations",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Mace Specialization"
-              }
-            }
+            label = "optional"
           },
           sword_specialization = {
             id = 13,
             type = "int32",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyWeaponSpecializations",
-                spellId = 12815,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
-                SpellSchool = "core.SpellSchoolPhysical",
-                label = "Sword Specialization"
-              }
-            }
+            label = "optional"
           },
           improved_disciplines = {
             id = 14,
@@ -459,7 +522,38 @@ ns.protoSchema['tbc'] = {
           mortal_strike = {
             id = 16,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/mortal_strike.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerMortalStrikeSpell",
+                  spellId = 30330,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: cost,
+				GCD:  core.GCDDefault,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    cdTimer,
+				Duration: time.Second*6 - time.Millisecond*200*time.Duration(warrior.Talents.ImprovedMortalStrike),
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second*6 - time.Millisecond*200*time.Duration(warrior.Talents.ImprovedMortalStrike)",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  DamageMultiplier = "1 *",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           },
           improved_mortal_strike = {
             id = 17,
@@ -491,15 +585,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyUnbridledWrath",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Unbridled Wrath"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyUnbridledWrath",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Unbridled Wrath"
+                }
               }
             }
           },
@@ -533,16 +629,55 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
-                registrationType = "RegisterAura",
-                functionName = "registerSweepingStrikesCD",
-                spellId = 12328,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerSweepingStrikesCD",
+                  spellId = 12328,
+                  Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskEmpty",
+                  DamageMultiplier = "1",
+                  ThreatMultiplier = "1"
                 },
-                label = "Sweeping Strikes"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerSweepingStrikesCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 12328,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: cost,
+			},
+			CD: core.Cooldown{
+				Timer:    warrior.NewTimer(),
+				Duration: time.Second * 30,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 30",
+                    seconds = 30
+                  },
+                  SpellSchool = "core.SpellSchoolPhysical"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerSweepingStrikesCD",
+                  spellId = 12328,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Sweeping Strikes"
+                }
               }
             }
           },
@@ -561,15 +696,38 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyFlurry",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFlurry",
+                  spellId = 12974,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Flurry Proc"
                 },
-                label = "Flurry"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFlurry",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Flurry"
+                },
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFlurry",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Flurry"
+                }
               }
             }
           },
@@ -581,7 +739,38 @@ ns.protoSchema['tbc'] = {
           bloodthirst = {
             id = 32,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/bloodthirst.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerBloodthirstSpell",
+                  spellId = 30335,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: cost,
+				GCD:  core.GCDDefault,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    cdTimer,
+				Duration: time.Second * 6,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 6",
+                    seconds = 6
+                  },
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  DamageMultiplier = "1 * core.TernaryFloat64(ItemSetOnslaughtBattlegear.CharacterHasSetBonus(&warrior.Character",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           },
           improved_whirlwind = {
             id = 33,
@@ -598,16 +787,55 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
-                registrationType = "RegisterAura",
-                functionName = "registerRampageSpell",
-                spellId = 30033,
-                auraDuration = {
-                  raw = "time.Second * 30",
-                  seconds = 30
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerRampageSpell",
+                  spellId = 30033,
+                  auraDuration = {
+                    raw = "time.Second * 30",
+                    seconds = 30
+                  },
+                  label = "Rampage"
                 },
-                label = "Rampage"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerRampageSpell",
+                  spellId = 30033,
+                  auraDuration = {
+                    raw = "time.Second * 30",
+                    seconds = 30
+                  },
+                  label = "Rampage"
+                },
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerRampageSpell",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Rampage Talent"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerRampageSpell",
+                  spellId = 30033,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: 20,
+				GCD:  core.GCDDefault,
+			},
+			IgnoreHaste: true,
+		}]],
+                  IgnoreHaste = "true"
+                }
               }
             }
           },
@@ -631,15 +859,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyShieldSpecialization",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Shield Specialization"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyShieldSpecialization",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Shield Specialization"
+                }
               }
             }
           },
@@ -653,16 +883,40 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerLastStandCD",
-                spellId = 12975,
-                auraDuration = {
-                  raw = "time.Second * 20",
-                  seconds = 20
-                },
-                label = "Last Stand"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerLastStandCD",
+                  spellId = 12975,
+                  auraDuration = {
+                    raw = "time.Second * 20",
+                    seconds = 20
+                  },
+                  label = "Last Stand"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerLastStandCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeSurvival",
+                    priority = nil
+                  },
+                  spellId = 12975,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    warrior.NewTimer(),
+				Duration: time.Minute * 8,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 8",
+                    seconds = 480
+                  }
+                }
               }
             }
           },
@@ -704,7 +958,38 @@ ns.protoSchema['tbc'] = {
           shield_slam = {
             id = 41,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/shield_slam.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerShieldSlamSpell",
+                  spellId = 30356,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: cost,
+				GCD:  core.GCDDefault,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    cdTimer,
+				Duration: time.Second * 6,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 6",
+                    seconds = 6
+                  },
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  DamageMultiplier = "1 * core.TernaryFloat64(ItemSetOnslaughtArmor.CharacterHasSetBonus(&warrior.Character",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           },
           focused_rage = {
             id = 42,
@@ -719,7 +1004,30 @@ ns.protoSchema['tbc'] = {
           devastate = {
             id = 44,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warrior/devastate.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerDevastateSpell",
+                  spellId = 30022,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: cost,
+				GCD:  core.GCDDefault,
+			},
+			IgnoreHaste: true,
+		}]],
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  DamageMultiplier = "1",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           }
         },
         oneofs = {
@@ -869,15 +1177,28 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyArcaneConcentration",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyArcaneConcentration",
+                  spellId = 12536,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Clearcasting"
                 },
-                label = "Arcane Concentration"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyArcaneConcentration",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Arcane Concentration"
+                }
               }
             }
           },
@@ -894,7 +1215,32 @@ ns.protoSchema['tbc'] = {
           presence_of_mind = {
             id = 7,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerPresenceOfMindCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 12043,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: cooldown,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cooldown",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              }
+            }
           },
           arcane_mind = {
             id = 8,
@@ -921,16 +1267,41 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerArcanePowerCD",
-                spellId = 12042,
-                auraDuration = {
-                  raw = "time.Second * 15",
-                  seconds = 15
-                },
-                label = "Arcane Power"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerArcanePowerCD",
+                  spellId = 12042,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Arcane Power"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerArcanePowerCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 12042,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
               }
             }
           },
@@ -954,12 +1325,27 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
-                registrationType = "RegisterAura",
-                functionName = "newIgniteDot",
-                spellId = 12848,
-                label = "Ignite-"
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerIgniteSpell",
+                  spellId = 12848,
+                  Flags = "SpellFlagMage | core.SpellFlagIgnoreModifiers",
+                  SpellSchool = "core.SpellSchoolFire"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyIgnite",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Ignite Talent"
+                }
               }
             }
           },
@@ -983,12 +1369,37 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/mage/pyroblast.go",
-                registrationType = "RegisterAura",
-                functionName = "registerPyroblastSpell",
-                spellId = 33938,
-                label = "Pyroblast-"
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/pyroblast.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerPyroblastSpell",
+                  spellId = 33938,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost *
+					(1 - 0.01*float64(mage.Talents.Pyromaniac)) *
+					(1 - 0.01*float64(mage.Talents.ElementalPrecision)),
+
+				GCD:      core.GCDDefault,
+				CastTime: time.Second * 6,
+			},
+		}]],
+                  Flags = "SpellFlagMage",
+                  SpellSchool = "core.SpellSchoolFire",
+                  ProcMask = "core.ProcMaskSpellDamage",
+                  DamageMultiplier = "mage.spellDamageMultiplier * (1 + 0.02*float64(mage.Talents.FirePower))",
+                  ThreatMultiplier = "1 - 0.05*float64(mage.Talents.BurningSoul)"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/pyroblast.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerPyroblastSpell",
+                  spellId = 33938,
+                  label = "Pyroblast-"
+                }
               }
             }
           },
@@ -1007,15 +1418,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyMasterOfElements",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Master of Elements"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyMasterOfElements",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Master of Elements"
+                }
               }
             }
           },
@@ -1049,16 +1462,45 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerCombustionCD",
-                spellId = 11129,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerCombustionCD",
+                  spellId = 11129,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Combustion"
                 },
-                label = "Combustion"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerCombustionCD",
+                  spellId = 11129,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Combustion"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerCombustionCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 11129,
+                  cast = [[{
+			CD: cd,
+		}]],
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
               }
             }
           },
@@ -1107,16 +1549,40 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerIcyVeinsCD",
-                spellId = 12472,
-                auraDuration = {
-                  raw = "time.Second * 20",
-                  seconds = 20
-                },
-                label = "Icy Veins"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerIcyVeinsCD",
+                  spellId = 12472,
+                  auraDuration = {
+                    raw = "time.Second * 20",
+                    seconds = 20
+                  },
+                  label = "Icy Veins"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerIcyVeinsCD",
+                  spellId = 12472,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: manaCost,
+			},
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
               }
             }
           },
@@ -1133,7 +1599,32 @@ ns.protoSchema['tbc'] = {
           cold_snap = {
             id = 40,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerColdSnapCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 11958,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: cooldown,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cooldown",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              }
+            }
           },
           improved_cone_of_cold = {
             id = 41,
@@ -1148,7 +1639,31 @@ ns.protoSchema['tbc'] = {
           winters_chill = {
             id = 43,
             type = "int32",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/winters_chill.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerWintersChillSpell",
+                  spellId = 28595,
+                  Flags = "SpellFlagMage",
+                  SpellSchool = "core.SpellSchoolFrost"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/winters_chill.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyWintersChill",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Winters Chill Talent"
+                }
+              }
+            }
           },
           arctic_winds = {
             id = 44,
@@ -1163,7 +1678,33 @@ ns.protoSchema['tbc'] = {
           summon_water_elemental = {
             id = 46,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/mage/water_elemental.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerSummonWaterElementalCD",
+                  spellId = 31687,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost *
+					(1 - 0.05*float64(mage.Talents.FrostChanneling)) *
+					(1 - 0.01*float64(mage.Talents.ElementalPrecision)),
+				GCD: core.GCDDefault,
+			},
+			CD: core.Cooldown{
+				Timer:    mage.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  }
+                }
+              }
+            }
           }
         },
         oneofs = {
@@ -1255,20 +1796,7 @@ ns.protoSchema['tbc'] = {
           improved_aspect_of_the_hawk = {
             id = 1,
             type = "int32",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
-                registrationType = "RegisterAura",
-                functionName = "registerAspectOfTheHawkSpell",
-                spellId = 19556,
-                auraDuration = {
-                  raw = "time.Second * 12",
-                  seconds = 12
-                },
-                label = "Improved Aspect of the Hawk"
-              }
-            }
+            label = "optional"
           },
           endurance_training = {
             id = 2,
@@ -1305,15 +1833,38 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyFrenzy",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFrenzy",
+                  spellId = 19625,
+                  auraDuration = {
+                    raw = "time.Second * 8",
+                    seconds = 8
+                  },
+                  label = "Frenzy Proc"
                 },
-                label = "Frenzy"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFrenzy",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Frenzy"
+                },
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFrenzy",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Frenzy"
+                }
               }
             }
           },
@@ -1322,15 +1873,28 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyFerociousInspiration",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFerociousInspiration",
+                  spellId = 34460,
+                  auraDuration = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  label = "Ferocious Inspiration-"
                 },
-                label = "Ferocious Inspiration"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFerociousInspiration",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Ferocious Inspiration"
+                }
               }
             }
           },
@@ -1339,16 +1903,54 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerBestialWrathCD",
-                spellId = 19574,
-                auraDuration = {
-                  raw = "time.Second * 18",
-                  seconds = 18
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerBestialWrathCD",
+                  spellId = 19574,
+                  auraDuration = {
+                    raw = "time.Second * 18",
+                    seconds = 18
+                  },
+                  label = "Bestial Wrath Pet"
                 },
-                label = "Bestial Wrath"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerBestialWrathCD",
+                  spellId = 19574,
+                  auraDuration = {
+                    raw = "time.Second * 18",
+                    seconds = 18
+                  },
+                  label = "Bestial Wrath"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerBestialWrathCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 19574,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: manaCost,
+			},
+			CD: core.Cooldown{
+				Timer:    hunter.NewTimer(),
+				Duration: time.Minute * 2,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 2",
+                    seconds = 120
+                  }
+                }
               }
             }
           },
@@ -1382,15 +1984,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyGoForTheThroat",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Go for the Throat"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyGoForTheThroat",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Go for the Throat"
+                }
               }
             }
           },
@@ -1402,7 +2006,38 @@ ns.protoSchema['tbc'] = {
           aimed_shot = {
             id = 17,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/aimed_shot.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerAimedShotSpell",
+                  spellId = 27065,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost * (1 - 0.02*float64(hunter.Talents.Efficiency)),
+				// Actual aimed shot has a 2.5s cast time, but we only use it as an instant precast.
+				//CastTime:       time.Millisecond * 2500,
+				//GCD:            core.GCDDefault,
+			},
+			//CD: core.Cooldown{
+			//	Timer:    hunter.NewTimer(),
+			//	Duration: time.Second * 6,
+			//},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 6",
+                    seconds = 6
+                  },
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskRangedSpecial",
+                  DamageMultiplier = "1",
+                  ThreatMultiplier = "1"
+                }
+              }
+            }
           },
           rapid_killing = {
             id = 18,
@@ -1529,44 +2164,89 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyThrillOfTheHunt",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Thrill of the Hunt"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyThrillOfTheHunt",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Thrill of the Hunt"
+                }
               }
             }
           },
           expose_weakness = {
             id = 42,
             type = "int32",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyExposeWeakness",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Expose Weakness Talent"
+                }
+              }
+            }
           },
           master_tactician = {
             id = 43,
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyMasterTactician",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Master Tactician"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyMasterTactician",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Master Tactician"
+                }
               }
             }
           },
           readiness = {
             id = 44,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerReadinessCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 23989,
+                  cast = [[{
+			//GCD:         time.Second * 1, TODO: GCD causes panic
+			//IgnoreHaste: true, // Hunter GCD is locked
+			CD: core.Cooldown{
+				Timer:    hunter.NewTimer(),
+				Duration: time.Minute * 5,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 5",
+                    seconds = 300
+                  },
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           }
         },
         oneofs = {
@@ -1678,12 +2358,32 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/druid/insect_swarm.go",
-                registrationType = "RegisterAura",
-                functionName = "registerInsectSwarmSpell",
-                spellId = 27013,
-                label = "InsectSwarm-"
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/insect_swarm.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerInsectSwarmSpell",
+                  spellId = 27013,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  core.GCDDefault,
+			},
+		}]],
+                  SpellSchool = "core.SpellSchoolNature",
+                  ProcMask = "core.ProcMaskSpellDamage",
+                  DamageMultiplier = "1",
+                  ThreatMultiplier = "1"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/insect_swarm.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerInsectSwarmSpell",
+                  spellId = 27013,
+                  label = "InsectSwarm-"
+                }
               }
             }
           },
@@ -1700,20 +2400,7 @@ ns.protoSchema['tbc'] = {
           natures_grace = {
             id = 8,
             type = "bool",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "setupNaturesGrace",
-                spellId = 16880,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Natures Grace"
-              }
-            }
+            label = "optional"
           },
           moonglow = {
             id = 9,
@@ -1800,15 +2487,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyPrimalFury",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Primal Fury"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyPrimalFury",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Primal Fury"
+                }
               }
             }
           },
@@ -1820,7 +2509,29 @@ ns.protoSchema['tbc'] = {
           faerie_fire = {
             id = 24,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/faerie_fire.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerFaerieFireSpell",
+                  spellId = 26993,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  gcd,
+			},
+			IgnoreHaste: ignoreHaste,
+			CD:          cd,
+		}]],
+                  SpellSchool = "core.SpellSchoolNature",
+                  ProcMask = "core.ProcMaskSpellDamage",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "ignoreHaste"
+                }
+              }
+            }
           },
           heart_of_the_wild = {
             id = 25,
@@ -1887,15 +2598,28 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyOmenOfClarity",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyOmenOfClarity",
+                  spellId = 16870,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Clearcasting"
                 },
-                label = "Omen of Clarity"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyOmenOfClarity",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Omen of Clarity"
+                }
               }
             }
           },
@@ -1904,16 +2628,41 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerNaturesSwiftnessCD",
-                spellId = 17116,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Natures Swiftness"
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerNaturesSwiftnessCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 17116,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    druid.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerNaturesSwiftnessCD",
+                  spellId = 17116,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Natures Swiftness"
+                }
               }
             }
           },
@@ -2124,16 +2873,40 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerColdBloodCD",
-                spellId = 14177,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Cold Blood"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerColdBloodCD",
+                  spellId = 14177,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Cold Blood"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerColdBloodCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 14177,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: time.Minute * 3,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 3",
+                    seconds = 180
+                  }
+                }
               }
             }
           },
@@ -2147,15 +2920,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applySealFate",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Seal Fate"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applySealFate",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Seal Fate"
+                }
               }
             }
           },
@@ -2172,25 +2947,34 @@ ns.protoSchema['tbc'] = {
           find_weakness = {
             id = 16,
             type = "int32",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "makeFinishingMoveEffectApplier",
-                spellId = 31242,
-                auraDuration = {
-                  raw = "time.Second * 10",
-                  seconds = 10
-                },
-                label = "Find Weakness"
-              }
-            }
+            label = "optional"
           },
           mutilate = {
             id = 17,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/mutilate.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerMutilateSpell",
+                  spellId = 34413,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  time.Second,
+			},
+			IgnoreHaste: true,
+		}]],
+                  Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "true"
+                }
+              }
+            }
           },
           improved_sinister_strike = {
             id = 18,
@@ -2237,38 +3021,64 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerBladeFlurryCD",
-                spellId = 13877,
-                auraDuration = {
-                  raw = "dur",
-                  seconds = nil
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerBladeFlurryCD",
+                  spellId = 13877,
+                  Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskEmpty",
+                  DamageMultiplier = "1",
+                  ThreatMultiplier = "1"
                 },
-                label = "Blade Flurry"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerBladeFlurryCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = "core.CooldownPriorityLow"
+                  },
+                  spellId = 13877,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: energyCost,
+				GCD:  time.Second,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: cooldownDur,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cooldownDur",
+                    seconds = nil
+                  },
+                  IgnoreHaste = "true"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerBladeFlurryCD",
+                  spellId = 13877,
+                  auraDuration = {
+                    raw = "dur",
+                    seconds = nil
+                  },
+                  label = "Blade Flurry"
+                }
               }
             }
           },
           sword_specialization = {
             id = 25,
             type = "int32",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyWeaponSpecializations",
-                spellId = 13964,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                Flags = "core.SpellFlagMeleeMetrics",
-                SpellSchool = "core.SpellSchoolPhysical",
-                label = "Sword Specialization"
-              }
-            }
+            label = "optional"
           },
           fist_weapon_specialization = {
             id = 26,
@@ -2295,16 +3105,45 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerAdrenalineRushCD",
-                spellId = 13750,
-                auraDuration = {
-                  raw = "time.Second * 15",
-                  seconds = 15
-                },
-                label = "Adrenaline Rush"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerAdrenalineRushCD",
+                  spellId = 13750,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Adrenaline Rush"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerAdrenalineRushCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = "core.CooldownPriorityBloodlust"
+                  },
+                  spellId = 13750,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				GCD: time.Second,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    rogue.NewTimer(),
+				Duration: time.Minute * 5,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 5",
+                    seconds = 300
+                  },
+                  IgnoreHaste = "true"
+                }
               }
             }
           },
@@ -2313,15 +3152,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyCombatPotency",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Combat Potency"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyCombatPotency",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Combat Potency"
+                }
               }
             }
           },
@@ -2380,16 +3221,50 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
-                registrationType = "RegisterAura",
-                functionName = "registerHemorrhageSpell",
-                spellId = 26864,
-                auraDuration = {
-                  raw = "time.Second * 15",
-                  seconds = 15
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerHemorrhageSpell",
+                  spellId = 26864,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Hemorrhage"
                 },
-                label = "Hemorrhage"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerHemorrhageSpell",
+                  spellId = 26864,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Hemorrhage"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerHemorrhageSpell",
+                  spellId = 26864,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  time.Second,
+			},
+			IgnoreHaste: true,
+		}]],
+                  Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  DamageMultiplier = "1 +",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "true"
+                }
               }
             }
           },
@@ -2526,15 +3401,28 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyElementalFocus",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyElementalFocus",
+                  spellId = 16246,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Clearcasting"
                 },
-                label = "Elemental Focus"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyElementalFocus",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Elemental Focus"
+                }
               }
             }
           },
@@ -2558,15 +3446,17 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyElementalDevastation",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Elemental Devastation"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyElementalDevastation",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Elemental Devastation"
+                }
               }
             }
           },
@@ -2595,16 +3485,41 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerElementalMasteryCD",
-                spellId = 16166,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Elemental Mastery"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerElementalMasteryCD",
+                  spellId = 16166,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Elemental Mastery"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerElementalMasteryCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 16166,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    cdTimer,
+				Duration: cd,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cd",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
               }
             }
           },
@@ -2643,15 +3558,28 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyShamanisticFocus",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyShamanisticFocus",
+                  spellId = 43338,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Shamanistic Focus Proc"
                 },
-                label = "Shamanistic Focus"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyShamanisticFocus",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Shamanistic Focus"
+                }
               }
             }
           },
@@ -2665,15 +3593,38 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyFlurry",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFlurry",
+                  spellId = 16280,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Flurry Proc"
                 },
-                label = "Flurry"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFlurry",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Flurry"
+                },
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyFlurry",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Flurry"
+                }
               }
             }
           },
@@ -2717,15 +3668,28 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyUnleashedRage",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyUnleashedRage",
+                  spellId = 30811,
+                  auraDuration = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  label = "Unleahed Rage Proc"
                 },
-                label = "Unleashed Rage"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyUnleashedRage",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Unleashed Rage"
+                }
               }
             }
           },
@@ -2734,16 +3698,46 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
-                registrationType = "RegisterAura",
-                functionName = "stormstrikeDebuffAura",
-                spellId = 17364,
-                auraDuration = {
-                  raw = "time.Second * 12",
-                  seconds = 12
-                },
-                label = "Stormstrike"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
+                  registrationType = "RegisterAura",
+                  functionName = "stormstrikeDebuffAura",
+                  spellId = 17364,
+                  auraDuration = {
+                    raw = "time.Second * 12",
+                    seconds = 12
+                  },
+                  label = "Stormstrike"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerStormstrikeSpell",
+                  spellId = 17364,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  core.GCDDefault,
+			},
+			IgnoreHaste: true,
+			CD: core.Cooldown{
+				Timer:    shaman.NewTimer(),
+				Duration: time.Second * 10,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  ThreatMultiplier = "1",
+                  IgnoreHaste = "true"
+                }
               }
             }
           },
@@ -2752,16 +3746,41 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/shamanistic_rage.go",
-                registrationType = "RegisterAura",
-                functionName = "registerShamanisticRageCD",
-                spellId = 30823,
-                auraDuration = {
-                  raw = "time.Second * 15",
-                  seconds = 15
-                },
-                label = "Shamanistic Rage"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/shamanistic_rage.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerShamanisticRageCD",
+                  spellId = 30823,
+                  auraDuration = {
+                    raw = "time.Second * 15",
+                    seconds = 15
+                  },
+                  label = "Shamanistic Rage"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/shamanistic_rage.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerShamanisticRageCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeMana",
+                    priority = nil
+                  },
+                  spellId = 30823,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    shaman.NewTimer(),
+				Duration: time.Minute * 2,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Minute * 2",
+                    seconds = 120
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
               }
             }
           },
@@ -2790,16 +3809,41 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "registerNaturesSwiftnessCD",
-                spellId = 16188,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Natures Swiftness"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerNaturesSwiftnessCD",
+                  spellId = 16188,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Natures Swiftness"
+                }
+              },
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerNaturesSwiftnessCD",
+                  majorCooldown = {
+                    type = "core.CooldownTypeDPS",
+                    priority = nil
+                  },
+                  spellId = 16188,
+                  cast = [[{
+			CD: core.Cooldown{
+				Timer:    cdTimer,
+				Duration: cd,
+			},
+		}]],
+                  cooldown = {
+                    raw = "cd",
+                    seconds = nil
+                  },
+                  Flags = "core.SpellFlagNoOnCastComplete"
+                }
               }
             }
           },
@@ -3033,36 +4077,25 @@ ns.protoSchema['tbc'] = {
           amplify_curse = {
             id = 6,
             type = "bool",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "setupAmplifyCurse",
-                spellId = 18288,
-                auraDuration = {
-                  raw = "time.Second * 30",
-                  seconds = 30
-                },
-                label = "Amplify Curse"
-              }
-            }
+            label = "optional"
           },
           nightfall = {
             id = 7,
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "setupNightfall",
-                spellId = 18095,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
-                },
-                label = "Nightfall"
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "setupNightfall",
+                  spellId = 18095,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Nightfall"
+                }
               }
             }
           },
@@ -3074,19 +4107,51 @@ ns.protoSchema['tbc'] = {
           shadow_embrace = {
             id = 50,
             type = "int32",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyShadowEmbrace",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Shadow Embrace Talent"
+                }
+              }
+            }
           },
           siphon_life = {
             id = 9,
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/warlock/siphon_life.go",
-                registrationType = "RegisterAura",
-                functionName = "registerSiphonLifeSpell",
-                spellId = 30911,
-                label = "SiphonLife-"
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warlock/siphon_life.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerSiphonLifeSpell",
+                  spellId = 30911,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  core.GCDDefault,
+			},
+		}]],
+                  SpellSchool = "core.SpellSchoolShadow",
+                  ProcMask = "core.ProcMaskEmpty"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/warlock/siphon_life.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerSiphonLifeSpell",
+                  spellId = 30911,
+                  label = "SiphonLife-"
+                }
               }
             }
           },
@@ -4775,15 +5840,38 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyRedoubt",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyRedoubt",
+                  spellId = 20137,
+                  auraDuration = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  label = "Redoubt Proc"
                 },
-                label = "Redoubt"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyRedoubt",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Redoubt"
+                },
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyRedoubt",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Redoubt"
+                }
               }
             }
           },
@@ -4832,15 +5920,40 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyReckoning",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyReckoning",
+                  spellId = 20182,
+                  auraDuration = {
+                    raw = "time.Second * 8",
+                    seconds = 8
+                  },
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  label = "Reckoning Proc"
                 },
-                label = "Reckoning"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyReckoning",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Reckoning"
+                },
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyReckoning",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Reckoning"
+                }
               }
             }
           },
@@ -4864,16 +5977,53 @@ ns.protoSchema['tbc'] = {
             type = "bool",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
-                registrationType = "RegisterAura",
-                functionName = "registerHolyShieldSpell",
-                spellId = 27179,
-                auraDuration = {
-                  raw = "time.Second * 10",
-                  seconds = 10
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerHolyShieldSpell",
+                  spellId = 27179,
+                  tag = 1,
+                  Flags = "core.SpellFlagBinary",
+                  SpellSchool = "core.SpellSchoolHoly",
+                  ProcMask = "core.ProcMaskEmpty",
+                  DamageMultiplier = "1 + 0.1*float64(paladin.Talents.ImprovedHolyShield)",
+                  ThreatMultiplier = "1.35"
                 },
-                label = "Holy Shield"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerHolyShieldSpell",
+                  spellId = 27179,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  core.GCDDefault,
+			},
+			CD: core.Cooldown{
+				Timer:    paladin.NewTimer(),
+				Duration: time.Second * 10,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  SpellSchool = "core.SpellSchoolHoly"
+                }
+              },
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
+                  registrationType = "RegisterAura",
+                  functionName = "registerHolyShieldSpell",
+                  spellId = 27179,
+                  auraDuration = {
+                    raw = "time.Second * 10",
+                    seconds = 10
+                  },
+                  label = "Holy Shield"
+                }
               }
             }
           },
@@ -4882,16 +6032,28 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyArdentDefender",
-                spellId = 31854,
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyArdentDefender",
+                  spellId = 31854,
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Ardent Defender"
                 },
-                label = "Ardent Defender"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyArdentDefender",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Ardent Defender Talent"
+                }
               }
             }
           },
@@ -4943,20 +6105,7 @@ ns.protoSchema['tbc'] = {
           seal_of_command = {
             id = 24,
             type = "bool",
-            label = "optional",
-            goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-                registrationType = "RegisterAura",
-                functionName = "SetupSealOfCommand",
-                spellId = 20424,
-                auraDuration = {
-                  raw = "SealDuration",
-                  seconds = nil
-                },
-                label = "Seal of Command"
-              }
-            }
+            label = "optional"
           },
           pursuit_of_justice = {
             id = 47,
@@ -4998,15 +6147,38 @@ ns.protoSchema['tbc'] = {
             type = "int32",
             label = "optional",
             goMetadata = {
-              {
-                sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-                registrationType = "RegisterAura",
-                functionName = "applyVengeance",
-                auraDuration = {
-                  raw = "core.NeverExpires",
-                  seconds = -1
+              aura = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyVengeance",
+                  spellId = 20059,
+                  auraDuration = {
+                    raw = "time.Second * 30",
+                    seconds = 30
+                  },
+                  label = "Vengeance Proc"
                 },
-                label = "Vengeance"
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyVengeance",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Vengeance"
+                },
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+                  registrationType = "RegisterAura",
+                  functionName = "applyVengeance",
+                  auraDuration = {
+                    raw = "core.NeverExpires",
+                    seconds = -1
+                  },
+                  label = "Vengeance"
+                }
               }
             }
           },
@@ -5033,7 +6205,36 @@ ns.protoSchema['tbc'] = {
           crusader_strike = {
             id = 33,
             type = "bool",
-            label = "optional"
+            label = "optional",
+            goMetadata = {
+              spell = {
+                {
+                  sourceFile = "extern/wowsims-tbc/sim/paladin/crusader_strike.go",
+                  registrationType = "RegisterSpell",
+                  functionName = "registerCrusaderStrikeSpell",
+                  spellId = 35395,
+                  cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  core.GCDDefault,
+			},
+			CD: core.Cooldown{
+				Timer:    paladin.NewTimer(),
+				Duration: time.Second * 6,
+			},
+		}]],
+                  cooldown = {
+                    raw = "time.Second * 6",
+                    seconds = 6
+                  },
+                  Flags = "core.SpellFlagMeleeMetrics",
+                  SpellSchool = "core.SpellSchoolPhysical",
+                  ProcMask = "core.ProcMaskMeleeMHSpecial",
+                  DamageMultiplier = "1",
+                  ThreatMultiplier = "1"
+                }
+              }
+            }
           }
         },
         oneofs = {
@@ -7182,175 +8383,94 @@ ns.protoSchema['tbc'] = {
     },
     go_metadata = {
       rogue = {
-        registerSinisterStrikeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/sinister_strike.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSinisterStrikeSpell",
-          spellId = 26862,
-          cast = [[{
+        sinister_strike = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/sinister_strike.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSinisterStrikeSpell",
+              spellId = 26862,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: energyCost,
 				GCD:  time.Second,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 +",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 +",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerShivSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/shiv.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShivSpell",
-          spellId = 5938,
-          cast = [[{
+        shiv = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/shiv.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShivSpell",
+              spellId = 5938,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  time.Second,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder | core.SpellFlagCannotBeDodged",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeOHSpecial",
-          DamageMultiplier = "1 + core.TernaryFloat64(rogue.Talents.SurpriseAttacks",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder | core.SpellFlagCannotBeDodged",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeOHSpecial",
+              DamageMultiplier = "1 + core.TernaryFloat64(rogue.Talents.SurpriseAttacks",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerSliceAndDice_SliceandDice = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/slice_and_dice.go",
-          registrationType = "RegisterAura",
-          functionName = "registerSliceAndDice",
-          spellId = 6774,
-          label = "Slice and Dice"
+        slice_and_dice = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/slice_and_dice.go",
+              registrationType = "RegisterAura",
+              functionName = "registerSliceAndDice",
+              spellId = 6774,
+              label = "Slice and Dice"
+            }
+          }
         },
-        registerBackstabSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/backstab.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBackstabSpell",
-          spellId = 26863,
-          cast = [[{
+        backstab = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/backstab.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBackstabSpell",
+              spellId = 26863,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  time.Second,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 +",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 +",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerExposeArmorSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/expose_armor.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerExposeArmorSpell",
-          spellId = 26866,
-          cast = [[{
-			DefaultCast: core.Cast{
-				Cost: baseCost,
-				GCD:  time.Second,
-			},
-			ModifyCast:  rogue.applyDeathmantle,
-			IgnoreHaste: true,
-		}]],
-          Flags = "core.SpellFlagMeleeMetrics | rogue.finisherFlags()",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
-        },
-        registerHemorrhageSpell_Hemorrhage = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
-          registrationType = "RegisterAura",
-          functionName = "registerHemorrhageSpell",
-          spellId = 26864,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
-          },
-          label = "Hemorrhage"
-        },
-        registerHemorrhageSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerHemorrhageSpell",
-          spellId = 26864,
-          cast = [[{
-			DefaultCast: core.Cast{
-				Cost: baseCost,
-				GCD:  time.Second,
-			},
-			IgnoreHaste: true,
-		}]],
-          Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 +",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
-        },
-        registerDeadlyPoisonSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDeadlyPoisonSpell",
-          spellId = 27186,
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1"
-        },
-        registerDeadlyPoisonSpell_DeadlyPoison = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
-          registrationType = "RegisterAura",
-          functionName = "registerDeadlyPoisonSpell",
-          spellId = 27186,
-          auraDuration = {
-            raw = "time.Second * 12",
-            seconds = 12
-          },
-          label = "DeadlyPoison-"
-        },
-        applyDeadlyPoison_DeadlyPoison = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
-          registrationType = "RegisterAura",
-          functionName = "applyDeadlyPoison",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Deadly Poison"
-        },
-        registerInstantPoisonSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerInstantPoisonSpell",
-          spellId = 26891,
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskEmpty",
-          DamageMultiplier = "1 + 0.04*float64(rogue.Talents.VilePoisons)",
-          ThreatMultiplier = "1"
-        },
-        applyInstantPoison_InstantPoison = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
-          registrationType = "RegisterAura",
-          functionName = "applyInstantPoison",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Instant Poison"
-        },
-        makeRupture_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/rupture.go",
-          registrationType = "RegisterSpell",
-          functionName = "makeRupture",
-          spellId = 26867,
-          cast = [[{
+        expose_armor = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/expose_armor.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerExposeArmorSpell",
+              spellId = 26866,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  time.Second,
@@ -7358,25 +8478,154 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  rogue.applyDeathmantle,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagIgnoreResists | rogue.finisherFlags()",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | rogue.finisherFlags()",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerRupture_Rupture = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/rupture.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRupture",
-          label = "Rupture-"
+        hemorrhage = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
+              registrationType = "RegisterAura",
+              functionName = "registerHemorrhageSpell",
+              spellId = 26864,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Hemorrhage"
+            }
+          },
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/hemorrhage.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerHemorrhageSpell",
+              spellId = 26864,
+              cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  time.Second,
+			},
+			IgnoreHaste: true,
+		}]],
+              Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 +",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        makeEviscerate_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/eviscerate.go",
-          registrationType = "RegisterSpell",
-          functionName = "makeEviscerate",
-          spellId = 26865,
-          cast = [[{
+        deadly_poison = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerDeadlyPoisonSpell",
+              spellId = 27186,
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
+              registrationType = "RegisterAura",
+              functionName = "registerDeadlyPoisonSpell",
+              spellId = 27186,
+              auraDuration = {
+                raw = "time.Second * 12",
+                seconds = 12
+              },
+              label = "DeadlyPoison-"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
+              registrationType = "RegisterAura",
+              functionName = "applyDeadlyPoison",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Deadly Poison"
+            }
+          }
+        },
+        instant_poison = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerInstantPoisonSpell",
+              spellId = 26891,
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskEmpty",
+              DamageMultiplier = "1 + 0.04*float64(rogue.Talents.VilePoisons)",
+              ThreatMultiplier = "1"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/poisons.go",
+              registrationType = "RegisterAura",
+              functionName = "applyInstantPoison",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Instant Poison"
+            }
+          }
+        },
+        make_rupture = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/rupture.go",
+              registrationType = "RegisterSpell",
+              functionName = "makeRupture",
+              spellId = 26867,
+              cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+				GCD:  time.Second,
+			},
+			ModifyCast:  rogue.applyDeathmantle,
+			IgnoreHaste: true,
+		}]],
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagIgnoreResists | rogue.finisherFlags()",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
+        },
+        rupture = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/rupture.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRupture",
+              label = "Rupture-"
+            }
+          }
+        },
+        make_eviscerate = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/eviscerate.go",
+              registrationType = "RegisterSpell",
+              functionName = "makeEviscerate",
+              spellId = 26865,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  time.Second,
@@ -7384,45 +8633,57 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  rogue.applyDeathmantle,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | rogue.finisherFlags()",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 + 0.05*float64(rogue.Talents.ImprovedEviscerate) + 0.02*float64(rogue.Talents.Aggression)",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | rogue.finisherFlags()",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 + 0.05*float64(rogue.Talents.ImprovedEviscerate) + 0.02*float64(rogue.Talents.Aggression)",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newMutilateHitSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/mutilate.go",
-          registrationType = "RegisterSpell",
-          functionName = "newMutilateHitSpell",
-          spellId = 34419,
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical"
+        new_mutilate_hit = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/mutilate.go",
+              registrationType = "RegisterSpell",
+              functionName = "newMutilateHitSpell",
+              spellId = 34419,
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical"
+            }
+          }
         },
-        registerMutilateSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/mutilate.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMutilateSpell",
-          spellId = 34413,
-          cast = [[{
+        mutilate = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/mutilate.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMutilateSpell",
+              spellId = 34413,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  time.Second,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | SpellFlagBuilder",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        makeEnvenom_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/envenom.go",
-          registrationType = "RegisterSpell",
-          functionName = "makeEnvenom",
-          spellId = 32684,
-          cast = [[{
+        make_envenom = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/envenom.go",
+              registrationType = "RegisterSpell",
+              functionName = "makeEnvenom",
+              spellId = 32684,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  time.Second,
@@ -7430,23 +8691,27 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  rogue.applyDeathmantle,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagIgnoreResists | rogue.finisherFlags()",
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 + 0.04*float64(rogue.Talents.VilePoisons)",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagIgnoreResists | rogue.finisherFlags()",
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 + 0.04*float64(rogue.Talents.VilePoisons)",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerThistleTeaCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/thistle_tea.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerThistleTeaCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 7676,
-          cast = [[{
+        thistle_tea = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/thistle_tea.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerThistleTeaCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 7676,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    rogue.NewTimer(),
 				Duration: time.Minute * 5,
@@ -7456,155 +8721,195 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 2,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 5",
-            seconds = 300
+              cooldown = {
+                raw = "time.Minute * 5",
+                seconds = 300
+              }
+            }
           }
         },
-        makeFinishingMoveEffectApplier_FindWeakness = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "makeFinishingMoveEffectApplier",
-          spellId = 31242,
-          auraDuration = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          label = "Find Weakness"
+        make_finishing_move_effect_applier = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "makeFinishingMoveEffectApplier",
+              spellId = 31242,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Find Weakness"
+            }
+          }
         },
-        registerColdBloodCD_ColdBlood = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerColdBloodCD",
-          spellId = 14177,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Cold Blood"
+        find_weakness = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "makeFinishingMoveEffectApplier",
+              spellId = 31242,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Find Weakness"
+            }
+          }
         },
-        registerColdBloodCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerColdBloodCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
+        cold_blood = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerColdBloodCD",
+              spellId = 14177,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Cold Blood"
+            }
           },
-          spellId = 14177,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerColdBloodCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 14177,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    rogue.NewTimer(),
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              }
+            }
           }
         },
-        applySealFate_SealFate = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applySealFate",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Seal Fate"
+        seal_fate = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applySealFate",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Seal Fate"
+            }
+          }
         },
-        applyWeaponSpecializations_SwordSpecialization = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyWeaponSpecializations",
-          spellId = 13964,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          label = "Sword Specialization"
+        weapon_specializations = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWeaponSpecializations",
+              spellId = 13964,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              label = "Sword Specialization"
+            }
+          }
         },
-        applyCombatPotency_CombatPotency = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyCombatPotency",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Combat Potency"
+        sword_specialization = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWeaponSpecializations",
+              spellId = 13964,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              label = "Sword Specialization"
+            }
+          }
         },
-        registerBladeFlurryCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBladeFlurryCD",
-          spellId = 13877,
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskEmpty",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+        combat_potency = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyCombatPotency",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Combat Potency"
+            }
+          }
         },
-        registerBladeFlurryCD_BladeFlurry = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerBladeFlurryCD",
-          spellId = 13877,
-          auraDuration = {
-            raw = "dur",
-            seconds = nil
+        blade_flurry = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBladeFlurryCD",
+              spellId = 13877,
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskEmpty",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
           },
-          label = "Blade Flurry"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerBladeFlurryCD",
+              spellId = 13877,
+              auraDuration = {
+                raw = "dur",
+                seconds = nil
+              },
+              label = "Blade Flurry"
+            }
+          }
         },
-        registerBladeFlurryCD_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBladeFlurryCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = "core.CooldownPriorityLow"
+        adrenaline_rush = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerAdrenalineRushCD",
+              spellId = 13750,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Adrenaline Rush"
+            }
           },
-          spellId = 13877,
-          cast = [[{
-			DefaultCast: core.Cast{
-				Cost: energyCost,
-				GCD:  time.Second,
-			},
-			IgnoreHaste: true,
-			CD: core.Cooldown{
-				Timer:    rogue.NewTimer(),
-				Duration: cooldownDur,
-			},
-		}]],
-          cooldown = {
-            raw = "cooldownDur",
-            seconds = nil
-          },
-          IgnoreHaste = "true"
-        },
-        registerAdrenalineRushCD_AdrenalineRush = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerAdrenalineRushCD",
-          spellId = 13750,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
-          },
-          label = "Adrenaline Rush"
-        },
-        registerAdrenalineRushCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerAdrenalineRushCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = "core.CooldownPriorityBloodlust"
-          },
-          spellId = 13750,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/rogue/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerAdrenalineRushCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = "core.CooldownPriorityBloodlust"
+              },
+              spellId = 13750,
+              cast = [[{
 			DefaultCast: core.Cast{
 				GCD: time.Second,
 			},
@@ -7614,20 +8919,24 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 5,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 5",
-            seconds = 300
-          },
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Minute * 5",
+                seconds = 300
+              },
+              IgnoreHaste = "true"
+            }
+          }
         }
       },
       druid = {
-        newStarfireSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/starfire.go",
-          registrationType = "RegisterSpell",
-          functionName = "newStarfireSpell",
-          spellId = 26986,
-          cast = [[{
+        new_starfire = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/starfire.go",
+              registrationType = "RegisterSpell",
+              functionName = "newStarfireSpell",
+              spellId = 26986,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost * (1 - 0.03*float64(druid.Talents.Moonglow)),
 				GCD:      core.GCDDefault,
@@ -7639,37 +8948,47 @@ ns.protoSchema['tbc'] = {
 				druid.applyNaturesSwiftness(cast)
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolArcane"
+              SpellSchool = "core.SpellSchoolArcane"
+            }
+          }
         },
-        registerInsectSwarmSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/insect_swarm.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerInsectSwarmSpell",
-          spellId = 27013,
-          cast = [[{
+        insect_swarm = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/insect_swarm.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerInsectSwarmSpell",
+              spellId = 27013,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/insect_swarm.go",
+              registrationType = "RegisterAura",
+              functionName = "registerInsectSwarmSpell",
+              spellId = 27013,
+              label = "InsectSwarm-"
+            }
+          }
         },
-        registerInsectSwarmSpell_InsectSwarm = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/insect_swarm.go",
-          registrationType = "RegisterAura",
-          functionName = "registerInsectSwarmSpell",
-          spellId = 27013,
-          label = "InsectSwarm-"
-        },
-        registerFaerieFireSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/faerie_fire.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerFaerieFireSpell",
-          spellId = 26993,
-          cast = [[{
+        faerie_fire = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/faerie_fire.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerFaerieFireSpell",
+              spellId = 26993,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  gcd,
@@ -7677,69 +8996,85 @@ ns.protoSchema['tbc'] = {
 			IgnoreHaste: ignoreHaste,
 			CD:          cd,
 		}]],
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskSpellDamage",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "ignoreHaste"
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskSpellDamage",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "ignoreHaste"
+            }
+          }
         },
-        registerCatFormSpell_CatForm = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
-          registrationType = "RegisterAura",
-          functionName = "registerCatFormSpell",
-          spellId = 768,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        cat_form = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCatFormSpell",
+              spellId = 768,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Cat Form"
+            }
           },
-          label = "Cat Form"
-        },
-        registerCatFormSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCatFormSpell",
-          spellId = 768,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCatFormSpell",
+              spellId = 768,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.1*float64(druid.Talents.NaturalShapeshifter)),
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagNoOnCastComplete",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagNoOnCastComplete",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerBearFormSpell_BearForm = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
-          registrationType = "RegisterAura",
-          functionName = "registerBearFormSpell",
-          spellId = 9634,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        bear_form = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
+              registrationType = "RegisterAura",
+              functionName = "registerBearFormSpell",
+              spellId = 9634,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Bear Form"
+            }
           },
-          label = "Bear Form"
-        },
-        registerBearFormSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBearFormSpell",
-          spellId = 9634,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/forms.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBearFormSpell",
+              spellId = 9634,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.1*float64(druid.Talents.NaturalShapeshifter)),
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagNoOnCastComplete",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagNoOnCastComplete",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerDemoralizingRoarSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/demoralizing_roar.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDemoralizingRoarSpell",
-          spellId = 26998,
-          cast = [[{
+        demoralizing_roar = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/demoralizing_roar.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerDemoralizingRoarSpell",
+              spellId = 26998,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -7747,45 +9082,57 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  druid.ApplyClearcasting,
 			IgnoreHaste: true,
 		}]],
-          SpellSchool = "core.SpellSchoolPhysical",
-          IgnoreHaste = "true"
+              SpellSchool = "core.SpellSchoolPhysical",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerMoonfireSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/moonfire.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMoonfireSpell",
-          spellId = 26988,
-          cast = [[{
+        moonfire = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/moonfire.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMoonfireSpell",
+              spellId = 26988,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.03*float64(druid.Talents.Moonglow)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolArcane",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 * (1 + 0.05*float64(druid.Talents.ImprovedMoonfire)) * (1 + 0.02*float64(druid.Talents.Moonfury))",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolArcane",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1 * (1 + 0.05*float64(druid.Talents.ImprovedMoonfire)) * (1 + 0.02*float64(druid.Talents.Moonfury))",
+              ThreatMultiplier = "1"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/moonfire.go",
+              registrationType = "RegisterAura",
+              functionName = "registerMoonfireSpell",
+              spellId = 26988,
+              label = "Moonfire-"
+            }
+          }
         },
-        registerMoonfireSpell_Moonfire = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/moonfire.go",
-          registrationType = "RegisterAura",
-          functionName = "registerMoonfireSpell",
-          spellId = 26988,
-          label = "Moonfire-"
-        },
-        registerHurricaneSpell_Hurricane = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/hurricane.go",
-          registrationType = "RegisterAura",
-          functionName = "registerHurricaneSpell",
-          spellId = 27012,
-          label = "Hurricane"
-        },
-        registerHurricaneSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/hurricane.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerHurricaneSpell",
-          spellId = 27012,
-          cast = [[{
+        hurricane = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/hurricane.go",
+              registrationType = "RegisterAura",
+              functionName = "registerHurricaneSpell",
+              spellId = 27012,
+              label = "Hurricane"
+            }
+          },
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/hurricane.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerHurricaneSpell",
+              spellId = 27012,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:        baseCost,
 				GCD:         core.GCDDefault,
@@ -7796,23 +9143,27 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 60,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 60",
-            seconds = 60
-          },
-          Flags = "core.SpellFlagChanneled",
-          SpellSchool = "core.SpellSchoolNature"
+              cooldown = {
+                raw = "time.Second * 60",
+                seconds = 60
+              },
+              Flags = "core.SpellFlagChanneled",
+              SpellSchool = "core.SpellSchoolNature"
+            }
+          }
         },
-        registerInnervateCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/innervate.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerInnervateCD",
-          majorCooldown = {
-            type = "core.CooldownTypeMana",
-            priority = nil
-          },
-          spellId = 29166,
-          cast = [[{
+        innervate = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/innervate.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerInnervateCD",
+              majorCooldown = {
+                type = "core.CooldownTypeMana",
+                priority = nil
+              },
+              spellId = 29166,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -7822,17 +9173,21 @@ ns.protoSchema['tbc'] = {
 				Duration: innervateCD,
 			},
 		}]],
-          cooldown = {
-            raw = "innervateCD",
-            seconds = nil
+              cooldown = {
+                raw = "innervateCD",
+                seconds = nil
+              }
+            }
           }
         },
-        registerRakeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/rake.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerRakeSpell",
-          spellId = 27003,
-          cast = [[{
+        rake = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/rake.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerRakeSpell",
+              spellId = 27003,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  time.Second,
@@ -7840,30 +9195,36 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  druid.ApplyClearcasting,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
-        },
-        registerRakeSpell_Rake = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/rake.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRakeSpell",
-          spellId = 27003,
-          auraDuration = {
-            raw = "time.Second * 9",
-            seconds = 9
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
           },
-          label = "Rake-"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/rake.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRakeSpell",
+              spellId = 27003,
+              auraDuration = {
+                raw = "time.Second * 9",
+                seconds = 9
+              },
+              label = "Rake-"
+            }
+          }
         },
-        registerShredSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/shred.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShredSpell",
-          spellId = 27002,
-          cast = [[{
+        shred = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/shred.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShredSpell",
+              spellId = 27002,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  time.Second,
@@ -7871,19 +9232,23 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  druid.ApplyClearcasting,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerRipSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/rip.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerRipSpell",
-          spellId = 27008,
-          cast = [[{
+        rip = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/rip.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerRipSpell",
+              spellId = 27008,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  time.Second,
@@ -7891,26 +9256,32 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  druid.ApplyClearcasting,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagIgnoreResists",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagIgnoreResists",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/rip.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRipSpell",
+              spellId = 27008,
+              label = "Rip-"
+            }
+          }
         },
-        registerRipSpell_Rip = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/rip.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRipSpell",
-          spellId = 27008,
-          label = "Rip-"
-        },
-        registerWrathSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/wrath.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerWrathSpell",
-          spellId = 26985,
-          cast = [[{
+        wrath = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/wrath.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerWrathSpell",
+              spellId = 26985,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost * (1 - 0.03*float64(druid.Talents.Moonglow)),
 				GCD:      core.GCDDefault,
@@ -7922,17 +9293,21 @@ ns.protoSchema['tbc'] = {
 				druid.applyNaturesSwiftness(cast)
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 + 0.02*float64(druid.Talents.Moonfury)",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1 + 0.02*float64(druid.Talents.Moonfury)",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerLacerateSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/lacerate.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerLacerateSpell",
-          spellId = 33745,
-          cast = [[{
+        lacerate = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/lacerate.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerLacerateSpell",
+              spellId = 33745,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -7940,70 +9315,100 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  druid.ApplyClearcasting,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "0.5",
-          IgnoreHaste = "true"
-        },
-        registerLacerateSpell_Lacerate = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/lacerate.go",
-          registrationType = "RegisterAura",
-          functionName = "registerLacerateSpell",
-          spellId = 33745,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "0.5",
+              IgnoreHaste = "true"
+            }
           },
-          label = "Lacerate-"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/lacerate.go",
+              registrationType = "RegisterAura",
+              functionName = "registerLacerateSpell",
+              spellId = 33745,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Lacerate-"
+            }
+          }
         },
-        registerRebirthSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/rebirth.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerRebirthSpell",
-          spellId = 26994,
-          cast = [[{
+        rebirth = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/rebirth.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerRebirthSpell",
+              spellId = 26994,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
 				CastTime: time.Second*3 + time.Millisecond*500,
 			},
 		}]]
+            }
+          }
         },
-        registerMaulSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/maul.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMaulSpell",
-          spellId = 26996,
-          cast = [[{
+        maul = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/maul.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMaulSpell",
+              spellId = 26996,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 			},
 			ModifyCast: druid.ApplyClearcasting,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
-        },
-        registerMaulSpell_MaulQueueAura = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/maul.go",
-          registrationType = "RegisterAura",
-          functionName = "registerMaulSpell",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
           },
-          label = "Maul Queue Aura"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/maul.go",
+              registrationType = "RegisterAura",
+              functionName = "registerMaulSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Maul Queue Aura"
+            }
+          }
         },
-        registerSwipeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/swipe.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSwipeSpell",
-          spellId = 26997,
-          cast = [[{
+        maul_queue = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/maul.go",
+              registrationType = "RegisterAura",
+              functionName = "registerMaulSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Maul Queue Aura"
+            }
+          }
+        },
+        swipe = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/swipe.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSwipeSpell",
+              spellId = 26997,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -8011,101 +9416,164 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  druid.ApplyClearcasting,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        setupNaturesGrace_NaturesGraceProc = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "setupNaturesGrace",
-          spellId = 16886,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Natures Grace Proc"
+        up_natures_grace = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNaturesGrace",
+              spellId = 16886,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Natures Grace Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNaturesGrace",
+              spellId = 16880,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Natures Grace"
+            }
+          }
         },
-        setupNaturesGrace_NaturesGrace = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "setupNaturesGrace",
-          spellId = 16880,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Natures Grace"
+        natures_grace = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNaturesGrace",
+              spellId = 16886,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Natures Grace Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNaturesGrace",
+              spellId = 16880,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Natures Grace"
+            }
+          }
         },
-        registerNaturesSwiftnessCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerNaturesSwiftnessCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 17116,
-          cast = [[{
+        natures_swiftness = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerNaturesSwiftnessCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 17116,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    druid.NewTimer(),
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
           },
-          Flags = "core.SpellFlagNoOnCastComplete"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerNaturesSwiftnessCD",
+              spellId = 17116,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Natures Swiftness"
+            }
+          }
         },
-        registerNaturesSwiftnessCD_NaturesSwiftness = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerNaturesSwiftnessCD",
-          spellId = 17116,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Natures Swiftness"
+        primal_fury = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyPrimalFury",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Primal Fury"
+            }
+          }
         },
-        applyPrimalFury_PrimalFury = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyPrimalFury",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Primal Fury"
+        omen_of_clarity = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyOmenOfClarity",
+              spellId = 16870,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Clearcasting"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyOmenOfClarity",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Omen of Clarity"
+            }
+          }
         },
-        applyOmenOfClarity_Clearcasting = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyOmenOfClarity",
-          spellId = 16870,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
-          },
-          label = "Clearcasting"
+        clearcasting = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyOmenOfClarity",
+              spellId = 16870,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Clearcasting"
+            }
+          }
         },
-        applyOmenOfClarity_OmenofClarity = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyOmenOfClarity",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Omen of Clarity"
-        },
-        registerFerociousBiteSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/ferocious_bite.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerFerociousBiteSpell",
-          spellId = 24248,
-          cast = [[{
+        ferocious_bite = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/ferocious_bite.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerFerociousBiteSpell",
+              spellId = 24248,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  time.Second,
@@ -8117,19 +9585,23 @@ ns.protoSchema['tbc'] = {
 				cast.Cost = spell.Unit.CurrentEnergy()
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 +",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 +",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerMangleBearSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/mangle.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMangleBearSpell",
-          spellId = 33987,
-          cast = [[{
+        mangle_bear = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/mangle.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMangleBearSpell",
+              spellId = 33987,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -8141,23 +9613,27 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 6,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "(1.5 / 1.15) *",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 6",
+                seconds = 6
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "(1.5 / 1.15) *",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerMangleCatSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/druid/mangle.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMangleCatSpell",
-          spellId = 33983,
-          cast = [[{
+        mangle_cat = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/druid/mangle.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMangleCatSpell",
+              spellId = 33983,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  time.Second,
@@ -8165,28 +9641,36 @@ ns.protoSchema['tbc'] = {
 			ModifyCast:  druid.ApplyClearcasting,
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 + 0.1*float64(druid.Talents.SavageFury)",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 + 0.1*float64(druid.Talents.SavageFury)",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         }
       },
       shaman = {
-        registerFlameShockSpell_FlameShock = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/shocks.go",
-          registrationType = "RegisterAura",
-          functionName = "registerFlameShockSpell",
-          spellId = 25457,
-          label = "FlameShock-"
+        flame_shock = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/shocks.go",
+              registrationType = "RegisterAura",
+              functionName = "registerFlameShockSpell",
+              spellId = 25457,
+              label = "FlameShock-"
+            }
+          }
         },
-        registerSearingTotemSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSearingTotemSpell",
-          spellId = 25533,
-          cast = [[{
+        searing_totem = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSearingTotemSpell",
+              spellId = 25533,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost -
 					baseCost*float64(shaman.Talents.TotemicFocus)*0.05 -
@@ -8194,22 +9678,28 @@ ns.protoSchema['tbc'] = {
 				GCD: time.Second,
 			},
 		}]],
-          Flags = "SpellFlagTotem",
-          SpellSchool = "core.SpellSchoolFire"
+              Flags = "SpellFlagTotem",
+              SpellSchool = "core.SpellSchoolFire"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
+              registrationType = "RegisterAura",
+              functionName = "registerSearingTotemSpell",
+              spellId = 25533,
+              label = "SearingTotem-"
+            }
+          }
         },
-        registerSearingTotemSpell_SearingTotem = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
-          registrationType = "RegisterAura",
-          functionName = "registerSearingTotemSpell",
-          spellId = 25533,
-          label = "SearingTotem-"
-        },
-        registerMagmaTotemSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMagmaTotemSpell",
-          spellId = 25552,
-          cast = [[{
+        magma_totem = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMagmaTotemSpell",
+              spellId = 25552,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost -
 					baseCost*float64(shaman.Talents.TotemicFocus)*0.05 -
@@ -8217,22 +9707,28 @@ ns.protoSchema['tbc'] = {
 				GCD: time.Second,
 			},
 		}]],
-          Flags = "SpellFlagTotem",
-          SpellSchool = "core.SpellSchoolFire"
+              Flags = "SpellFlagTotem",
+              SpellSchool = "core.SpellSchoolFire"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
+              registrationType = "RegisterAura",
+              functionName = "registerMagmaTotemSpell",
+              spellId = 25552,
+              label = "MagmaTotem-"
+            }
+          }
         },
-        registerMagmaTotemSpell_MagmaTotem = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
-          registrationType = "RegisterAura",
-          functionName = "registerMagmaTotemSpell",
-          spellId = 25552,
-          label = "MagmaTotem-"
-        },
-        registerNovaTotemSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerNovaTotemSpell",
-          spellId = 25537,
-          cast = [[{
+        nova_totem = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerNovaTotemSpell",
+              spellId = 25537,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost -
 					baseCost*float64(shaman.Talents.TotemicFocus)*0.05 -
@@ -8244,63 +9740,86 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 15,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 15",
-            seconds = 15
+              cooldown = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              Flags = "SpellFlagTotem",
+              SpellSchool = "core.SpellSchoolFire"
+            }
           },
-          Flags = "SpellFlagTotem",
-          SpellSchool = "core.SpellSchoolFire"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
+              registrationType = "RegisterAura",
+              functionName = "registerNovaTotemSpell",
+              spellId = 25537,
+              label = "FireNovaTotem-"
+            }
+          }
         },
-        registerNovaTotemSpell_FireNovaTotem = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
-          registrationType = "RegisterAura",
-          functionName = "registerNovaTotemSpell",
-          spellId = 25537,
-          label = "FireNovaTotem-"
+        fire_nova_totem = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/fire_totems.go",
+              registrationType = "RegisterAura",
+              functionName = "registerNovaTotemSpell",
+              spellId = 25537,
+              label = "FireNovaTotem-"
+            }
+          }
         },
-        registerShamanisticRageCD_ShamanisticRage = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/shamanistic_rage.go",
-          registrationType = "RegisterAura",
-          functionName = "registerShamanisticRageCD",
-          spellId = 30823,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
+        shamanistic_rage = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/shamanistic_rage.go",
+              registrationType = "RegisterAura",
+              functionName = "registerShamanisticRageCD",
+              spellId = 30823,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Shamanistic Rage"
+            }
           },
-          label = "Shamanistic Rage"
-        },
-        registerShamanisticRageCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/shamanistic_rage.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShamanisticRageCD",
-          majorCooldown = {
-            type = "core.CooldownTypeMana",
-            priority = nil
-          },
-          spellId = 30823,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/shamanistic_rage.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShamanisticRageCD",
+              majorCooldown = {
+                type = "core.CooldownTypeMana",
+                priority = nil
+              },
+              spellId = 30823,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    shaman.NewTimer(),
 				Duration: time.Minute * 2,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 2",
-            seconds = 120
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "time.Minute * 2",
+                seconds = 120
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerBloodlustCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/bloodlust.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBloodlustCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = "core.CooldownPriorityBloodlust"
-          },
-          spellId = 2825,
-          tag = "int32(shaman.Index)",
-          cast = [[{
+        bloodlust = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/bloodlust.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBloodlustCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = "core.CooldownPriorityBloodlust"
+              },
+              spellId = 2825,
+              tag = "int32(shaman.Index)",
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(shaman.Talents.MentalQuickness)),
 				GCD:  core.GCDDefault,
@@ -8310,92 +9829,129 @@ ns.protoSchema['tbc'] = {
 				Duration: core.BloodlustCD,
 			},
 		}]],
-          cooldown = {
-            raw = "core.BloodlustCD",
-            seconds = nil
+              cooldown = {
+                raw = "core.BloodlustCD",
+                seconds = nil
+              }
+            }
           }
         },
-        newWindfuryImbueSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
-          registrationType = "RegisterSpell",
-          functionName = "newWindfuryImbueSpell",
-          spellId = 25505,
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical"
+        new_windfury_imbue = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
+              registrationType = "RegisterSpell",
+              functionName = "newWindfuryImbueSpell",
+              spellId = 25505,
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical"
+            }
+          }
         },
-        ApplyWindfuryImbue_WindfuryImbue = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
-          registrationType = "RegisterAura",
-          functionName = "ApplyWindfuryImbue",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        windfury_imbue = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
+              registrationType = "RegisterAura",
+              functionName = "ApplyWindfuryImbue",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              ProcMask = "20",
+              label = "Windfury Imbue"
+            }
+          }
+        },
+        new_flametongue_imbue = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
+              registrationType = "RegisterSpell",
+              functionName = "newFlametongueImbueSpell",
+              spellId = 25489,
+              SpellSchool = "core.SpellSchoolFire"
+            }
+          }
+        },
+        flametongue_imbue = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
+              registrationType = "RegisterAura",
+              functionName = "ApplyFlametongueImbue",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Flametongue Imbue"
+            }
+          }
+        },
+        new_frostbrand_imbue = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
+              registrationType = "RegisterSpell",
+              functionName = "newFrostbrandImbueSpell",
+              spellId = 25500,
+              SpellSchool = "core.SpellSchoolFrost",
+              ProcMask = "core.ProcMaskEmpty",
+              DamageMultiplier = "1 + 0.05*float64(shaman.Talents.ElementalWeapons)",
+              ThreatMultiplier = "1"
+            }
+          }
+        },
+        frostbrand_imbue = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
+              registrationType = "RegisterAura",
+              functionName = "ApplyFrostbrandImbue",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Frostbrand Imbue"
+            }
+          }
+        },
+        stormstrike_debuff = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
+              registrationType = "RegisterAura",
+              functionName = "stormstrikeDebuffAura",
+              spellId = 17364,
+              auraDuration = {
+                raw = "time.Second * 12",
+                seconds = 12
+              },
+              label = "Stormstrike"
+            }
+          }
+        },
+        stormstrike = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
+              registrationType = "RegisterAura",
+              functionName = "stormstrikeDebuffAura",
+              spellId = 17364,
+              auraDuration = {
+                raw = "time.Second * 12",
+                seconds = 12
+              },
+              label = "Stormstrike"
+            }
           },
-          ProcMask = "20",
-          label = "Windfury Imbue"
-        },
-        newFlametongueImbueSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
-          registrationType = "RegisterSpell",
-          functionName = "newFlametongueImbueSpell",
-          spellId = 25489,
-          SpellSchool = "core.SpellSchoolFire"
-        },
-        ApplyFlametongueImbue_FlametongueImbue = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
-          registrationType = "RegisterAura",
-          functionName = "ApplyFlametongueImbue",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Flametongue Imbue"
-        },
-        newFrostbrandImbueSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
-          registrationType = "RegisterSpell",
-          functionName = "newFrostbrandImbueSpell",
-          spellId = 25500,
-          SpellSchool = "core.SpellSchoolFrost",
-          ProcMask = "core.ProcMaskEmpty",
-          DamageMultiplier = "1 + 0.05*float64(shaman.Talents.ElementalWeapons)",
-          ThreatMultiplier = "1"
-        },
-        ApplyFrostbrandImbue_FrostbrandImbue = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/weapon_imbues.go",
-          registrationType = "RegisterAura",
-          functionName = "ApplyFrostbrandImbue",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Frostbrand Imbue"
-        },
-        stormstrikeDebuffAura_Stormstrike = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
-          registrationType = "RegisterAura",
-          functionName = "stormstrikeDebuffAura",
-          spellId = 17364,
-          auraDuration = {
-            raw = "time.Second * 12",
-            seconds = 12
-          },
-          label = "Stormstrike"
-        },
-        newStormstrikeHitSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
-          registrationType = "RegisterSpell",
-          functionName = "newStormstrikeHitSpell",
-          spellId = 17364,
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical"
-        },
-        registerStormstrikeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerStormstrikeSpell",
-          spellId = 17364,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerStormstrikeSpell",
+              spellId = 17364,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -8406,182 +9962,260 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 10,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        applyElementalFocus_Clearcasting = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyElementalFocus",
-          spellId = 16246,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
-          },
-          label = "Clearcasting"
+        new_stormstrike_hit = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/stormstrike.go",
+              registrationType = "RegisterSpell",
+              functionName = "newStormstrikeHitSpell",
+              spellId = 17364,
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical"
+            }
+          }
         },
-        applyElementalFocus_ElementalFocus = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyElementalFocus",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Elemental Focus"
+        elemental_focus = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyElementalFocus",
+              spellId = 16246,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Clearcasting"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyElementalFocus",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Elemental Focus"
+            }
+          }
         },
-        applyElementalDevastation_ElementalDevastation = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyElementalDevastation",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Elemental Devastation"
+        clearcasting = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyElementalFocus",
+              spellId = 16246,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Clearcasting"
+            }
+          }
         },
-        registerElementalMasteryCD_ElementalMastery = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerElementalMasteryCD",
-          spellId = 16166,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Elemental Mastery"
+        elemental_devastation = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyElementalDevastation",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Elemental Devastation"
+            }
+          }
         },
-        registerElementalMasteryCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerElementalMasteryCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
+        elemental_mastery = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerElementalMasteryCD",
+              spellId = 16166,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Elemental Mastery"
+            }
           },
-          spellId = 16166,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerElementalMasteryCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 16166,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    cdTimer,
 				Duration: cd,
 			},
 		}]],
-          cooldown = {
-            raw = "cd",
-            seconds = nil
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "cd",
+                seconds = nil
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerNaturesSwiftnessCD_NaturesSwiftness = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerNaturesSwiftnessCD",
-          spellId = 16188,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        natures_swiftness = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerNaturesSwiftnessCD",
+              spellId = 16188,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Natures Swiftness"
+            }
           },
-          label = "Natures Swiftness"
-        },
-        registerNaturesSwiftnessCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerNaturesSwiftnessCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 16188,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerNaturesSwiftnessCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 16188,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    cdTimer,
 				Duration: cd,
 			},
 		}]],
-          cooldown = {
-            raw = "cd",
-            seconds = nil
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "cd",
+                seconds = nil
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        applyUnleashedRage_UnleahedRageProc = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyUnleashedRage",
-          spellId = 30811,
-          auraDuration = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          label = "Unleahed Rage Proc"
+        unleashed_rage = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyUnleashedRage",
+              spellId = 30811,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Unleahed Rage Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyUnleashedRage",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Unleashed Rage"
+            }
+          }
         },
-        applyUnleashedRage_UnleashedRage = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyUnleashedRage",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Unleashed Rage"
+        unleahed_rage = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyUnleashedRage",
+              spellId = 30811,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Unleahed Rage Proc"
+            }
+          }
         },
-        applyShamanisticFocus_ShamanisticFocusProc = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyShamanisticFocus",
-          spellId = 43338,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Shamanistic Focus Proc"
+        shamanistic_focus = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyShamanisticFocus",
+              spellId = 43338,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Shamanistic Focus Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyShamanisticFocus",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Shamanistic Focus"
+            }
+          }
         },
-        applyShamanisticFocus_ShamanisticFocus = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyShamanisticFocus",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Shamanistic Focus"
-        },
-        applyFlurry_FlurryProc = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyFlurry",
-          spellId = 16280,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Flurry Proc"
-        },
-        applyFlurry_Flurry = {
-          sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyFlurry",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Flurry"
+        flurry = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFlurry",
+              spellId = 16280,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Flurry Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/shaman/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFlurry",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Flurry"
+            }
+          }
         }
       },
       hunter = {
-        registerArcaneShotSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/arcane_shot.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerArcaneShotSpell",
-          spellId = 27019,
-          cast = [[{
+        arcane_shot = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/arcane_shot.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerArcaneShotSpell",
+              spellId = 27019,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(hunter.Talents.Efficiency)),
 				GCD:  core.GCDDefault + hunter.latency,
@@ -8592,23 +10226,27 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second*6 - time.Millisecond*200*time.Duration(hunter.Talents.ImprovedArcaneShot),
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second*6 - time.Millisecond*200*time.Duration(hunter.Talents.ImprovedArcaneShot)",
-            seconds = nil
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolArcane",
-          ProcMask = "core.ProcMaskRangedSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second*6 - time.Millisecond*200*time.Duration(hunter.Talents.ImprovedArcaneShot)",
+                seconds = nil
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolArcane",
+              ProcMask = "core.ProcMaskRangedSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newBite_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newBite",
-          spellId = 27050,
-          cast = [[{
+        new_bite = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newBite",
+              spellId = 27050,
+              cast = [[{
 				DefaultCast: core.Cast{
 					GCD: core.GCDDefault,
 				},
@@ -8618,94 +10256,114 @@ ns.protoSchema['tbc'] = {
 					Duration: time.Second * 10,
 				},
 			}]],
-          cooldown = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newClaw_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newClaw",
-          spellId = 27049,
-          cast = [[{
+        new_claw = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newClaw",
+              spellId = 27049,
+              cast = [[{
 				DefaultCast: core.Cast{
 					GCD: core.GCDDefault,
 				},
 				IgnoreHaste: true,
 			}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newGore_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newGore",
-          spellId = 35298,
-          cast = [[{
+        new_gore = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newGore",
+              spellId = 35298,
+              cast = [[{
 				DefaultCast: core.Cast{
 					GCD: core.GCDDefault,
 				},
 				IgnoreHaste: true,
 			}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newLightningBreath_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newLightningBreath",
-          spellId = 25011,
-          cast = [[{
+        new_lightning_breath = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newLightningBreath",
+              spellId = 25011,
+              cast = [[{
 				DefaultCast: core.Cast{
 					GCD: core.GCDDefault,
 				},
 				IgnoreHaste: true,
 			}]],
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newScreech_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newScreech",
-          spellId = 27051,
-          cast = [[{
+        new_screech = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newScreech",
+              spellId = 27051,
+              cast = [[{
 				DefaultCast: core.Cast{
 					GCD: core.GCDDefault,
 				},
 				IgnoreHaste: true,
 			}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerSteadyShotSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/steady_shot.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSteadyShotSpell",
-          spellId = 34120,
-          cast = [[{
+        steady_shot = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/steady_shot.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSteadyShotSpell",
+              spellId = 34120,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost * (1 - 0.02*float64(hunter.Talents.Efficiency)),
 				GCD:      core.GCDDefault + hunter.latency,
@@ -8716,19 +10374,23 @@ ns.protoSchema['tbc'] = {
 			},
 			IgnoreHaste: true, // Hunter GCD is locked at 1.5s
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskRangedSpecial",
-          DamageMultiplier = "1 * core.TernaryFloat64(ItemSetGronnstalker.CharacterHasSetBonus(&hunter.Character",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskRangedSpecial",
+              DamageMultiplier = "1 * core.TernaryFloat64(ItemSetGronnstalker.CharacterHasSetBonus(&hunter.Character",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerAimedShotSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/aimed_shot.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerAimedShotSpell",
-          spellId = 27065,
-          cast = [[{
+        aimed_shot = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/aimed_shot.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerAimedShotSpell",
+              spellId = 27065,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(hunter.Talents.Efficiency)),
 				// Actual aimed shot has a 2.5s cast time, but we only use it as an instant precast.
@@ -8740,123 +10402,204 @@ ns.protoSchema['tbc'] = {
 			//	Duration: time.Second * 6,
 			//},
 		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskRangedSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+              cooldown = {
+                raw = "time.Second * 6",
+                seconds = 6
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskRangedSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerAspectOfTheHawkSpell_ImprovedAspectoftheHawk = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
-          registrationType = "RegisterAura",
-          functionName = "registerAspectOfTheHawkSpell",
-          spellId = 19556,
-          auraDuration = {
-            raw = "time.Second * 12",
-            seconds = 12
+        aspect_of_the_hawk = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
+              registrationType = "RegisterAura",
+              functionName = "registerAspectOfTheHawkSpell",
+              spellId = 19556,
+              auraDuration = {
+                raw = "time.Second * 12",
+                seconds = 12
+              },
+              label = "Improved Aspect of the Hawk"
+            }
           },
-          label = "Improved Aspect of the Hawk"
-        },
-        registerAspectOfTheHawkSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerAspectOfTheHawkSpell",
-          spellId = 27044,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerAspectOfTheHawkSpell",
+              spellId = 27044,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true, // Hunter GCD is locked at 1.5s
 		}]],
-          IgnoreHaste = "true"
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerAspectOfTheViperSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerAspectOfTheViperSpell",
-          spellId = 34074,
-          cast = [[{
+        improved_aspect_of_the_hawk = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
+              registrationType = "RegisterAura",
+              functionName = "registerAspectOfTheHawkSpell",
+              spellId = 19556,
+              auraDuration = {
+                raw = "time.Second * 12",
+                seconds = 12
+              },
+              label = "Improved Aspect of the Hawk"
+            }
+          }
+        },
+        aspect_of_the_viper = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/aspects.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerAspectOfTheViperSpell",
+              spellId = 34074,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true, // Hunter GCD is locked at 1.5s
 		}]],
-          IgnoreHaste = "true"
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerScorpidStingSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/scorpid_sting.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerScorpidStingSpell",
-          spellId = 3043,
-          cast = [[{
+        scorpid_sting = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/scorpid_sting.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerScorpidStingSpell",
+              spellId = 3043,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(hunter.Talents.Efficiency)),
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true, // Hunter GCD is locked at 1.5s
 		}]],
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskRangedSpecial",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskRangedSpecial",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        applyKillCommand_KillCommandTrigger = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/kill_command.go",
-          registrationType = "RegisterAura",
-          functionName = "applyKillCommand",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        kill_command = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/kill_command.go",
+              registrationType = "RegisterAura",
+              functionName = "applyKillCommand",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Kill Command Trigger"
+            }
           },
-          label = "Kill Command Trigger"
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/kill_command.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerKillCommandSpell",
+              spellId = 34026,
+              cast = [[{
+			DefaultCast: core.Cast{
+				Cost: baseCost,
+			},
+			CD: core.Cooldown{
+				Timer:    hunter.NewTimer(),
+				Duration: time.Second * 5,
+			},
+		}]],
+              cooldown = {
+                raw = "time.Second * 5",
+                seconds = 5
+              },
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/kill_command.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerKillCommandSpell",
+              spellId = 34027,
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "hp.config.DamageMultiplier",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerKillCommandSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/kill_command.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerKillCommandSpell",
-          spellId = 34027,
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "hp.config.DamageMultiplier",
-          ThreatMultiplier = "1"
+        kill_command_trigger = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/kill_command.go",
+              registrationType = "RegisterAura",
+              functionName = "applyKillCommand",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Kill Command Trigger"
+            }
+          }
         },
-        registerSerpentStingSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/serpent_sting.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSerpentStingSpell",
-          spellId = 27016,
-          cast = [[{
+        serpent_sting = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/serpent_sting.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSerpentStingSpell",
+              spellId = 27016,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(hunter.Talents.Efficiency)),
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true, // Hunter GCD is locked at 1.5s
 		}]],
-          SpellSchool = "core.SpellSchoolNature",
-          ProcMask = "core.ProcMaskRangedSpecial",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              SpellSchool = "core.SpellSchoolNature",
+              ProcMask = "core.ProcMaskRangedSpecial",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/serpent_sting.go",
+              registrationType = "RegisterAura",
+              functionName = "registerSerpentStingSpell",
+              spellId = 27016,
+              label = "SerpentSting-"
+            }
+          }
         },
-        registerSerpentStingSpell_SerpentSting = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/serpent_sting.go",
-          registrationType = "RegisterAura",
-          functionName = "registerSerpentStingSpell",
-          spellId = 27016,
-          label = "SerpentSting-"
-        },
-        registerRaptorStrikeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/raptor_strike.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerRaptorStrikeSpell",
-          spellId = 27014,
-          cast = [[{
+        raptor_strike = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/raptor_strike.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerRaptorStrikeSpell",
+              spellId = 27014,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.2*float64(hunter.Talents.Resourcefulness)),
 			},
@@ -8865,33 +10608,39 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 6,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+              cooldown = {
+                raw = "time.Second * 6",
+                seconds = 6
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerRapidFireCD_RapidFire = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/rapid_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRapidFireCD",
-          spellId = 3045,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
+        rapid_fire = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/rapid_fire.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRapidFireCD",
+              spellId = 3045,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Rapid Fire"
+            }
           },
-          label = "Rapid Fire"
-        },
-        registerRapidFireCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/rapid_fire.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerRapidFireCD",
-          spellId = 3045,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/rapid_fire.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerRapidFireCD",
+              spellId = 3045,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 			},
@@ -8900,74 +10649,88 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute*5 - time.Minute*time.Duration(hunter.Talents.RapidKilling),
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute*5 - time.Minute*time.Duration(hunter.Talents.RapidKilling)",
-            seconds = nil
+              cooldown = {
+                raw = "time.Minute*5 - time.Minute*time.Duration(hunter.Talents.RapidKilling)",
+                seconds = nil
+              }
+            }
           }
         },
-        applyFrenzy_FrenzyProc = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyFrenzy",
-          spellId = 19625,
-          auraDuration = {
-            raw = "time.Second * 8",
-            seconds = 8
-          },
-          label = "Frenzy Proc"
+        frenzy = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFrenzy",
+              spellId = 19625,
+              auraDuration = {
+                raw = "time.Second * 8",
+                seconds = 8
+              },
+              label = "Frenzy Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFrenzy",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Frenzy"
+            }
+          }
         },
-        applyFrenzy_Frenzy = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyFrenzy",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Frenzy"
+        ferocious_inspiration = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFerociousInspiration",
+              spellId = 34460,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Ferocious Inspiration-"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFerociousInspiration",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Ferocious Inspiration"
+            }
+          }
         },
-        applyFerociousInspiration_FerociousInspiration = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyFerociousInspiration",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        bestial_wrath = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerBestialWrathCD",
+              spellId = 19574,
+              auraDuration = {
+                raw = "time.Second * 18",
+                seconds = 18
+              },
+              label = "Bestial Wrath Pet"
+            }
           },
-          label = "Ferocious Inspiration"
-        },
-        registerBestialWrathCD_BestialWrathPet = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerBestialWrathCD",
-          spellId = 19574,
-          auraDuration = {
-            raw = "time.Second * 18",
-            seconds = 18
-          },
-          label = "Bestial Wrath Pet"
-        },
-        registerBestialWrathCD_BestialWrath = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerBestialWrathCD",
-          spellId = 19574,
-          auraDuration = {
-            raw = "time.Second * 18",
-            seconds = 18
-          },
-          label = "Bestial Wrath"
-        },
-        registerBestialWrathCD_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBestialWrathCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 19574,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBestialWrathCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 19574,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: manaCost,
 			},
@@ -8976,61 +10739,110 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 2,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 2",
-            seconds = 120
+              cooldown = {
+                raw = "time.Minute * 2",
+                seconds = 120
+              }
+            }
           }
         },
-        applyGoForTheThroat_GofortheThroat = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyGoForTheThroat",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Go for the Throat"
+        bestial_wrath_pet = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerBestialWrathCD",
+              spellId = 19574,
+              auraDuration = {
+                raw = "time.Second * 18",
+                seconds = 18
+              },
+              label = "Bestial Wrath Pet"
+            }
+          }
         },
-        applyThrillOfTheHunt_ThrilloftheHunt = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyThrillOfTheHunt",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Thrill of the Hunt"
+        go_for_the_throat = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyGoForTheThroat",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Go for the Throat"
+            }
+          }
         },
-        applyExposeWeakness_ExposeWeaknessTalent = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyExposeWeakness",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Expose Weakness Talent"
+        thrill_of_the_hunt = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyThrillOfTheHunt",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Thrill of the Hunt"
+            }
+          }
         },
-        applyMasterTactician_MasterTactician = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyMasterTactician",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Master Tactician"
+        expose_weakness = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyExposeWeakness",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Expose Weakness Talent"
+            }
+          }
         },
-        registerReadinessCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerReadinessCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 23989,
-          cast = [[{
+        expose_weakness_talent = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyExposeWeakness",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Expose Weakness Talent"
+            }
+          }
+        },
+        master_tactician = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyMasterTactician",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Master Tactician"
+            }
+          }
+        },
+        readiness = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerReadinessCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 23989,
+              cast = [[{
 			//GCD:         time.Second * 1, TODO: GCD causes panic
 			//IgnoreHaste: true, // Hunter GCD is locked
 			CD: core.Cooldown{
@@ -9038,18 +10850,22 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 5,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 5",
-            seconds = 300
-          },
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Minute * 5",
+                seconds = 300
+              },
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerMultiShotSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/hunter/multi_shot.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMultiShotSpell",
-          spellId = 27021,
-          cast = [[{
+        multi_shot = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/hunter/multi_shot.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMultiShotSpell",
+              spellId = 27021,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.02*float64(hunter.Talents.Efficiency)) *
@@ -9067,22 +10883,26 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 10,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              IgnoreHaste = "true"
+            }
+          }
         }
       },
       priest = {
-        registerStarshardsSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/starshards.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerStarshardsSpell",
-          spellId = 25446,
-          cast = [[{
+        starshards = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/starshards.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerStarshardsSpell",
+              spellId = 25446,
+              cast = [[{
 			DefaultCast: core.Cast{
 				GCD: core.GCDDefault,
 			},
@@ -9091,33 +10911,69 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 30,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 30",
-            seconds = 30
+              cooldown = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              SpellSchool = "core.SpellSchoolArcane",
+              ProcMask = "core.ProcMaskSpellDamage",
+              ThreatMultiplier = "1"
+            }
           },
-          SpellSchool = "core.SpellSchoolArcane",
-          ProcMask = "core.ProcMaskSpellDamage",
-          ThreatMultiplier = "1"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/starshards.go",
+              registrationType = "RegisterAura",
+              functionName = "registerStarshardsSpell",
+              spellId = 25446,
+              label = "Starshards-"
+            }
+          }
         },
-        registerStarshardsSpell_Starshards = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/starshards.go",
-          registrationType = "RegisterAura",
-          functionName = "registerStarshardsSpell",
-          spellId = 25446,
-          label = "Starshards-"
+        new_mind_flay_dot = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/mind_flay.go",
+              registrationType = "RegisterAura",
+              functionName = "newMindFlayDot",
+              label = "MindFlay-"
+            }
+          },
+          dot = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/mind_flay.go",
+              registrationType = "RegisterAura",
+              functionName = "newMindFlayDot",
+              label = "MindFlay-"
+            }
+          }
         },
-        newMindFlayDot_MindFlay = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/mind_flay.go",
-          registrationType = "RegisterAura",
-          functionName = "newMindFlayDot",
-          label = "MindFlay-"
+        mind_flay = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/mind_flay.go",
+              registrationType = "RegisterAura",
+              functionName = "newMindFlayDot",
+              label = "MindFlay-"
+            }
+          },
+          dot = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/mind_flay.go",
+              registrationType = "RegisterAura",
+              functionName = "newMindFlayDot",
+              label = "MindFlay-"
+            }
+          }
         },
-        registerShadowfiendSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/shadowfiend.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShadowfiendSpell",
-          spellId = 34433,
-          cast = [[{
+        shadowfiend = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/shadowfiend.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShadowfiendSpell",
+              spellId = 34433,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(priest.Talents.MentalAgility)),
 				GCD:  core.GCDDefault,
@@ -9127,26 +10983,32 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 5,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 5",
-            seconds = 300
+              cooldown = {
+                raw = "time.Minute * 5",
+                seconds = 300
+              },
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty"
+            }
           },
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/shadowfiend.go",
+              registrationType = "RegisterAura",
+              functionName = "registerShadowfiendSpell",
+              spellId = 34433,
+              label = "Shadowfiend-"
+            }
+          }
         },
-        registerShadowfiendSpell_Shadowfiend = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/shadowfiend.go",
-          registrationType = "RegisterAura",
-          functionName = "registerShadowfiendSpell",
-          spellId = 34433,
-          label = "Shadowfiend-"
-        },
-        registerShadowWordDeathSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/shadow_word_death.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShadowWordDeathSpell",
-          spellId = 32996,
-          cast = [[{
+        shadow_word_death = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/shadow_word_death.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShadowWordDeathSpell",
+              spellId = 32996,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(priest.Talents.MentalAgility)),
 				GCD:  core.GCDDefault,
@@ -9156,21 +11018,25 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 12,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 12",
-            seconds = 12
-          },
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 *",
-          ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+              cooldown = {
+                raw = "time.Second * 12",
+                seconds = 12
+              },
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1 *",
+              ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+            }
+          }
         },
-        registerDevouringPlagueSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/devouring_plague.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDevouringPlagueSpell",
-          spellId = 25467,
-          cast = [[{
+        devouring_plague = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/devouring_plague.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerDevouringPlagueSpell",
+              spellId = 25467,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(priest.Talents.MentalAgility)),
 				GCD:  core.GCDDefault,
@@ -9180,64 +11046,94 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+            }
           },
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/devouring_plague.go",
+              registrationType = "RegisterAura",
+              functionName = "registerDevouringPlagueSpell",
+              spellId = 25467,
+              label = "DevouringPlague-"
+            }
+          }
         },
-        registerDevouringPlagueSpell_DevouringPlague = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/devouring_plague.go",
-          registrationType = "RegisterAura",
-          functionName = "registerDevouringPlagueSpell",
-          spellId = 25467,
-          label = "DevouringPlague-"
+        shadow_on_hit_effects = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/shadow_effects.go",
+              registrationType = "RegisterAura",
+              functionName = "ApplyShadowOnHitEffects",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Priest Shadow Effects"
+            }
+          }
         },
-        ApplyShadowOnHitEffects_PriestShadowEffects = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/shadow_effects.go",
-          registrationType = "RegisterAura",
-          functionName = "ApplyShadowOnHitEffects",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Priest Shadow Effects"
+        priest_shadow_effects = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/shadow_effects.go",
+              registrationType = "RegisterAura",
+              functionName = "ApplyShadowOnHitEffects",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Priest Shadow Effects"
+            }
+          }
         },
-        registerVampiricTouchSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/vampiric_touch.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerVampiricTouchSpell",
-          spellId = 34917,
-          cast = [[{
+        vampiric_touch = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/vampiric_touch.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerVampiricTouchSpell",
+              spellId = 34917,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
 				CastTime: time.Millisecond * 1500,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskSpellDamage",
-          ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
-        },
-        registerVampiricTouchSpell_VampiricTouch = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/vampiric_touch.go",
-          registrationType = "RegisterAura",
-          functionName = "registerVampiricTouchSpell",
-          spellId = 34917,
-          label = "VampiricTouch-"
-        },
-        registerPowerInfusionCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/power_infusion.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerPowerInfusionCD",
-          majorCooldown = {
-            type = "core.CooldownTypeMana",
-            priority = "core.CooldownPriorityBloodlust"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskSpellDamage",
+              ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+            }
           },
-          spellId = 10060,
-          cast = [[{
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/vampiric_touch.go",
+              registrationType = "RegisterAura",
+              functionName = "registerVampiricTouchSpell",
+              spellId = 34917,
+              label = "VampiricTouch-"
+            }
+          }
+        },
+        power_infusion = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/power_infusion.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerPowerInfusionCD",
+              majorCooldown = {
+                type = "core.CooldownTypeMana",
+                priority = "core.CooldownPriorityBloodlust"
+              },
+              spellId = 10060,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 			},
@@ -9246,17 +11142,21 @@ ns.protoSchema['tbc'] = {
 				Duration: core.PowerInfusionCD,
 			},
 		}]],
-          cooldown = {
-            raw = "core.PowerInfusionCD",
-            seconds = nil
+              cooldown = {
+                raw = "core.PowerInfusionCD",
+                seconds = nil
+              }
+            }
           }
         },
-        registerSmiteSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/smite.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSmiteSpell",
-          spellId = 25364,
-          cast = [[{
+        smite = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/smite.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSmiteSpell",
+              spellId = 25364,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
@@ -9264,17 +11164,21 @@ ns.protoSchema['tbc'] = {
 			},
 			ModifyCast: priest.applySurgeOfLight,
 		}]],
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 + 0.05*float64(priest.Talents.SearingLight)",
-          ThreatMultiplier = "1 - 0.04*float64(priest.Talents.SilentResolve)"
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1 + 0.05*float64(priest.Talents.SearingLight)",
+              ThreatMultiplier = "1 - 0.04*float64(priest.Talents.SilentResolve)"
+            }
+          }
         },
-        registerMindBlastSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/mind_blast.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMindBlastSpell",
-          spellId = 25375,
-          cast = [[{
+        mind_blast = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/mind_blast.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMindBlastSpell",
+              spellId = 25375,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost * (1 - 0.05*float64(priest.Talents.FocusedMind)),
 				GCD:      core.GCDDefault,
@@ -9285,118 +11189,169 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second*8 - time.Millisecond*500*time.Duration(priest.Talents.ImprovedMindBlast),
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second*8 - time.Millisecond*500*time.Duration(priest.Talents.ImprovedMindBlast)",
-            seconds = nil
-          },
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 *",
-          ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+              cooldown = {
+                raw = "time.Second*8 - time.Millisecond*500*time.Duration(priest.Talents.ImprovedMindBlast)",
+                seconds = nil
+              },
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1 *",
+              ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+            }
+          }
         },
-        registerHolyFireSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/holy_fire.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerHolyFireSpell",
-          spellId = 25384,
-          cast = [[{
+        holy_fire = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/holy_fire.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerHolyFireSpell",
+              spellId = 25384,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
 				CastTime: time.Millisecond*3500 - time.Millisecond*100*time.Duration(priest.Talents.DivineFury),
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1 + 0.05*float64(priest.Talents.SearingLight)",
-          ThreatMultiplier = "1 - 0.04*float64(priest.Talents.SilentResolve)"
-        },
-        registerHolyFireSpell_HolyFire = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/holy_fire.go",
-          registrationType = "RegisterAura",
-          functionName = "registerHolyFireSpell",
-          spellId = 25384,
-          label = "HolyFire-"
-        },
-        setupSurgeOfLight_SurgeofLightProc = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "setupSurgeOfLight",
-          spellId = 33151,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1 + 0.05*float64(priest.Talents.SearingLight)",
+              ThreatMultiplier = "1 - 0.04*float64(priest.Talents.SilentResolve)"
+            }
           },
-          label = "Surge of Light Proc"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/holy_fire.go",
+              registrationType = "RegisterAura",
+              functionName = "registerHolyFireSpell",
+              spellId = 25384,
+              label = "HolyFire-"
+            }
+          }
         },
-        setupSurgeOfLight_SurgeofLight = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "setupSurgeOfLight",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        up_surge_of_light = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSurgeOfLight",
+              spellId = 33151,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Surge of Light Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSurgeOfLight",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Surge of Light"
+            }
+          }
+        },
+        surge_of_light = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSurgeOfLight",
+              spellId = 33151,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Surge of Light Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSurgeOfLight",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Surge of Light"
+            }
+          }
+        },
+        inner_focus = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerInnerFocus",
+              spellId = 14751,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Inner Focus"
+            }
           },
-          label = "Surge of Light"
-        },
-        registerInnerFocus_InnerFocus = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerInnerFocus",
-          spellId = 14751,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Inner Focus"
-        },
-        registerInnerFocus_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerInnerFocus",
-          spellId = 14751,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerInnerFocus",
+              spellId = 14751,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    priest.NewTimer(),
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerShadowWordPainSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/shadow_word_pain.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShadowWordPainSpell",
-          spellId = 25368,
-          cast = [[{
+        shadow_word_pain = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/shadow_word_pain.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShadowWordPainSpell",
+              spellId = 25368,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.02*float64(priest.Talents.MentalAgility)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskSpellDamage",
-          ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
-        },
-        registerShadowWordPainSpell_ShadowWordPain = {
-          sourceFile = "extern/wowsims-tbc/sim/priest/shadow_word_pain.go",
-          registrationType = "RegisterAura",
-          functionName = "registerShadowWordPainSpell",
-          spellId = 25368,
-          label = "ShadowWordPain-"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskSpellDamage",
+              ThreatMultiplier = "1 - 0.08*float64(priest.Talents.ShadowAffinity)"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/priest/shadow_word_pain.go",
+              registrationType = "RegisterAura",
+              functionName = "registerShadowWordPainSpell",
+              spellId = 25368,
+              label = "ShadowWordPain-"
+            }
+          }
         }
       },
       warlock = {
-        newFirebolt_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newFirebolt",
-          spellId = 27267,
-          cast = [[{
+        new_firebolt = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newFirebolt",
+              spellId = 27267,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
@@ -9404,18 +11359,22 @@ ns.protoSchema['tbc'] = {
 			},
 			IgnoreHaste: true,
 		}]],
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1.0 + (0.1 * float64(wp.owner.Talents.ImprovedImp))",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              SpellSchool = "core.SpellSchoolFire",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1.0 + (0.1 * float64(wp.owner.Talents.ImprovedImp))",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newCleave_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newCleave",
-          spellId = 30223,
-          cast = [[{
+        new_cleave = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newCleave",
+              spellId = 30223,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -9426,23 +11385,27 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 6,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1.0",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 6",
+                seconds = 6
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1.0",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        newLashOfPain_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/pet_abilities.go",
-          registrationType = "RegisterSpell",
-          functionName = "newLashOfPain",
-          spellId = 27274,
-          cast = [[{
+        new_lash_of_pain = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/pet_abilities.go",
+              registrationType = "RegisterSpell",
+              functionName = "newLashOfPain",
+              spellId = 27274,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -9453,136 +11416,181 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second*12 - (time.Second * time.Duration(3*wp.owner.Talents.ImprovedLashOfPain)),
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second*12 - (time.Second * time.Duration(3*wp.owner.Talents.ImprovedLashOfPain))",
-            seconds = nil
-          },
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1.0 * (1.0 + (0.1 * float64(wp.owner.Talents.ImprovedSayaad)))",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second*12 - (time.Second * time.Duration(3*wp.owner.Talents.ImprovedLashOfPain))",
+                seconds = nil
+              },
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1.0 * (1.0 + (0.1 * float64(wp.owner.Talents.ImprovedSayaad)))",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerCorruptionSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/corruption.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCorruptionSpell",
-          spellId = 27216,
-          cast = [[{
+        corruption = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/corruption.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCorruptionSpell",
+              spellId = 27216,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
 				CastTime: time.Millisecond*2000 - (time.Millisecond * 400 * time.Duration(warlock.Talents.ImprovedCorruption)),
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskSpellDamage"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskSpellDamage"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/corruption.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCorruptionSpell",
+              spellId = 27216,
+              label = "Corruption-"
+            }
+          }
         },
-        registerCorruptionSpell_Corruption = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/corruption.go",
-          registrationType = "RegisterAura",
-          functionName = "registerCorruptionSpell",
-          spellId = 27216,
-          label = "Corruption-"
-        },
-        registerLifeTapSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/lifetap.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerLifeTapSpell",
-          spellId = 27222,
-          cast = [[{
+        life_tap = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/lifetap.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerLifeTapSpell",
+              spellId = 27222,
+              cast = [[{
 			DefaultCast: core.Cast{
 				GCD: core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerCurseOfElementsSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCurseOfElementsSpell",
-          spellId = 27228,
-          cast = [[{
+        curse_of_elements = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCurseOfElementsSpell",
+              spellId = 27228,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerCurseOfRecklessnessSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCurseOfRecklessnessSpell",
-          spellId = 27226,
-          cast = [[{
+        curse_of_recklessness = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCurseOfRecklessnessSpell",
+              spellId = 27226,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerCurseOfTonguesSpell_CurseofTongues = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterAura",
-          functionName = "registerCurseOfTonguesSpell",
-          spellId = 11719,
-          auraDuration = {
-            raw = "time.Second * 30",
-            seconds = 30
+        curse_of_tongues = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCurseOfTonguesSpell",
+              spellId = 11719,
+              auraDuration = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              label = "Curse of Tongues"
+            }
           },
-          label = "Curse of Tongues"
-        },
-        registerCurseOfTonguesSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCurseOfTonguesSpell",
-          spellId = 11719,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCurseOfTonguesSpell",
+              spellId = 11719,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerCurseOfAgonySpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCurseOfAgonySpell",
-          spellId = 27218,
-          cast = [[{
+        curse_of_agony = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCurseOfAgonySpell",
+              spellId = 27218,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCurseOfAgonySpell",
+              spellId = 27218,
+              label = "CurseofAgony-"
+            }
+          }
         },
-        registerCurseOfAgonySpell_CurseofAgony = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterAura",
-          functionName = "registerCurseOfAgonySpell",
-          spellId = 27218,
-          label = "CurseofAgony-"
+        curseof_agony = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCurseOfAgonySpell",
+              spellId = 27218,
+              label = "CurseofAgony-"
+            }
+          }
         },
-        registerCurseOfDoomSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCurseOfDoomSpell",
-          spellId = 30910,
-          cast = [[{
+        curse_of_doom = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCurseOfDoomSpell",
+              spellId = 30910,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -9592,69 +11600,98 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute",
-            seconds = 60
+              cooldown = {
+                raw = "time.Minute",
+                seconds = 60
+              },
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1"
+            }
           },
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCurseOfDoomSpell",
+              spellId = 30910,
+              label = "CurseofDoom-"
+            }
+          }
         },
-        registerCurseOfDoomSpell_CurseofDoom = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
-          registrationType = "RegisterAura",
-          functionName = "registerCurseOfDoomSpell",
-          spellId = 30910,
-          label = "CurseofDoom-"
+        curseof_doom = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/curses.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCurseOfDoomSpell",
+              spellId = 30910,
+              label = "CurseofDoom-"
+            }
+          }
         },
-        registerImmolateSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/immolate.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerImmolateSpell",
-          spellId = 27215,
-          cast = [[{
+        immolate = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/immolate.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerImmolateSpell",
+              spellId = 27215,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost * (1 - 0.01*float64(warlock.Talents.Cataclysm)),
 				GCD:      core.GCDDefault,
 				CastTime: time.Millisecond*2000 - (time.Millisecond * 100 * time.Duration(warlock.Talents.Bane)),
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolFire"
+              SpellSchool = "core.SpellSchoolFire"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/immolate.go",
+              registrationType = "RegisterAura",
+              functionName = "registerImmolateSpell",
+              spellId = 27215,
+              label = "immolate-"
+            }
+          }
         },
-        registerImmolateSpell_immolate = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/immolate.go",
-          registrationType = "RegisterAura",
-          functionName = "registerImmolateSpell",
-          spellId = 27215,
-          label = "immolate-"
-        },
-        registerSiphonLifeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/siphon_life.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSiphonLifeSpell",
-          spellId = 30911,
-          cast = [[{
+        siphon_life = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/siphon_life.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSiphonLifeSpell",
+              spellId = 30911,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty"
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/siphon_life.go",
+              registrationType = "RegisterAura",
+              functionName = "registerSiphonLifeSpell",
+              spellId = 30911,
+              label = "SiphonLife-"
+            }
+          }
         },
-        registerSiphonLifeSpell_SiphonLife = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/siphon_life.go",
-          registrationType = "RegisterAura",
-          functionName = "registerSiphonLifeSpell",
-          spellId = 30911,
-          label = "SiphonLife-"
-        },
-        registerIncinerateSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/incinerate.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerIncinerateSpell",
-          spellId = 32231,
-          cast = [[{
+        incinerate = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/incinerate.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerIncinerateSpell",
+              spellId = 32231,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.01*float64(warlock.Talents.Cataclysm)),
 				GCD:  core.GCDDefault,
@@ -9662,14 +11699,18 @@ ns.protoSchema['tbc'] = {
 				CastTime: time.Duration(float64(time.Millisecond*2500) * (1.0 - (0.02 * float64(warlock.Talents.Emberstorm)))),
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolFire"
+              SpellSchool = "core.SpellSchoolFire"
+            }
+          }
         },
-        registerShadowboltSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/shadowbolt.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShadowboltSpell",
-          spellId = 27209,
-          cast = [[{
+        shadowbolt = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/shadowbolt.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShadowboltSpell",
+              spellId = 27209,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost * (1 - 0.01*float64(warlock.Talents.Cataclysm)),
 				GCD:      core.GCDDefault,
@@ -9677,119 +11718,230 @@ ns.protoSchema['tbc'] = {
 			},
 			ModifyCast: modCast,
 		}]],
-          SpellSchool = "core.SpellSchoolShadow"
+              SpellSchool = "core.SpellSchoolShadow"
+            }
+          }
         },
-        makeSeed_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/seed.go",
-          registrationType = "RegisterSpell",
-          functionName = "makeSeed",
-          spellId = 27243,
-          cast = [[{
+        make_seed = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/seed.go",
+              registrationType = "RegisterSpell",
+              functionName = "makeSeed",
+              spellId = 27243,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
 				CastTime: time.Millisecond * 2000,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow"
+              SpellSchool = "core.SpellSchoolShadow"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/seed.go",
+              registrationType = "RegisterAura",
+              functionName = "makeSeed",
+              spellId = 27243,
+              label = "Seed-"
+            }
+          }
         },
-        makeSeed_Seed = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/seed.go",
-          registrationType = "RegisterAura",
-          functionName = "makeSeed",
-          spellId = 27243,
-          label = "Seed-"
+        seed = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/seed.go",
+              registrationType = "RegisterAura",
+              functionName = "makeSeed",
+              spellId = 27243,
+              label = "Seed-"
+            }
+          }
         },
-        registerUnstableAffSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/unstable_affliction.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerUnstableAffSpell",
-          spellId = 30405,
-          cast = [[{
+        unstable_aff = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/unstable_affliction.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerUnstableAffSpell",
+              spellId = 30405,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
 				CastTime: time.Millisecond * 1500,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolShadow",
-          ProcMask = "core.ProcMaskEmpty"
-        },
-        registerUnstableAffSpell_unstableaff = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/unstable_affliction.go",
-          registrationType = "RegisterAura",
-          functionName = "registerUnstableAffSpell",
-          spellId = 30405,
-          label = "unstableaff-"
-        },
-        applyShadowEmbrace_ShadowEmbraceTalent = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyShadowEmbrace",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+              SpellSchool = "core.SpellSchoolShadow",
+              ProcMask = "core.ProcMaskEmpty"
+            }
           },
-          label = "Shadow Embrace Talent"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/unstable_affliction.go",
+              registrationType = "RegisterAura",
+              functionName = "registerUnstableAffSpell",
+              spellId = 30405,
+              label = "unstableaff-"
+            }
+          }
         },
-        setupAmplifyCurse_AmplifyCurse = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "setupAmplifyCurse",
-          spellId = 18288,
-          auraDuration = {
-            raw = "time.Second * 30",
-            seconds = 30
+        unstableaff = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/unstable_affliction.go",
+              registrationType = "RegisterAura",
+              functionName = "registerUnstableAffSpell",
+              spellId = 30405,
+              label = "unstableaff-"
+            }
+          }
+        },
+        shadow_embrace = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyShadowEmbrace",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Shadow Embrace Talent"
+            }
+          }
+        },
+        shadow_embrace_talent = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyShadowEmbrace",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Shadow Embrace Talent"
+            }
+          }
+        },
+        up_amplify_curse = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupAmplifyCurse",
+              spellId = 18288,
+              auraDuration = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              label = "Amplify Curse"
+            }
           },
-          label = "Amplify Curse"
-        },
-        setupAmplifyCurse_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupAmplifyCurse",
-          spellId = 18288,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupAmplifyCurse",
+              spellId = 18288,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    warlock.NewTimer(),
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
-          },
-          SpellSchool = "core.SpellSchoolShadow"
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              SpellSchool = "core.SpellSchoolShadow"
+            }
+          }
         },
-        setupNightfall_NightfallShadowTrance = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "setupNightfall",
-          spellId = 17941,
-          auraDuration = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          label = "Nightfall Shadow Trance"
+        amplify_curse = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupAmplifyCurse",
+              spellId = 18288,
+              auraDuration = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              label = "Amplify Curse"
+            }
+          }
         },
-        setupNightfall_Nightfall = {
-          sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "setupNightfall",
-          spellId = 18095,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Nightfall"
+        up_nightfall = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNightfall",
+              spellId = 17941,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Nightfall Shadow Trance"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNightfall",
+              spellId = 18095,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Nightfall"
+            }
+          }
+        },
+        nightfall_shadow_trance = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNightfall",
+              spellId = 17941,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Nightfall Shadow Trance"
+            }
+          }
+        },
+        nightfall = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warlock/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "setupNightfall",
+              spellId = 18095,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Nightfall"
+            }
+          }
         }
       },
       paladin = {
-        registerCrusaderStrikeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/crusader_strike.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCrusaderStrikeSpell",
-          spellId = 35395,
-          cast = [[{
+        crusader_strike = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/crusader_strike.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCrusaderStrikeSpell",
+              spellId = 35395,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -9799,217 +11951,355 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 6,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+              cooldown = {
+                raw = "time.Second * 6",
+                seconds = 6
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        setupSealOfBlood_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupSealOfBlood",
-          spellId = 31893,
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolHoly"
-        },
-        setupSealOfBlood_SealofBlood = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterAura",
-          functionName = "setupSealOfBlood",
-          spellId = 31893,
-          auraDuration = {
-            raw = "SealDuration",
-            seconds = nil
-          },
-          label = "Seal of Blood"
-        },
-        setupSealOfBlood_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupSealOfBlood",
-          spellId = 31892,
-          cast = [[{
+        up_seal_of_blood = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupSealOfBlood",
+              spellId = 31893,
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolHoly"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupSealOfBlood",
+              spellId = 31892,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost - baseCost*(0.03*float64(paladin.Talents.Benediction)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          Flags = "SpellFlagSeal",
-          SpellSchool = "core.SpellSchoolHoly"
-        },
-        SetupSealOfCommand_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "SetupSealOfCommand",
-          spellId = 20424,
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "paladin.WeaponSpecializationMultiplier()",
-          ThreatMultiplier = "1"
-        },
-        SetupSealOfCommand_SealofCommand = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterAura",
-          functionName = "SetupSealOfCommand",
-          spellId = 20424,
-          auraDuration = {
-            raw = "SealDuration",
-            seconds = nil
+              Flags = "SpellFlagSeal",
+              SpellSchool = "core.SpellSchoolHoly"
+            }
           },
-          label = "Seal of Command"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfBlood",
+              spellId = 31893,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Blood"
+            }
+          }
         },
-        SetupSealOfCommand_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "SetupSealOfCommand",
-          spellId = 20375,
-          cast = [[{
+        seal_of_blood = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfBlood",
+              spellId = 31893,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Blood"
+            }
+          }
+        },
+        up_seal_of_command = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "SetupSealOfCommand",
+              spellId = 20424,
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "paladin.WeaponSpecializationMultiplier()",
+              ThreatMultiplier = "1"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "SetupSealOfCommand",
+              spellId = 20375,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost - baseCost*(0.03*float64(paladin.Talents.Benediction)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          Flags = "SpellFlagSeal",
-          SpellSchool = "core.SpellSchoolHoly"
-        },
-        setupSealOfTheCrusader_SealoftheCrusader = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterAura",
-          functionName = "setupSealOfTheCrusader",
-          spellId = 27158,
-          auraDuration = {
-            raw = "SealDuration",
-            seconds = nil
+              Flags = "SpellFlagSeal",
+              SpellSchool = "core.SpellSchoolHoly"
+            }
           },
-          label = "Seal of the Crusader"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "SetupSealOfCommand",
+              spellId = 20424,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Command"
+            }
+          }
         },
-        setupSealOfTheCrusader_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupSealOfTheCrusader",
-          spellId = 27158,
-          cast = [[{
+        seal_of_command = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "SetupSealOfCommand",
+              spellId = 20424,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Command"
+            }
+          }
+        },
+        up_seal_of_the_crusader = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfTheCrusader",
+              spellId = 27158,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of the Crusader"
+            }
+          },
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupSealOfTheCrusader",
+              spellId = 27158,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost - baseCost*(0.03*float64(paladin.Talents.Benediction)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          Flags = "SpellFlagSeal",
-          SpellSchool = "core.SpellSchoolHoly"
+              Flags = "SpellFlagSeal",
+              SpellSchool = "core.SpellSchoolHoly"
+            }
+          }
         },
-        setupSealOfWisdom_SealofWisdom = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterAura",
-          functionName = "setupSealOfWisdom",
-          spellId = 27166,
-          auraDuration = {
-            raw = "SealDuration",
-            seconds = nil
+        seal_of_the_crusader = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfTheCrusader",
+              spellId = 27158,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of the Crusader"
+            }
+          }
+        },
+        up_seal_of_wisdom = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfWisdom",
+              spellId = 27166,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Wisdom"
+            }
           },
-          label = "Seal of Wisdom"
-        },
-        setupSealOfWisdom_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupSealOfWisdom",
-          spellId = 27166,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupSealOfWisdom",
+              spellId = 27166,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost - baseCost*(0.03*float64(paladin.Talents.Benediction)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          Flags = "SpellFlagSeal",
-          SpellSchool = "core.SpellSchoolHoly"
+              Flags = "SpellFlagSeal",
+              SpellSchool = "core.SpellSchoolHoly"
+            }
+          }
         },
-        setupSealOfLight_SealofLight = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterAura",
-          functionName = "setupSealOfLight",
-          spellId = 27160,
-          auraDuration = {
-            raw = "SealDuration",
-            seconds = nil
+        seal_of_wisdom = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfWisdom",
+              spellId = 27166,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Wisdom"
+            }
+          }
+        },
+        up_seal_of_light = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfLight",
+              spellId = 27160,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Light"
+            }
           },
-          label = "Seal of Light"
-        },
-        setupSealOfLight_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupSealOfLight",
-          spellId = 27160,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupSealOfLight",
+              spellId = 27160,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost - baseCost*(0.03*float64(paladin.Talents.Benediction)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          Flags = "SpellFlagSeal",
-          SpellSchool = "core.SpellSchoolHoly"
+              Flags = "SpellFlagSeal",
+              SpellSchool = "core.SpellSchoolHoly"
+            }
+          }
         },
-        setupSealOfRighteousness_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupSealOfRighteousness",
-          spellId = 27156,
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskEmpty",
-          DamageMultiplier = "1 *",
-          ThreatMultiplier = "1"
+        seal_of_light = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfLight",
+              spellId = 27160,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Light"
+            }
+          }
         },
-        setupSealOfRighteousness_SealofRighteousness = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterAura",
-          functionName = "setupSealOfRighteousness",
-          spellId = 27155,
-          auraDuration = {
-            raw = "SealDuration",
-            seconds = nil
-          },
-          label = "Seal of Righteousness"
-        },
-        setupSealOfRighteousness_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
-          registrationType = "RegisterSpell",
-          functionName = "setupSealOfRighteousness",
-          spellId = 27155,
-          cast = [[{
+        up_seal_of_righteousness = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupSealOfRighteousness",
+              spellId = 27156,
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskEmpty",
+              DamageMultiplier = "1 *",
+              ThreatMultiplier = "1"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterSpell",
+              functionName = "setupSealOfRighteousness",
+              spellId = 27155,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 - 0.03*float64(paladin.Talents.Benediction)),
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          Flags = "SpellFlagSeal",
-          SpellSchool = "core.SpellSchoolHoly"
-        },
-        registerSpiritualAttunement_SpiritualAttunement = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/spiritual_attunement.go",
-          registrationType = "RegisterAura",
-          functionName = "registerSpiritualAttunement",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+              Flags = "SpellFlagSeal",
+              SpellSchool = "core.SpellSchoolHoly"
+            }
           },
-          label = "Spiritual Attunement"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfRighteousness",
+              spellId = 27155,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Righteousness"
+            }
+          }
         },
-        RegisterConsecrationSpell_Consecration = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/consecration.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterConsecrationSpell",
-          label = "Consecration"
+        seal_of_righteousness = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/seals.go",
+              registrationType = "RegisterAura",
+              functionName = "setupSealOfRighteousness",
+              spellId = 27155,
+              auraDuration = {
+                raw = "SealDuration",
+                seconds = nil
+              },
+              label = "Seal of Righteousness"
+            }
+          }
         },
-        registerExorcismSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/exorcism.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerExorcismSpell",
-          spellId = 10314,
-          cast = [[{
+        spiritual_attunement = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/spiritual_attunement.go",
+              registrationType = "RegisterAura",
+              functionName = "registerSpiritualAttunement",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Spiritual Attunement"
+            }
+          }
+        },
+        consecration = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/consecration.go",
+              registrationType = "RegisterAura",
+              functionName = "RegisterConsecrationSpell",
+              label = "Consecration"
+            }
+          }
+        },
+        exorcism = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/exorcism.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerExorcismSpell",
+              spellId = 10314,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -10019,36 +12309,42 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 15,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 15",
-            seconds = 15
-          },
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+              cooldown = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        RegisterAvengingWrathCD_AvengingWrath = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/avenging_wrath.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterAvengingWrathCD",
-          spellId = 31884,
-          auraDuration = {
-            raw = "time.Second * 20",
-            seconds = 20
+        avenging_wrath = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/avenging_wrath.go",
+              registrationType = "RegisterAura",
+              functionName = "RegisterAvengingWrathCD",
+              spellId = 31884,
+              auraDuration = {
+                raw = "time.Second * 20",
+                seconds = 20
+              },
+              label = "Avenging Wrath"
+            }
           },
-          label = "Avenging Wrath"
-        },
-        RegisterAvengingWrathCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/avenging_wrath.go",
-          registrationType = "RegisterSpell",
-          functionName = "RegisterAvengingWrathCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 31884,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/avenging_wrath.go",
+              registrationType = "RegisterSpell",
+              functionName = "RegisterAvengingWrathCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 31884,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 			},
@@ -10057,41 +12353,34 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerHolyShieldSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerHolyShieldSpell",
-          spellId = 27179,
-          tag = 1,
-          Flags = "core.SpellFlagBinary",
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskEmpty",
-          DamageMultiplier = "1 + 0.1*float64(paladin.Talents.ImprovedHolyShield)",
-          ThreatMultiplier = "1.35"
-        },
-        registerHolyShieldSpell_HolyShield = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
-          registrationType = "RegisterAura",
-          functionName = "registerHolyShieldSpell",
-          spellId = 27179,
-          auraDuration = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          label = "Holy Shield"
-        },
-        registerHolyShieldSpell_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerHolyShieldSpell",
-          spellId = 27179,
-          cast = [[{
+        holy_shield = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerHolyShieldSpell",
+              spellId = 27179,
+              tag = 1,
+              Flags = "core.SpellFlagBinary",
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskEmpty",
+              DamageMultiplier = "1 + 0.1*float64(paladin.Talents.ImprovedHolyShield)",
+              ThreatMultiplier = "1.35"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerHolyShieldSpell",
+              spellId = 27179,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
@@ -10101,18 +12390,35 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 10,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 10",
-            seconds = 10
+              cooldown = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              SpellSchool = "core.SpellSchoolHoly"
+            }
           },
-          SpellSchool = "core.SpellSchoolHoly"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/holy_shield.go",
+              registrationType = "RegisterAura",
+              functionName = "registerHolyShieldSpell",
+              spellId = 27179,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Holy Shield"
+            }
+          }
         },
-        registerJudgementOfBloodSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerJudgementOfBloodSpell",
-          spellId = 31898,
-          cast = [[{
+        judgement_of_blood = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerJudgementOfBloodSpell",
+              spellId = 31898,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost - JudgementManaCost*(0.03*float64(paladin.Talents.Benediction)),
 			},
@@ -10121,19 +12427,23 @@ ns.protoSchema['tbc'] = {
 				Duration: JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement)),
 			},
 		}]],
-          cooldown = {
-            raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
-            seconds = nil
-          },
-          Flags = "SpellFlagJudgement",
-          SpellSchool = "core.SpellSchoolHoly"
+              cooldown = {
+                raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
+                seconds = nil
+              },
+              Flags = "SpellFlagJudgement",
+              SpellSchool = "core.SpellSchoolHoly"
+            }
+          }
         },
-        registerJudgementOfTheCrusaderSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerJudgementOfTheCrusaderSpell",
-          spellId = 27159,
-          cast = [[{
+        judgement_of_the_crusader = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerJudgementOfTheCrusaderSpell",
+              spellId = 27159,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost - JudgementManaCost*(0.03*float64(paladin.Talents.Benediction)),
 			},
@@ -10147,20 +12457,24 @@ ns.protoSchema['tbc'] = {
 				paladin.CurrentSeal = nil
 			},
 		}]],
-          cooldown = {
-            raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
-            seconds = nil
-          },
-          Flags = "SpellFlagJudgement",
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskEmpty"
+              cooldown = {
+                raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
+                seconds = nil
+              },
+              Flags = "SpellFlagJudgement",
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskEmpty"
+            }
+          }
         },
-        registerJudgementOfWisdomSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerJudgementOfWisdomSpell",
-          spellId = 27164,
-          cast = [[{
+        judgement_of_wisdom = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerJudgementOfWisdomSpell",
+              spellId = 27164,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost - JudgementManaCost*(0.03*float64(paladin.Talents.Benediction)),
 			},
@@ -10174,20 +12488,24 @@ ns.protoSchema['tbc'] = {
 				paladin.CurrentSeal = nil
 			},
 		}]],
-          cooldown = {
-            raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
-            seconds = nil
-          },
-          Flags = "SpellFlagJudgement",
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskEmpty"
+              cooldown = {
+                raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
+                seconds = nil
+              },
+              Flags = "SpellFlagJudgement",
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskEmpty"
+            }
+          }
         },
-        registerJudgementOfLightSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerJudgementOfLightSpell",
-          spellId = 27163,
-          cast = [[{
+        judgement_of_light = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerJudgementOfLightSpell",
+              spellId = 27163,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost - JudgementManaCost*(0.03*float64(paladin.Talents.Benediction)),
 			},
@@ -10201,20 +12519,24 @@ ns.protoSchema['tbc'] = {
 				paladin.CurrentSeal = nil
 			},
 		}]],
-          cooldown = {
-            raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
-            seconds = nil
-          },
-          Flags = "SpellFlagJudgement",
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskEmpty"
+              cooldown = {
+                raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
+                seconds = nil
+              },
+              Flags = "SpellFlagJudgement",
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskEmpty"
+            }
+          }
         },
-        registerJudgementOfRighteousnessSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerJudgementOfRighteousnessSpell",
-          spellId = 27157,
-          cast = [[{
+        judgement_of_righteousness = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerJudgementOfRighteousnessSpell",
+              spellId = 27157,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost - JudgementManaCost*(0.03*float64(paladin.Talents.Benediction)),
 			},
@@ -10223,149 +12545,223 @@ ns.protoSchema['tbc'] = {
 				Duration: JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement)),
 			},
 		}]],
-          cooldown = {
-            raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
-            seconds = nil
-          },
-          Flags = "SpellFlagJudgement | core.SpellFlagBinary",
-          SpellSchool = "core.SpellSchoolHoly",
-          ProcMask = "core.ProcMaskMeleeOrRangedSpecial",
-          DamageMultiplier = "1 + 0.03*float64(paladin.Talents.ImprovedSealOfRighteousness)",
-          ThreatMultiplier = "1"
+              cooldown = {
+                raw = "JudgementCDTime - (time.Second * time.Duration(paladin.Talents.ImprovedJudgement))",
+                seconds = nil
+              },
+              Flags = "SpellFlagJudgement | core.SpellFlagBinary",
+              SpellSchool = "core.SpellSchoolHoly",
+              ProcMask = "core.ProcMaskMeleeOrRangedSpecial",
+              DamageMultiplier = "1 + 0.03*float64(paladin.Talents.ImprovedSealOfRighteousness)",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        setupJudgementRefresh_RefreshJudgement = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
-          registrationType = "RegisterAura",
-          functionName = "setupJudgementRefresh",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Refresh Judgement"
+        up_judgement_refresh = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
+              registrationType = "RegisterAura",
+              functionName = "setupJudgementRefresh",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Refresh Judgement"
+            }
+          }
         },
-        applyRedoubt_RedoubtProc = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyRedoubt",
-          spellId = 20137,
-          auraDuration = {
-            raw = "time.Second * 10",
-            seconds = 10
-          },
-          label = "Redoubt Proc"
+        refresh_judgement = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/judgement.go",
+              registrationType = "RegisterAura",
+              functionName = "setupJudgementRefresh",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Refresh Judgement"
+            }
+          }
         },
-        applyRedoubt_Redoubt = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyRedoubt",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Redoubt"
+        redoubt = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyRedoubt",
+              spellId = 20137,
+              auraDuration = {
+                raw = "time.Second * 10",
+                seconds = 10
+              },
+              label = "Redoubt Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyRedoubt",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Redoubt"
+            }
+          }
         },
-        applyReckoning_ReckoningProc = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyReckoning",
-          spellId = 20182,
-          auraDuration = {
-            raw = "time.Second * 8",
-            seconds = 8
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          label = "Reckoning Proc"
+        reckoning = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyReckoning",
+              spellId = 20182,
+              auraDuration = {
+                raw = "time.Second * 8",
+                seconds = 8
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              label = "Reckoning Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyReckoning",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Reckoning"
+            }
+          }
         },
-        applyReckoning_Reckoning = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyReckoning",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Reckoning"
+        ardent_defender = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyArdentDefender",
+              spellId = 31854,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Ardent Defender"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyArdentDefender",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Ardent Defender Talent"
+            }
+          }
         },
-        applyArdentDefender_ArdentDefender = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyArdentDefender",
-          spellId = 31854,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Ardent Defender"
+        ardent_defender_talent = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyArdentDefender",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Ardent Defender Talent"
+            }
+          }
         },
-        applyArdentDefender_ArdentDefenderTalent = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyArdentDefender",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Ardent Defender Talent"
-        },
-        applyVengeance_VengeanceProc = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyVengeance",
-          spellId = 20059,
-          auraDuration = {
-            raw = "time.Second * 30",
-            seconds = 30
-          },
-          label = "Vengeance Proc"
-        },
-        applyVengeance_Vengeance = {
-          sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyVengeance",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Vengeance"
+        vengeance = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyVengeance",
+              spellId = 20059,
+              auraDuration = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              label = "Vengeance Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/paladin/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyVengeance",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Vengeance"
+            }
+          }
         }
       },
       mage = {
-        registerWintersChillSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/winters_chill.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerWintersChillSpell",
-          spellId = 28595,
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolFrost"
-        },
-        applyWintersChill_WintersChillTalent = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/winters_chill.go",
-          registrationType = "RegisterAura",
-          functionName = "applyWintersChill",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        winters_chill = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/winters_chill.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerWintersChillSpell",
+              spellId = 28595,
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolFrost"
+            }
           },
-          label = "Winters Chill Talent"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/winters_chill.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWintersChill",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Winters Chill Talent"
+            }
+          }
         },
-        newArcaneBlastSpell_ArcaneBlast = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/arcane_blast.go",
-          registrationType = "RegisterAura",
-          functionName = "newArcaneBlastSpell",
-          spellId = 36032,
-          auraDuration = {
-            raw = "time.Second * 8",
-            seconds = 8
+        winters_chill_talent = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/winters_chill.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWintersChill",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Winters Chill Talent"
+            }
+          }
+        },
+        new_arcane_blast = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/arcane_blast.go",
+              registrationType = "RegisterAura",
+              functionName = "newArcaneBlastSpell",
+              spellId = 36032,
+              auraDuration = {
+                raw = "time.Second * 8",
+                seconds = 8
+              },
+              label = "Arcane Blast"
+            }
           },
-          label = "Arcane Blast"
-        },
-        newArcaneBlastSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/arcane_blast.go",
-          registrationType = "RegisterSpell",
-          functionName = "newArcaneBlastSpell",
-          spellId = 30451,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/arcane_blast.go",
+              registrationType = "RegisterSpell",
+              functionName = "newArcaneBlastSpell",
+              spellId = 30451,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: ArcaneBlastBaseManaCost * (1 + 0.75*float64(numStacks) + core.TernaryFloat64(mage.hasTristfal, 0.2, 0)),
 
@@ -10377,43 +12773,111 @@ ns.protoSchema['tbc'] = {
 				mage.ArcaneBlastAura.AddStack(sim)
 			},
 		}]],
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolArcane",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "mage.spellDamageMultiplier * core.TernaryFloat64(mage.hasTristfal",
-          ThreatMultiplier = "1 - 0.2*float64(mage.Talents.ArcaneSubtlety)"
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolArcane",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "mage.spellDamageMultiplier * core.TernaryFloat64(mage.hasTristfal",
+              ThreatMultiplier = "1 - 0.2*float64(mage.Talents.ArcaneSubtlety)"
+            }
+          }
         },
-        registerIgniteSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerIgniteSpell",
-          spellId = 12848,
-          Flags = "SpellFlagMage | core.SpellFlagIgnoreModifiers",
-          SpellSchool = "core.SpellSchoolFire"
+        arcane_blast = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/arcane_blast.go",
+              registrationType = "RegisterAura",
+              functionName = "newArcaneBlastSpell",
+              spellId = 36032,
+              auraDuration = {
+                raw = "time.Second * 8",
+                seconds = 8
+              },
+              label = "Arcane Blast"
+            }
+          }
         },
-        newIgniteDot_Ignite = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
-          registrationType = "RegisterAura",
-          functionName = "newIgniteDot",
-          spellId = 12848,
-          label = "Ignite-"
-        },
-        applyIgnite_IgniteTalent = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
-          registrationType = "RegisterAura",
-          functionName = "applyIgnite",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        ignite = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerIgniteSpell",
+              spellId = 12848,
+              Flags = "SpellFlagMage | core.SpellFlagIgnoreModifiers",
+              SpellSchool = "core.SpellSchoolFire"
+            }
           },
-          label = "Ignite Talent"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+              registrationType = "RegisterAura",
+              functionName = "newIgniteDot",
+              spellId = 12848,
+              label = "Ignite-"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+              registrationType = "RegisterAura",
+              functionName = "applyIgnite",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Ignite Talent"
+            }
+          },
+          dot = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+              registrationType = "RegisterAura",
+              functionName = "newIgniteDot",
+              spellId = 12848,
+              label = "Ignite-"
+            }
+          }
         },
-        registerScorchSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/scorch.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerScorchSpell",
-          spellId = 27074,
-          cast = [[{
+        new_ignite_dot = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+              registrationType = "RegisterAura",
+              functionName = "newIgniteDot",
+              spellId = 12848,
+              label = "Ignite-"
+            }
+          },
+          dot = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+              registrationType = "RegisterAura",
+              functionName = "newIgniteDot",
+              spellId = 12848,
+              label = "Ignite-"
+            }
+          }
+        },
+        ignite_talent = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/ignite.go",
+              registrationType = "RegisterAura",
+              functionName = "applyIgnite",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Ignite Talent"
+            }
+          }
+        },
+        scorch = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/scorch.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerScorchSpell",
+              spellId = 27074,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.01*float64(mage.Talents.Pyromaniac)) *
@@ -10423,15 +12887,19 @@ ns.protoSchema['tbc'] = {
 				CastTime: time.Millisecond * 1500,
 			},
 		}]],
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolFire"
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolFire"
+            }
+          }
         },
-        registerArcaneMissilesSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/arcane_missiles.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerArcaneMissilesSpell",
-          spellId = 38699,
-          cast = [[{
+        arcane_missiles = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/arcane_missiles.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerArcaneMissilesSpell",
+              spellId = 38699,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost * (1 + float64(mage.Talents.EmpoweredArcaneMissiles)*0.02),
 
@@ -10439,31 +12907,39 @@ ns.protoSchema['tbc'] = {
 				ChannelTime: time.Second * 5,
 			},
 		}]],
-          Flags = "SpellFlagMage | core.SpellFlagChanneled",
-          SpellSchool = "core.SpellSchoolArcane",
-          ProcMask = "core.ProcMaskEmpty",
-          ThreatMultiplier = "1 - 0.2*float64(mage.Talents.ArcaneSubtlety)"
+              Flags = "SpellFlagMage | core.SpellFlagChanneled",
+              SpellSchool = "core.SpellSchoolArcane",
+              ProcMask = "core.ProcMaskEmpty",
+              ThreatMultiplier = "1 - 0.2*float64(mage.Talents.ArcaneSubtlety)"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/arcane_missiles.go",
+              registrationType = "RegisterAura",
+              functionName = "registerArcaneMissilesSpell",
+              spellId = 38699,
+              label = "ArcaneMissiles-"
+            }
+          }
         },
-        registerArcaneMissilesSpell_ArcaneMissiles = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/arcane_missiles.go",
-          registrationType = "RegisterAura",
-          functionName = "registerArcaneMissilesSpell",
-          spellId = 38699,
-          label = "ArcaneMissiles-"
-        },
-        registerBlizzardSpell_Blizzard = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/blizzard.go",
-          registrationType = "RegisterAura",
-          functionName = "registerBlizzardSpell",
-          spellId = 27085,
-          label = "Blizzard"
-        },
-        registerBlizzardSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/blizzard.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBlizzardSpell",
-          spellId = 27085,
-          cast = [[{
+        blizzard = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/blizzard.go",
+              registrationType = "RegisterAura",
+              functionName = "registerBlizzardSpell",
+              spellId = 27085,
+              label = "Blizzard"
+            }
+          },
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/blizzard.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBlizzardSpell",
+              spellId = 27085,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.05*float64(mage.Talents.FrostChanneling)) *
@@ -10473,15 +12949,19 @@ ns.protoSchema['tbc'] = {
 				ChannelTime: time.Second * 8,
 			},
 		}]],
-          Flags = "SpellFlagMage | core.SpellFlagChanneled",
-          SpellSchool = "core.SpellSchoolFrost"
+              Flags = "SpellFlagMage | core.SpellFlagChanneled",
+              SpellSchool = "core.SpellSchoolFrost"
+            }
+          }
         },
-        registerFlamestrikeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/flamestrike.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerFlamestrikeSpell",
-          spellId = 27086,
-          cast = [[{
+        flamestrike = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/flamestrike.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerFlamestrikeSpell",
+              spellId = 27086,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.01*float64(mage.Talents.Pyromaniac)) *
@@ -10491,22 +12971,28 @@ ns.protoSchema['tbc'] = {
 				CastTime: time.Second * 3,
 			},
 		}]],
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolFire"
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolFire"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/flamestrike.go",
+              registrationType = "RegisterAura",
+              functionName = "registerFlamestrikeSpell",
+              spellId = 27086,
+              label = "Flamestrike"
+            }
+          }
         },
-        registerFlamestrikeSpell_Flamestrike = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/flamestrike.go",
-          registrationType = "RegisterAura",
-          functionName = "registerFlamestrikeSpell",
-          spellId = 27086,
-          label = "Flamestrike"
-        },
-        registerFrostboltSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/frostbolt.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerFrostboltSpell",
-          spellId = 27072,
-          cast = [[{
+        frostbolt = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/frostbolt.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerFrostboltSpell",
+              spellId = 27072,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.05*float64(mage.Talents.FrostChanneling)) *
@@ -10516,18 +13002,22 @@ ns.protoSchema['tbc'] = {
 				CastTime: time.Second*3 - time.Millisecond*100*time.Duration(mage.Talents.ImprovedFrostbolt),
 			},
 		}]],
-          Flags = "SpellFlagMage | core.SpellFlagBinary",
-          SpellSchool = "core.SpellSchoolFrost",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "mage.spellDamageMultiplier *",
-          ThreatMultiplier = "1 - (0.1/3)*float64(mage.Talents.FrostChanneling)"
+              Flags = "SpellFlagMage | core.SpellFlagBinary",
+              SpellSchool = "core.SpellSchoolFrost",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "mage.spellDamageMultiplier *",
+              ThreatMultiplier = "1 - (0.1/3)*float64(mage.Talents.FrostChanneling)"
+            }
+          }
         },
-        registerPyroblastSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/pyroblast.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerPyroblastSpell",
-          spellId = 33938,
-          cast = [[{
+        pyroblast = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/pyroblast.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerPyroblastSpell",
+              spellId = 33938,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.01*float64(mage.Talents.Pyromaniac)) *
@@ -10537,25 +13027,31 @@ ns.protoSchema['tbc'] = {
 				CastTime: time.Second * 6,
 			},
 		}]],
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "mage.spellDamageMultiplier * (1 + 0.02*float64(mage.Talents.FirePower))",
-          ThreatMultiplier = "1 - 0.05*float64(mage.Talents.BurningSoul)"
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolFire",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "mage.spellDamageMultiplier * (1 + 0.02*float64(mage.Talents.FirePower))",
+              ThreatMultiplier = "1 - 0.05*float64(mage.Talents.BurningSoul)"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/pyroblast.go",
+              registrationType = "RegisterAura",
+              functionName = "registerPyroblastSpell",
+              spellId = 33938,
+              label = "Pyroblast-"
+            }
+          }
         },
-        registerPyroblastSpell_Pyroblast = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/pyroblast.go",
-          registrationType = "RegisterAura",
-          functionName = "registerPyroblastSpell",
-          spellId = 33938,
-          label = "Pyroblast-"
-        },
-        registerFireballSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/fireball.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerFireballSpell",
-          spellId = 27070,
-          cast = [[{
+        fireball = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/fireball.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerFireballSpell",
+              spellId = 27070,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.01*float64(mage.Talents.Pyromaniac)) *
@@ -10565,29 +13061,35 @@ ns.protoSchema['tbc'] = {
 				CastTime: time.Millisecond*3500 - time.Millisecond*100*time.Duration(mage.Talents.ImprovedFireball),
 			},
 		}]],
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "mage.spellDamageMultiplier *",
-          ThreatMultiplier = "1 - 0.05*float64(mage.Talents.BurningSoul)"
-        },
-        registerFireballSpell_Fireball = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/fireball.go",
-          registrationType = "RegisterAura",
-          functionName = "registerFireballSpell",
-          spellId = 27070,
-          label = "Fireball-"
-        },
-        registerEvocationCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/evocation.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerEvocationCD",
-          majorCooldown = {
-            type = "core.CooldownTypeMana",
-            priority = nil
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolFire",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "mage.spellDamageMultiplier *",
+              ThreatMultiplier = "1 - 0.05*float64(mage.Talents.BurningSoul)"
+            }
           },
-          spellId = 12051,
-          cast = [[{
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/fireball.go",
+              registrationType = "RegisterAura",
+              functionName = "registerFireballSpell",
+              spellId = 27070,
+              label = "Fireball-"
+            }
+          }
+        },
+        evocation = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/evocation.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerEvocationCD",
+              majorCooldown = {
+                type = "core.CooldownTypeMana",
+                priority = nil
+              },
+              spellId = 12051,
+              cast = [[{
 			DefaultCast: core.Cast{
 				GCD:         core.GCDDefault,
 				ChannelTime: channelTime,
@@ -10597,34 +13099,42 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 8,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 8",
-            seconds = 480
+              cooldown = {
+                raw = "time.Minute * 8",
+                seconds = 480
+              }
+            }
           }
         },
-        registerArcaneExplosionSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/arcane_explosion.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerArcaneExplosionSpell",
-          spellId = 10202,
-          cast = [[{
+        arcane_explosion = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/arcane_explosion.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerArcaneExplosionSpell",
+              spellId = 10202,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost,
 				GCD:  core.GCDDefault,
 			},
 		}]],
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolArcane",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "mage.spellDamageMultiplier",
-          ThreatMultiplier = "1 - 0.2*float64(mage.Talents.ArcaneSubtlety)"
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolArcane",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "mage.spellDamageMultiplier",
+              ThreatMultiplier = "1 - 0.2*float64(mage.Talents.ArcaneSubtlety)"
+            }
+          }
         },
-        registerSummonWaterElementalCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/water_elemental.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSummonWaterElementalCD",
-          spellId = 31687,
-          cast = [[{
+        summon_water_elemental = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/water_elemental.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSummonWaterElementalCD",
+              spellId = 31687,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.05*float64(mage.Talents.FrostChanneling)) *
@@ -10636,154 +13146,203 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              }
+            }
           }
         },
-        registerWaterboltSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/water_elemental.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerWaterboltSpell",
-          spellId = 31707,
-          cast = [[{
+        waterbolt = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/water_elemental.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerWaterboltSpell",
+              spellId = 31707,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     baseCost,
 				GCD:      core.GCDDefault,
 				CastTime: time.Second * 3,
 			},
 		}]],
-          SpellSchool = "core.SpellSchoolFrost",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+              SpellSchool = "core.SpellSchoolFrost",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        applyArcaneConcentration_Clearcasting = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyArcaneConcentration",
-          spellId = 12536,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
-          },
-          label = "Clearcasting"
+        arcane_concentration = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyArcaneConcentration",
+              spellId = 12536,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Clearcasting"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyArcaneConcentration",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Arcane Concentration"
+            }
+          }
         },
-        applyArcaneConcentration_ArcaneConcentration = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyArcaneConcentration",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Arcane Concentration"
+        clearcasting = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyArcaneConcentration",
+              spellId = 12536,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Clearcasting"
+            }
+          }
         },
-        registerPresenceOfMindCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerPresenceOfMindCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 12043,
-          cast = [[{
+        presence_of_mind = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerPresenceOfMindCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 12043,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    mage.NewTimer(),
 				Duration: cooldown,
 			},
 		}]],
-          cooldown = {
-            raw = "cooldown",
-            seconds = nil
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "cooldown",
+                seconds = nil
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerArcanePowerCD_ArcanePower = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerArcanePowerCD",
-          spellId = 12042,
-          auraDuration = {
-            raw = "time.Second * 15",
-            seconds = 15
+        arcane_power = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerArcanePowerCD",
+              spellId = 12042,
+              auraDuration = {
+                raw = "time.Second * 15",
+                seconds = 15
+              },
+              label = "Arcane Power"
+            }
           },
-          label = "Arcane Power"
-        },
-        registerArcanePowerCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerArcanePowerCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 12042,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerArcanePowerCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 12042,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    mage.NewTimer(),
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        applyMasterOfElements_MasterofElements = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyMasterOfElements",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Master of Elements"
+        master_of_elements = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyMasterOfElements",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Master of Elements"
+            }
+          }
         },
-        registerCombustionCD_Combustion = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerCombustionCD",
-          spellId = 11129,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        combustion = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerCombustionCD",
+              spellId = 11129,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Combustion"
+            }
           },
-          label = "Combustion"
-        },
-        registerCombustionCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCombustionCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 11129,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCombustionCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 11129,
+              cast = [[{
 			CD: cd,
 		}]],
-          Flags = "core.SpellFlagNoOnCastComplete"
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerIcyVeinsCD_IcyVeins = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerIcyVeinsCD",
-          spellId = 12472,
-          auraDuration = {
-            raw = "time.Second * 20",
-            seconds = 20
+        icy_veins = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerIcyVeinsCD",
+              spellId = 12472,
+              auraDuration = {
+                raw = "time.Second * 20",
+                seconds = 20
+              },
+              label = "Icy Veins"
+            }
           },
-          label = "Icy Veins"
-        },
-        registerIcyVeinsCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerIcyVeinsCD",
-          spellId = 12472,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerIcyVeinsCD",
+              spellId = 12472,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: manaCost,
 			},
@@ -10792,39 +13351,47 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerColdSnapCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerColdSnapCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 11958,
-          cast = [[{
+        cold_snap = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerColdSnapCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 11958,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    mage.NewTimer(),
 				Duration: cooldown,
 			},
 		}]],
-          cooldown = {
-            raw = "cooldown",
-            seconds = nil
-          },
-          Flags = "core.SpellFlagNoOnCastComplete"
+              cooldown = {
+                raw = "cooldown",
+                seconds = nil
+              },
+              Flags = "core.SpellFlagNoOnCastComplete"
+            }
+          }
         },
-        registerFireBlastSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/mage/fire_blast.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerFireBlastSpell",
-          spellId = 27079,
-          cast = [[{
+        fire_blast = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/mage/fire_blast.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerFireBlastSpell",
+              spellId = 27079,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: baseCost *
 					(1 - 0.01*float64(mage.Talents.Pyromaniac)) *
@@ -10837,24 +13404,28 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second*8 - time.Millisecond*500*time.Duration(mage.Talents.ImprovedFireBlast),
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second*8 - time.Millisecond*500*time.Duration(mage.Talents.ImprovedFireBlast)",
-            seconds = nil
-          },
-          Flags = "SpellFlagMage",
-          SpellSchool = "core.SpellSchoolFire",
-          ProcMask = "core.ProcMaskSpellDamage",
-          DamageMultiplier = "mage.spellDamageMultiplier * (1 + 0.02*float64(mage.Talents.FirePower))",
-          ThreatMultiplier = "1 - 0.05*float64(mage.Talents.BurningSoul)"
+              cooldown = {
+                raw = "time.Second*8 - time.Millisecond*500*time.Duration(mage.Talents.ImprovedFireBlast)",
+                seconds = nil
+              },
+              Flags = "SpellFlagMage",
+              SpellSchool = "core.SpellSchoolFire",
+              ProcMask = "core.ProcMaskSpellDamage",
+              DamageMultiplier = "mage.spellDamageMultiplier * (1 + 0.02*float64(mage.Talents.FirePower))",
+              ThreatMultiplier = "1 - 0.05*float64(mage.Talents.BurningSoul)"
+            }
+          }
         }
       },
       warrior = {
-        registerBerserkerRageSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/berserker_rage.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBerserkerRageSpell",
-          spellId = 18499,
-          cast = [[{
+        berserker_rage = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/berserker_rage.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBerserkerRageSpell",
+              spellId = 18499,
+              cast = [[{
 			DefaultCast: core.Cast{
 				GCD: core.GCDDefault,
 			},
@@ -10864,28 +13435,34 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 30,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 30",
-            seconds = 30
-          },
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerRevengeSpell_RevengeTrigger = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/revenge.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRevengeSpell",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        revenge = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/revenge.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRevengeSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Revenge Trigger"
+            }
           },
-          label = "Revenge Trigger"
-        },
-        registerRevengeSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/revenge.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerRevengeSpell",
-          spellId = 30357,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/revenge.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerRevengeSpell",
+              spellId = 30357,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -10896,57 +13473,81 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 5,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 5",
-            seconds = 5
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 5",
+                seconds = 5
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerHamstringSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/hamstring.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerHamstringSpell",
-          spellId = 25212,
-          cast = [[{
+        revenge_trigger = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/revenge.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRevengeSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Revenge Trigger"
+            }
+          }
+        },
+        hamstring = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/hamstring.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerHamstringSpell",
+              spellId = 25212,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1.25",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1.25",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        RegisterShieldWallCD_ShieldWall = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/shield_wall.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterShieldWallCD",
-          spellId = 871,
-          auraDuration = {
-            raw = "duration",
-            seconds = nil
+        shield_wall = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/shield_wall.go",
+              registrationType = "RegisterAura",
+              functionName = "RegisterShieldWallCD",
+              spellId = 871,
+              auraDuration = {
+                raw = "duration",
+                seconds = nil
+              },
+              label = "Shield Wall"
+            }
           },
-          label = "Shield Wall"
-        },
-        RegisterShieldWallCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/shield_wall.go",
-          registrationType = "RegisterSpell",
-          functionName = "RegisterShieldWallCD",
-          majorCooldown = {
-            type = "core.CooldownTypeSurvival",
-            priority = nil
-          },
-          spellId = 871,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/shield_wall.go",
+              registrationType = "RegisterSpell",
+              functionName = "RegisterShieldWallCD",
+              majorCooldown = {
+                type = "core.CooldownTypeSurvival",
+                priority = nil
+              },
+              spellId = 871,
+              cast = [[{
 			DefaultCast: core.Cast{
 				GCD: core.GCDDefault,
 			},
@@ -10956,38 +13557,46 @@ ns.protoSchema['tbc'] = {
 				Duration: cooldownDur,
 			},
 		}]],
-          cooldown = {
-            raw = "cooldownDur",
-            seconds = nil
-          },
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "cooldownDur",
+                seconds = nil
+              },
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerBloodrageCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/bloodrage.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBloodrageCD",
-          majorCooldown = {
-            type = nil,
-            priority = nil
-          },
-          spellId = 2687,
-          cast = [[{
+        bloodrage = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/bloodrage.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBloodrageCD",
+              majorCooldown = {
+                type = nil,
+                priority = nil
+              },
+              spellId = 2687,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    warrior.NewTimer(),
 				Duration: time.Minute,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute",
-            seconds = 60
+              cooldown = {
+                raw = "time.Minute",
+                seconds = 60
+              }
+            }
           }
         },
-        registerSlamSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/slam.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSlamSpell",
-          spellId = 25242,
-          cast = [[{
+        slam = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/slam.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSlamSpell",
+              spellId = 25242,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost:     cost,
 				GCD:      core.GCDDefault,
@@ -10995,30 +13604,36 @@ ns.protoSchema['tbc'] = {
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerShieldBlockSpell_ShieldBlock = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/shield_block.go",
-          registrationType = "RegisterAura",
-          functionName = "registerShieldBlockSpell",
-          spellId = 2565,
-          auraDuration = {
-            raw = "time.Second*5 + core.TernaryDuration(warrior.Talents.ImprovedShieldBlock",
-            seconds = nil
+        shield_block = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/shield_block.go",
+              registrationType = "RegisterAura",
+              functionName = "registerShieldBlockSpell",
+              spellId = 2565,
+              auraDuration = {
+                raw = "time.Second*5 + core.TernaryDuration(warrior.Talents.ImprovedShieldBlock",
+                seconds = nil
+              },
+              label = "Shield Block"
+            }
           },
-          label = "Shield Block"
-        },
-        registerShieldBlockSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/shield_block.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShieldBlockSpell",
-          spellId = 2565,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/shield_block.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShieldBlockSpell",
+              spellId = 2565,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 			},
@@ -11027,75 +13642,105 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 5,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 5",
-            seconds = 5
+              cooldown = {
+                raw = "time.Second * 5",
+                seconds = 5
+              },
+              SpellSchool = "core.SpellSchoolPhysical"
+            }
+          }
+        },
+        deep_wounds = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/deep_wounds.go",
+              registrationType = "RegisterSpell",
+              functionName = "applyDeepWounds",
+              spellId = 12867,
+              Flags = "core.SpellFlagNoOnCastComplete",
+              SpellSchool = "core.SpellSchoolPhysical"
+            }
           },
-          SpellSchool = "core.SpellSchoolPhysical"
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/deep_wounds.go",
+              registrationType = "RegisterAura",
+              functionName = "applyDeepWounds",
+              spellId = 12867,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              ProcMask = "core.ProcMaskPeriodicDamage",
+              DamageMultiplier = "0.2 * float64(warrior.Talents.DeepWounds)",
+              ThreatMultiplier = "1",
+              label = "Deep Wounds"
+            }
+          }
         },
-        applyDeepWounds_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/deep_wounds.go",
-          registrationType = "RegisterSpell",
-          functionName = "applyDeepWounds",
-          spellId = 12867,
-          Flags = "core.SpellFlagNoOnCastComplete",
-          SpellSchool = "core.SpellSchoolPhysical"
-        },
-        applyDeepWounds_DeepWounds = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/deep_wounds.go",
-          registrationType = "RegisterAura",
-          functionName = "applyDeepWounds",
-          spellId = 12867,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        rampage = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRampageSpell",
+              spellId = 30033,
+              auraDuration = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              label = "Rampage"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRampageSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Rampage Talent"
+            }
           },
-          ProcMask = "core.ProcMaskPeriodicDamage",
-          DamageMultiplier = "0.2 * float64(warrior.Talents.DeepWounds)",
-          ThreatMultiplier = "1",
-          label = "Deep Wounds"
-        },
-        registerRampageSpell_Rampage = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRampageSpell",
-          spellId = 30033,
-          auraDuration = {
-            raw = "time.Second * 30",
-            seconds = 30
-          },
-          label = "Rampage"
-        },
-        registerRampageSpell_RampageTalent = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
-          registrationType = "RegisterAura",
-          functionName = "registerRampageSpell",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Rampage Talent"
-        },
-        registerRampageSpell_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerRampageSpell",
-          spellId = 30033,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerRampageSpell",
+              spellId = 30033,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: 20,
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true,
 		}]],
-          IgnoreHaste = "true"
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerThunderClapSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/thunder_clap.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerThunderClapSpell",
-          spellId = 25264,
-          cast = [[{
+        rampage_talent = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/rampage.go",
+              registrationType = "RegisterAura",
+              functionName = "registerRampageSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Rampage Talent"
+            }
+          }
+        },
+        thunder_clap = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/thunder_clap.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerThunderClapSpell",
+              spellId = 25264,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11106,81 +13751,69 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 4,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 4",
-            seconds = 4
-          },
-          Flags = "core.SpellFlagBinary",
-          SpellSchool = "core.SpellSchoolPhysical",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 4",
+                seconds = 4
+              },
+              Flags = "core.SpellFlagBinary",
+              SpellSchool = "core.SpellSchoolPhysical",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerSweepingStrikesCD_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSweepingStrikesCD",
-          spellId = 12328,
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskEmpty",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+        sweeping_strikes = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerSweepingStrikesCD",
+              spellId = 12328,
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskEmpty",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          },
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
+              registrationType = "RegisterAura",
+              functionName = "registerSweepingStrikesCD",
+              spellId = 12328,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Sweeping Strikes"
+            }
+          }
         },
-        registerSweepingStrikesCD_SweepingStrikes = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
-          registrationType = "RegisterAura",
-          functionName = "registerSweepingStrikesCD",
-          spellId = 12328,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        recklessness = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/recklessness.go",
+              registrationType = "RegisterAura",
+              functionName = "RegisterRecklessnessCD",
+              spellId = 1719,
+              auraDuration = {
+                raw = "time.Second*15 + time.Second*2*time.Duration(warrior.Talents.ImprovedDisciplines)",
+                seconds = nil
+              },
+              label = "Recklessness"
+            }
           },
-          label = "Sweeping Strikes"
-        },
-        registerSweepingStrikesCD_3 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/sweeping_strikes.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerSweepingStrikesCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 12328,
-          cast = [[{
-			DefaultCast: core.Cast{
-				Cost: cost,
-			},
-			CD: core.Cooldown{
-				Timer:    warrior.NewTimer(),
-				Duration: time.Second * 30,
-			},
-		}]],
-          cooldown = {
-            raw = "time.Second * 30",
-            seconds = 30
-          },
-          SpellSchool = "core.SpellSchoolPhysical"
-        },
-        RegisterRecklessnessCD_Recklessness = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/recklessness.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterRecklessnessCD",
-          spellId = 1719,
-          auraDuration = {
-            raw = "time.Second*15 + time.Second*2*time.Duration(warrior.Talents.ImprovedDisciplines)",
-            seconds = nil
-          },
-          label = "Recklessness"
-        },
-        RegisterRecklessnessCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/recklessness.go",
-          registrationType = "RegisterSpell",
-          functionName = "RegisterRecklessnessCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 1719,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/recklessness.go",
+              registrationType = "RegisterSpell",
+              functionName = "RegisterRecklessnessCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 1719,
+              cast = [[{
 			DefaultCast: core.Cast{
 				GCD: core.GCDDefault,
 			},
@@ -11190,18 +13823,22 @@ ns.protoSchema['tbc'] = {
 				Duration: cooldownDur,
 			},
 		}]],
-          cooldown = {
-            raw = "cooldownDur",
-            seconds = nil
-          },
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "cooldownDur",
+                seconds = nil
+              },
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerMortalStrikeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/mortal_strike.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerMortalStrikeSpell",
-          spellId = 30330,
-          cast = [[{
+        mortal_strike = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/mortal_strike.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerMortalStrikeSpell",
+              spellId = 30330,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11212,23 +13849,27 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second*6 - time.Millisecond*200*time.Duration(warrior.Talents.ImprovedMortalStrike),
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second*6 - time.Millisecond*200*time.Duration(warrior.Talents.ImprovedMortalStrike)",
-            seconds = nil
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 *",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second*6 - time.Millisecond*200*time.Duration(warrior.Talents.ImprovedMortalStrike)",
+                seconds = nil
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 *",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerShieldSlamSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/shield_slam.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerShieldSlamSpell",
-          spellId = 30356,
-          cast = [[{
+        shield_slam = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/shield_slam.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerShieldSlamSpell",
+              spellId = 30356,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11239,33 +13880,39 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 6,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 * core.TernaryFloat64(ItemSetOnslaughtArmor.CharacterHasSetBonus(&warrior.Character",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 6",
+                seconds = 6
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 * core.TernaryFloat64(ItemSetOnslaughtArmor.CharacterHasSetBonus(&warrior.Character",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerOverpowerSpell_OverpowerTrigger = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/overpower.go",
-          registrationType = "RegisterAura",
-          functionName = "registerOverpowerSpell",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
+        overpower = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/overpower.go",
+              registrationType = "RegisterAura",
+              functionName = "registerOverpowerSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Overpower Trigger"
+            }
           },
-          label = "Overpower Trigger"
-        },
-        registerOverpowerSpell_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/overpower.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerOverpowerSpell",
-          spellId = 11585,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/overpower.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerOverpowerSpell",
+              spellId = 11585,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11276,20 +13923,38 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 5,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 5",
-            seconds = 5
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 5",
+                seconds = 5
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerWhirlwindSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/whirlwind.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerWhirlwindSpell",
-          spellId = 1680,
-          cast = [[{
+        overpower_trigger = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/overpower.go",
+              registrationType = "RegisterAura",
+              functionName = "registerOverpowerSpell",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Overpower Trigger"
+            }
+          }
+        },
+        whirlwind = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/whirlwind.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerWhirlwindSpell",
+              spellId = 1680,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11300,126 +13965,176 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second*10 - time.Second*time.Duration(warrior.Talents.ImprovedWhirlwind),
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second*10 - time.Second*time.Duration(warrior.Talents.ImprovedWhirlwind)",
-            seconds = nil
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second*10 - time.Second*time.Duration(warrior.Talents.ImprovedWhirlwind)",
+                seconds = nil
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerBattleStanceAura_BattleStance = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/stances.go",
-          registrationType = "RegisterAura",
-          functionName = "registerBattleStanceAura",
-          spellId = 2457,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Battle Stance"
+        battle_stance = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/stances.go",
+              registrationType = "RegisterAura",
+              functionName = "registerBattleStanceAura",
+              spellId = 2457,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Battle Stance"
+            }
+          }
         },
-        registerDefensiveStanceAura_DefensiveStance = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/stances.go",
-          registrationType = "RegisterAura",
-          functionName = "registerDefensiveStanceAura",
-          spellId = 71,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Defensive Stance"
+        defensive_stance = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/stances.go",
+              registrationType = "RegisterAura",
+              functionName = "registerDefensiveStanceAura",
+              spellId = 71,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Defensive Stance"
+            }
+          }
         },
-        registerBerserkerStanceAura_BerserkerStance = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/stances.go",
-          registrationType = "RegisterAura",
-          functionName = "registerBerserkerStanceAura",
-          spellId = 2458,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Berserker Stance"
+        berserker_stance = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/stances.go",
+              registrationType = "RegisterAura",
+              functionName = "registerBerserkerStanceAura",
+              spellId = 2458,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Berserker Stance"
+            }
+          }
         },
-        registerHeroicStrikeSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/heroic_strike_cleave.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerHeroicStrikeSpell",
-          spellId = 29707,
-          cast = [[{
+        heroic_strike = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/heroic_strike_cleave.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerHeroicStrikeSpell",
+              spellId = 29707,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1"
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHAuto | core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1"
+            }
+          }
         },
-        registerCleaveSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/heroic_strike_cleave.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerCleaveSpell",
-          spellId = 25231,
-          cast = [[{
+        cleave = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/heroic_strike_cleave.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerCleaveSpell",
+              spellId = 25231,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical"
+            }
+          }
         },
-        RegisterHSOrCleave_HSQueueAura = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/heroic_strike_cleave.go",
-          registrationType = "RegisterAura",
-          functionName = "RegisterHSOrCleave",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "HS Queue Aura"
+        hs_or_cleave = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/heroic_strike_cleave.go",
+              registrationType = "RegisterAura",
+              functionName = "RegisterHSOrCleave",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "HS Queue Aura"
+            }
+          }
         },
-        registerDemoralizingShoutSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/demoralizing_shout.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDemoralizingShoutSpell",
-          spellId = 25203,
-          cast = [[{
+        hs_queue = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/heroic_strike_cleave.go",
+              registrationType = "RegisterAura",
+              functionName = "RegisterHSOrCleave",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "HS Queue Aura"
+            }
+          }
+        },
+        demoralizing_shout = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/demoralizing_shout.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerDemoralizingShoutSpell",
+              spellId = 25203,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true,
 		}]],
-          SpellSchool = "core.SpellSchoolPhysical",
-          IgnoreHaste = "true"
+              SpellSchool = "core.SpellSchoolPhysical",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerDevastateSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/devastate.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDevastateSpell",
-          spellId = 30022,
-          cast = [[{
+        devastate = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/devastate.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerDevastateSpell",
+              spellId = 30022,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
 			},
 			IgnoreHaste: true,
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerExecuteSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/execute.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerExecuteSpell",
-          spellId = 25236,
-          cast = [[{
+        execute = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/execute.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerExecuteSpell",
+              spellId = 25236,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11430,98 +14145,151 @@ ns.protoSchema['tbc'] = {
 				extraRage = cast.Cost - spell.BaseCost
 			},
 		}]],
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1",
-          ThreatMultiplier = "1.25",
-          IgnoreHaste = "true"
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1",
+              ThreatMultiplier = "1.25",
+              IgnoreHaste = "true"
+            }
+          }
         },
-        applyWeaponSpecializations_MaceSpecialization = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyWeaponSpecializations",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Mace Specialization"
+        weapon_specializations = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWeaponSpecializations",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Mace Specialization"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWeaponSpecializations",
+              spellId = 12815,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+              SpellSchool = "core.SpellSchoolPhysical",
+              label = "Sword Specialization"
+            }
+          }
         },
-        applyWeaponSpecializations_SwordSpecialization = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyWeaponSpecializations",
-          spellId = 12815,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
-          SpellSchool = "core.SpellSchoolPhysical",
-          label = "Sword Specialization"
+        mace_specialization = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWeaponSpecializations",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Mace Specialization"
+            }
+          }
         },
-        applyUnbridledWrath_UnbridledWrath = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyUnbridledWrath",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Unbridled Wrath"
+        sword_specialization = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyWeaponSpecializations",
+              spellId = 12815,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              Flags = "core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete",
+              SpellSchool = "core.SpellSchoolPhysical",
+              label = "Sword Specialization"
+            }
+          }
         },
-        applyFlurry_FlurryProc = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyFlurry",
-          spellId = 12974,
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Flurry Proc"
+        unbridled_wrath = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyUnbridledWrath",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Unbridled Wrath"
+            }
+          }
         },
-        applyFlurry_Flurry = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyFlurry",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Flurry"
+        flurry = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFlurry",
+              spellId = 12974,
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Flurry Proc"
+            },
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyFlurry",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Flurry"
+            }
+          }
         },
-        applyShieldSpecialization_ShieldSpecialization = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "applyShieldSpecialization",
-          auraDuration = {
-            raw = "core.NeverExpires",
-            seconds = -1
-          },
-          label = "Shield Specialization"
+        shield_specialization = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "applyShieldSpecialization",
+              auraDuration = {
+                raw = "core.NeverExpires",
+                seconds = -1
+              },
+              label = "Shield Specialization"
+            }
+          }
         },
-        registerDeathWishCD_DeathWish = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerDeathWishCD",
-          spellId = 12292,
-          auraDuration = {
-            raw = "time.Second * 30",
-            seconds = 30
+        death_wish = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerDeathWishCD",
+              spellId = 12292,
+              auraDuration = {
+                raw = "time.Second * 30",
+                seconds = 30
+              },
+              label = "Death Wish"
+            }
           },
-          label = "Death Wish"
-        },
-        registerDeathWishCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerDeathWishCD",
-          majorCooldown = {
-            type = "core.CooldownTypeDPS",
-            priority = nil
-          },
-          spellId = 12292,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerDeathWishCD",
+              majorCooldown = {
+                type = "core.CooldownTypeDPS",
+                priority = nil
+              },
+              spellId = 12292,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11532,49 +14300,59 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Minute * 3,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 3",
-            seconds = 180
-          },
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Minute * 3",
+                seconds = 180
+              },
+              IgnoreHaste = "true"
+            }
+          }
         },
-        registerLastStandCD_LastStand = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterAura",
-          functionName = "registerLastStandCD",
-          spellId = 12975,
-          auraDuration = {
-            raw = "time.Second * 20",
-            seconds = 20
+        last_stand = {
+          aura = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterAura",
+              functionName = "registerLastStandCD",
+              spellId = 12975,
+              auraDuration = {
+                raw = "time.Second * 20",
+                seconds = 20
+              },
+              label = "Last Stand"
+            }
           },
-          label = "Last Stand"
-        },
-        registerLastStandCD_2 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerLastStandCD",
-          majorCooldown = {
-            type = "core.CooldownTypeSurvival",
-            priority = nil
-          },
-          spellId = 12975,
-          cast = [[{
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/talents.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerLastStandCD",
+              majorCooldown = {
+                type = "core.CooldownTypeSurvival",
+                priority = nil
+              },
+              spellId = 12975,
+              cast = [[{
 			CD: core.Cooldown{
 				Timer:    warrior.NewTimer(),
 				Duration: time.Minute * 8,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Minute * 8",
-            seconds = 480
+              cooldown = {
+                raw = "time.Minute * 8",
+                seconds = 480
+              }
+            }
           }
         },
-        registerBloodthirstSpell_1 = {
-          sourceFile = "extern/wowsims-tbc/sim/warrior/bloodthirst.go",
-          registrationType = "RegisterSpell",
-          functionName = "registerBloodthirstSpell",
-          spellId = 30335,
-          cast = [[{
+        bloodthirst = {
+          spell = {
+            {
+              sourceFile = "extern/wowsims-tbc/sim/warrior/bloodthirst.go",
+              registrationType = "RegisterSpell",
+              functionName = "registerBloodthirstSpell",
+              spellId = 30335,
+              cast = [[{
 			DefaultCast: core.Cast{
 				Cost: cost,
 				GCD:  core.GCDDefault,
@@ -11585,16 +14363,18 @@ ns.protoSchema['tbc'] = {
 				Duration: time.Second * 6,
 			},
 		}]],
-          cooldown = {
-            raw = "time.Second * 6",
-            seconds = 6
-          },
-          Flags = "core.SpellFlagMeleeMetrics",
-          SpellSchool = "core.SpellSchoolPhysical",
-          ProcMask = "core.ProcMaskMeleeMHSpecial",
-          DamageMultiplier = "1 * core.TernaryFloat64(ItemSetOnslaughtBattlegear.CharacterHasSetBonus(&warrior.Character",
-          ThreatMultiplier = "1",
-          IgnoreHaste = "true"
+              cooldown = {
+                raw = "time.Second * 6",
+                seconds = 6
+              },
+              Flags = "core.SpellFlagMeleeMetrics",
+              SpellSchool = "core.SpellSchoolPhysical",
+              ProcMask = "core.ProcMaskMeleeMHSpecial",
+              DamageMultiplier = "1 * core.TernaryFloat64(ItemSetOnslaughtBattlegear.CharacterHasSetBonus(&warrior.Character",
+              ThreatMultiplier = "1",
+              IgnoreHaste = "true"
+            }
+          }
         }
       }
     },
@@ -11606,5 +14386,117 @@ ns.protoSchema['tbc'] = {
     },
     consumables_unparsed = {
 
+    },
+    diagnostic = {
+      actions = {
+        total_found = 0,
+        matched = 0,
+        missing = {
+
+        },
+        missing_attributes = {
+          uiLabel = 0,
+          shortDescription = 0,
+          fields = 0
+        },
+        missing_attr_items = {
+          uiLabel = {
+
+          },
+          shortDescription = {
+
+          },
+          fields = {
+
+          }
+        }
+      },
+      values = {
+        total_found = 0,
+        matched = 0,
+        missing = {
+
+        },
+        missing_attributes = {
+          uiLabel = 0,
+          shortDescription = 0,
+          fields = 0
+        },
+        missing_attr_items = {
+          uiLabel = {
+
+          },
+          shortDescription = {
+
+          },
+          fields = {
+
+          }
+        }
+      }
+    },
+    go_diagnostic = {
+      files_scanned = 285,
+      functions_scanned = 1176,
+      registrations_found = 308,
+      registrations_parsed = 301,
+      registrations_missed = {
+        {
+          file = "sim/rogue/slice_and_dice.go",
+          ["function"] = "makeSliceAndDice",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: actionID, 		Flags:    SpellFlagFinisher,  		ResourceType: stats.Energy, 		BaseCost:     baseCost,  		Cast: core.CastConfig{ 			DefaultCa..."
+        },
+        {
+          file = "sim/priest/mind_flay.go",
+          ["function"] = "newMindFlaySpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:     priest.MindFlayActionID(numTicks), 		SpellSchool:  core.SpellSchoolShadow, 		Flags:        core.SpellFlagBinary | core.SpellFlagChan..."
+        },
+        {
+          file = "sim/warlock/seed.go",
+          ["function"] = "makeSeed",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:     explosionId, 		SpellSchool:  core.SpellSchoolShadow, 		Cast:         core.CastConfig{}, 		ApplyEffects: core.ApplyEffectFuncMultiple..."
+        },
+        {
+          file = "sim/paladin/consecration.go",
+          ["function"] = "RegisterConsecrationSpell",
+          registration_index = 2,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID:    actionID, 		SpellSchool: core.SpellSchoolHoly,  		ResourceType: stats.Mana, 		BaseCost:     manaCost,  		Cast: core.CastConfig{ 			De..."
+        },
+        {
+          file = "sim/mage/mana_gems.go",
+          ["function"] = "registerManaGemsCD",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: core.MageManaGemMCDActionID, 		Flags:    core.SpellFlagNoOnCastComplete,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer:    m..."
+        },
+        {
+          file = "sim/warrior/shouts.go",
+          ["function"] = "makeShoutSpellHelper",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagNoOnCastComplete,  		ResourceType: stats.Rage, 		BaseCost:     cost,  		Cast: core.CastConfig{ 			De..."
+        },
+        {
+          file = "sim/warrior/stances.go",
+          ["function"] = "makeStanceSpell",
+          registration_index = 1,
+          registration_type = "RegisterSpell",
+          reason = "Could not extract spellId",
+          block_preview = "{ 		ActionID: actionID, 		Flags:    core.SpellFlagNoOnCastComplete,  		Cast: core.CastConfig{ 			CD: core.Cooldown{ 				Timer:    stanceCD, 				Durati..."
+        }
+      }
     }
   }

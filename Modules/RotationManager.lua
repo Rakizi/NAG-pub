@@ -133,6 +133,9 @@ do
         self.rotationDropdownFrame = nil
         self.devMenuFrame = nil
         self:SetState("isMainFrameVisible", true) -- Assume visible by default and let messages update
+        
+        -- Initialize ShareInGame integration
+        self:InitializeShareInGame()
     end
 
     function RotationManager:ModuleEnable()
@@ -896,6 +899,24 @@ function RotationManager:RefreshRotationList()
         selectIcon:SetWidth(20)
         selectIcon:SetHeight(20)
         selectIcon:SetDisabled(rotation.isSelected)
+        
+        -- Apply color tinting based on selection state
+        if rotation.isSelected then
+            selectIcon.image:SetVertexColor(1, 1, 1, 1)  -- Full color for selected rotation
+        else
+            selectIcon.image:SetVertexColor(0.5, 0.5, 0.5, 1)  -- Gray for unselected rotations
+        end
+        
+        -- Add tooltip
+        selectIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationSelect"] or "Select")
+            GameTooltip:Show()
+        end)
+        selectIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         selectIcon:SetCallback("OnClick", function()
             local valid, err = NAG:ValidateRotation(rotation.config)
             if not valid then
@@ -913,6 +934,17 @@ function RotationManager:RefreshRotationList()
         editIcon:SetImageSize(18, 18)
         editIcon:SetWidth(20)
         editIcon:SetHeight(20)
+        
+        -- Add tooltip
+        editIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationEdit"] or "Edit")
+            GameTooltip:Show()
+        end)
+        editIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         editIcon:SetCallback("OnClick", function()
             -- Create editor frame (same as before)
             local frame = AceGUI:Create("Frame")
@@ -1006,10 +1038,21 @@ function RotationManager:RefreshRotationList()
 
         -- Export icon
         local exportIcon = AceGUI:Create("Icon")
-        exportIcon:SetImage("Interface\\Buttons\\UI-Share-Up")
+        exportIcon:SetImage("Interface\\Buttons\\UI-SpellbookIcon-NextPage-Up")
         exportIcon:SetImageSize(18, 18)
         exportIcon:SetWidth(20)
         exportIcon:SetHeight(20)
+        
+        -- Add tooltip
+        exportIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationExport"] or "Export")
+            GameTooltip:Show()
+        end)
+        exportIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         exportIcon:SetCallback("OnClick", function()
             local ImportExport = NAG:GetModule("ImportExport")
             if ImportExport then
@@ -1030,6 +1073,17 @@ function RotationManager:RefreshRotationList()
         deleteIcon:SetWidth(20)
         deleteIcon:SetHeight(20)
         deleteIcon:SetDisabled(not rotation.config.userModified)
+        
+        -- Add tooltip
+        deleteIcon:SetCallback("OnEnter", function(widget)
+            GameTooltip:SetOwner(widget.frame, "ANCHOR_RIGHT")
+            GameTooltip:SetText(L["rotationDelete"] or "Delete")
+            GameTooltip:Show()
+        end)
+        deleteIcon:SetCallback("OnLeave", function()
+            GameTooltip:Hide()
+        end)
+        
         deleteIcon:SetCallback("OnClick", function()
             StaticPopupDialogs["NAG_DELETE_ROTATION_CONFIRM"] = {
                 text = format(
@@ -1161,6 +1215,146 @@ NAG:RegisterChatCommand("nagvalidateall", function()
         print("|cFFFF0000Found " .. numErrors .. " invalid rotation(s).|r")
     end
 end)
+
+-- ~~~~~~~~~~ SHAREINGAME INTEGRATION ~~~~~~~~~~
+
+function RotationManager:InitializeShareInGame()
+    -- Get the ShareInGame module
+    local ShareInGame = NAG:GetModule("ShareInGame")
+    if not ShareInGame then
+        self:Debug("ShareInGame module not available")
+        return
+    end
+    
+    -- Register handler for rotation data
+    ShareInGame:RegisterHandler("rotation", function(sender, data)
+        self:OnRotationReceived(sender, data)
+    end)
+    
+    self:Debug("ShareInGame integration initialized")
+end
+
+--- Handle received rotation data from ShareInGame
+--- @param sender string The sender's name
+--- @param data table The received rotation data
+function RotationManager:OnRotationReceived(sender, data)
+    self:Info("Received rotation '%s' from %s", data.name or "Unknown", sender)
+    
+    -- Validate the received data
+    if not data.rotation or not data.name then
+        self:Warn("Invalid rotation data received from %s", sender)
+        return
+    end
+    
+    -- Import the rotation using ImportExport module
+    local ImportExport = NAG:GetModule("ImportExport")
+    if not ImportExport then
+        self:Error("ImportExport module not available")
+        return
+    end
+    
+    -- Convert the data to import format
+    local importData = {
+        name = data.name,
+        specID = data.specID or 0,
+        class = data.class or "UNKNOWN",
+        rotationString = data.rotationString,
+        apl = data.apl,
+        prePull = data.prePull or {},
+        macros = data.macros or {},
+        burstTrackers = data.burstTrackers or {},
+        resourceBar = data.resourceBar or {},
+        enabled = data.enabled or true,
+        userModified = data.userModified or true,
+        gameType = data.gameType or "UNKNOWN",
+        authors = data.authors or { sender },
+        lastModified = data.lastModified or time(),
+        lastModifiedBy = sender,
+        exportTime = data.exportTime or time(),
+        imported = true,
+        importTime = time()
+    }
+    
+    -- Import the rotation
+    local success, result = ImportExport:ImportRotation(importData)
+    if success then
+        self:Info("Successfully imported rotation '%s' from %s", data.name, sender)
+        -- Notify other modules that a rotation was imported
+        NAG:SendMessage("NAG_ROTATION_IMPORTED", result)
+    else
+        self:Error("Failed to import rotation from %s: %s", sender, result or "Unknown error")
+    end
+end
+
+--- Share a rotation with another player
+--- @param rotationName string The name of the rotation to share
+--- @param targetPlayer string The target player name
+function RotationManager:ShareRotation(rotationName, targetPlayer)
+    if not rotationName or not targetPlayer then
+        self:Error("ShareRotation: Invalid parameters")
+        return false
+    end
+    
+    -- Get the ShareInGame module
+    local ShareInGame = NAG:GetModule("ShareInGame")
+    if not ShareInGame then
+        self:Error("ShareInGame module not available")
+        return false
+    end
+    
+    -- Get the rotation data
+    local rotation = self:GetRotationByName(rotationName)
+    if not rotation then
+        self:Error("Rotation '%s' not found", rotationName)
+        return false
+    end
+    
+    -- Prepare the data for sharing
+    local shareData = {
+        name = rotation.name,
+        specID = rotation.specID,
+        class = rotation.class,
+        rotationString = rotation.rotationString,
+        apl = rotation.apl,
+        prePull = rotation.prePull,
+        macros = rotation.macros,
+        burstTrackers = rotation.burstTrackers,
+        resourceBar = rotation.resourceBar,
+        enabled = rotation.enabled,
+        userModified = rotation.userModified,
+        gameType = rotation.gameType,
+        authors = rotation.authors,
+        lastModified = rotation.lastModified,
+        lastModifiedBy = rotation.lastModifiedBy,
+        exportTime = time()
+    }
+    
+    -- Send the rotation data
+    local success = ShareInGame:Send(rotationName, shareData, targetPlayer, "rotation")
+    if success then
+        self:Info("Sent rotation '%s' to %s", rotationName, targetPlayer)
+    else
+        self:Error("Failed to send rotation '%s' to %s", rotationName, targetPlayer)
+    end
+    
+    return success
+end
+
+--- Get a rotation by name (helper function)
+--- @param rotationName string The name of the rotation
+--- @return table|nil The rotation data or nil if not found
+function RotationManager:GetRotationByName(rotationName)
+    -- This is a placeholder - implement based on your rotation storage system
+    -- You'll need to integrate with your actual rotation storage mechanism
+    local ImportExport = NAG:GetModule("ImportExport")
+    if not ImportExport then
+        return nil
+    end
+    
+    -- This is a simplified example - you'll need to implement the actual lookup
+    -- based on how rotations are stored in your system
+    return nil -- Placeholder
+end
 
 -- Expose in private namespace
 ns.RotationManager = RotationManager

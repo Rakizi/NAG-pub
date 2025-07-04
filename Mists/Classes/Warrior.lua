@@ -46,16 +46,19 @@ defaults.class.specSpellLocations = {
 
 local rotationStringWarriorArms = [[
             NAG:AutocastOtherCooldowns()
-    or NAG:Cast(100)
+    or not UnitAffectingCombat('player') and NAG:Cast(100)
+    or NAG:AuraIsActive(12292) and NAG:Cast(126734)
     or ((NAG:IsExecutePhase(20) and (NAG:AnyTrinketStatProcsActive(6) and (NAG:TrinketProcsMinRemainingTime(6) >= 15.0))) or (NAG:RemainingTime() < 26.5)) and NAG:Cast(76095)
     or ((NAG:RemainingTime() > 125.0) or (NAG:IsExecutePhase(20) and NAG:AuraIsActive(76095))) and NAG:Cast(33697)
-    or (NAG:NumberTargets() > 1) and NAG:Cast(6343)
-    or (NAG:NumberTargets() > 1) and NAG:Cast(12328)
-    or (NAG:NumberTargets() > 1) and NAG:Cast(46924)
+    or (NAG:NumberTargets() > 1) and NAG:Cast(6343, "RIGHT")
+    or (NAG:NumberTargets() > 1 and NAG:SpellCanCast(46924)) and NAG:Cast(12328, "RIGHT")
+    or ((NAG:NumberTargets() > 1) and NAG:SpellCanCast(46924)) and NAG:Cast(126734, "RIGHT")
+    or ((NAG:NumberTargets() > 1) and NAG:SpellCanCast(46924)) and NAG:Cast(12292, "RIGHT")
+    or ((NAG:NumberTargets() > 1) and NAG:SpellCanCast(46924)) and NAG:Cast(46924, "RIGHT")
     or false and NAG:Cast(64382)
     or ((not NAG:AuraIsActive(12880)) and (NAG:CurrentTime() >= 1.0) and (NAG:AuraIsActive(86346, "target") or NAG:SpellIsReady(118000))) and NAG:Cast(18499)
     or ((((NAG:RemainingTime() >= 185.0) or NAG:AuraIsActive(2825)) and (not NAG:AuraIsActive(114206))) or (NAG:IsExecutePhase(20) and NAG:AuraIsActive(76095) and (not NAG:AuraIsActive(114206)))) and NAG:Cast(114206)
-    or ((NAG:RemainingTime() >= 72.0) or (NAG:IsExecutePhase(20) and (NAG:AuraIsActive(76095) or (NAG:RemainingTime() <= 15.0)))) and NAG:StrictSequence("someName185", NAG:Cast(126734), NAG:Cast(12292))
+    or (((NAG:RemainingTime() >= 72.0) or (NAG:IsExecutePhase(20) and (NAG:AuraIsActive(76095) or (NAG:RemainingTime() <= 15.0)))) and (NAG:NumStatBuffCooldowns() <= 1)) and NAG:Cast(12292)
     or ((((NAG:RemainingTime() >= 63.0) and (NAG:CurrentTime() >= 1.5)) or (NAG:IsExecutePhase(20) and (NAG:AuraIsActive(76095) or (NAG:RemainingTime() <= 15.0)))) and (NAG:AuraIsInactiveWithReactionTime(86346, "target") or (NAG:AuraIsActive(12292) and (NAG:AuraRemainingTime(12292) <= 1.5)))) and NAG:Cast(118000)
     or ((((NAG:RemainingTime() >= 95.0) and NAG:AuraIsKnown(123144)) or (NAG:RemainingTime() >= 185.0)) or (NAG:IsExecutePhase(20) and NAG:AuraIsActive(76095))) and NAG:Cast(1719)
     or ((not NAG:AuraIsActive(86346, "target")) and NAG:IsExecutePhase(20) and (NAG:RemainingTime() <= 26.5)) and NAG:Cast(86346)
@@ -72,7 +75,10 @@ local rotationStringWarriorArms = [[
     or ((not NAG:SpellCanCast(100)) and (not NAG:UnitIsMoving())) and NAG:Channel(46924, function() return (NAG:SpellChanneledTicks(46924) == 4) end)
     or (NAG:AuraIsActive(46924) and NAG:SpellIsKnown(46924)) and NAG:Cast(6673)
     or (NAG:CurrentRage() < 10) and NAG:Cast(6673)
-    or ((NAG:CurrentRage() >= 100) or ((NAG:SpellTimeToReady(100) < 1.5) and (NAG:CurrentRage() > (true - 35)))) and NAG:Cast(78)
+    or ((NAG:CurrentRage() >= 100) or ((NAG:SpellTimeToReady(100) < 1.5) and (NAG:CurrentRage() > (UnitPowerMax('player') - 35)))) and NAG:Cast(78)
+    or NAG:Cast(100)
+    or     ((NAG:TimeToReady(86346) < NAG:TimeToReady(12294)) and NAG:Cast(86346, 10))
+    or     NAG:Cast(12294, 10)
 ]]
 local rotationStringWarriorFury = [[
 ]]

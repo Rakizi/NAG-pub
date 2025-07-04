@@ -34,11 +34,11 @@ defaults.class.specSpellLocations = {
         AOE = {}
     },
     [CLASS_SPECS.BALANCE] = {
-        ABOVE = { 1126, 24858 },
-        BELOW = {},
-        RIGHT = { 48505, 88751, 88747, 16914 },
-        LEFT = { 33831, 26297 },
-        AOE = {}
+        LEFT = { 26297, 112071, 102560 }, -- Berserking, Celestial Alignment, Incarnation: Chosen of Elune
+        ABOVE = { 24858 },               -- Moonkin Form
+        BELOW = { 48505, 88751, 88747 }, -- Starfall, Wild Mushroom: Detonate, Wild Mushroom
+        RIGHT = {},                      
+        AOE = { 16914 },                 -- Hurricane
     },
     [CLASS_SPECS.RESTORATION] = {
         ABOVE = {},
@@ -56,17 +56,60 @@ if UnitClassBase('player') ~= "DRUID" then return end
 
 -- START OF GENERATED_ROTATIONS
 
-ns.AddRotationToDefaults(defaults, CLASS_SPECS.BALANCE, "Balance", {
-    default = true,
-    enabled = true,
-    experimental = true,
-    gameType = Version.GAME_TYPES.CLASSIC_MISTS,
-    prePull = {
-        { NAG:GetBattlePotion(), 1.5 }
-    },
-    rotationString = [[
-    ]],
-})
+ns.AddRotationToDefaults(defaults,
+    SpecializationCompat:GetSpecID("Druid", "Balance"),
+    "Druid Balance - Default by @Jiw",
+    {
+        -- Required parameters
+        default = true,
+        enabled = true,
+        experimental = false,
+        gameType = Version.GAME_TYPES.CLASSIC_MISTS,
+        prePull = {
+            { NAG:Cast(88747), -6000 }, { NAG:Cast(76093), -2000 }, { NAG:Cast(5176), -2000 }, { NAG:Cast(48505), -500 }
+        },
+        rotationString = [[
+            (not NAG:AuraIsActive(24858)) and NAG:Cast(24858)
+    or NAG:SpellCanCast(76093) and NAG:Cast(76093)
+    or NAG:SpellCanCast(26297) and NAG:Cast(26297)
+    or ((not NAG:AuraIsActive(48518)) and (not NAG:AuraIsActive(48517)) and (NAG:CurrentLunarEnergy() <= 40) and (NAG:CurrentSolarEnergy() <= 40)) and NAG:Cast(112071)
+    or (NAG:SpellCanCast(102560) and (NAG:CurrentLunarEnergy() >= 100) and NAG:AuraIsActive(48518)) and NAG:Cast(102560)
+    or (NAG:SpellCanCast(48505) and NAG:AuraIsActive(48518) and (not NAG:AuraIsActive(48505))) and NAG:Cast(48505)
+    or NAG:AuraIsActive(93400) and NAG:Cast(78674)
+    or ((NAG:AuraIsActive(112071) and (NAG:AuraRemainingTime(112071) <= 3)) and (NAG:DotRemainingTime(8921) <= 9)) and NAG:Cast(8921)
+    or (NAG:UnitIsMoving() and (NAG:DotRemainingTime(8921) <= 7)) and NAG:Cast(8921)
+    or (NAG:UnitIsMoving() and (NAG:DotRemainingTime(93402) <= 7)) and NAG:Cast(93402)
+    or (NAG:UnitIsMoving() and NAG:AuraIsActive(48517) and (NAG:AuraNumStacks(88747) >= 1)) and NAG:Cast(88751)
+    or NAG:UnitIsMoving() and NAG:Cast(88747)
+    or (NAG:NumberTargets() >= 5) and NAG:Cast(16914)
+    or (((not NAG:DotIsActive(8921)) or (NAG:DotRemainingTime(8921) <= 1)) and (NAG:RemainingTime() >= 9)) and NAG:Cast(8921)
+    or (((not NAG:DotIsActive(93402)) or (NAG:DotRemainingTime(93402) <= 1)) and (NAG:RemainingTime() >= 9)) and NAG:Cast(93402)
+    or NAG:DruidGetEclipseDirection() == "sun" and NAG:Cast(2912)
+    or NAG:DruidGetEclipseDirection() == "moon" and NAG:Cast(5176)
+    or NAG:DruidGetEclipseDirection() == "none" and NAG:Cast(5176)
+    or NAG:Cast(5176)
+        ]],
+        
+        -- New action-based format
+        --prePullActions = {{action = {channelSpell = {spellId = {spellId = 127663}, interruptIf = {cmp = {op = "OpGe", lhs = {currentLunarEnergy = {}}, rhs = {const = {val = "50"}}}}}}, doAtValue = {const = {val = "-20s"}}}, {action = {castSpell = {spellId = {spellId = 88747}}}, doAtValue = {const = {val = "-6s"}}}, {action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-2s"}}}, {action = {castSpell = {spellId = {spellId = 5176}}}, doAtValue = {const = {val = "-2s"}}}, {action = {castSpell = {spellId = {spellId = 48505}}}, doAtValue = {const = {val = "-0.5s"}}}},
+        --aplActions = {{action = {condition = {not = {val = {auraIsActive = {auraId = {spellId = 24858}}}}}, castSpell = {spellId = {spellId = 2825, tag = -1}}}}, {action = {condition = {spellCanCast = {spellId = {otherId = "OtherActionPotion"}}}, castSpell = {spellId = {otherId = "OtherActionPotion"}}}}, {action = {condition = {spellCanCast = {spellId = {spellId = 26297}}}, castSpell = {spellId = {spellId = 26297}}}}, {action = {condition = {and = {vals = {{not = {val = {auraIsActive = {auraId = {spellId = 48518}}}}}, {not = {val = {auraIsActive = {auraId = {spellId = 48517}}}}}, {cmp = {op = "OpLe", lhs = {currentLunarEnergy = {}}, rhs = {const = {val = "40"}}}}, {cmp = {op = "OpLe", lhs = {currentSolarEnergy = {}}, rhs = {const = {val = "40"}}}}}}}, castSpell = {spellId = {spellId = 112071}}}}, {action = {condition = {and = {vals = {{spellCanCast = {spellId = {spellId = 102560}}}, {cmp = {op = "OpGe", lhs = {currentLunarEnergy = {}}, rhs = {const = {val = "100"}}}}, {auraIsActive = {auraId = {spellId = 48518}}}}}}, castSpell = {spellId = {spellId = 102560}}}}, {action = {condition = {and = {vals = {{spellCanCast = {spellId = {spellId = 48505}}}, {auraIsActive = {auraId = {spellId = 48518}}}, {not = {val = {auraIsActive = {auraId = {spellId = 48505}}}}}}}}, castSpell = {spellId = {spellId = 48505}}}}, {action = {condition = {auraIsActive = {auraId = {spellId = 93400}}}, castSpell = {spellId = {spellId = 78674}}}}, {action = {condition = {and = {vals = {{and = {vals = {{auraIsActive = {auraId = {spellId = 112071}}}, {cmp = {op = "OpLe", lhs = {auraRemainingTime = {auraId = {spellId = 112071}}}, rhs = {const = {val = "3"}}}}}}}, {cmp = {op = "OpLe", lhs = {dotRemainingTime = {spellId = {spellId = 8921}}}, rhs = {const = {val = "9"}}}}}}}, castSpell = {spellId = {spellId = 8921}}}}, {action = {condition = {and = {vals = {{unitIsMoving = {}}, {cmp = {op = "OpLe", lhs = {dotRemainingTime = {spellId = {spellId = 8921}}}, rhs = {const = {val = "7"}}}}}}}, castSpell = {spellId = {spellId = 8921}}}}, {action = {condition = {and = {vals = {{unitIsMoving = {}}, {cmp = {op = "OpLe", lhs = {dotRemainingTime = {spellId = {spellId = 93402}}}, rhs = {const = {val = "7"}}}}}}}, castSpell = {spellId = {spellId = 93402}}}}, {action = {condition = {and = {vals = {{unitIsMoving = {}}, {auraIsActive = {auraId = {spellId = 48517}}}, {cmp = {op = "OpGe", lhs = {auraNumStacks = {auraId = {spellId = 88747}}}, rhs = {const = {val = "1"}}}}}}}, castSpell = {spellId = {spellId = 88751}}}}, {action = {condition = {unitIsMoving = {}}, castSpell = {spellId = {spellId = 88747}}}}, {action = {condition = {cmp = {op = "OpGe", lhs = {const = {val = "NAG:NumberTargets()"}}, rhs = {const = {val = "5"}}}}, castSpell = {spellId = {spellId = 16914}}}}, {action = {condition = {and = {vals = {{or = {vals = {{not = {val = {dotIsActive = {spellId = {spellId = 8921}}}}}, {cmp = {op = "OpLe", lhs = {dotRemainingTime = {spellId = {spellId = 8921}}}, rhs = {const = {val = "1"}}}}}}}, {cmp = {op = "OpGe", lhs = {remainingTime = {}}, rhs = {const = {val = "9"}}}}}}}, castSpell = {spellId = {spellId = 8921}}}}, {action = {condition = {and = {vals = {{or = {vals = {{not = {val = {dotIsActive = {spellId = {spellId = 93402}}}}}, {cmp = {op = "OpLe", lhs = {dotRemainingTime = {spellId = {spellId = 93402}}}, rhs = {const = {val = "1"}}}}}}}, {cmp = {op = "OpGe", lhs = {remainingTime = {}}, rhs = {const = {val = "9"}}}}}}}, castSpell = {spellId = {spellId = 93402}}}}, {action = {condition = {druidCurrentEclipsePhase = {eclipsePhase = "LunarPhase"}}, castSpell = {spellId = {spellId = 2912}}}}, {action = {condition = {druidCurrentEclipsePhase = {eclipsePhase = "SolarPhase"}}, castSpell = {spellId = {spellId = 5176}}}}, {action = {condition = {druidCurrentEclipsePhase = {eclipsePhase = "NeutralPhase"}}, castSpell = {spellId = {spellId = 5176}}}}, {action = {castSpell = {spellId = {spellId = 5176}}}}},
+
+        -- Tracked IDs for optimization
+        spells = {2912, 5176, 8921, 16914, 24858, 26297, 48505, 48517, 48518, 78674, 88747, 88751, 93400, 93402, 102560, 112071},
+        items = {76093},
+        auras = {},
+        runes = {},
+
+        -- Optional metadata
+        glyphs = {40914, 40906, 40909},
+        lastModified = "07/03/2025",
+        author = "@Jiw",
+
+        -- Serialized JSON for straight APL reading
+        --rotation_json = [[[{"action":{"condition":{"not":{"val":{"auraIsActive":{"auraId":{"spellId":24858}}}}},"castSpell":{"spellId":{"spellId":2825,"tag":-1}}}},{"action":{"condition":{"spellCanCast":{"spellId":{"otherId":"OtherActionPotion"}}},"castSpell":{"spellId":{"otherId":"OtherActionPotion"}}}},{"action":{"condition":{"spellCanCast":{"spellId":{"spellId":26297}}},"castSpell":{"spellId":{"spellId":26297}}}},{"action":{"condition":{"and":{"vals":[{"not":{"val":{"auraIsActive":{"auraId":{"spellId":48518}}}}},{"not":{"val":{"auraIsActive":{"auraId":{"spellId":48517}}}}},{"cmp":{"op":"OpLe","lhs":{"currentLunarEnergy":{}},"rhs":{"const":{"val":"40"}}}},{"cmp":{"op":"OpLe","lhs":{"currentSolarEnergy":{}},"rhs":{"const":{"val":"40"}}}}]}},"castSpell":{"spellId":{"spellId":112071}}}},{"action":{"condition":{"and":{"vals":[{"spellCanCast":{"spellId":{"spellId":102560}}},{"cmp":{"op":"OpGe","lhs":{"currentLunarEnergy":{}},"rhs":{"const":{"val":"100"}}}},{"auraIsActive":{"auraId":{"spellId":48518}}}]}},"castSpell":{"spellId":{"spellId":102560}}}},{"action":{"condition":{"and":{"vals":[{"spellCanCast":{"spellId":{"spellId":48505}}},{"auraIsActive":{"auraId":{"spellId":48518}}},{"not":{"val":{"auraIsActive":{"auraId":{"spellId":48505}}}}}]}},"castSpell":{"spellId":{"spellId":48505}}}},{"action":{"condition":{"auraIsActive":{"auraId":{"spellId":93400}}},"castSpell":{"spellId":{"spellId":78674}}}},{"action":{"condition":{"and":{"vals":[{"and":{"vals":[{"auraIsActive":{"auraId":{"spellId":112071}}},{"cmp":{"op":"OpLe","lhs":{"auraRemainingTime":{"auraId":{"spellId":112071}}},"rhs":{"const":{"val":"3"}}}}]}},{"cmp":{"op":"OpLe","lhs":{"dotRemainingTime":{"spellId":{"spellId":8921}}},"rhs":{"const":{"val":"9"}}}}]}},"castSpell":{"spellId":{"spellId":8921}}}},{"action":{"condition":{"and":{"vals":[{"unitIsMoving":{}},{"cmp":{"op":"OpLe","lhs":{"dotRemainingTime":{"spellId":{"spellId":8921}}},"rhs":{"const":{"val":"7"}}}}]}},"castSpell":{"spellId":{"spellId":8921}}}},{"action":{"condition":{"and":{"vals":[{"unitIsMoving":{}},{"cmp":{"op":"OpLe","lhs":{"dotRemainingTime":{"spellId":{"spellId":93402}}},"rhs":{"const":{"val":"7"}}}}]}},"castSpell":{"spellId":{"spellId":93402}}}},{"action":{"condition":{"and":{"vals":[{"unitIsMoving":{}},{"auraIsActive":{"auraId":{"spellId":48517}}},{"cmp":{"op":"OpGe","lhs":{"auraNumStacks":{"auraId":{"spellId":88747}}},"rhs":{"const":{"val":"1"}}}}]}},"castSpell":{"spellId":{"spellId":88751}}}},{"action":{"condition":{"unitIsMoving":{}},"castSpell":{"spellId":{"spellId":88747}}}},{"action":{"condition":{"cmp":{"op":"OpGe","lhs":{"const":{"val":"NAG:NumberTargets()"}},"rhs":{"const":{"val":"5"}}}},"castSpell":{"spellId":{"spellId":16914}}}},{"action":{"condition":{"and":{"vals":[{"or":{"vals":[{"not":{"val":{"dotIsActive":{"spellId":{"spellId":8921}}}}},{"cmp":{"op":"OpLe","lhs":{"dotRemainingTime":{"spellId":{"spellId":8921}}},"rhs":{"const":{"val":"1"}}}}]}},{"cmp":{"op":"OpGe","lhs":{"remainingTime":{}},"rhs":{"const":{"val":"9"}}}}]}},"castSpell":{"spellId":{"spellId":8921}}}},{"action":{"condition":{"and":{"vals":[{"or":{"vals":[{"not":{"val":{"dotIsActive":{"spellId":{"spellId":93402}}}}},{"cmp":{"op":"OpLe","lhs":{"dotRemainingTime":{"spellId":{"spellId":93402}}},"rhs":{"const":{"val":"1"}}}}]}},{"cmp":{"op":"OpGe","lhs":{"remainingTime":{}},"rhs":{"const":{"val":"9"}}}}]}},"castSpell":{"spellId":{"spellId":93402}}}},{"action":{"condition":{"druidCurrentEclipsePhase":{"eclipsePhase":"LunarPhase"}},"castSpell":{"spellId":{"spellId":2912}}}},{"action":{"condition":{"druidCurrentEclipsePhase":{"eclipsePhase":"SolarPhase"}},"castSpell":{"spellId":{"spellId":5176}}}},{"action":{"condition":{"druidCurrentEclipsePhase":{"eclipsePhase":"NeutralPhase"}},"castSpell":{"spellId":{"spellId":5176}}}},{"action":{"castSpell":{"spellId":{"spellId":5176}}}}]]],
+        --prepull_json = [[[{"action":{"channelSpell":{"spellId":{"spellId":127663},"interruptIf":{"cmp":{"op":"OpGe","lhs":{"currentLunarEnergy":{}},"rhs":{"const":{"val":"50"}}}}}},"doAtValue":{"const":{"val":"-20s"}}},{"action":{"castSpell":{"spellId":{"spellId":88747}}},"doAtValue":{"const":{"val":"-6s"}}},{"action":{"castSpell":{"spellId":{"otherId":"OtherActionPotion"}}},"doAtValue":{"const":{"val":"-2s"}}},{"action":{"castSpell":{"spellId":{"spellId":5176}}},"doAtValue":{"const":{"val":"-2s"}}},{"action":{"castSpell":{"spellId":{"spellId":48505}}},"doAtValue":{"const":{"val":"-0.5s"}}}]]]
+    }
+)
 
 ns.AddRotationToDefaults(defaults, CLASS_SPECS.FERAL, "Feral", {
     default = true,

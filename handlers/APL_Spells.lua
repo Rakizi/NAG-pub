@@ -515,6 +515,9 @@ function NAG:SpellCanCast(spellId, tolerance)
                 end
             end
         end
+        if spellId == 63560 then --dark infusion 
+            return NAG:AuraNumStacks(49572) >= 5 and self:IsReadySpell(spellId, tolerance)
+        end
 
         --TODO believe this can be removed?
         -- Rune Strike has no cooldown, it becomes usable after a dodge or parry
@@ -580,10 +583,12 @@ function NAG:SpellCanCast(spellId, tolerance)
             return targetHealth <= playerHealth and self:IsReadySpell(spellId, tolerance)
         end
     elseif self.CLASS == "ROGUE" then
-        -- Removed for 3/6 to account for pooling issues. But still showing when pooling energy.
-        if not self:HasEnergy(spellId) then
-            self.isPooling = true
-            NAG:Pooling()
+        if not self:HasEnergy(spellId) and not NAG:IsSecondarySpell(spellId) then
+            -- Only start pooling if not already pooling
+            if not self.isPooling then
+                self.isPooling = true
+                NAG:Pooling()
+            end
             
             if spellId == 8676 then 
                 return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
@@ -593,10 +598,10 @@ function NAG:SpellCanCast(spellId, tolerance)
                     return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
                     or self:AuraIsActive(58984) or self:AuraIsActive(11327)
                     or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
-                end
+            end
             return true
-        elseif self.isPooling then
-            self:StopPooling()
+        elseif self.isPooling and not NAG:IsSecondarySpell(spellId)then
+                 self:StopPooling()
         end
         if not self:HasComboPoints(spellId) then
             return false
@@ -609,7 +614,7 @@ function NAG:SpellCanCast(spellId, tolerance)
                 return (self:AuraIsActive(1784) or self:AuraIsActive(51713)
                 or self:AuraIsActive(58984) or self:AuraIsActive(11327)
                 or self:AuraIsActive(115192)) and self:IsReadySpell(spellId, tolerance)
-            end
+        end
     elseif self.CLASS == "WARLOCK" then
         if not self:HasMana(spellId) or not self:HasSoulShards(spellId) then
             return false
@@ -912,6 +917,8 @@ function NAG:SpellTimeToCharge(spellId)
     return 0
 end
 
+--[[
+--- This is currently handled in NAG/Modules/Snapshotter.lua
 --- Returns the percent increase in DoT damage if a new DoT is applied, compared to the existing one.
 --- @param spellId number The ID of the DoT spell to compare (expected new DoT).
 --- @param targetUnit? string The unit to check (defaults to "target").
@@ -938,6 +945,7 @@ function NAG:DotPercentIncrease(spellId, targetUnit)
     local percentIncrease = (newMultiplier - currentEffect.snapshot.damageMultiplier) / currentEffect.snapshot.damageMultiplier
     return percentIncrease
 end
+]]
 
 --- Determines if a spell should be used for multidotting without casting it.
 --- @param spellId number The ID of the spell.

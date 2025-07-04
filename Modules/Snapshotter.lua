@@ -726,19 +726,20 @@ do
     ---
     --- @usage
     --- -- Check how much a DoT's damage has increased since application
-    --- local damageIncrease = NAG:DotDamageIncreasePercent(59879)
+    --- local damageIncrease = NAG:DotPercentIncrease(59879)
     --- 
     --- -- Example usage in conditions:
-    --- -- if NAG:DotDamageIncreasePercent(rip_spellid) > 0.2 then  -- If damage increased by 20%+
+    --- -- if NAG:DotPercentIncrease(rip_spellid) > 0.2 then  -- If damage increased by 20%+
     --- --     -- Consider refreshing the DoT for higher damage
-    --- -- end --NAG:DotDamageIncreasePercent(59879)
-    function NAG:DotDamageIncreasePercent(spellID)
+    --- -- end --NAG:DotPercentIncrease(59879)
+    function NAG:DotPercentIncrease(spellID)
         local Snapshotter = NAG:GetModule("Snapshotter")
         if Snapshotter then
-            Snapshotter:DebugPrint(format("DotDamageIncreasePercent called for spellID: %d (%s)", 
+            Snapshotter:DebugPrint(format("DotPercentIncrease called for spellID: %d (%s)", 
                 spellID, GetSpellInfo(spellID) or "Unknown"))
         end
         -- Simply call SnapshotPercent with "ap" only
         return NAG:SnapshotPercent(spellID, "ap")
     end
+    NAG.DotDamageIncreasePercent = NAG.DotPercentIncrease
 end

@@ -54,58 +54,66 @@ defaults.class.specSpellLocations = {
 if UnitClassBase('player') ~= "HUNTER" then return end
 
 -- START OF GENERATED_ROTATIONS
-
-ns.AddRotationToDefaults(defaults, CLASS_SPECS.BEAST_MASTERY, "Beast Mastery", {
-    default = true,
-    enabled = true,
-    experimental = false,
-    gameType = Version.GAME_TYPES.CLASSIC_MISTS,
-    prePull = {
-        { NAG:GetBattlePotion(), 1.5 }
-    },
-    rotationString = [[
-    ]],
-})
-
 ns.AddRotationToDefaults(defaults,
-    SpecializationCompat:GetSpecID("Hunter", "Marksmanship"),
-    "Hunter Marksmanship - AoE by APLParser",
+    SpecializationCompat:GetSpecID("Hunter", "Beastmastery"),
+    "Beastmastery AOE/ST- by fonsas",
     {
         -- Required parameters
         default = false,
         enabled = true,
-        experimental = true,
+        experimental = false,
         gameType = Version.GAME_TYPES.CLASSIC_MISTS,
         prePull = {
-            { NAG:Cast(76089), -1000 }
+            { NAG:Cast(76089), -1000 }, { NAG:Cast(13165), -2000 }, { NAG:Cast(1130), -3000 }, { NAG:Cast(117050), -1000 }, { NAG:Cast(13812), -24000 }
         },
         rotationString = [[
-NAG:AutocastOtherCooldowns()
+       (NAG:NumberTargets() > 1 and NAG:SpellIsReady(13812) and not(NAG:AuraIsActive(77769))) and NAG:Cast(77769, 'RIGHT')
+    or NAG:NumberTargets() > 1 and NAG:AuraIsActive(77769) and NAG:Cast(13812, 'RIGHT')
+    or NAG:NumberTargets() > 1 and NAG:Cast(2643, 'RIGHT')
+    or (NAG:CurrentTime() >= 1) and NAG:AutocastOtherCooldowns()
+    or ((NAG:AuraNumStacks(19623, "pet") == 5) and (NAG:AuraRemainingTime(82692) <= 4.0) and (not NAG:AuraIsActive(19574)) and (not (NAG:SpellTimeToReady(19574) <= 5))) and NAG:Cast(82692)
+    or NAG:Cast(19574)
+    or NAG:AuraIsActive(19574) and NAG:Cast(126734)
+    or NAG:AuraIsActive(19574) and NAG:Cast(53401)
+    or NAG:AuraIsActive(19574) and NAG:Cast(33697)
+    or NAG:Cast(53351)
+    or NAG:Cast(3045)
+    or NAG:Cast(34026)
+    or NAG:Cast(131894)
+    or (NAG:CurrentFocus() <= 37) and NAG:Cast(82726)
+    or NAG:Cast(120697)
+    or NAG:Cast(109259)
+    or NAG:Cast(120679)
+    or NAG:AuraIsInactiveWithReactionTime(1978, "target") and NAG:Cast(1978)
+    or (NAG:AuraRemainingTime(1978, "target") <= 6.0) and NAG:Cast(77767)
+    or NAG:Cast(117050)
+    or (NAG:AuraIsActive(19574) and (NAG:CurrentFocus() >= 35)) and NAG:Cast(3044)
+    or ((NAG:CurrentFocus() >= 79)) and NAG:Cast(3044)
     or NAG:Cast(13812)
-    or NAG:Cast(2643)
-    or NAG:Cast(56641)
+    or NAG:Cast(77767)
         ]],
         
         -- New action-based format
-        --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-1s"}}}},
-        --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {castSpell = {spellId = {spellId = 13812}}}}, {action = {castSpell = {spellId = {spellId = 2643}}}}, {action = {castSpell = {spellId = {spellId = 56641}}}}},
+        --prePullActions = {{action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-1s"}}}, {action = {castSpell = {spellId = {spellId = 13165}}}, doAtValue = {const = {val = "-2s"}}}, {action = {castSpell = {spellId = {spellId = 1130}}}, doAtValue = {const = {val = "-3s"}}}, {action = {castSpell = {spellId = {spellId = 117050}}}, doAtValue = {const = {val = "-1s"}}}, {action = {castSpell = {spellId = {spellId = 13812}}}, doAtValue = {const = {val = "-24s"}}}},
+        --aplActions = {{action = {autocastOtherCooldowns = {}}}, {action = {condition = {and = {vals = {{cmp = {op = "OpEq", lhs = {auraNumStacks = {sourceUnit = {type = "Pet", owner = {type = "Self"}}, auraId = {spellId = 19623}}}, rhs = {const = {val = "5"}}}}, {cmp = {op = "OpLe", lhs = {auraRemainingTime = {auraId = {spellId = 82692}}}, rhs = {const = {val = "4s"}}}}, {not = {val = {auraIsActive = {auraId = {spellId = 19574}}}}}, {not = {val = {cmp = {op = "OpLe", lhs = {spellTimeToReady = {spellId = {spellId = 19574}}}, rhs = {const = {val = "5"}}}}}}}}}, castSpell = {spellId = {spellId = 82692}}}}, {action = {castSpell = {spellId = {spellId = 19574}}}}, {action = {castSpell = {spellId = {spellId = 126734}}}}, {action = {castSpell = {spellId = {spellId = 53401}}}}, {action = {castSpell = {spellId = {spellId = 33697}}}}, {action = {castSpell = {spellId = {spellId = 53351}}}}, {action = {castSpell = {spellId = {spellId = 3045}}}}, {action = {castSpell = {spellId = {spellId = 34026}}}}, {action = {castSpell = {spellId = {spellId = 131894}}}}, {action = {condition = {cmp = {op = "OpLe", lhs = {currentFocus = {}}, rhs = {const = {val = "37"}}}}, castSpell = {spellId = {spellId = 82726}}}}, {action = {castSpell = {spellId = {spellId = 120697}}}}, {action = {castSpell = {spellId = {spellId = 109259}}}}, {action = {castSpell = {spellId = {spellId = 120679}}}}, {action = {condition = {auraIsInactiveWithReactionTime = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 1978}}}, castSpell = {spellId = {spellId = 1978}}}}, {action = {condition = {cmp = {op = "OpLe", lhs = {auraRemainingTime = {sourceUnit = {type = "CurrentTarget"}, auraId = {spellId = 1978}}}, rhs = {const = {val = "6s"}}}}, castSpell = {spellId = {spellId = 77767}}}}, {action = {castSpell = {spellId = {spellId = 117050}}}}, {action = {condition = {and = {vals = {{auraIsActive = {auraId = {spellId = 19574}}}, {cmp = {op = "OpGe", lhs = {currentFocus = {}}, rhs = {const = {val = "35"}}}}}}}, castSpell = {spellId = {spellId = 3044}}}}, {action = {condition = {or = {vals = {{cmp = {op = "OpGe", lhs = {currentFocus = {}}, rhs = {const = {val = "79"}}}}}}}, castSpell = {spellId = {spellId = 3044}}}}, {action = {castSpell = {spellId = {spellId = 13812}}}}, {action = {castSpell = {spellId = {spellId = 77767}}}}},
 
         -- Tracked IDs for optimization
-        spells = {2643, 13812, 56641},
+        spells = {1978, 3044, 3045, 13812, 19574, 19623, 33697, 34026, 53351, 53401, 77767, 82692, 82726, 109259, 117050, 120679, 120697, 126734, 131894},
         items = {},
         auras = {},
         runes = {},
 
         -- Optional metadata
-        glyphs = {42909, 42903, 42914},
-        lastModified = "06/22/2025",
-        author = "APLParser"
+        glyphs = {42909, 42903, 42911},
+        lastModified = "07/03/2025",
+        author = "fonsas",
+
     }
 )
 
 ns.AddRotationToDefaults(defaults,
     SpecializationCompat:GetSpecID("Hunter", "Marksmanship"),
-    "Hunter Marksmanship - ST by APLParser",
+    "Marksmanship AOE/ST - by fonsas",
     {
         -- Required parameters
         default = true,
@@ -116,7 +124,13 @@ ns.AddRotationToDefaults(defaults,
             { NAG:Cast(1130), -10000 }, { NAG:Cast(13165), -11000 }, { NAG:Cast(76089), -1000 }, { NAG:Cast(13812), -5000 }, { NAG:Cast(19434), -2300 }
         },
         rotationString = [[
-(NAG:CurrentTime() >= 2.0) and NAG:AutocastOtherCooldowns()
+       (NAG:NumberTargets() > 1 and NAG:SpellIsReady(13812) and not(NAG:AuraIsActive(77769))) and NAG:Cast(77769, 'RIGHT')
+    or NAG:NumberTargets() > 1 and NAG:AuraIsActive(77769) and NAG:Cast(13812, 'RIGHT')
+        or NAG:NumberTargets() > 1 and NAG:Cast(2643, 'RIGHT')
+        or NAG:NumberTargets() > 1 and NAG:Cast(117050, 'RIGHT')
+        or NAG:NumberTargets() > 1 and NAG:Cast(120360, 'RIGHT')
+        or NAG:NumberTargets() > 1 and NAG:Cast(109259, 'RIGHT')
+    or (NAG:CurrentTime() >= 1) and NAG:AutocastOtherCooldowns()
     or NAG:AuraIsInactiveWithReactionTime(1978, "target") and NAG:Cast(1978)
     or NAG:Cast(53209)
     or (NAG:CurrentFocus() <= 50) and NAG:Cast(82726)
@@ -128,8 +142,9 @@ ns.AddRotationToDefaults(defaults,
     or NAG:Cast(53351)
     or ((NAG:CurrentFocus() >= 60) or ((NAG:CurrentFocus() >= 43) and (NAG:SpellTimeToReady(53209) >= NAG:SpellCastTime(56641)) and (not NAG:AuraIsActive(2825)) and (not NAG:AuraIsActive(3045)))) and NAG:Cast(3044)
     or NAG:Cast(19434)
-    or (not NAG:IsExecutePhase(90)) and NAG:Cast(120360)
     or NAG:Cast(117050)
+    or NAG:Cast(120360)
+    or NAG:Cast(109259)
     or NAG:Cast(56641)
         ]],
         
@@ -150,48 +165,10 @@ ns.AddRotationToDefaults(defaults,
     }
 )
 
-ns.AddRotationToDefaults(defaults,
-    SpecializationCompat:GetSpecID("Hunter", "Survival"),
-    "Hunter Survival - Surv-AoE by APLParser",
-    {
-        -- Required parameters
-        default = false,
-        enabled = true,
-        experimental = true,
-        gameType = Version.GAME_TYPES.CLASSIC_MISTS,
-        prePull = {
-            { NAG:Cast(13165), -10000 }, { NAG:Cast(1130), -5000 }, { NAG:Cast(76089), -1000 }, { NAG:Cast(13812), -1000 }
-        },
-        rotationString = [[
-(NAG:CurrentTime() > 1.0) and NAG:AutocastOtherCooldowns()
-    or NAG:AuraIsActive(77769) and NAG:Cast(13812)
-    or NAG:SpellIsReady(13812) and NAG:Cast(77769)
-    or NAG:Cast(2643)
-    or NAG:Cast(53351)
-    or (NAG:AuraIsActive(56343) and ((not NAG:DotIsActive(53301)) or (NAG:DotRemainingTime(53301) < (NAG:SpellTravelTime(53301) + 1.0)))) and NAG:Cast(53301)
-    or NAG:Cast(77767)
-        ]],
-        
-        -- New action-based format
-        --prePullActions = {{action = {castSpell = {spellId = {spellId = 13165}}}, doAtValue = {const = {val = "-10s"}}}, {action = {castSpell = {spellId = {spellId = 1130}}}, doAtValue = {const = {val = "-5s"}}}, {action = {castSpell = {spellId = {otherId = "OtherActionPotion"}}}, doAtValue = {const = {val = "-1s"}}}, {action = {castSpell = {spellId = {spellId = 13812}}}, doAtValue = {const = {val = "-1s"}}}},
-        --aplActions = {{action = {condition = {cmp = {op = "OpGt", lhs = {currentTime = {}}, rhs = {const = {val = "1s"}}}}, autocastOtherCooldowns = {}}}, {action = {condition = {auraIsActive = {auraId = {spellId = 77769}}}, castSpell = {spellId = {spellId = 13812}}}}, {action = {condition = {spellIsReady = {spellId = {spellId = 13812}}}, castSpell = {spellId = {spellId = 77769}}}}, {action = {castSpell = {spellId = {spellId = 2643}}}}, {action = {castSpell = {spellId = {spellId = 53351}}}}, {action = {condition = {and = {vals = {{auraIsActive = {auraId = {spellId = 56343}}}, {or = {vals = {{not = {val = {dotIsActive = {spellId = {spellId = 53301}}}}}, {cmp = {op = "OpLt", lhs = {dotRemainingTime = {spellId = {spellId = 53301}}}, rhs = {math = {op = "OpAdd", lhs = {spellTravelTime = {spellId = {spellId = 53301}}}, rhs = {const = {val = "1s"}}}}}}}}}}}}, castSpell = {spellId = {spellId = 53301}}}}, {action = {castSpell = {spellId = {spellId = 77767}}}}},
-
-        -- Tracked IDs for optimization
-        spells = {2643, 13812, 53301, 53351, 56343, 77767, 77769},
-        items = {},
-        auras = {},
-        runes = {},
-
-        -- Optional metadata
-        glyphs = {42909, 42903, 42899},
-        lastModified = "06/22/2025",
-        author = "APLParser"
-    }
-)
 
 ns.AddRotationToDefaults(defaults,
     SpecializationCompat:GetSpecID("Hunter", "Survival"),
-    "Hunter Survival - Surv-ST by APLParser",
+    "Surv AOE/ST",
     {
         -- Required parameters
         default = true,
@@ -202,7 +179,14 @@ ns.AddRotationToDefaults(defaults,
             { NAG:Cast(13165), -10000 }, { NAG:Cast(117050), -1000 }
         },
         rotationString = [[
-(NAG:CurrentTime() >= 3.0) and NAG:AutocastOtherCooldowns()
+        
+       (NAG:NumberTargets() > 1 and NAG:SpellIsReady(13812) and not(NAG:AuraIsActive(77769))) and NAG:Cast(77769, 'RIGHT')
+    or NAG:NumberTargets() > 1 and NAG:AuraIsActive(77769) and NAG:Cast(13812, 'RIGHT')
+    or NAG:NumberTargets() > 1 and NAG:Cast(2643, 'RIGHT')
+        or NAG:NumberTargets() > 1 and NAG:Cast(117050, 'RIGHT')
+        or NAG:NumberTargets() > 1 and NAG:Cast(120360, 'RIGHT')
+        or NAG:NumberTargets() > 1 and NAG:Cast(109259, 'RIGHT')
+    or (NAG:CurrentTime() >= 1) and NAG:AutocastOtherCooldowns()
     or NAG:Cast(53301)
     or NAG:IsExecutePhase(20) and NAG:Cast(53351)
     or NAG:Cast(131894)
@@ -212,10 +196,12 @@ ns.AddRotationToDefaults(defaults,
     or NAG:Cast(120697)
     or NAG:Cast(109259)
     or NAG:Cast(120679)
+    or NAG:Cast(120360)
     or NAG:AuraIsInactiveWithReactionTime(1978, "target") and NAG:Cast(1978)
     or (NAG:AuraRemainingTime(1978, "target") <= 6.0) and NAG:Cast(77767)
     or NAG:Cast(117050)
     or (NAG:CurrentFocus() >= 50) and NAG:Cast(3044)
+    or NAG:Cast(13812)
     or NAG:Cast(77767)
         ]],
         
@@ -232,7 +218,7 @@ ns.AddRotationToDefaults(defaults,
         -- Optional metadata
         glyphs = {42909, 42903, 42899},
         lastModified = "06/22/2025",
-        author = "APLParser"
+        author = "Fonsas"
     }
 )
 

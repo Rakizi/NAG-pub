@@ -38,6 +38,62 @@ local tContains = tContains
 local sort = table.sort
 local concat = table.concat
 
+function ns.IsWeakAuraLoaded(auraName)
+    -- First check if WeakAuras addon is loaded
+    if not IsAddOnLoaded("WeakAuras") then
+        return false
+    end
+
+    -- Check if WeakAuras exists in global scope and has required methods
+    if not WeakAuras or not WeakAuras.GetData then
+        return false
+    end
+
+    -- Check if the specific aura exists in WeakAuras data
+    local aura = WeakAuras.GetData(auraName)
+    if not aura then
+        return false
+    end
+
+    return true
+end
+
+function ns.tCount(tbl)
+    if type(tbl) ~= "table" then return 0 end
+    local count = 0
+    for _ in pairs(tbl) do count = count + 1 end
+    return count
+end
+
+-- Pretty-print a Lua table for debug/config UI
+function ns.DumpTable(tbl, indent, visited)
+    indent = indent or 0
+    visited = visited or {}
+    if type(tbl) ~= "table" then
+        return tostring(tbl)
+    end
+    if visited[tbl] then
+        return string.rep(" ", indent) .. "<recursion>"
+    end
+    visited[tbl] = true
+    local lines = {"{"}
+    for k, v in pairs(tbl) do
+        local keyStr = (type(k) == "string" and "[\""..k.."\"]" or "["..tostring(k).."]")
+        local valueStr
+        if type(v) == "table" then
+            valueStr = ns.DumpTable(v, indent + 2, visited)
+        elseif type(v) == "string" then
+            valueStr = '"'..v..'"'
+        else
+            valueStr = tostring(v)
+        end
+        table.insert(lines, string.rep(" ", indent + 2) .. keyStr .. " = " .. valueStr .. ",")
+    end
+    table.insert(lines, string.rep(" ", indent) .. "}")
+    return table.concat(lines, "\n")
+end
+
+
 -- Type checking and assertions
 function ns.assertType(value, expectedType, paramName)
     if type(value) ~= expectedType then

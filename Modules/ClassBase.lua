@@ -88,12 +88,7 @@ function ns.AddRotationToDefaults(defaults, specID, name, config)
     defaults.char = defaults.char or {}
     defaults.char.selectedRotations = defaults.char.selectedRotations or {}
 
-    -- Register tracked IDs with DataManager using ImportExport's registration function
-    --- @type ImportExport|AceModule|ModuleBase
-    local ImportExport = ns.ImportExport
-    if ImportExport and ImportExport.RegisterRotationEntities then
-        ImportExport:RegisterRotationEntities(config)
-    end
+    -- Removed entity registration from here; handled in ModuleEnable for robustness
 
     -- Add the base rotation to class data
     defaults.class.rotations[specID][name] = CopyTable(config)
@@ -229,6 +224,29 @@ do -- Ace3 lifecycle
         -- Update NAG's enabled state directly
         NAG.hasEnabledModule = true
         NAG:RefreshConfig()
+
+        -- Register all rotation entities after all modules are loaded
+        -- This ensures DataManager and ImportExport are available and avoids timing issues
+        local ImportExport = ns.ImportExport
+        if ImportExport and ImportExport.RegisterRotationEntities then
+            local classDB = self:GetClass()
+            -- Register base rotations
+            if classDB.rotations then
+                for specID, rotations in pairs(classDB.rotations) do
+                    for name, config in pairs(rotations) do
+                        ImportExport:RegisterRotationEntities(config)
+                    end
+                end
+            end
+            -- Register custom rotations
+            if classDB.customRotations then
+                for specID, rotations in pairs(classDB.customRotations) do
+                    for name, config in pairs(rotations) do
+                        ImportExport:RegisterRotationEntities(config)
+                    end
+                end
+            end
+        end
 
         -- Signal that class module system is ready
         self:SendMessage("NAG_CLASS_MODULE_READY", true)
