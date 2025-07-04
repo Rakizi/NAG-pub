@@ -138,7 +138,6 @@ ns.AddRotationToDefaults(defaults, ROGUE_SPECS.SUBTLETY, "Subtlety", {
     or ((NAG:CurrentComboPoints() <= 4) and (not NAG:AuraIsActive(145211)) and (not NAG:AuraIsActive(51713)) and (not NAG:AuraIsActive(1784)) and (not NAG:AuraIsActive(58984)) and (not NAG:AuraIsActive(11327)) and (NAG:NumberTargets() < 3)) and NAG:Cast(53)
     or (not NAG:SpellIsReady(1856)) and NAG:Cast(14185)
     or (not NAG:AuraIsActive(51713)) and NAG:Cast(57934)
-    or NAG:Pooling()
     ]],
 })
 
