@@ -1,4 +1,4 @@
--- Generated schema for mop on 2025-07-03 20:45:21
+-- Generated schema for mop on 2025-07-03 22:04:32
 local _, ns = ...
 ns.protoSchema = ns.protoSchema or {}
 ns.protoSchema['mists'] = {
@@ -33187,7 +33187,7 @@ ns.protoSchema['mists'] = {
               ClassSpellMask = "mage.MageSpellPyroblastDot",
               SpellSchool = "core.SpellSchoolFire",
               ProcMask = "core.ProcMaskSpellDamage",
-              DamageMultiplier = "1 * 1.12",
+              DamageMultiplier = "1",
               CritMultiplier = "fire.DefaultCritMultiplier()",
               ThreatMultiplier = "1",
               label = "PyroblastDoT"
@@ -33204,7 +33204,7 @@ ns.protoSchema['mists'] = {
               ClassSpellMask = "mage.MageSpellPyroblastDot",
               SpellSchool = "core.SpellSchoolFire",
               ProcMask = "core.ProcMaskSpellDamage",
-              DamageMultiplier = "1 * 1.12",
+              DamageMultiplier = "1",
               CritMultiplier = "fire.DefaultCritMultiplier()",
               ThreatMultiplier = "1",
               label = "PyroblastDoT"
