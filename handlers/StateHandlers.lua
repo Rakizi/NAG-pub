@@ -1,4 +1,0 @@
---- @module "APL_Handlers"
---- Player state and event handler logic for the NAG addon.
---- This file is part of the handler refactor to improve maintainability and modularity.
---- (Functions will be moved here from MiscHandlers.lua in subsequent steps) 
